@@ -66,4 +66,5 @@ void PowerBlend(short Mode)
     if (KeyAbortState==2) memset(Screen,0,64000);
   }
 }
-
+
+/* EOF */

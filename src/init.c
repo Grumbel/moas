@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
 #define D32RealSeg(P)   ((((uLong) (P)) >> 4) & 0xFFFF)
 #define D32RealOff(P)   (((uLong) (P)) & 0xF)
