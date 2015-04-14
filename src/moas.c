@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
 char *__Benutze   ="BENUTZE %s";
 char *__BenutzeMit="BENUTZE %s MIT %s";
@@ -34,6 +34,8 @@ char *__Siehe     ="SCHAU %s AN";
 char *__Sprich    ="REDE MIT %s";
 char *__Bewege    ="BEWEGE %s";
 char *__BewegeMit ="BEWEGE %s IN RICHTUNG %s";
+
+void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty);
 
 void main(void)
 {
@@ -735,6 +737,7 @@ void TeakEffekt(void)
   FREE((char*)(Tab320-100));
   FREE((char*)Star);
 }
+
 void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty)
 {
   short c;

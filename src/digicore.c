@@ -98,4 +98,3 @@ void ApplyOverdrive(void)
   for (c=0;c<SampleSize;c++)
     SampleBuffer2[c]=OverdriveRemapper[OverdriveBuffer[c]];
 }
-

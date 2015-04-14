@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
 unsigned char __b1,__b2,__b3,__b4;
 char *_FRAGEZEICHEN;
@@ -86,9 +86,17 @@ short ChkOpen(char *FileName,char Mode)
   ClrChk();
   if (strcmp(FileName,_FRAGEZEICHEN)==0) return(-1);
   if (Mode==READ)
-    xfil=open(FileName,O_RDONLY|O_BINARY);
+    xfil=open(FileName,O_RDONLY
+#ifdef DOS
+              |O_BINARY
+#endif
+      );
   if (Mode==WRITE)
-    xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
+    xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY
+#ifdef DOS
+              |O_BINARY
+#endif
+              ,S_IWRITE);
   return(xfil);
 }
 void ChkRead(short xfil,char *Target,long Length)
@@ -128,4 +136,4 @@ void ChkClose(short xfil)
   }
   close(xfil);
 }
-
+

@@ -26,14 +26,16 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "moas.H"
+#include "moas.h"
 
 void ShowHercBak(void)
 {
   static unsigned char Buffer[80],B2[20];
   short c,y;
 
+#ifdef DOS
   _setvideomode(_DEFAULTMODE);
+#endif
 
   for (c=0;c<35;c++) ((unsigned short*)(0xB8000))[c]=0x0f00+"Prs ### x    y    z    tx   ty   Bits"[c];
   for (y=0;y<20;y++)
@@ -57,7 +59,9 @@ void ShowHercBak(void)
     sprintf(Buffer,"  %i     %-2i %-4i %s",c,SayWindow[y].RefPrs,SayWindow[y].Time,B2);
     for (c=0;c<32;c++) ((unsigned short*)(0xB8240+160*y))[c]=0x0f00+Buffer[c];
   }
+#ifdef DOS
   for (y=0;y<24;y++) ((unsigned short*)(0xB805e+160*y))[0]=0x0fB3;
+#endif
   sprintf(Buffer,"Mouse:[%i|%i] %c%c",Mouse.x,Mouse.y,Mouse.Left ? 'L' : 32,Mouse.Right ? 'R' : 32);
   for (c=0;c<18;c++) ((unsigned short*)(0xB8060))[c]=0x0f00+Buffer[c];
   strcpy(Buffer,"SayWin Prs Time Text");
@@ -65,8 +69,10 @@ void ShowHercBak(void)
   for (c=0;c<33;c++) ((unsigned short*)(0xB8A5e))[c]=((unsigned short*)(0xB855e))[c]=((unsigned short*)(0xB80Fc))[c]=0x0f00+((unsigned char*)"ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ")[c];
 
   getch();
+#ifdef DOS
   _setvideomode(_MRES256COLOR);
+#endif
   Blend(64,1);
   PowerRedrawArea(0,0,320,200);
 }
-
+

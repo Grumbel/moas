@@ -59,7 +59,9 @@ void InitAll(void)
   InitSystemVars();          InitFont();
   InitMarker();              LoadPack();
   DayLightR=DayLightG=DayLightB=0;
+#ifdef DOS
   if (!_setvideomode(_MRES256COLOR)) InternalError(1003);
+#endif
   inp(0x3d4+6);
   outp(0x3c0,0x11); outp(0x3c0,0);  /* FrameColor := 0  */
   outp(0x3c0,0x20);                 /* Reset Controller */
@@ -67,6 +69,7 @@ void InitAll(void)
 }
 unsigned long DosGetDiskIdNum(void)
 {
+#ifdef DOS
   union REGS Regs;
   struct SREGS sRegs;
 
@@ -85,6 +88,9 @@ unsigned long DosGetDiskIdNum(void)
   Boot.SektorNum=*((unsigned long*)(Boot.IoBuffer+39));
   FREE(Boot.IoBuffer);
   return(Boot.SektorNum);
+#else
+  return 0;
+#endif
 }
 void InitMarker(void)
 {
@@ -129,6 +135,7 @@ void InitVars(void)
 }
 void InitBreakVector(void)
 {
+#ifdef DOS
   signal(SIGBREAK,SIG_IGN);
   signal(SIGINT,SIG_IGN);
 
@@ -140,6 +147,7 @@ void InitBreakVector(void)
   _dos_setvect(0x8,MyTickerIrq);
   //_dos_setvect(SoftIRQ[Config.IrqNum],MySoundIrq);
   //StartSoundProcessing();
+#endif
 }
 void InitPersons(void)
 {

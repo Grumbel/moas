@@ -36,7 +36,9 @@ void InternalError(short num)
   long c;
 
   if (num==1007) return; /* ==>+<== Ignore CHKSUM due to FastLink */
+#ifdef DOS
   _setvideomode(_DEFAULTMODE);
+#endif
 
   switch(num)
   {
@@ -49,9 +51,11 @@ void InternalError(short num)
     case 1049:printf("\nNicht genug standart Speicherplatz !");    break;
     default:if (num) printf("\nInterner Fehler %i",num);
   }
+#ifdef DOS
   outp(0x40,0xff); outp(0x40,0xff);
   _dos_setvect(0x9,RealIrq9);
   _dos_setvect(0x8,RealIrq1c);
+#endif
   //ExitCommunicator=1;
   //for (c=0;c<1000000;c++)
   //  if (ExitCommunicator!=1) break;
@@ -223,7 +227,9 @@ void LookKeys(void)
                           static char Buffer[40],oBuf[80];
                           short ofil;
 
+#ifdef DOS
                           _clearscreen(_GCLEARSCREEN);
+#endif
                           printf("Exportiere Label! Bitte Namen eingeben.\n");
                           printf("Danach per Drag&Drop ein Rechteck markieren.\nName:");
 
@@ -235,13 +241,21 @@ void LookKeys(void)
                             char *Tmp;
                             short l;
 
-                            ofil=open("Export.Dpp",O_RDWR+O_BINARY,S_IWRITE);
+                            ofil=open("Export.Dpp",O_RDWR
+#ifdef DOS
+                                      +O_BINARY
+#endif
+                                      ,S_IWRITE);
                             if (ofil>0)
                             {
                               Tmp=MALLOC(l=filelength(ofil));
                               read(ofil,Tmp,l);
                               close(ofil);
-                              ofil=open("Export.Dpp",O_RDWR+O_BINARY+O_TRUNC,S_IWRITE);
+                              ofil=open("Export.Dpp",O_RDWR
+#ifdef DOS
+                                        +O_BINARY
+#endif
+                                        +O_TRUNC,S_IWRITE);
                               if (Tmp[l-1]==26) l--;
                               write(ofil,Tmp,l);
                               close(ofil);
@@ -252,7 +266,11 @@ void LookKeys(void)
                             while (Mouse.Left | Mouse.Right) MouseCheck();
                             GetClickOrEnter(32000);
                             sprintf(oBuf,"MarkArea %3i %3i %3i %3i %s\x0d\x0a",Mouse.ClickX,Mouse.ClickY,Mouse.ReleaseX,Mouse.ReleaseY,Buffer);
-                            ofil=open("Export.Dpp",O_CREAT+O_RDWR+O_BINARY+O_APPEND,S_IWRITE);
+                            ofil=open("Export.Dpp",O_CREAT+O_RDWR
+#ifdef DOS
+                                      +O_BINARY
+#endif
+                                      +O_APPEND,S_IWRITE);
                             write(ofil,oBuf,strlen(oBuf));
                             close(ofil);
                           }
@@ -305,6 +323,7 @@ void WillBeCalledEverySecond(void)
 }
 void Wait(short Milliseconds)
 {
+#ifdef DOS
   static unsigned char LastTime;
   union REGS Regs;
 
@@ -318,9 +337,11 @@ void Wait(short Milliseconds)
     LastTime=(Regs.h.dl/10);
     MouseCheck();
   }
+#endif
 }
 void GetClickOrEnter(short Time)
 {
+#ifdef DOS
   unsigned char LastTime;
   union REGS Regs;
 
@@ -342,6 +363,7 @@ void GetClickOrEnter(short Time)
   }
   Mouse.LastRight=Mouse.LastLeft=0;
   WalkingAllowed=1;
+#endif
 }
 void LoadPack(void)
 {
@@ -649,14 +671,18 @@ short GetRealPersonNum(short Number)
 
   if (Number==-1) return(GetPlayerPersonNumber());
   for (c=0;c<MAX_PRS;c++) if (Person[c].Num==Number) return(c);
+#ifdef DOS
   _setvideomode(_DEFAULTMODE);  /* ==>+<== DEBUG Version */
+#endif
   printf("\n'short GetRealPersonNum(short Number)' findet Person nicht.");
   printf("\ngesucht war Person Nummer:%i",Number);
   printf("\nDie internen Personennummern sind folgendermaáen belegt:");
   for (c=0;c<MAX_PRS;c++)
     printf("\ninterne Nummer %i: Person Nummer %i",c,Person[c].Num);
   getch();
+#ifdef DOS
   _setvideomode(_MRES256COLOR);
+#endif
   InternalError(1028);
   return(-1);
 }
@@ -687,7 +713,9 @@ void ShowMarker(void)
     if (Marker[c].MarkTyp!=Unused)
     {
       if (Marker[c].MarkTyp==Label) _setcolor(2); else _setcolor(0);
+#ifdef DOS
       _rectangle(_GBORDER,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2);
+#endif
     }
 }
 void TestIfPersonIsInTrap(void)
@@ -860,4 +888,4 @@ void MrFree(char *p,char *File,short Line)
 //write(MallocFile,Buffer,strlen(Buffer));
   free(p);
 }
-
+

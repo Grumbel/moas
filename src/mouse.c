@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 #define HIGHLIGHT 40
 
 char _sString[]=">%s<";
@@ -93,6 +93,7 @@ void MouseCheck(void)
 }
 short IsMousePresent(void)
 {
+#ifdef DOS
   static short MousePres=-1;
   union REGS Regs;
 
@@ -106,9 +107,12 @@ short IsMousePresent(void)
     SetMousePos(100,100);
     return (MousePres=1);
   } else return (MousePres=0);
+#endif
 }
+
 void MouseRead(void)
 {
+#ifdef DOS
   static short MouseDivX=30000,MouseDivY=30000,LastX=-1000,LastY=-1000;
   short x,y,ox,oy;
   union REGS Regs;
@@ -141,7 +145,9 @@ void MouseRead(void)
   Mouse.Left=(Regs.w.bx & 1) | SpaceState;
   Mouse.Right=(Regs.w.bx & 2)/2;
   Mouse.Middle=(Regs.w.bx & 4)/4;
+#endif
 }
+
 void MouseIntelligence(void)
 {
   register short y;
@@ -401,11 +407,13 @@ void WalkClick(short x,short y) /* Click an legale Position umleiten */
 }
 void SetMousePos(short x,short y)
 {
+#ifdef DOS
   union REGS Regs;
 
   Regs.w.ax=4;
   Regs.w.cx=x;
   Regs.w.dx=y;
   int386(51,&Regs,&Regs);
+#endif
 }
-
+

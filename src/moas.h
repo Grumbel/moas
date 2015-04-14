@@ -87,20 +87,20 @@
 #define Real(PrsNum)            GetRealPersonNum(PrsNum)
 
 #include <signal.h>
-#include <conio.h>
+//#include <conio.h>
 #include <math.h>
 #include <fcntl.h>
-#include <graph.h>
-#include <io.h>
-#include <i86.h>
-#include <dos.h>
+//#include <graph.h>
+//#include <io.h>
+//#include <i86.h>
+//#include <dos.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <sys\types.h>
-#include <sys\stat.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 struct I_LINE
 {
@@ -308,7 +308,9 @@ char RoomName[40];
   uShort SpeechVolume,GlobalVolume;                        // [0..256]
   uChar OverdriveRemapper[5130];
 
+#ifdef DOS
   void __interrupt __far MySoundIrq(void);
+#endif
   void SoundMixer(const short c);
   void ApplyOverdrive(void);
 
@@ -360,9 +362,11 @@ short RealStringLength(char *String,char FontNum);
 short SelectFromWindow(void);
 short ShiftCharLeft(char c1,char c2,short FontNum);
 short WhatsAt(short x,short y);
+#ifdef DOS
 void (interrupt far *RealIrq1c)();
 void (interrupt far *RealIrq9)();
 void (interrupt far *RealSoundIrq)();
+#endif
 void *D32DosMemAlloc(long size);
 void AddArea(short x1,short y1,short x2,short y2,unsigned short Ref,enum MARKTYP MarkTyp);
 void AddDescription(short Num,char *Text);
@@ -502,10 +506,14 @@ void WalkClick(short x,short y);
 void WalkPerson(short PrsNum,short tx,short ty);
 void WillBeCalledEverySecond(void);
 void WinEnhance(void);
+#ifdef DOS
 void __interrupt __far KeyboardIrq(void);
+#endif
 void iWalk(short PrsNum,short tx,short ty);
+#ifdef DOS
 void interrupt MySoundIrq(void);
 void interrupt MyTickerIrq(void);
+#endif
 short GetTicker(void);
 
 void MrFree(char *p,char *File,short Line);                         ///
@@ -514,4 +522,4 @@ char *MrMalloc(long Size,char *File,short Line);                    ///
 #define MALLOC(Size) MrMalloc(Size,__FILE__,__LINE__)               ///
 #define FREE(Size) MrFree(Size,__FILE__,__LINE__)                   ///
 short MallocFile;                                                   ///
-
+

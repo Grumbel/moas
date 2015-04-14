@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
 struct PACK
 {
@@ -357,6 +357,7 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
 }
 void Shake(short Milliseconds,short Staerke)
 {
+#ifdef DOS
   register unsigned short x,y;
   USHORT LastTime;
   union REGS Regs;
@@ -375,7 +376,9 @@ void Shake(short Milliseconds,short Staerke)
   }
   outp(0x3d4,13); outp(0x3d5,0);
   outp(0x3d4,12); outp(0x3d5,0);
+#endif
 }
+
 void QuickSetSinglePal(short Color,short r,short g,short b)
 {
    short tmp;

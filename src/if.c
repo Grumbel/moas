@@ -26,7 +26,7 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
 /* interne If-Routinen und die intelligent-Walk Algorythmen */
 
@@ -398,4 +398,4 @@ void KompliziereLaufReihe(void)
     c++;
   }
 }
-
+

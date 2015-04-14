@@ -26,9 +26,11 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
-#include "MOAS.H"
+#include "moas.h"
 
+#ifdef DOS
 void (interrupt far *RealIrq1c)();
+#endif
 
 char *_FRAGEZEICHEN="?";
 char *_MOAS_CFG="MOAS.CFG";
@@ -42,14 +44,22 @@ short DataOpen(short Num)
   char Name[10];
 
   sprintf(Name,"PIZZZA.%i",Num);
-  FileHandle=open(Name,O_RDONLY|O_BINARY);
+  FileHandle=open(Name,O_RDONLY
+#ifdef DOS
+                  |O_BINARY
+#endif
+    );
   if (FileHandle<0)
   {
     sprintf(Name,"GAME.%i",Num);
-    FileHandle=open(Name,O_RDONLY|O_BINARY);
+    FileHandle=open(Name,O_RDONLY
+#ifdef DOS
+                    |O_BINARY
+#endif
+      );
   }
 
-  if (FileHandle<0) {printf(Name);getch();InternalError(1002);}
+  if (FileHandle<0) {puts(Name);getch();InternalError(1002);}
 
   return(FileHandle);
 }
@@ -203,7 +213,11 @@ void LoadSaveMenu(char *Text)
         Line(250,60+d,36+c*30,60+d,59+c*30);
         Line(250,20+d,59+c*30,60+d,59+c*30);
         sprintf(String,"GAME%i.SAV",c+d/142*5);
-        ifil=open(String,O_RDONLY|O_BINARY);
+        ifil=open(String,O_RDONLY
+#ifdef DOS
+                  |O_BINARY
+#endif
+          );
         if (ifil>0)
         {
           for (h=0;h<25;h++)
@@ -304,7 +318,12 @@ void LoadGame(void)
       if (Mouse.x>=19+d && Mouse.y>=33+c*30 && Mouse.x<=60+d && Mouse.y<=60+c*30)
       {
         sprintf(Name,"GAME%i.SAV",c+d/142*5);
-        ifil=open(Name,O_RDONLY|O_BINARY);  if (ifil<0) return; else close(ifil);
+        ifil=open(Name,O_RDONLY
+#ifdef DOS
+                  |O_BINARY
+#endif
+          );
+        if (ifil<0) return; else close(ifil);
         ifil=ChkOpen(Name,READ);
         V_LockVga=1;
         RemoveAllPersons();
@@ -421,7 +440,9 @@ void FileMenu(void)
       if (y==1) x=SpeechSpeed*3+10;
       if (y==2) x=TotalSpeed*10+3;
       _setcolor(5);
+#ifdef DOS
       _rectangle(_GFILLINTERIOR,x-2,y*21+145,x+2,y*21+153);
+#endif
       Rectangle3D((char*)0xA0000,x-2,y*21+145,x+2,y*21+153,4,6,320);
     }
     switch(getch())
@@ -457,6 +478,8 @@ void FileMenu(void)
   DontCyclePal--;
   PowerRedrawArea(0,122,114,199);
 }
+
+#ifdef DOS
 /*                                     */
 /* Interrupt Servies im Protected Mode */
 /*                                     */
@@ -512,6 +535,9 @@ void __interrupt /*__far*/ MyTickerIrq(void)
   if ((TimeCounter&7)!=0) ((long*)0x0046c)[0]--;
   _chain_intr( RealIrq1c );
 }
+#endif
+
+#ifdef DOS
 void __interrupt __far KeyboardIrq(void)
 {
   KeyScanCode=inp(0x60);
@@ -524,6 +550,8 @@ void __interrupt __far KeyboardIrq(void)
 
   _chain_intr( RealIrq9 );
 }
+#endif
+
 short GetTicker(void)
 {
   kbhit();

@@ -28,6 +28,11 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 
+void InitDSP(void);
+void InitVolumeTab(void);
+void InitStepTable(void);
+void GetEnvirenment(void);
+
 void InitDigi(void)
 {
   SampleSize=1000;
@@ -65,6 +70,7 @@ void InitDigi(void)
   InitVolumeTab();
   InitStepTable();
 }
+
 void InitDSP(void)
 {
   short c;
@@ -81,6 +87,7 @@ void InitDSP(void)
   OutpWait(Config.BaseNum+0xC,0x40);
   OutpWait(Config.BaseNum+0xC,184);   /*14000 Hz*/
 }
+
 void InitVolumeTab(void)
 {
   short c,d;
@@ -97,6 +104,7 @@ void InitVolumeTab(void)
     if (c-0x0A0A+128<0) OverdriveRemapper[c]=0;
   }
 }
+
 void InitStepTable(void)
 {
   StepTable[ 0]=(long)(256*261.7/261.7/2);
@@ -151,6 +159,7 @@ void InitStepTable(void)
   StepTable[58]=(long)(256*466.2/261.7*4);
   StepTable[59]=(long)(256*493.9/261.7*4);
 }
+
 void GetEnvirenment(void)
 {
   char *p=getenv("BLASTER");     /* BLASTER=A220 I7 D1 T3 */
@@ -183,8 +192,10 @@ void GetEnvirenment(void)
     DMA_ADRESS_Adresse=0xC4; DMA_ADRESS_Seite=0x88; DMA_ADRESS_Zaehler=0xC6;
   }
 }
+
 void *D32DosMemAlloc(long size)
 {
+#ifdef DOS
   union REGS Regs;
 
   Regs.x.eax = 0x0100;           /* DPMI allocate DOS memory */
@@ -193,7 +204,11 @@ void *D32DosMemAlloc(long size)
 
   if (Regs.x.cflag) InternalError(1049);
   return((void *)((Regs.x.eax & 0xFFFF) << 4));
+#else
+  return 0;
+#endif
 }
+
 void LoadMusic(short Num)
 {
   short c,Anz,ifil;
@@ -201,7 +216,11 @@ void LoadMusic(short Num)
 
   V_Play=CurrentLine=0;
   sprintf(Name,"PIZZZA%i.TSS",Num);
-  ifil=open(Name,O_RDONLY|O_BINARY);
+  ifil=open(Name,O_RDONLY
+#ifdef DOS
+            |O_BINARY
+#endif
+    );
 
   if (ifil<0) return;
   lseek(ifil,80,SEEK_CUR);         /* Ignore SongTitle */
@@ -227,6 +246,8 @@ void LoadMusic(short Num)
   close(ifil);
   V_Play=1;
 }
+
+#ifdef DOS
 void __interrupt __far MySoundIrq(void)
 {
   static uShort c,GoToLine;
@@ -350,6 +371,8 @@ void __interrupt __far MySoundIrq(void)
   } else outp(0x20,0x20);
   if (ExitCommunicator!=0) ExitCommunicator=2;
 }
+#endif
+
 void StartSoundProcessing(void)
 {
   uShort Seite,Block;
@@ -397,4 +420,4 @@ void StartSoundProcessing(void)
   outp(0x21,inp(0x21)&127);
   ((uChar*)(0xA0000))[1]++;
 }
-
+
