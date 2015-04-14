@@ -16,14 +16,14 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
@@ -147,7 +147,7 @@ void LadeBild(short Num)
     DisplayBox(Bilder[Num].Data,0,122,Bilder[Num].x,Bilder[Num].y);
   }
 }
-// °±²Û Infobild Typ 1 oder 2 laden. Typ muá InfoTyp1 oder InfoTyp2 sein Û²±° //
+// Â°Â±Â²Ã› Infobild Typ 1 oder 2 laden. Typ muÃ¡ InfoTyp1 oder InfoTyp2 sein Ã›Â²Â±Â° //
 void LadeInfoBild(short Num,enum PICTYP Typ)
 {
   unsigned short c;

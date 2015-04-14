@@ -16,14 +16,14 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie kˆnnen mich erreichen unter thomas_holz@mail.com
+// Sie k√∂nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lˆsen kˆnnte
+//  - Anfragen wie man denn das Problem x l√∂sen k√∂nnte
 //--------------------------------------------------------------------------------------------
-// F¸r die tysischen Fragen: Das Programm ist in C geschrieben. Heute w¸rde ich den Profis
-// C++ empfehlen. F¸r die Grafik (f¸r Windows) ist DirektX f¸r Profis gut. Anf‰nger werden
+// F√ºr die tysischen Fragen: Das Programm ist in C geschrieben. Heute w√ºrde ich den Profis
+// C++ empfehlen. F√ºr die Grafik (f√ºr Windows) ist DirektX f√ºr Profis gut. Anf√§nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #define AsmQPalSet QuickSetPalette
@@ -132,7 +132,7 @@ struct PERSON
   USHORT Bits;            /* Siehe LANGUAGE.DOK */
 } Person[MAX_PRS+1];  /*==>+<== Mallocen*/
 
-struct FONT /*A..Zéôö·- .!,:;'"0..9<>()[]a..zÑîÅ*/
+struct FONT /*A..Z¬é¬ô¬ö√°- .!,:;'"0..9<>()[]a..z¬Ñ¬î¬Å*/
 {
   char SizeY;
   unsigned char *Data;
@@ -143,7 +143,7 @@ struct MAPFILE
 {
   char FileNum;
   long FilePos,Length;
-  uChar *Data;     /* fÅr Programm[0] x=AnzVars */
+  uChar *Data;     /* f¬År Programm[0] x=AnzVars */
   long x,y,Anz;    /* for Raum,Bild: Picsize; for Inventar x=ObjPos,y=ScrPos */
   char InUse;      /* Only for Phase */
   CHKSUM Check;
@@ -169,10 +169,10 @@ struct SAY_PROPERTIES
 struct MOUSE
 {
   short x,y;                          /* Maus Position                        */
-  short Left,Right,Middle;            /* Maus Knîpfe   1=gedrÅckt             */
+  short Left,Right,Middle;            /* Maus Kn¬îpfe   1=gedr¬Åckt             */
   short LastLeft,LastRight,LastMiddle;/* Mausstatus zuletzt                   */
-  short ClickX,ClickY;                /* Position beim letzten drÅcken        */
-  short ClickObject;                  /* Objekt beim letzten drÅcken          */
+  short ClickX,ClickY;                /* Position beim letzten dr¬Åcken        */
+  short ClickObject;                  /* Objekt beim letzten dr¬Åcken          */
   short ReleaseX,ReleaseY;            /* Position beim letzten loslassen      */
   short CursorState;                  /* Cursor an, aus oder virtuell  (012)  */
   char BewegeMode;                    /* -1 = Nein, sonst CursorPhase         */
@@ -229,7 +229,7 @@ unsigned char KeyScanCode,LastKeyScanCode;  // aktueller Scancode des Keyboards
 short anz_codes;
 char *codes[257];
 unsigned char *Palette;    /* Die Palette des aktuellen Bildes */
-unsigned char *Paletten;   /* 16 umsortierte Paletten fÅr schnelle Effekte */
+unsigned char *Paletten;   /* 16 umsortierte Paletten f¬År schnelle Effekte */
 unsigned char *MegaTable;
 char *SmallTextLine;
 short SmallTextLineLength;
@@ -318,16 +318,16 @@ char RoomName[40];
 /** DigiSound - Daten ** Ende ********************/
 /*************************************************/
 
-/* MOAS.C              INTERPRETER          ˚˚ */
-/* IO.C                DISK-ROUTINEN        ˚˚ */
-/* PRINT.C             PRINTROUTINEN        ˚˚ */
-/* GRAFIX.C            GRAFIKROUTINEN       ˚- */
-/* IF.C                IF-ABFRAGEN          ˚- */
-/* MISC.C              SONSTIGES            ˚˚ */
-/* INIT.C              INITIALISIERROUTINEN ˚- */
-/* CHK.C               CHECKSUMMENROUTINEN  ˚- */
-/* MOUSE.C             MAUSROUTINEN         ˚- */
-/* HERCBAK.C           HERCULESROUTINEN     ˚- */
+/* MOAS.C              INTERPRETER          √ª√ª */
+/* IO.C                DISK-ROUTINEN        √ª√ª */
+/* PRINT.C             PRINTROUTINEN        √ª√ª */
+/* GRAFIX.C            GRAFIKROUTINEN       √ª- */
+/* IF.C                IF-ABFRAGEN          √ª- */
+/* MISC.C              SONSTIGES            √ª√ª */
+/* INIT.C              INITIALISIERROUTINEN √ª- */
+/* CHK.C               CHECKSUMMENROUTINEN  √ª- */
+/* MOUSE.C             MAUSROUTINEN         √ª- */
+/* HERCBAK.C           HERCULESROUTINEN     √ª- */
 
 
 CHKSUM GetChk(void);

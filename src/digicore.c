@@ -1,20 +1,20 @@
 //============================================================================================
 // MOAS - Mouse Orientiertes Adventure System
 //============================================================================================
-// Der Sourcecode ist derzeit urheberrechtlich geschützt:
+// Der Sourcecode ist derzeit urheberrechtlich geschÃ¼tzt:
 // Copyright (C) 2000 bei Thomas Holz
 //
-// Sobald ich den entsprechenden Text habe, wird das in Public Domain geändert, evtl mit 
-// kleinen Einschränkungen.
+// Sobald ich den entsprechenden Text habe, wird das in Public Domain geÃ¤ndert, evtl mit 
+// kleinen EinschrÃ¤nkungen.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #define uLong unsigned long
@@ -54,7 +54,7 @@ void SoundMixer(const short c)
 
   if (c<8)
   {
-    if ((DefNote[c]&15)!=15)                               // Teil fr Sound
+    if ((DefNote[c]&15)!=15)                               // Teil fÂr Sound
     {
       Step=StepTable[DefNote[c]];
       e=DefInsPos[c]; Size=Sample[DefIns[c]].Size; Data=Sample[DefIns[c]].Data;
@@ -66,7 +66,7 @@ void SoundMixer(const short c)
 
       for (d=0;d<Ende;d++)
       {
-        OverdriveBuffer[d]+=NewVolumeTab[Data[e>>8]];      // Kern fr Sound
+        OverdriveBuffer[d]+=NewVolumeTab[Data[e>>8]];      // Kern fÂr Sound
         e+=Step;
       }
 //    if ((e>>8)>=Size) DefNote[c]|=15;
@@ -84,7 +84,7 @@ void SoundMixer(const short c)
       else Ende=SampleSize;
 
       for (d=0;d<Ende;d++)
-        OverdriveBuffer[d]+=NewVolumeTab[Data[d]];        // Kern fr Sprache
+        OverdriveBuffer[d]+=NewVolumeTab[Data[d]];        // Kern fÂr Sprache
 
       if (d+e>=Size) DefInsPos[9]=0xFFFFFFFF;
         else DefInsPos[9]=d+e;

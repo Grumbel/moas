@@ -16,14 +16,14 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
@@ -44,7 +44,7 @@ void InternalError(short num)
   {
     case 1000:printf("\nNicht genug erweiterter Speicherplatz !"); break;
     case 1001:printf("\nDatenfile korrupt. Bitte neu installieren !"); break;
-    case 1002:printf("\nDatenfile kann nicht ge”ffnet werden !");  break;
+    case 1002:printf("\nDatenfile kann nicht geÂ”ffnet werden !");  break;
     case 1003:printf("\nVGA-Karte ist nicht vorhanden !");         break;
     case 1047:printf("\nDOS-Handling Problem !");                  break;
     case 1048:printf("\nKann Soundkarte nicht ansprechen !");      break;
@@ -432,7 +432,7 @@ void StopAllWalking(void)
 
   for (c=0;c<MAX_PRS;c++) StopPerson(c);
 }
-void UpDateWalking(void) /*==>+<== v”llig neuschreiben !!! Total Chaos !!! */
+void UpDateWalking(void) /*==>+<== vÂ”llig neuschreiben !!! Total Chaos !!! */
 {
   register short ox,oy,c,d,NDir,WasSomething,Ok,Speed,WasAnythingAtAll=0;
   static long Animation=0;
@@ -524,7 +524,7 @@ void UpDateWalking(void) /*==>+<== v”llig neuschreiben !!! Total Chaos !!! */
           RedrawPerson(c);
         }
 
-        if ((Person[c].Bits & 2)==2 && IsPersonPositionOk(c+1000) && (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY)) continue; /* H„lt andere Prs sie auf ?*/
+        if ((Person[c].Bits & 2)==2 && IsPersonPositionOk(c+1000) && (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY)) continue; /* HÂ„lt andere Prs sie auf ?*/
 
         if ((Person[c].x==Person[c].TargetX && Person[c].y==Person[c].TargetY) || Person[c].StepSpeed>0 || Person[c].Bits&16384==0)
           StopPerson(c);
@@ -676,7 +676,7 @@ short GetRealPersonNum(short Number)
 #endif
   printf("\n'short GetRealPersonNum(short Number)' findet Person nicht.");
   printf("\ngesucht war Person Nummer:%i",Number);
-  printf("\nDie internen Personennummern sind folgendermaáen belegt:");
+  printf("\nDie internen Personennummern sind folgendermaÃ¡en belegt:");
   for (c=0;c<MAX_PRS;c++)
     printf("\ninterne Nummer %i: Person Nummer %i",c,Person[c].Num);
   getch();

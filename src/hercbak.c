@@ -16,14 +16,14 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
@@ -66,7 +66,7 @@ void ShowHercBak(void)
   for (c=0;c<18;c++) ((unsigned short*)(0xB8060))[c]=0x0f00+Buffer[c];
   strcpy(Buffer,"SayWin Prs Time Text");
   for (c=0;c<20;c++) ((unsigned short*)(0xB81a0))[c]=0x0f00+Buffer[c];
-  for (c=0;c<33;c++) ((unsigned short*)(0xB8A5e))[c]=((unsigned short*)(0xB855e))[c]=((unsigned short*)(0xB80Fc))[c]=0x0f00+((unsigned char*)"ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ")[c];
+  for (c=0;c<33;c++) ((unsigned short*)(0xB8A5e))[c]=((unsigned short*)(0xB855e))[c]=((unsigned short*)(0xB80Fc))[c]=0x0f00+((unsigned char*)"ÃƒÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„")[c];
 
   getch();
 #ifdef DOS

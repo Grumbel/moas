@@ -16,21 +16,21 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 
 char _SPACE_STRING[]=" ";
 
-unsigned char CharAvail[]="ABCDEFGHIJKLMNOPQRSTUVWXYZ™šá- .!?,:;'\"0123456789<>()[]abcdefghijklmnopqrstuvwxyz„”";
+unsigned char CharAvail[]="ABCDEFGHIJKLMNOPQRSTUVWXYZÂÂ™ÂšÃ¡- .!?,:;'\"0123456789<>()[]abcdefghijklmnopqrstuvwxyzÂ„Â”Â";
 short CharAvailL=-1;
 
 void OpenWindow(char x1,char y,char x2)

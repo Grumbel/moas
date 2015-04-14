@@ -16,14 +16,14 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //--------------------------------------------------------------------------------------------
-// Sie können mich erreichen unter thomas_holz@mail.com
+// Sie kÃ¶nnen mich erreichen unter thomas_holz@mail.com
 // Bitte senden Sie mir KEINE:
 //  - Werbung
 //  - Anfragen wie denn bestimme Codesegmente funktionieren
-//  - Anfragen wie man denn das Problem x lösen könnte
+//  - Anfragen wie man denn das Problem x lÃ¶sen kÃ¶nnte
 //--------------------------------------------------------------------------------------------
-// Für die tysischen Fragen: Das Programm ist in C geschrieben. Heute würde ich den Profis
-// C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
+// FÃ¼r die tysischen Fragen: Das Programm ist in C geschrieben. Heute wÃ¼rde ich den Profis
+// C++ empfehlen. FÃ¼r die Grafik (fÃ¼r Windows) ist DirektX fÃ¼r Profis gut. AnfÃ¤nger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
@@ -114,9 +114,9 @@ void InitSystemVars(void)
   short c;
 
   for (c=0;c<AnzVars;c++) Var[c]=0;
-  for (c=0;c<5;c++) SayWindow[c].RefPrs=-1;        /*Say Windows l”schen*/
-  for (c=0;c<10;c++) SayProperties[c].PrsNum=-1;   /*Say Properties l”schen*/
-  for (c=0;c<MAX_PARSE;c++) PowerParse[c].Nummer=-1; /* PowerParser l”schen*/
+  for (c=0;c<5;c++) SayWindow[c].RefPrs=-1;        /*Say Windows lÂ”schen*/
+  for (c=0;c<10;c++) SayProperties[c].PrsNum=-1;   /*Say Properties lÂ”schen*/
+  for (c=0;c<MAX_PARSE;c++) PowerParse[c].Nummer=-1; /* PowerParser lÂ”schen*/
   V_Colored=1;  V_InventarState=1;
 }
 void InitVars(void)
