@@ -415,15 +415,30 @@ char *UnPack(unsigned char *String)
   static unsigned char Buffer[300];
   short c,l;
 
-  if (Packing==0) strcpy(Buffer,String);
-  else
-  {
-    *Buffer=0;
-
-    l=strlen(String);
-    for (c=0;c<l;c++) strcat(Buffer,codes[String[c]]);
+  if (!String) {
+    Buffer[0] = 0;
+    return (char *)Buffer;
   }
-  return(Buffer);
+  if (Packing==0) {
+    strncpy((char *)Buffer, (const char *)String, sizeof(Buffer)-1);
+    Buffer[sizeof(Buffer)-1] = 0;
+  } else {
+    size_t used = 0;
+    Buffer[0] = 0;
+    l = (short)strlen((const char *)String);
+    for (c = 0; c < l; c++) {
+      const char *piece = (const char *)codes[(unsigned char)String[c]];
+      size_t plen;
+      if (!piece) continue;
+      plen = strlen(piece);
+      if (used + plen >= sizeof(Buffer) - 1)
+        break;
+      memcpy(Buffer + used, piece, plen);
+      used += plen;
+      Buffer[used] = 0;
+    }
+  }
+  return (char *)Buffer;
 }
 void RedrawCompleteScreen(void)
 {

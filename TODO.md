@@ -4,12 +4,16 @@
 - `8d399e6`
 
 ## Status
-### Quit
-- `SDL_QUIT` was setting `running=0` but main was `while(1)` — never exited
-- Now: `while (!PlatformShouldQuit())`, then `PlatformShutdown()`
-- Quit via: window close, **Q**, **Ctrl+C**, **Alt+F4**
-- **Esc** still only sets `KeyAbortState=2` (script abort), as in original
+### Heap / quit crash
+`corrupted size vs. prev_size` on SDL_Quit was heap damage from earlier:
+
+- `AddSayWindow`: `MALLOC(strlen(Text))` without `+1` for NUL (and similar strcat paths)
+- `UnPack`: unbounded `strcpy`/`strcat` into 300-byte static buffer
+- Tiny script stubs: pad allocation by 4 bytes
+
+`PlatformShutdown` is idempotent and tears down SDL before freeing `pixels`.
 
 ### Still open
-- Dirty-rect / full room graphics
+- Dirty-rect / room graphics
 - Sound
+- More ASAN-driven cleanup if needed

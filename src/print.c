@@ -495,7 +495,7 @@ void AddSayWindow(short PrsNum,short wx,short wy,char *Text)
       if (SayProperties[d].PrsNum==PrsNum) break;
     SayWindow[c].Font=SayProperties[d].StdFont;
 
-    SayWindow[c].Text=MALLOC(strlen(Text));
+    SayWindow[c].Text=MALLOC(strlen(Text)+1);
 
     SayWindow[c].Data=NULL;
     strcpy(SayWindow[c].Text,Text);
@@ -508,13 +508,13 @@ void AddSayWindow(short PrsNum,short wx,short wy,char *Text)
 
     if (SayWindow[c].Text!=NULL)
     {
-      Tmp=MALLOC(strlen(Text)+strlen(SayWindow[c].Text));
+      Tmp=MALLOC(strlen(Text)+strlen(SayWindow[c].Text)+2); /* + space + NUL */
       strcpy(Tmp,SayWindow[c].Text);
       strcat(Tmp,_SPACE_STRING);
       FREE(SayWindow[c].Text);
     } else
     {
-      Tmp=MALLOC(strlen(Text));
+      Tmp=MALLOC(strlen(Text)+1);
       *Tmp=0;
     }
     strcat(Tmp,Text);

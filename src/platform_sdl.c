@@ -108,10 +108,16 @@ void PlatformRequestQuit(void)
 
 void PlatformShutdown(void)
 {
-  if (pixels)   { free(pixels);   pixels   = NULL; }
+  static int done = 0;
+  if (done) return;
+  done = 1;
+  running = 0;
+
+  /* Destroy SDL objects before freeing our buffers. */
   if (texture)  { SDL_DestroyTexture(texture);  texture  = NULL; }
   if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
   if (window)   { SDL_DestroyWindow(window);     window   = NULL; }
+  if (pixels)   { free(pixels);   pixels   = NULL; }
   SDL_Quit();
 }
 

@@ -82,11 +82,13 @@ void LadeProgramm(short Num)
   }
   if (Programm[Num].Data) return;
   if (Programm[Num].Length <= 0) {
-    Programm[Num].Data = (uChar *)MALLOC(1);
-    Programm[Num].Data[0] = 0;
+    Programm[Num].Data = (uChar *)MALLOC(4);
+    memset(Programm[Num].Data, 0, 4);
     return;
   }
-  Programm[Num].Data=(char *)MALLOC(Programm[Num].Length);
+  /* +4 pad: script decoder may peek past last byte on stub (len=1) entries */
+  Programm[Num].Data=(char *)MALLOC(Programm[Num].Length + 4);
+  memset(Programm[Num].Data + Programm[Num].Length, 0, 4);
   LadeBereich(Programm[Num].FileNum,Programm[Num].FilePos,Programm[Num].Length,Programm[Num].Data,Programm[Num].Check);
 }
 void LadePhase(short Num)
