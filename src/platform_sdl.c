@@ -118,7 +118,11 @@ void PlatformShutdown(void)
   if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
   if (window)   { SDL_DestroyWindow(window);     window   = NULL; }
   if (pixels)   { free(pixels);   pixels   = NULL; }
-  SDL_Quit();
+  /*
+   * Full SDL_Quit() walks SDL's allocator and aborts if the game already
+   * corrupted the heap. Tear down video only; process exit reclaims the rest.
+   */
+  SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 void PlatformSetPalette(const unsigned char *pal768)

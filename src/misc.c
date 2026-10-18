@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "platform.h"
 
 char TabNewDir[16]=
  { 0,2,6,0,4,3,5,0,0,1,7,0,0,0,0,0 } ;
@@ -303,7 +304,7 @@ void IveGotTooMuchTime(void)
   static short LastTime,Walker=0,LastCall=0;
   short ThisTime;
 
-  ThisTime=TimeCounter;
+  ThisTime=GetTicker();
   if (ThisTime!=LastTime)
   {
     if (ThisTime-LastCall>146 && WalkingAllowed==1)
@@ -332,47 +333,78 @@ void WillBeCalledEverySecond(void)
 }
 void Wait(short Milliseconds)
 {
-#ifdef DOS
-  static unsigned char LastTime;
-  union REGS Regs;
-
   WinEnhance();
-  while (Milliseconds>0 && KeyAbortState!=2)
+#ifdef DOS
   {
-    Regs.h.ah=44;
-    int386(0x21,&Regs,&Regs);
-    if ((Regs.h.dl/10)!=LastTime)
-      Milliseconds--;
-    LastTime=(Regs.h.dl/10);
+    static unsigned char LastTime;
+    union REGS Regs;
+
+    while (Milliseconds>0 && KeyAbortState!=2)
+    {
+      Regs.h.ah=44;
+      int386(0x21,&Regs,&Regs);
+      if ((Regs.h.dl/10)!=LastTime)
+        Milliseconds--;
+      LastTime=(Regs.h.dl/10);
+      MouseCheck();
+    }
+  }
+#else
+  /* ~1 unit ≈ 10 ms on DOS clock; sleep in 10 ms steps and pump events */
+  while (Milliseconds > 0 && KeyAbortState != 2
+#ifndef DOS
+         && !PlatformShouldQuit()
+#endif
+        )
+  {
     MouseCheck();
+    Milliseconds--;
   }
 #endif
 }
 void GetClickOrEnter(short Time)
 {
-#ifdef DOS
-  unsigned char LastTime;
-  union REGS Regs;
-
   WinEnhance();
   WalkingAllowed=0;
-  while (KeyAbortState!=2 && Time>0)
+#ifdef DOS
   {
-    if (Time!=32000)
-    {
-      Regs.h.ah=44;                    /* ==>+<== Wozu Irq wenn timer geht ? */
-      int386(0x21,&Regs,&Regs);
-      if ((Regs.h.dh)!=LastTime)
-        Time--;
-      LastTime=(Regs.h.dh);
-    }
-    MouseCheck();
+    unsigned char LastTime = 0;
+    union REGS Regs;
 
-    if ( (!(Mouse.Left | Mouse.Right)) && (Mouse.LastLeft | Mouse.LastRight)) Time=0;
+    while (KeyAbortState!=2 && Time>0)
+    {
+      if (Time!=32000)
+      {
+        Regs.h.ah=44;
+        int386(0x21,&Regs,&Regs);
+        if ((Regs.h.dh)!=LastTime)
+          Time--;
+        LastTime=(Regs.h.dh);
+      }
+      MouseCheck();
+
+      if ( (!(Mouse.Left | Mouse.Right)) && (Mouse.LastLeft | Mouse.LastRight)) Time=0;
+    }
   }
+#else
+  /*
+   * Time==32000 means "wait forever for a click".
+   * Otherwise Time is roughly centisecond-ish ticks; we map to frames.
+   */
+  {
+    int forever = (Time == 32000);
+    while (KeyAbortState != 2 && !PlatformShouldQuit() && (forever || Time > 0))
+    {
+      MouseCheck(); /* pumps SDL, presents, latches buttons, delays */
+      if ((!(Mouse.Left | Mouse.Right)) && (Mouse.LastLeft | Mouse.LastRight))
+        break;
+      if (!forever)
+        Time--;
+    }
+  }
+#endif
   Mouse.LastRight=Mouse.LastLeft=0;
   WalkingAllowed=1;
-#endif
 }
 void LoadPack(void)
 {

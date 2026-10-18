@@ -114,7 +114,8 @@ void PrintSentence(char *Text)
     if (RealStringLength(_SPACE_STRING,1)>(Window.x2-Window.XPos))
       NeueZeile(); else if (Window.XPos!=Window.x1) PrintCharacter(32);
 
-  strcpy(Buffer,Text);
+  strncpy((char *)Buffer, Text ? Text : "", sizeof(Buffer)-1);
+  Buffer[sizeof(Buffer)-1] = 0;
   while (1)
   {
     if ((Word=strtok(AnzPointer ? NULL : Buffer,_SPACE_STRING))==NULL) break;

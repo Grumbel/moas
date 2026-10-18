@@ -46,8 +46,16 @@ void MouseRead(void);
 void MouseCheck(void)
 {
 #ifndef DOS
-  /* Wait loops (title/menu) only call MouseCheck — pump events here. */
+  /*
+   * Capture previous button state, then poll SDL.
+   * Last* must still differ from Left/Right when callers (GetClickOrEnter)
+   * inspect the edge AFTER MouseCheck returns.
+   */
+  short prevL = Mouse.Left, prevR = Mouse.Right, prevM = Mouse.Middle;
   PlatformPumpEvents();
+  Mouse.LastLeft = prevL;
+  Mouse.LastRight = prevR;
+  Mouse.LastMiddle = prevM;
   if (PlatformShouldQuit())
     return;
 #endif
@@ -98,10 +106,6 @@ void MouseCheck(void)
 
   IveGotTooMuchTime();
 #ifndef DOS
-  /* Latch previous-frame buttons after edge detection used Last*. */
-  Mouse.LastLeft = Mouse.Left;
-  Mouse.LastRight = Mouse.Right;
-  Mouse.LastMiddle = Mouse.Middle;
   PlatformPresent();
   PlatformDelay(16);
 #endif
