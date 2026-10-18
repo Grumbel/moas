@@ -32,9 +32,10 @@ sed -e "s/@VERSION_NAME@/$GAME_VERSION/" -e "s/@VERSION_CODE@/$VERSION_CODE/" \
 cp "$GAME_SRC_DIR"/src/*.c src/jni/src/
 cp "$GAME_SRC_DIR"/src/*.h src/jni/src/
 
-# SDL2, prebuilt; the game includes <SDL2/SDL.h>.
+# SDL2, prebuilt; sources use #include <SDL.h> (headers at SDL/include/).
 cp "$SDL_PREBUILT_MK" src/jni/SDL/Android.mk
-cp -r "$SDL_ANDROID_LIBS/include" src/jni/SDL/include
+# Use /. so we fill SDL/include/ instead of nesting include/include/
+cp -r "$SDL_ANDROID_LIBS/include/." src/jni/SDL/include/
 chmod -R u+rwX src
 
 "$NDK/ndk-build" \
