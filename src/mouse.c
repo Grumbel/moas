@@ -164,6 +164,25 @@ void MouseRead(void)
   Mouse.Left=(Regs.w.bx & 1) | SpaceState;
   Mouse.Right=(Regs.w.bx & 2)/2;
   Mouse.Middle=(Regs.w.bx & 4)/4;
+#else
+  /* SDL already updated Mouse.x/y/buttons; refresh software cursor. */
+  static short ox = -1000, oy = -1000;
+
+  /* Space/Enter act as left button, same as DOS MouseRead. */
+  if (SpaceState)
+    Mouse.Left = 1;
+
+  if (ox != Mouse.x || oy != Mouse.y || ox < -500) {
+    short px = (ox < -500) ? Mouse.x : ox;
+    short py = (oy < -500) ? Mouse.y : oy;
+    if (Window.Status == None)
+      PowerRedrawArea(min(Mouse.x - 15, px - 15), min(Mouse.y - 15, py - 15),
+                      max(Mouse.x - 15, px - 15) + 59, max(Mouse.y - 15, py - 15) + 55);
+    else
+      VMouse(2);
+    ox = Mouse.x;
+    oy = Mouse.y;
+  }
 #endif
 }
 

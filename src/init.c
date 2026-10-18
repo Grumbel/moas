@@ -123,6 +123,7 @@ void InitSystemVars(void)
   for (c=0;c<10;c++) SayProperties[c].PrsNum=-1;   /*Say Properties lschen*/
   for (c=0;c<MAX_PARSE;c++) PowerParse[c].Nummer=-1; /* PowerParser lschen*/
   V_Colored=1;  V_InventarState=1;
+  V_CursorState=1; /* software mouse cursor visible */
 }
 void InitVars(void)
 {
@@ -137,6 +138,7 @@ void InitVars(void)
   TotalSpeed=3; SpeechSpeed=8;
   KeyAbortState=0;
   Mouse.x=16;  Mouse.y=10;
+  Mouse.BewegeMode=-1;
   Window.Status=None;   AutoSaveGame=SpaceState=AnzDescription=0;
   MegaTable=NULL;
   Mouse.CursorState=1;

@@ -398,6 +398,9 @@ void GetClickOrEnter(short Time)
       MouseCheck(); /* pumps SDL, presents, latches buttons, delays */
       if ((!(Mouse.Left | Mouse.Right)) && (Mouse.LastLeft | Mouse.LastRight))
         break;
+      /* Space/Enter (SpaceState) — same as DOS OR into left button */
+      if (SpaceState)
+        break;
       if (!forever)
         Time--;
     }
