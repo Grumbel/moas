@@ -104,6 +104,7 @@ short Execute(short ProcNum,unsigned short Adresse)
       unsigned char op = Prg[Adresse];
       /* Log wait-ish / control ops at higher visibility; others only every op */
       if (op == 4 || op == 14 || op == 7 || op == 10 || op == 48 || op == 50 ||
+          op == 55 || op == 12 || op == 47 ||
           op == 60 || op == 61 || op == 79 || op == 23 || op == 29)
         MoasDbg(MOAS_DBG_SCRIPT, "proc=%d addr=%u op=%u p0=%d p1=%d",
                 (int)ProcNum, (unsigned)Adresse, (unsigned)op,

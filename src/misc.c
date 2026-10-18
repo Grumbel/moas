@@ -879,18 +879,42 @@ void Adress(short Prs,short Ref)
 void WaitWhileSomeBodyIsWalking(short PersonNum)
 {
   register short c,Ok=0;
+  short prev_walk;
+  int frames = 0;
 
   WinEnhance();
-  while (Ok==0 && KeyAbortState!=2)
+  prev_walk = WalkingAllowed;
+  WalkingAllowed = 1; /* UpDateWalking only runs when allowed */
+  MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking(PersonNum=%d)", (int)PersonNum);
+  while (Ok==0 && KeyAbortState!=2
+#ifndef DOS
+        && !PlatformShouldQuit()
+#endif
+        )
   {
     MouseCheck();
     for (Ok=1,c=0;c<MAX_PRS;c++)
-      if ((Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) && (Person[c].StepSpeed>0 || (Person[c].Bits&4096)==4096))
-      if (PersonNum==-1)
+      if (Person[c].Num!=-1 &&
+          (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) &&
+          (Person[c].StepSpeed>0 || (Person[c].Bits & 4096) == 4096))
       {
-        if (Person[c].Num!=-1) Ok=0;
-      } else if (Person[c].Num==PersonNum) Ok=0;
+        if (PersonNum==-1 || Person[c].Num==PersonNum)
+          Ok=0;
+      }
+    frames++;
+    /* Safety: if blocked for ~30s of ticks, snap to targets */
+    if (frames > 30 * 60) {
+      for (c=0;c<MAX_PRS;c++)
+        if (Person[c].Num!=-1) {
+          Person[c].x = Person[c].TargetX;
+          Person[c].y = Person[c].TargetY;
+        }
+      MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking: timeout snap");
+      break;
+    }
   }
+  WalkingAllowed = prev_walk;
+  MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking done");
 }
 void TurnInventar(short State)
 {
