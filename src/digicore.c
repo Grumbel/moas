@@ -86,7 +86,7 @@ void SoundMixer(const short c)
       for (d=0;d<Ende;d++)
         OverdriveBuffer[d]+=NewVolumeTab[Data[d]];        // Kern fr Sprache
 
-      if (d+e>=Size) DefInsPos[9]=0xFFFFFFFF;
+      if (d+e>=(long)SpeechSize) DefInsPos[9]=0xFFFFFFFF;
         else DefInsPos[9]=d+e;
     }
   }

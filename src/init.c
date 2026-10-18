@@ -58,7 +58,7 @@ void InitAll(void)
   PRedrawTmpBak=MALLOC(6000);
   SmallTextLine=MALLOC(340*(5+2+2));  memset(SmallTextLine,0,340*(5+2+2));
   VMouseBuf=MALLOC(40*44);
-  InitDialogs();             //InitDigi();
+  InitDialogs();             InitDigi();
   Init320Tab();              InitScreenData();
   InitVars();                InitPersons();
   InitPictureData();         InitOntimes();

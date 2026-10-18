@@ -359,7 +359,7 @@ short Execute(short ProcNum,unsigned short Adresse)
               Adresse+=7;                                                break;
       case 94:LookKeys();
               Adresse++;                                                 break;
-      //case 95:LoadMusic(Parameter[0]);
+      case 95:LoadMusic(Parameter[0]); Adresse+=3; break;
       //        Adresse+=3;                                                break;
       case 96:iWalk(Parameter[0],Parameter[1]-Person[GetRealPersonNum(Parameter[0])].xs/2,Parameter[2]-Person[GetRealPersonNum(Parameter[0])].ys);
               WaitWhileSomeBodyIsWalking(Person[GetRealPersonNum(Parameter[0])].Num);

@@ -27,14 +27,62 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include <stdint.h>
+#include <string.h>
+#ifndef DOS
+#include <SDL.h>
+#include "datapath.h"
+#include "platform.h"
+#endif
 
 void InitDSP(void);
 void InitVolumeTab(void);
 void InitStepTable(void);
 void GetEnvirenment(void);
 
+#ifndef DOS
+static SDL_AudioDeviceID digi_audio_dev = 0;
+
+/* One mixed frame into SampleBuffer2 (was MySoundIrq body without DMA). */
+static void DigiMixFrame(void);
+static void digi_audio_callback(void *userdata, Uint8 *stream, int len);
+
+static void DigiStartSdlAudio(void)
+{
+  SDL_AudioSpec want, have;
+  if (SDL_WasInit(SDL_INIT_AUDIO) == 0) {
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
+      fprintf(stderr, "moas: SDL audio init failed: %s\n", SDL_GetError());
+      return;
+    }
+  }
+  SDL_zero(want);
+  want.freq = 14000;
+  want.format = AUDIO_U8;
+  want.channels = 1;
+  want.samples = 1024;
+  want.callback = digi_audio_callback;
+  digi_audio_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+  if (!digi_audio_dev) {
+    fprintf(stderr, "moas: SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
+    return;
+  }
+  SDL_PauseAudioDevice(digi_audio_dev, 0);
+}
+
+static void DigiStopSdlAudio(void)
+{
+  if (digi_audio_dev) {
+    SDL_CloseAudioDevice(digi_audio_dev);
+    digi_audio_dev = 0;
+  }
+}
+#endif
+
 void InitDigi(void)
 {
+  short c;
+
   SampleSize=1000;
   SpeechVolume=0;                                          // 100% Sound
   GlobalVolume=255;                                        // voll stoff
@@ -64,11 +112,21 @@ void InitDigi(void)
   SampleBuffer2=(uChar*)D32DosMemAlloc(15000);  //notwendig im DOS
   OverdriveBuffer=(short*)D32DosMemAlloc(40000);
   memset(SampleBuffer0,0,15000);
+  memset(SampleBuffer1,128,15000);
+  memset(SampleBuffer2,128,15000);
+  for (c=0;c<64;c++) Sample[c].Data=NULL;
 
+#ifdef DOS
   GetEnvirenment();
   InitDSP();
+#else
+  /* No SB hardware — tables + SDL stream only. */
+#endif
   InitVolumeTab();
   InitStepTable();
+#ifndef DOS
+  DigiStartSdlAudio();
+#endif
 }
 
 void InitDSP(void)
@@ -215,16 +273,39 @@ void LoadMusic(short Num)
 {
   short c,Anz,ifil;
   char Name[80];
+#ifndef DOS
+#pragma pack(push, 1)
+  struct SampleDisk {
+    unsigned char Name[40];
+    int32_t Rate;
+    int32_t Size;
+    uint32_t DataFlag; /* non-zero => sample payload follows */
+  } disk;
+#pragma pack(pop)
+  char path[512];
+#endif
 
   V_Play=CurrentLine=0;
   sprintf(Name,"PIZZZA%i.TSS",Num);
-  ifil=open(Name,O_RDONLY
-#ifdef DOS
-            |O_BINARY
+#ifndef DOS
+  {
+    const char *dir = MoasDataDir();
+    if (dir && dir[0])
+      snprintf(path, sizeof(path), "%s/%s", dir, Name);
+    else
+      snprintf(path, sizeof(path), "%s", Name);
+    ifil=open(path,O_RDONLY);
+  }
+#else
+  ifil=open(Name,O_RDONLY|O_BINARY);
 #endif
-    );
 
-  if (ifil<0) return;
+  if (ifil<0) {
+#ifndef DOS
+    fprintf(stderr, "moas: LoadMusic: cannot open %s\n", Name);
+#endif
+    return;
+  }
   lseek(ifil,80,SEEK_CUR);         /* Ignore SongTitle */
   read(ifil,Song,sizeof(Song));
   read(ifil,&SongBegin,2);
@@ -235,8 +316,9 @@ void LoadMusic(short Num)
   lseek(ifil,Anz*10,SEEK_CUR);  /* Ignore RowTitles*/
 
   for (c=0;c<64;c++)
-    if (Sample[c].Data!=NULL) FREE((char*)Sample[c].Data);
+    if (Sample[c].Data!=NULL) { FREE((char*)Sample[c].Data); Sample[c].Data=NULL; }
 
+#ifdef DOS
   read(ifil,(char*)Sample,sizeof(Sample));
   for (c=0;c<64;c++)
     if (Sample[c].Data!=NULL)
@@ -244,13 +326,118 @@ void LoadMusic(short Num)
       Sample[c].Data=(uChar*)MALLOC(Sample[c].Size);
       read(ifil,Sample[c].Data,Sample[c].Size);
     }
+#else
+  for (c=0;c<64;c++) {
+    if (read(ifil, &disk, sizeof(disk)) != (ssize_t)sizeof(disk)) {
+      memset(&Sample[c], 0, sizeof(Sample[c]));
+      continue;
+    }
+    memcpy(Sample[c].Name, disk.Name, 40);
+    Sample[c].Rate = disk.Rate;
+    Sample[c].Size = disk.Size;
+    Sample[c].Data = NULL;
+    if (disk.DataFlag != 0 && disk.Size > 0) {
+      Sample[c].Data = (uChar*)MALLOC(disk.Size);
+      if (Sample[c].Data)
+        read(ifil, Sample[c].Data, disk.Size);
+    }
+  }
+#endif
 
   close(ifil);
   V_Play=1;
+#ifndef DOS
+  fprintf(stderr, "moas: LoadMusic(%d) SongBegin=%d SongEnd=%d\n",
+          (int)Num, (int)SongBegin, (int)SongEnd);
+#endif
 }
 
+#ifndef DOS
+/* Shared tracker step + mix (DOS: inside MySoundIrq). */
+static void DigiMixFrame(void)
+{
+  short c;
+  uShort GoToLine = 0xFFFF;
+
+  if (!V_Play || !SampleBuffer2 || !OverdriveBuffer)
+    return;
+
+  if (SampleSize > 14000)
+    SampleSize = 1000;
+
+  memset(OverdriveBuffer, 0x0a0a, SampleSize * 2 + 2);
+
+  for (c = 0; c < 8; c++) {
+    if ((Song[CurrentLine].Col[c] >> 11) != 0x1f &&
+        (Song[CurrentLine].Col[c] & 15) != 13 &&
+        (Song[CurrentLine].Col[c] & 15) != 14) {
+      DefIns[c] = (Song[CurrentLine].Col[c] >> 11);
+      DefInsPos[c] = 0;
+    }
+    if (((Song[CurrentLine].Col[c] >> 6) & 31) != 0 &&
+        (Song[CurrentLine].Col[c] & 15) != 13 &&
+        (Song[CurrentLine].Col[c] & 15) != 14)
+      DefVol[c] = (Song[CurrentLine].Col[c] >> 6) & 31;
+    if ((Song[CurrentLine].Col[c] & 15) != 15) {
+      if ((Song[CurrentLine].Col[c] & 15) == 13)
+        SampleSize = 4000 - ((Song[CurrentLine].Col[c] >> 6) & 31) * 3000 / 31;
+      else if ((Song[CurrentLine].Col[c] & 15) == 14) {
+        if (((Song[CurrentLine].Col[c] >> 6) & 31) == 31 && ForNextValue > 0) {
+          ForNextValue--;
+          GoToLine = ForNextPosition;
+        }
+        if (((Song[CurrentLine].Col[c] >> 6) & 31) < 31 && ForNextPosition != CurrentLine) {
+          ForNextValue = ((Song[CurrentLine].Col[c] >> 6) & 31) - 1;
+          ForNextPosition = CurrentLine;
+        }
+      } else
+        DefNote[c] = Song[CurrentLine].Col[c] & 63;
+    }
+    if ((DefInsPos[c] >> 8) > (uLong)Sample[DefIns[c]].Size)
+      DefNote[c] |= 15;
+    SoundMixer(c);
+  }
+  SoundMixer(8);
+  SoundMixer(9);
+  ApplyOverdrive();
+
+  if (CurrentLine > SongEnd) {
+    CurrentLine = SongBegin;
+  } else if (GoToLine == 0xFFFF)
+    CurrentLine++;
+  else
+    CurrentLine = GoToLine;
+}
+
+static void digi_audio_callback(void *userdata, Uint8 *stream, int len)
+{
+  int filled = 0;
+  (void)userdata;
+  if (!stream || len <= 0)
+    return;
+  while (filled < len) {
+    if (!V_Play || !SampleBuffer2) {
+      memset(stream + filled, 128, (size_t)(len - filled));
+      break;
+    }
+    DigiMixFrame();
+    {
+      int n = (int)SampleSize;
+      if (n > len - filled)
+        n = len - filled;
+      if (n > 0) {
+        memcpy(stream + filled, SampleBuffer2, (size_t)n);
+        filled += n;
+      } else {
+        stream[filled++] = 128;
+      }
+    }
+  }
+}
+#endif
+
 #ifdef DOS
-void __interrupt __far MySoundIrq(void)
+void __interrupt /*__far*/ MySoundIrq(void)
 {
   static uShort c,GoToLine;
   static uChar *h;
@@ -375,9 +562,9 @@ void __interrupt __far MySoundIrq(void)
 }
 #endif
 
+
 void StartSoundProcessing(void)
 {
-  uShort Seite,Block;
   memset(SampleBuffer1,128,5000);
   memset(SampleBuffer2,128,5000);
   memset(DefInsPos,0,10*4);
@@ -386,6 +573,9 @@ void StartSoundProcessing(void)
   ForNextPosition=32000;
   CurrentLine=0;
 
+#ifdef DOS
+  {
+  uShort Seite,Block;
   /*Stop old sound*/
   OutpWait(Config.BaseNum+0xC,0xD0);
 
@@ -420,6 +610,12 @@ void StartSoundProcessing(void)
   /*EnableIRQs*/
   _enable();
   outp(0x21,inp(0x21)&127);
+
   ((uChar*)(VGA_ADRESSE))[1]++;
+  }
+#else
+  if (digi_audio_dev)
+    SDL_PauseAudioDevice(digi_audio_dev, 0);
+#endif
 }
 
