@@ -1,13 +1,15 @@
 # TODO / Handoff
 
-## From user debug log
-- Clicks work; GetClickOrEnter dismisses text (op=84)
-- After AddPerson x3 and op=50 (Found return), script ends
-- Further clicks obj=-1 — persons not hittable
+## Struct audit
+- MAPFILE: fixed (30-byte disk)
+- PERSON: fixed (236-byte disk, stride 240)
+- Save/load still uses native sizeof(Person)/Dialog — broken for old saves on 64-bit
 
-## Root cause
-AddPerson read `sizeof(struct PERSON)` on 64-bit into GAME.1 records of **236 bytes**
-(stride 240). Same class of bug as MAPFILE. Fixed via PersonDisk.
+## Trails
+Screen was also VGA_ADRESSE → PowerRedraw baked sprites into the background.
+Now: Screen = clean BG, Display = composite (VGA_ADRESSE), SDL presents Display.
 
-## Debug CLI remains
-`--debug=wait,input,window,script`
+## Timing
+- Guard PhaseSpeed/BaseSpeed == 0
+- Single Walker step per DOS tick (removed duplicate Walker++)
+- Ticker still ms/55 (~18.2 Hz)

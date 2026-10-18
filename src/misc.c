@@ -317,8 +317,12 @@ void IveGotTooMuchTime(void)
     else if (LastCall>ThisTime) LastCall=ThisTime;
 
     LastTime=ThisTime;          /*TotalSpeed:1..8*/
-    Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
-    Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+    /* One step per timer tick (DOS ~18.2 Hz); TotalSpeed 1..8 */
+    Walker++;
+    if (WalkingAllowed==1 && Walker >= (10 - TotalSpeed)) {
+      UpDateWalking();
+      Walker = 0;
+    }
     if (WalkingAllowed==1 && (ThisTime&3)==0) UpDateSayWindows();
     if (WalkingAllowed==1) LookKeys();
   }
@@ -520,7 +524,10 @@ void UpDateWalking(void) /*==>+<== vllig neuschreiben !!! Total Chaos !!! */
   for (c=0;c<MAX_PRS;c++)
     if (Person[c].Num!=-1)
     {
-      if (Person[c].BaseSpeed>1 && (Animation % Person[c].BaseSpeed)) continue;
+      {
+        short base = Person[c].BaseSpeed > 0 ? Person[c].BaseSpeed : 1;
+        if (base > 1 && (Animation % base)) continue;
+      }
       if (Person[c].Dir>7 && (Person[c].Bits & 8192)==0)
       {
         Person[c].Dir=(Person[c].Dir-8)*2;
@@ -633,8 +640,11 @@ void UpDateWalking(void) /*==>+<== vllig neuschreiben !!! Total Chaos !!! */
           LoescheKopie(c);
           Person[c].Boden=Boden(c);
         }
-        if ((Animation % Person[c].PhaseSpeed)==0)
-          NextPersonPhase(c);
+        {
+          short ps = Person[c].PhaseSpeed > 0 ? Person[c].PhaseSpeed : 1;
+          if ((Animation % ps)==0)
+            NextPersonPhase(c);
+        }
         CheckKopie(c);
         if (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY || (Person[c].Bits & 2048)==0)
           PowerRedrawArea(Person[c].x-Speed,Person[c].y-Speed,Person[c].xs+Person[c].x+Speed,Person[c].ys+Person[c].y+Speed);

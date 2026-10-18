@@ -49,6 +49,11 @@ void InitAll(void)
 {
   ReadLicence();
   Screen=D32DosMemAlloc(65000*3); Info1=Screen+65000; Info2=Info1+65000; //freiwillig im DOS !
+#ifndef DOS
+  Display = (uChar *)MALLOC(64000);
+  if (Display) memset(Display, 0, 64000);
+  else Display = Screen; /* fallback */
+#endif
   Palette=MALLOC(768*129); Paletten=Palette+768;
   PRedrawTmpBak=MALLOC(6000);
   SmallTextLine=MALLOC(340*(5+2+2));  memset(SmallTextLine,0,340*(5+2+2));
@@ -222,6 +227,9 @@ void InitMapData(void)
 void InitScreenData(void)
 {
   memset(Screen,0,64000);
+#ifndef DOS
+  if (Display) memset(Display, 0, 64000);
+#endif
   memset(Info1,0,64000);
   memset(Info2,0,64000);
 }

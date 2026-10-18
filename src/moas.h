@@ -36,9 +36,8 @@
 #ifdef DOS
 #define VGA_ADRESSE ((char*)0xa0000)
 #else
-/* On SDL we treat the software Screen buffer as the "VGA" plane. */
-extern uChar *Screen;
-#define VGA_ADRESSE ((char*)Screen)
+/* Screen = clean BG; Display = composited frame (DOS VGA plane) */
+#define VGA_ADRESSE ((char*)Display)
 #endif
 #define MODE  0
 #define READ  1
@@ -131,7 +130,7 @@ struct LAUFREIHE
   short x,y;
 } LaufReihe[30];
 
-uChar *Screen,*Info1,*Info2,AutoSaveGame;
+uChar *Screen,*Display,*Info1,*Info2,AutoSaveGame;
 uChar *PRedrawTmpBak,*VMouseBuf;  /*Virtual Mouse*/
 uShort PaletteCycleFirst,PaletteCycleLast,DontCyclePal,CycleWait;
 

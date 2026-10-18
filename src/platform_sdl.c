@@ -15,6 +15,7 @@
 /* Minimal declarations of the globals we touch (defined elsewhere). */
 typedef unsigned char uChar;
 extern uChar *Screen;
+extern uChar *Display;
 extern unsigned char *Palette;   /* 768 bytes, VGA 0-63 */
 extern char KeyAbortState;
 extern unsigned char KeyScanCode;
@@ -296,10 +297,10 @@ void PlatformPresent(void)
   SDL_Rect dst;
   int dx, dy, dw, dh;
 
-  if (!Screen || !pixels || !texture || !renderer) return;
-
+  if (!pixels || !texture || !renderer) return;
   {
-    const unsigned char *src = Screen;
+    const unsigned char *src = Display ? Display : Screen;
+    if (!src) return;
     Uint32 *d = pixels;
     for (int i = 0; i < LOGICAL_W * LOGICAL_H; i++)
       d[i] = sdl_palette[src[i]];
