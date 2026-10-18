@@ -1,7 +1,7 @@
 # MOAS — Mouse Orientiertes Adventure System
 
 MOAS is a point-and-click adventure system originally written in C by Thomas
-Holz around 1992–2000 for DOS. This repository is a work-in-progress Linux port
+Holz around 1992–2000 for DOS. This repository is a work-in-progress port
 using SDL2, intended to preserve the original game logic while replacing DOS
 hardware and services with a modern platform layer.
 
@@ -21,6 +21,8 @@ the original DOS release.
 - SDL audio output for digitized tracker samples (14 kHz, unsigned 8-bit mono)
 - DOS save-game structures adapted to a packed on-disk layout
 - Debug logging for scripts, input, waits, windows, and data loading
+- FreeDesktop integration (`.desktop`, hicolor icons, AppStream metainfo)
+- Cross builds: Windows (MinGW), Android (APK), WebAssembly, R36S/PortMaster
 
 Known limitations include unfinished speech-channel wiring and legacy effects
 such as `PowerBlend` and `WalkNLayers`. The bundled data does not include the
@@ -65,31 +67,29 @@ To build and run the Nix package directly:
 
 ```sh
 nix run .
+# or: nix build .#moas && ./result/bin/moas
 ```
 
 The CMake install target installs the executable, game data, FreeDesktop
 `.desktop` entry, hicolor icons, and AppStream metainfo under the configured
-install prefixes. After `cmake --install`, the game appears in application
-menus on typical Linux desktops.
+prefixes. After `cmake --install`, the game appears in application menus on
+typical Linux desktops.
 
-The compiled-in default data path can be changed with
-`-DMOAS_DATADIR=/path/to/data` at configure time; `MOAS_DATADIR` or the
-`--datadir=PATH` command-line option can override it at runtime.
+## Cross-platform packages (Nix)
 
+All of the following require Linux host tools and the flake inputs (SDL2
+source, Android SDK where needed).
 
-## Cross-platform ports
-
-Packaging follows the same approach as [Kurvenrausch](https://github.com/Grumbel/kurvenrausch):
-
-### Windows
+### Windows (MinGW)
 
 ```sh
-nix build .#moas-win64-zip   # 64-bit
-nix build .#moas-win32-zip   # 32-bit
+nix build .#moas-win64          # 64-bit
+nix build .#moas-win64-zip      # zip with SDL2.dll + data
+nix build .#moas-win32
+nix build .#moas-win32-zip
 ```
 
-MinGW cross-build with the official SDL2 MinGW package (`nix/windows.nix`).
-Each zip contains `moas.exe`, `SDL2.dll`, and the game data files.
+See `nix/windows.nix`.
 
 ### Android
 
@@ -98,21 +98,26 @@ nix build .#moas-android         # moas-<version>.apk
 nix run .#install-android-moas   # install on a device with adb
 ```
 
-NDK + SDL2 2.30.3 Java side (`nix/android.nix`, `mk/android/`). Game data
-in the APK (assets) is not fully wired yet.
+NDK build of `libmain.so` against a prebuilt SDL2, packaged with SDL’s Java
+activity (`nix/android.nix`, `mk/android/`). Game data from `manick/` is
+packaged as APK assets and extracted to internal storage on first run
+(`MOAS_DATADIR`). Useful logcat filter:
 
+```sh
+adb logcat -s SDL/APP:V MOAS:V *:E
+```
 
 ### WebAssembly (Emscripten)
 
 ```sh
 nix build .#moas-wasm
-nix run .#moas-wasm   # local HTTP server + browser
+nix run .#moas-wasm              # local HTTP server + open browser
 ```
 
 Static SDL2 for wasm32 and a self-contained site (`moas.html` / `.js` /
-`.wasm` plus preloaded game data). The blocking DOS-style game loop uses
-Emscripten ASYNCIFY so `Wait` / `getch` yield to the browser
-(`nix/wasm.nix`, `mk/wasm/`).
+`.wasm` plus preloaded game data). Header globals use a single definition
+TU under Emscripten; the blocking DOS-style game loop uses ASYNCIFY so
+`Wait` / `getch` can yield to the browser (`nix/wasm.nix`, `mk/wasm/`).
 
 ### R36S and other PortMaster handhelds (ArkOS)
 
@@ -122,7 +127,7 @@ nix build .#moas-r36s-portmaster       # or copy contents to /roms/ports/
 ```
 
 Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
-binary runs on ArkOS's glibc and SDL2. Controls and install notes:
+binary runs on ArkOS’s glibc and SDL2. Controls and install notes:
 `mk/r36s/README.md`. Launch with `--fullscreen`.
 
 ## Command-line options
@@ -133,7 +138,8 @@ binary runs on ArkOS's glibc and SDL2. Controls and install notes:
 --skip-intro         Skip the intro/title script
 --proc=N             Start at program N
 --addr=N             Start at an address in that program
---datadir=PATH       Set the game-data directory
+--datadir=PATH       Set the game-data directory (same as MOAS_DATADIR)
+--fullscreen         Start in desktop-fullscreen mode
 ```
 
 Debug categories are `script`, `input`, `wait`, `window`, `load`, and `all`.
@@ -142,6 +148,7 @@ For example:
 ```sh
 ./build/moas --debug=wait,input,window
 ./build/moas --skip-intro --debug=script
+./build/moas --fullscreen
 MOAS_DEBUG=all ./build/moas
 ```
 
@@ -150,9 +157,13 @@ MOAS_DEBUG=all ./build/moas
 - `src/` — C game engine and SDL2 platform layer
 - `manick/` — game data files; original DOS executables are not used by the port
 - `data/` — FreeDesktop `.desktop` file, hicolor icons, AppStream metainfo
+- `mk/android/` — Android NDK/APK packaging scripts and templates
+- `mk/r36s/` — PortMaster launcher, `port.json`, screenshot
+- `mk/wasm/` — Emscripten HTML shell and helper scripts
+- `nix/` — Windows, Android, R36S, and WASM derivations
 - `docs/screenshot.png` — screenshot of the current port
 - `TODO.md` — current implementation notes and outstanding work
-- `flake.nix` — Nix development shell and package definition
+- `flake.nix` — Nix development shell, packages, and apps
 
 ## Contributing / development notes
 
