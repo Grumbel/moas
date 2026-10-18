@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "name": "moas.zip",
+  "items": ["Moas.sh", "moas"],
+  "items_opt": null,
+  "attr": {
+    "title": "MOAS",
+    "desc": "Mouse Orientiertes Adventure System — point-and-click adventure (Mänick Mänschion). SDL2 Linux port of the classic DOS engine.",
+    "inst": "Ready to run. Version @version@.",
+    "genres": ["adventure"],
+    "porter": ["Ingo Ruhnke"],
+    "image": {},
+    "rtr": true,
+    "runtime": null,
+    "reqs": [],
+    "arch": ["aarch64"]
+  }
+}

@@ -1,40 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-or-later
 {
   description = "MOAS - Mouse Orientiertes Adventure System (SDL2 Linux port)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+
+    # Official prebuilt MinGW SDL2 (same as Kurvenrausch / Pingus)
+    SDL2-win32.url = "github:grumnix/SDL2-win32";
+    SDL2-win32.inputs.nixpkgs.follows = "nixpkgs";
+    SDL2-win32.inputs.flake-utils.follows = "flake-utils";
+
+    # SDL2 sources for the Android NDK build
+    sdl2-src = {
+      url = "https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-2.30.3.tar.gz";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs }:
-    let
-      systems = [ "x86_64-linux" "aarch64-linux" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f {
-        inherit system;
+  outputs = { self, nixpkgs, flake-utils, SDL2-win32, sdl2-src }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
         pkgs = import nixpkgs { inherit system; };
-      });
-    in
-    {
-      packages = forAllSystems ({ pkgs, system }: {
-        default = pkgs.stdenv.mkDerivation {
-          pname = "moas";
-          version = "0.1.0-sdl";
 
+        version = "0.1.0-sdl";
+
+        moas = pkgs.stdenv.mkDerivation {
+          pname = "moas";
+          inherit version;
           src = ./.;
 
-          dontStrip = true;  # keep debug symbols for gdb
+          dontStrip = true;
 
-          nativeBuildInputs = with pkgs; [
-            cmake
-            pkg-config
-          ];
-
-          buildInputs = with pkgs; [
-            SDL2
-          ];
+          nativeBuildInputs = with pkgs; [ cmake pkg-config ];
+          buildInputs = with pkgs; [ SDL2 ];
 
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-            # Bake the store path so the binary finds data without env vars
             "-DMOAS_DATADIR=${placeholder "out"}/share/moas"
           ];
 
@@ -45,24 +48,71 @@
             mainProgram = "moas";
           };
         };
-      });
 
-      apps = forAllSystems ({ pkgs, system }: {
-        default = {
-          type = "app";
-          program = "${self.packages.${system}.default}/bin/moas";
-          meta = {
-            description = "Run MOAS (Mänick Mänschion) with bundled data";
+        r36s = import ./nix/r36s.nix { inherit pkgs version; };
+
+        androidPkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          config.android_sdk.accept_license = true;
+        };
+        android = import ./nix/android.nix {
+          pkgs = androidPkgs;
+          sdlSrc = sdl2-src;
+          sdlVersion = "2.30.3";
+          buildToolsVersion = "30.0.3";
+          packagePlatform = "22";
+          compilePlatform = "33";
+          targetAbis = [ "armeabi-v7a" "arm64-v8a" "x86_64" ];
+          androidSdk = (androidPkgs.androidenv.composeAndroidPackages {
+            platformVersions = [ "22" "33" ];
+            buildToolsVersions = [ "30.0.3" ];
+            includeNDK = true;
+            ndkVersion = "29.0.14206865";
+            includeEmulator = false;
+            includeSources = false;
+          }).androidsdk;
+          inherit version;
+          versionCode = self.revCount or 1;
+        };
+
+        windows = import ./nix/windows.nix {
+          inherit pkgs version;
+          sdl2Win64 = SDL2-win32.packages.${system}.SDL2-win64;
+          sdl2Win32 = SDL2-win32.packages.${system}.SDL2-win32;
+        };
+      in {
+        packages = {
+          default = moas;
+          moas = moas;
+
+          moas-win64 = windows.win64;
+          moas-win64-zip = windows.win64Zip;
+          moas-win32 = windows.win32;
+          moas-win32-zip = windows.win32Zip;
+
+          moas-r36s = r36s.r36s;
+          moas-r36s-portmaster = r36s.portmaster;
+          moas-r36s-portmaster-zip = r36s.portmasterZip;
+          arkos-sysroot = r36s.sysroot;
+
+          moas-android = android.apk;
+          sdl2-android = android.sdlAndroidLibs;
+        };
+
+        apps = {
+          default = {
+            type = "app";
+            program = "${moas}/bin/moas";
           };
+          moas = {
+            type = "app";
+            program = "${moas}/bin/moas";
+          };
+          install-android-moas = android.installApp;
         };
-        moas = {
-          type = "app";
-          program = "${self.packages.${system}.default}/bin/moas";
-        };
-      });
 
-      devShells = forAllSystems ({ pkgs, system }: {
-        default = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             cmake
             pkg-config
@@ -70,11 +120,9 @@
             gdb
             clang-tools
           ];
-          # Local runs from the repo: prefer ./manick
           shellHook = ''
             export MOAS_DATADIR="''${MOAS_DATADIR:-$PWD/manick}"
           '';
         };
       });
-    };
 }

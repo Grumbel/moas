@@ -76,6 +76,42 @@ The compiled-in default data path can be changed with
 `-DMOAS_DATADIR=/path/to/data` at configure time; `MOAS_DATADIR` or the
 `--datadir=PATH` command-line option can override it at runtime.
 
+
+## Cross-platform ports
+
+Packaging follows the same approach as [Kurvenrausch](https://github.com/Grumbel/kurvenrausch):
+
+### Windows
+
+```sh
+nix build .#moas-win64-zip   # 64-bit
+nix build .#moas-win32-zip   # 32-bit
+```
+
+MinGW cross-build with the official SDL2 MinGW package (`nix/windows.nix`).
+Each zip contains `moas.exe`, `SDL2.dll`, and the game data files.
+
+### Android
+
+```sh
+nix build .#moas-android         # moas-<version>.apk
+nix run .#install-android-moas   # install on a device with adb
+```
+
+NDK + SDL2 2.30.3 Java side (`nix/android.nix`, `mk/android/`). Game data
+in the APK (assets) is not fully wired yet.
+
+### R36S and other PortMaster handhelds (ArkOS)
+
+```sh
+nix build .#moas-r36s-portmaster-zip   # for PortMaster autoinstall
+nix build .#moas-r36s-portmaster       # or copy contents to /roms/ports/
+```
+
+Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
+binary runs on ArkOS's glibc and SDL2. Controls and install notes:
+`mk/r36s/README.md`. Launch with `--fullscreen`.
+
 ## Command-line options
 
 ```text

@@ -10,6 +10,7 @@ unsigned moas_debug = 0;
 int moas_skip_intro = 0;
 int moas_start_proc = -1;
 int moas_start_addr = 0;
+int moas_fullscreen = 0;
 
 static void usage(const char *argv0)
 {
@@ -30,6 +31,7 @@ static void usage(const char *argv0)
     "  --proc=N             Start at program N (default 0 after intro)\n"
     "  --addr=N             Start address in that program (default 0)\n"
     "  --datadir=PATH       Same as MOAS_DATADIR\n"
+    "  --fullscreen         Start in desktop-fullscreen mode\n"
     "\n"
     "Examples:\n"
     "  %s --debug=wait,input,window\n"
@@ -108,6 +110,10 @@ void MoasParseArgs(int argc, char **argv)
 #ifndef DOS
       setenv("MOAS_DATADIR", a + 10, 1);
 #endif
+      continue;
+    }
+    if (!strcmp(a, "--fullscreen") || !strcmp(a, "-f")) {
+      moas_fullscreen = 1;
       continue;
     }
     fprintf(stderr, "moas: unknown option '%s' (try --help)\n", a);

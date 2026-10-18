@@ -18,6 +18,7 @@ extern unsigned moas_debug;
 extern int moas_skip_intro;   /* skip Execute(3,0) */
 extern int moas_start_proc;   /* -1 = default 0 after intro */
 extern int moas_start_addr;
+extern int moas_fullscreen;   /* request desktop-fullscreen window */
 
 void MoasParseArgs(int argc, char **argv);
 void MoasDbg(unsigned flag, const char *fmt, ...);

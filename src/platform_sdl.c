@@ -6,6 +6,7 @@
  */
 
 #include "platform.h"
+#include "debug.h"
 
 #include <SDL.h>
 #include <stdio.h>
@@ -192,10 +193,15 @@ int PlatformInit(void)
     return -1;
   }
 
-  window = SDL_CreateWindow("MOAS",
-                            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                            LOGICAL_W * SCALE, LOGICAL_H * SCALE,
-                            SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+  {
+    Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    if (moas_fullscreen)
+      flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    window = SDL_CreateWindow("MOAS",
+                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              LOGICAL_W * SCALE, LOGICAL_H * SCALE,
+                              flags);
+  }
   if (!window) {
     fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
     return -1;

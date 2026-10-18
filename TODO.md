@@ -1,11 +1,19 @@
 # TODO / Handoff
 
-## Desktop integration (this bundle)
+## Cross ports (this bundle)
+- Technique mirrored from Kurvenrausch (Nix flake packages + mk/ tree)
+- Windows: `nix/windows.nix` — MinGW + SDL2-win32 flake, win32/win64 zip
+- R36S / PortMaster: `nix/r36s.nix`, `mk/r36s/` — eoan arm64 sysroot, launcher
+- Android: `nix/android.nix`, `mk/android/` — NDK + SDL2 APK scaffold
+- `--fullscreen` / `-f` for handhelds and borderless desktop
+- Android: game data (manick/) not yet packed into APK assets / internal storage
+- Windows: first MinGW build may need small POSIX path fixes — untested here
+
+## Desktop integration
 - FreeDesktop `.desktop` file: `data/moas.desktop`
 - hicolor icons (16–256 px): large red “M” with protagonist, night path scene
 - AppStream metainfo: `data/metainfo/org.grumbel.moas.metainfo.xml`
 - CMake install rules for applications/, icons/hicolor/, metainfo/
-- README notes on menu integration after `cmake --install`
 
 ## Audio
 - InitDigi() enabled: volume/step tables + SDL audio @ 14 kHz U8 mono
@@ -15,20 +23,15 @@
 - No PIZZZA*.TSS in manick/ — music silent until data present
 
 ## Timing
-- Ticker back to PIT divisor 0x1FFF (~145.67 Hz). Evidence: IRQ lets the BIOS
-  clock advance every 8th tick, game second = 146 ticks, intro waits 17*64 ticks.
-- IveGotTooMuchTime: original semantics, one step per call (no catch-up);
-  speech bubbles every 4th tick again. Palette cycle still runs per tick.
-- Wait()/shake use real 100 ms units (PlatformGetMillis).
-- Verify by playing: walking speed vs TotalSpeed, intro star/fade timing.
+- Ticker back to PIT divisor 0x1FFF (~145.67 Hz)
+- IveGotTooMuchTime: original semantics, one step per call
+- Wait()/shake use real 100 ms units (PlatformGetMillis)
 
 ## Input
-- Cursor tracks again inside windows (dialogs, save/load menu): MouseRead
-  calls VMouse(2) whenever a window is open, as on DOS.
-- getch() blocks like conio (pumps/presents; ESC on quit). F10 FileMenu
-  previously spun forever on the non-blocking getch.
-- GetClickOrEnter timeout counts seconds (DOS RTC), not frames.
+- Cursor tracks inside windows; blocking getch(); click timeout in seconds
 
 ## Still open
 - Speech channel (SpeechData) wiring if used
 - PowerBlend / WalkNLayers
+- Android asset data path
+- Verify Windows MinGW and R36S device builds
