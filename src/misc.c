@@ -455,10 +455,11 @@ void GetClickOrEnter(short Time)
 #else
   /*
    * Time==32000 means "wait forever for a click".
-   * Otherwise Time is roughly centisecond-ish ticks; we map to frames.
+   * Otherwise Time is in seconds (DOS counted RTC second changes).
    */
   {
     int forever = (Time == 32000);
+    unsigned int next = PlatformGetMillis() + 1000u;
     short saw_down = 0;
     while (KeyAbortState != 2 && !PlatformShouldQuit() && (forever || Time > 0))
     {
@@ -479,8 +480,10 @@ void GetClickOrEnter(short Time)
         if (ch == 0 && kbhit())
           (void)getch();
       }
-      if (!forever)
+      if (!forever && (int)(PlatformGetMillis() - next) >= 0) {
         Time--;
+        next += 1000u;
+      }
     }
   }
 #endif

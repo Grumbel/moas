@@ -15,6 +15,13 @@
 - Wait()/shake use real 100 ms units (PlatformGetMillis).
 - Verify by playing: walking speed vs TotalSpeed, intro star/fade timing.
 
+## Input
+- Cursor tracks again inside windows (dialogs, save/load menu): MouseRead
+  calls VMouse(2) whenever a window is open, as on DOS.
+- getch() blocks like conio (pumps/presents; ESC on quit). F10 FileMenu
+  previously spun forever on the non-blocking getch.
+- GetClickOrEnter timeout counts seconds (DOS RTC), not frames.
+
 ## Still open
 - Speech channel (SpeechData) wiring if used
 - PowerBlend / WalkNLayers

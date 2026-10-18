@@ -178,8 +178,12 @@ void MouseRead(void)
   /* Keep hotspot flag current so cursor shape can change while moving. */
   if (PlayerHasControl && Window.Status == None)
     ThingAtCursor = (WhatsAt(Mouse.x, Mouse.y) != -1);
-  /* VMouse save/restore — do not bake cursor into Screen (avoids trails). */
-  if (Mouse.CursorState==1 && V_CursorState==1)
+  /*
+   * VMouse save/restore — do not bake cursor into Screen (avoids trails).
+   * As on DOS, windows (dialogs, menus) clear CursorState but still track
+   * the cursor via VMouse; VMouse itself honours V_CursorState.
+   */
+  if (Window.Status!=None || (Mouse.CursorState==1 && V_CursorState==1))
     VMouse(2);
 #endif
 }

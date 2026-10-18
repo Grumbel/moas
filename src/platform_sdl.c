@@ -75,7 +75,14 @@ int PlatformKbhit(void)
 int PlatformGetch(void)
 {
   unsigned char c;
-  if (key_qhead == key_qtail) return 0;
+  /* Blocks like conio getch(); keeps the window alive while waiting. */
+  while (key_qhead == key_qtail) {
+    PlatformPumpEvents();
+    if (PlatformShouldQuit())
+      return 27; /* ESC: lets DOS-style menu loops exit */
+    PlatformPresent();
+    SDL_Delay(10);
+  }
   c = key_queue[key_qhead];
   key_qhead = (key_qhead + 1) % KEYQ_SIZE;
   return (int)c;
