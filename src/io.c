@@ -60,7 +60,14 @@ short DataOpen(short Num)
 #endif
   }
 
-  if (FileHandle<0) {puts(Name);getch();InternalError(1002);}
+  if (FileHandle<0) {
+#ifndef DOS
+    MoasReportMissingData(Name);
+#else
+    puts(Name); getch();
+#endif
+    InternalError(1002);
+  }
 
   return(FileHandle);
 }
@@ -187,6 +194,15 @@ void LadeInventar(short Num)
 }
 void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSum)
 {
+  if (FileNum < 1) {
+    fprintf(stderr, "moas: LadeBereich: invalid FileNum=%d pos=%ld len=%ld\n",
+            (int)FileNum, (long)FilePos, (long)Length);
+#ifndef DOS
+    fprintf(stderr, "  data dir: %s\n", MoasDataDir());
+#endif
+    InternalError(1002);
+  }
+
   short ifil;
 
   ifil=DataOpen(FileNum);     ChkOpen(_FRAGEZEICHEN,READ);

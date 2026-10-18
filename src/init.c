@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "datapath.h"
 #include "mapfile_disk.h"
 
 #define D32RealSeg(P)   ((((uLong) (P)) >> 4) & 0xFFFF)
@@ -228,6 +229,12 @@ void InitFont(void)
 
   ifil=ChkOpen("PIZZZA.XXX",READ);
   if (ifil<0) ifil=ChkOpen("GAME.XXX",READ);
+  if (ifil<0) {
+#ifndef DOS
+    MoasReportMissingData("GAME.XXX");
+#endif
+    InternalError(1002);
+  }
   for (f=0;f<7;f++)
   {
     ChkRead(ifil,&Font[f].SizeY,1);

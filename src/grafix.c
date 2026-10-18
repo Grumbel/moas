@@ -124,7 +124,11 @@ void PutCharAt(short CharNum,char *Vga,char FontNum,char c1,char c2,short VgaXs)
   register short x,y,xs,SizeY;
   register UCHAR *p,pp;
 
+  if (!Vga || FontNum < 0 || FontNum > 6 || !Font[FontNum].Data || !Font[FontNum].Width || !Font[FontNum].Begin)
+    return;
+  if (CharNum < 0) return;
   xs=Font[FontNum].Width[CharNum];
+  if (xs <= 0) return;
   p =Font[FontNum].Data+Font[FontNum].Begin[CharNum];
   SizeY=Font[FontNum].SizeY;
 

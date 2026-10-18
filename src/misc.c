@@ -45,7 +45,7 @@ void InternalError(short num)
   {
     case 1000:printf("\nNicht genug erweiterter Speicherplatz !"); break;
     case 1001:printf("\nDatenfile korrupt. Bitte neu installieren !"); break;
-    case 1002:printf("\nDatenfile kann nicht geffnet werden !");  break;
+    case 1002:printf("\nCannot open data file (see stderr for path details)!\n"); break;
     case 1003:printf("\nVGA-Karte ist nicht vorhanden !");         break;
     case 1047:printf("\nDOS-Handling Problem !");                  break;
     case 1048:printf("\nKann Soundkarte nicht ansprechen !");      break;

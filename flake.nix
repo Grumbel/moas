@@ -21,6 +21,8 @@
 
           src = ./.;
 
+          dontStrip = true;  # keep debug symbols for gdb
+
           nativeBuildInputs = with pkgs; [
             cmake
             pkg-config
@@ -31,7 +33,7 @@
           ];
 
           cmakeFlags = [
-            "-DCMAKE_BUILD_TYPE=Release"
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
             # Bake the store path so the binary finds data without env vars
             "-DMOAS_DATADIR=${placeholder "out"}/share/moas"
           ];

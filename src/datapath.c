@@ -15,6 +15,7 @@
 #endif
 
 static char data_dir[PATH_MAX] = ".";
+static int data_dir_resolved = 0;
 
 static int is_dir(const char *path)
 {
@@ -27,12 +28,12 @@ static int file_readable(const char *path)
   return path && access(path, R_OK) == 0;
 }
 
-/* True if dir contains a recognizable game data file. */
 static int looks_like_data_dir(const char *dir)
 {
   char buf[PATH_MAX];
   static const char *markers[] = {
     "GAME.PCK", "game.pck", "GAME.1", "game.1",
+    "GAME.2", "game.2", "GAME.XXX", "game.xxx",
     "LICENCE.DAT", "Licence.Dat", "licence.dat",
     NULL
   };
@@ -55,16 +56,14 @@ static void set_data_dir(const char *dir)
   }
   strncpy(data_dir, dir, sizeof(data_dir) - 1);
   data_dir[sizeof(data_dir) - 1] = 0;
-  /* strip trailing slashes */
   {
     size_t n = strlen(data_dir);
-    while (n > 1 && data_dir[n - 1] == '/') {
+    while (n > 1 && data_dir[n - 1] == '/')
       data_dir[--n] = 0;
-    }
   }
+  data_dir_resolved = 1;
 }
 
-/* dirname of path into out (may be "."). */
 static void dirname_of(const char *path, char *out, size_t outsz)
 {
   const char *slash;
@@ -96,51 +95,94 @@ void MoasInitDataPath(const char *argv0)
   const char *env;
   char buf[PATH_MAX];
   char exe_dir[PATH_MAX];
+  char tried[8][PATH_MAX];
+  int ntried = 0;
+
+#define REMEMBER(p) do { \
+    if (ntried < 8 && (p) && (p)[0]) { \
+      strncpy(tried[ntried], (p), PATH_MAX - 1); \
+      tried[ntried][PATH_MAX - 1] = 0; \
+      ntried++; \
+    } \
+  } while (0)
 
   env = getenv("MOAS_DATADIR");
-  if (env && looks_like_data_dir(env)) {
-    set_data_dir(env);
-    return;
+  if (env) {
+    REMEMBER(env);
+    if (looks_like_data_dir(env)) {
+      set_data_dir(env);
+      fprintf(stderr, "moas: data directory (env MOAS_DATADIR): %s\n", data_dir);
+      return;
+    }
   }
 
-  if (MOAS_DATADIR[0] && looks_like_data_dir(MOAS_DATADIR)) {
-    set_data_dir(MOAS_DATADIR);
-    return;
+  if (MOAS_DATADIR[0]) {
+    REMEMBER(MOAS_DATADIR);
+    if (looks_like_data_dir(MOAS_DATADIR)) {
+      set_data_dir(MOAS_DATADIR);
+      fprintf(stderr, "moas: data directory (built-in): %s\n", data_dir);
+      return;
+    }
   }
 
+  REMEMBER("./manick");
   if (looks_like_data_dir("./manick")) {
     set_data_dir("./manick");
+    fprintf(stderr, "moas: data directory (./manick): %s\n", data_dir);
     return;
   }
+  REMEMBER("manick");
   if (looks_like_data_dir("manick")) {
     set_data_dir("manick");
+    fprintf(stderr, "moas: data directory (manick): %s\n", data_dir);
     return;
   }
+  REMEMBER(".");
   if (looks_like_data_dir(".")) {
     set_data_dir(".");
+    fprintf(stderr, "moas: data directory (cwd): %s\n", data_dir);
     return;
   }
 
   dirname_of(argv0, exe_dir, sizeof(exe_dir));
 
   snprintf(buf, sizeof(buf), "%s/../share/moas", exe_dir);
+  REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
+    fprintf(stderr, "moas: data directory ($exe/../share/moas): %s\n", data_dir);
     return;
   }
   snprintf(buf, sizeof(buf), "%s/manick", exe_dir);
+  REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
+    fprintf(stderr, "moas: data directory ($exe/manick): %s\n", data_dir);
     return;
   }
   snprintf(buf, sizeof(buf), "%s/../manick", exe_dir);
+  REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
+    fprintf(stderr, "moas: data directory ($exe/../manick): %s\n", data_dir);
     return;
   }
 
-  /* Fall back to cwd; opens will still try relative names. */
   set_data_dir(".");
+  fprintf(stderr,
+          "moas: WARNING: could not find game data directory.\n"
+          "  Expected files like GAME.1, GAME.PCK, LICENCE.DAT.\n"
+          "  Searched:\n");
+  {
+    int i;
+    for (i = 0; i < ntried; i++)
+      fprintf(stderr, "    - %s%s\n", tried[i],
+              is_dir(tried[i]) ? " (exists, but no game files)" : " (missing)");
+  }
+  fprintf(stderr,
+          "  Fix: set MOAS_DATADIR to the directory that contains GAME.*\n"
+          "       e.g. export MOAS_DATADIR=/path/to/manick\n");
+#undef REMEMBER
 }
 
 const char *MoasDataDir(void)
@@ -150,8 +192,7 @@ const char *MoasDataDir(void)
 
 static int try_open(const char *path)
 {
-  int fd = open(path, O_RDONLY);
-  return fd;
+  return open(path, O_RDONLY);
 }
 
 static void fold_case_copy(char *dst, const char *src, size_t dstsz, int upper)
@@ -172,11 +213,9 @@ int MoasOpenData(const char *name)
 
   if (!name || !*name) return -1;
 
-  /* 1. as given in cwd */
   fd = try_open(name);
   if (fd >= 0) return fd;
 
-  /* 2. case variants in cwd */
   fold_case_copy(folded, name, sizeof(folded), 1);
   fd = try_open(folded);
   if (fd >= 0) return fd;
@@ -184,7 +223,6 @@ int MoasOpenData(const char *name)
   fd = try_open(folded);
   if (fd >= 0) return fd;
 
-  /* 3. under data dir */
   if (data_dir[0] && strcmp(data_dir, ".") != 0) {
     snprintf(path, sizeof(path), "%s/%s", data_dir, name);
     fd = try_open(path);
@@ -202,4 +240,23 @@ int MoasOpenData(const char *name)
   }
 
   return -1;
+}
+
+void MoasReportMissingData(const char *name)
+{
+  fprintf(stderr,
+          "moas: cannot open data file '%s'\n"
+          "  data directory: %s\n"
+          "  cwd:            ",
+          name ? name : "(null)", data_dir);
+  {
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)))
+      fprintf(stderr, "%s\n", cwd);
+    else
+      fprintf(stderr, "(unknown)\n");
+  }
+  fprintf(stderr,
+          "  Hint: install places data in share/moas next to the binary,\n"
+          "        or set MOAS_DATADIR to the manick/ folder.\n");
 }
