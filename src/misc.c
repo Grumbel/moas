@@ -96,7 +96,11 @@ void LookKeys(void)
   PersonX=Person[PN].x; PersonY=Person[PN].y;
   if (PlayerHasControl==0) PN=MAX_PRS;
 
+  #ifdef DOS
   Time=*((long*)0x0046C); Strg=((((char *)0x00417)[0]&4)/4) | SpaceState | (Window.Status!=None) | (PN==MAX_PRS) | (Person[PN].StepSpeed==0);
+#else
+  Time=GetTicker(); Strg=SpaceState | (Window.Status!=None) | (PN==MAX_PRS) | (Person[PN].StepSpeed==0);
+#endif
 
   switch(KeyScanCode)
   {
@@ -123,7 +127,11 @@ void LookKeys(void)
 
   if (KeyScanCode!=LastKeyScanCode)
   {
-    if (((PN==MAX_PRS) | (Person[PN].StepSpeed==0)) && PlayerHasControl==1 && Window.Status==None && (((char *)0x00417)[0]&4)==0)
+    if (((PN==MAX_PRS) | (Person[PN].StepSpeed==0)) && PlayerHasControl==1 && Window.Status==None
+#ifdef DOS
+        && (((char *)0x00417)[0]&4)==0
+#endif
+       )
       if (KeyScanCode==72 || KeyScanCode==73 || KeyScanCode==77 || KeyScanCode==80 || KeyScanCode==81 || KeyScanCode==79 || KeyScanCode==75 || KeyScanCode==71)
       {
         short T0=Var[0],T1=Var[1],T2=Var[2];

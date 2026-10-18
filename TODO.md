@@ -5,29 +5,21 @@
 - Work line base for bundles: `8d399e6`
 
 ## Status (2026-10-18)
-### Latest
-Fixed Nix build failure under hardened flags (`-Werror=format-security`):
-- `mouse.c`: non-literal `sprintf` formats from game data → `snprintf` + `%s` / diagnostic ignore for intentional dynamic format
-- `misc.c`: `gets` → `fgets`
-- CMake: `-Wno-error=format-security` as belt-and-suspenders for hardened toolchains
+### Encoding / umlauts
+Root cause: Latin1→UTF-8 conversion of sources mangled `CharAvail[]`. Game data and font use **CP850 single bytes** (Ä=0x8E, Ö=0x99, Ü=0x9A, ß=0xE1, ä=0x84, ö=0x94, ü=0x81).
 
-### Prior
-- SDL2 platform, datapath, install to `share/moas`, flake apps
-- 64-bit MAPFILE / CHKSUM / case-insensitive open
+Fixed:
+- `CharAvail` restored as explicit `\x..` CP850 bytes
+- `CharNum` no longer aborts on unknown glyphs; casts use `unsigned char`
+- Remaining BIOS peeks (`0x417`, `0x46C`) guarded — were segfaulting after text path progressed further
+
+Console licence line may still look wrong on UTF-8 terminals (file is CP850); in-game font path is what matters.
 
 ### Still open
-1. Font / Latin1 encoding vs UTF-8 source strings (InternalError 1013)
-2. PlatformPresent on dirty redraws
+1. PlatformPresent on dirty redraws (visible rooms)
+2. SDL shift modifiers → Extra for say-window timing
 3. Sound stub
-4. Header globals / `-fcommon`
-
-### Run
-```bash
-nix build
-nix run .
-# or
-cmake -B build && cmake --build build && ./build/moas
-```
+4. Optional: convert licence printf via iconv for the terminal
 
 ## Bundle
-Next delivered: `moas-010.1-format-security-8d399e6.bundle`
+`moas-011.1-cp850-charavail-8d399e6.bundle`

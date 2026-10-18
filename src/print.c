@@ -30,7 +30,11 @@
 
 char _SPACE_STRING[]=" ";
 
-unsigned char CharAvail[]="ABCDEFGHIJKLMNOPQRSTUVWXYZá- .!?,:;'\"0123456789<>()[]abcdefghijklmnopqrstuvwxyz";
+unsigned char CharAvail[]=
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ\x8E\x99\x9A\xE1"
+  "- .!?,:;'\"0123456789<>()[]"
+  "abcdefghijklmnopqrstuvwxyz\x84\x94\x81";
+/* CP850: A-Z, ÄÖÜß, punct, a-z, äöü — must stay single-byte for game data */
 short CharAvailL=-1;
 
 void OpenWindow(char x1,char y,char x2)
@@ -137,7 +141,7 @@ void PrintWord(char *Text)
 }
 void PrintCharacter(char Char)
 {
-  short Coded=CharNum(Char);
+  short Coded=CharNum((unsigned char)Char);
 
   PutCharAt(Coded,((char*)VGA_ADRESSE)+Window.XPos+320*Window.YPos,1,253,251,320);
   Window.XPos+=Font[1].Width[Coded];
@@ -191,13 +195,16 @@ short CharNum(unsigned char Char)
 
   if (Char=='_' || Char=='@') Char=' ';
 
-  if (CharAvailL==-1) CharAvailL=strlen(CharAvail);
+  if (CharAvailL==-1) CharAvailL=(short)strlen((const char *)CharAvail);
   for (c=0;c<CharAvailL;c++)
     if (Char==CharAvail[c]) return(c);
 
-  printf("\n#%i='%c'",Char,Char); getch();
-  InternalError(1013);
-  return(-1);
+  /* Unknown glyph: do not abort the whole game (data may use rare bytes). */
+  fprintf(stderr, "CharNum: unknown byte %u\n", (unsigned)Char);
+  /* Prefer space if present, else first glyph. */
+  for (c=0;c<CharAvailL;c++)
+    if (CharAvail[c]==' ') return(c);
+  return(0);
 }
 short RealStringLength(char *String,char FontNum)
 {
@@ -206,7 +213,7 @@ short RealStringLength(char *String,char FontNum)
   if (String==NULL) return(-1);
   for (c=Length=0;c<l;c++)
   {
-    Length+=Font[FontNum].Width[CharNum(String[c])];
+    Length+=Font[FontNum].Width[CharNum((unsigned char)String[c])];
     if (FontNum>1) Length-=ShiftCharLeft(String[c],String[c+1],FontNum);
   }
   return(Length);
@@ -260,8 +267,8 @@ void SmallPrint(char *Message,char *Text,short TxtColor,short VgaXs)
   l=strlen(Message);
   for (c=0;c<l;c++)
   {
-    PutCharAt(CharNum(Message[c]),Text+xp,0,TxtColor,0,VgaXs);
-    xp+=Font[0].Width[CharNum(Message[c])];
+    PutCharAt(CharNum((unsigned char)Message[c]),Text+xp,0,TxtColor,0,VgaXs);
+    xp+=Font[0].Width[CharNum((unsigned char)Message[c])];
   }
 }
 void LargePrint(char *Message,char *Text,short TxtColor,short VgaXs)
@@ -271,8 +278,8 @@ void LargePrint(char *Message,char *Text,short TxtColor,short VgaXs)
   l=strlen(Message);
   for (c=0;c<l;c++)
   {
-    PutCharAt(CharNum(Message[c]),Text+xp,1,TxtColor,0,VgaXs);
-    xp+=Font[1].Width[CharNum(Message[c])];
+    PutCharAt(CharNum((unsigned char)Message[c]),Text+xp,1,TxtColor,0,VgaXs);
+    xp+=Font[1].Width[CharNum((unsigned char)Message[c])];
   }
 }
 void AddDialog(short RefNum)
@@ -565,13 +572,13 @@ void ReTextSayWin(short WinNum)
     {
       while (Buffer[xp]!=' ' && Buffer[xp]!=0 && *Buffer)
       {
-        RSL-=Font[SayWindow[WinNum].Font].Width[CharNum(Buffer[xp])];
+        RSL-=Font[SayWindow[WinNum].Font].Width[CharNum((unsigned char)Buffer[xp])];
         RSL+=ShiftCharLeft(Buffer[xp-1],Buffer[xp],SayWindow[WinNum].Font);
         Buffer[xp--]=0;
       }
       if (Buffer[xp]==' ')
       {
-        RSL-=Font[SayWindow[WinNum].Font].Width[CharNum(Buffer[xp])];
+        RSL-=Font[SayWindow[WinNum].Font].Width[CharNum((unsigned char)Buffer[xp])];
         RSL+=ShiftCharLeft(Buffer[xp-1],Buffer[xp],SayWindow[WinNum].Font);
         Buffer[xp--]=0;
       }
@@ -598,9 +605,9 @@ void ReTextSayWin(short WinNum)
 
     for (c=0;c<strlen(Buffer);c++)
     {
-      PutCharAt(CharNum(Buffer[c]),SayWindow[WinNum].Data+xp+yp*SayWindow[WinNum].xs,SayWindow[WinNum].Font,
+      PutCharAt(CharNum((unsigned char)Buffer[c]),SayWindow[WinNum].Data+xp+yp*SayWindow[WinNum].xs,SayWindow[WinNum].Font,
                 SayProperties[d].TxtColor,1,SayWindow[WinNum].xs);
-      xp+=Font[SayWindow[WinNum].Font].Width[CharNum(Buffer[c])];
+      xp+=Font[SayWindow[WinNum].Font].Width[CharNum((unsigned char)Buffer[c])];
       xp-=ShiftCharLeft(Buffer[c],Buffer[c+1],SayWindow[WinNum].Font);
       SayWindow[WinNum].Time+=15;
     }
@@ -639,7 +646,11 @@ void ReTextSayWin(short WinNum)
 void UpDateSayWindows(void)
 {
   static uChar LastExtra,LastMiddle;
+#ifdef DOS
   uChar Extra=*((uChar*)0x417);
+#else
+  uChar Extra=0; /* Shift state: wire to SDL modifiers later if needed */
+#endif
   short c,d;
   short ox,oy,ox2,oy2;
 
