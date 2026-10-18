@@ -303,28 +303,44 @@ void LookKeys(void)
 void IveGotTooMuchTime(void)
 {
   static short LastTime,Walker=0,LastCall=0;
+  static int inited = 0;
   short ThisTime;
+  int steps;
 
   ThisTime=GetTicker();
-  if (ThisTime!=LastTime)
-  {
-    if (ThisTime-LastCall>146 && WalkingAllowed==1)
+  if (!inited) {
+    LastTime = ThisTime;
+    LastCall = ThisTime;
+    inited = 1;
+    return;
+  }
+  /*
+   * Advance one game-tick at a time for every elapsed timer unit.
+   * Skipping intermediate ticks (LastTime = ThisTime in one jump) made the
+   * whole game run slow whenever a frame took longer than one tick (~55ms).
+   */
+  steps = (int)ThisTime - (int)LastTime;
+  if (steps < 0)
+    steps += 65536; /* short wrap */
+  if (steps > 64)
+    steps = 64; /* avoid spiral of death after a long stall */
+  while (steps-- > 0) {
+    LastTime++;
+
+    if ((short)(LastTime - LastCall) > 146 && WalkingAllowed==1)
     {
-      LastCall=ThisTime;
+      LastCall=LastTime;
       UpDateOntimes();
       WillBeCalledEverySecond();
     }
-    else if (LastCall>ThisTime) LastCall=ThisTime;
 
-    LastTime=ThisTime;          /*TotalSpeed:1..8*/
-    /* One step per timer tick (DOS ~18.2 Hz); TotalSpeed 1..8 */
+    /* Original source: two Walker steps per timer tick */
     Walker++;
-    if (WalkingAllowed==1 && Walker >= (10 - TotalSpeed)) {
-      UpDateWalking();
-      Walker = 0;
-    }
-    /* Every tick (was every 4th — made speech/intro text ~4x too slow). */
-    if (WalkingAllowed==1) UpDateSayWindows();
+    if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+    Walker++;
+    if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+
+    if (WalkingAllowed==1 && (LastTime&3)==0) UpDateSayWindows();
     if (WalkingAllowed==1) LookKeys();
   }
 }
@@ -356,21 +372,20 @@ void Wait(short Milliseconds)
     }
   }
 #else
-  /*
-   * DOS Wait: INT 21h AH=2Ch, decrement when DL/10 changes (~100 ms/unit).
-   * GetTicker is ~18.2 Hz → 2 ticks ≈ 110 ms per unit.
-   */
+  /* DOS: decrement when clock DL/10 changes (~100 ms/unit). ~2 ticks @ 18.2 Hz. */
   {
     int units = Milliseconds;
-    int start_tick = GetTicker();
+    short start = GetTicker();
     while (units > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
       MouseCheck();
       {
-        int elapsed = GetTicker() - start_tick;
+        short now = GetTicker();
+        int elapsed = (int)now - (int)start;
+        if (elapsed < 0) elapsed += 65536;
         int done = elapsed / 2;
         if (done > 0) {
           units -= done;
-          start_tick += done * 2;
+          start = (short)(start + done * 2);
         }
       }
     }
@@ -879,13 +894,8 @@ void Adress(short Prs,short Ref)
 void WaitWhileSomeBodyIsWalking(short PersonNum)
 {
   register short c,Ok=0;
-  short prev_walk;
-  int frames = 0;
 
   WinEnhance();
-  prev_walk = WalkingAllowed;
-  WalkingAllowed = 1; /* UpDateWalking only runs when allowed */
-  MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking(PersonNum=%d)", (int)PersonNum);
   while (Ok==0 && KeyAbortState!=2
 #ifndef DOS
         && !PlatformShouldQuit()
@@ -894,27 +904,12 @@ void WaitWhileSomeBodyIsWalking(short PersonNum)
   {
     MouseCheck();
     for (Ok=1,c=0;c<MAX_PRS;c++)
-      if (Person[c].Num!=-1 &&
-          (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) &&
-          (Person[c].StepSpeed>0 || (Person[c].Bits & 4096) == 4096))
+      if ((Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) && (Person[c].StepSpeed>0 || (Person[c].Bits&4096)==4096))
+      if (PersonNum==-1)
       {
-        if (PersonNum==-1 || Person[c].Num==PersonNum)
-          Ok=0;
-      }
-    frames++;
-    /* Safety: if blocked for ~30s of ticks, snap to targets */
-    if (frames > 30 * 60) {
-      for (c=0;c<MAX_PRS;c++)
-        if (Person[c].Num!=-1) {
-          Person[c].x = Person[c].TargetX;
-          Person[c].y = Person[c].TargetY;
-        }
-      MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking: timeout snap");
-      break;
-    }
+        if (Person[c].Num!=-1) Ok=0;
+      } else if (Person[c].Num==PersonNum) Ok=0;
   }
-  WalkingAllowed = prev_walk;
-  MoasDbg(MOAS_DBG_WAIT, "WaitWhileSomeBodyIsWalking done");
 }
 void TurnInventar(short State)
 {
