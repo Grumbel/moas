@@ -395,8 +395,15 @@ void QuickSetPalette(char *Pal)
 {
   short c;
 
+#ifdef DOS
   for (c=0;c<256;c++,Pal+=3)
     QuickSetSinglePal(c,Pal[0],Pal[1],Pal[2]);
+#else
+  /* Keep the game palette in sync and push to SDL. */
+  if (Pal && Pal != (char*)Palette)
+    memcpy(Palette, Pal, 768);
+  PlatformSetPalette((const unsigned char *)Palette);
+#endif
 }
 void Blend(char Step,char Dir)
 {

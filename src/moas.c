@@ -37,18 +37,34 @@ char *__BewegeMit ="BEWEGE %s IN RICHTUNG %s";
 
 void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty);
 
-void main(void)
+int main(void)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
 
   DontCyclePal=1;
   InitAll();
   DontCyclePal=0;
+#ifndef DOS
+  /* Without game data the script loader will fail; still show a window. */
+  PlatformPresent();
+#endif
   Execute(3,0);
 //ChkAuthorisation();
   Execute(0,0);
-  while (1)
+  while (1) {
+#ifndef DOS
+    PlatformPumpEvents();
+#endif
     MouseCheck();
+#ifndef DOS
+    PlatformPresent();
+    PlatformDelay(16);
+#endif
+  }
+#ifndef DOS
+  PlatformShutdown();
+#endif
+  return 0;
 }
 short Execute(short ProcNum,unsigned short Adresse)
 {
@@ -607,7 +623,7 @@ void TeakEffekt(void)
         Star[c].y=Star[c].ty+cos(w)*r; /*+96;*/
         Star[c].vx=-(Star[c].y-Star[c].ty)/4;
         Star[c].vy=(Star[c].x-Star[c].tx)/4;
-        Star[c].Vga=((char*)0xA0000)+Star[c].x+Star[c].y*320l;
+        Star[c].Vga=(VGA_ADRESSE)+Star[c].x+Star[c].y*320l;
         Star[c].Color=Screen[x+y*320l];
         c++; if (c>=2500) InternalError(1050);
       }
@@ -620,7 +636,7 @@ void TeakEffekt(void)
     outp(0x3c9,Palette[3*((x&15)+16)+1]);
     outp(0x3c9,Palette[3*((x&15)+16)+2]);
   }
-  memcpy((char*)0xA0000,Info1,64000);
+  memcpy(VGA_ADRESSE,Info1,64000);
   w=0;
   Time=GetTicker();
   while (!kbhit() && w<58)
@@ -695,7 +711,7 @@ void TeakEffekt(void)
     Time=GetTicker(); while (Time==GetTicker()) x++;
     Time=GetTicker(); while (Time==GetTicker()) x++;
   }
-  memcpy((char*)0xA0000,Screen,64000);
+  memcpy(VGA_ADRESSE,Screen,64000);
   for (c=29;c>=0;c--)
   {
     for (y=0;y<10;y++)

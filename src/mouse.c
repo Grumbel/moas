@@ -314,19 +314,19 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
   if (Type==1 && State==0)
   {
     for (y=0;y<40 && y+Mouse.y<200;y++)
-      memcpy(VMouseBuf+y*44,0xA0000+Mouse.x+(Mouse.y+y)*320,44);
+      memcpy(VMouseBuf+y*44,VGA_ADRESSE+Mouse.x+(Mouse.y+y)*320,44);
     if (V_CursorState==1)
       for (y=0;y<40 && y+Mouse.y<200;y++)
         for (x=0;x<44 && x+Mouse.x<320;x++)
           if (RefTable[0].Num==-1)
           {
             if (Phase[0].Data[x+y*44+3520])
-              ((unsigned char*)0xA0000)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+3520];
+              (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+3520];
           }
           else
           {
             if (Phase[0].Data[x+y*44+1760])
-              ((unsigned char*)0xA0000)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+1760];
+              (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+1760];
           }
     State=1;
   }
@@ -340,7 +340,7 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
   }
   if (Type==3 && State==1)
   {
-    for (y=0;y<40 && y+oy<200;y++) memcpy(0xA0000+ox+(oy+y)*320,VMouseBuf+y*44,44);
+    for (y=0;y<40 && y+oy<200;y++) memcpy(VGA_ADRESSE+ox+(oy+y)*320,VMouseBuf+y*44,44);
     State=0;
   }
   ox=Mouse.x;

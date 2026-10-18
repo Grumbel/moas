@@ -61,10 +61,13 @@ void InitAll(void)
   DayLightR=DayLightG=DayLightB=0;
 #ifdef DOS
   if (!_setvideomode(_MRES256COLOR)) InternalError(1003);
-#endif
   inp(0x3d4+6);
   outp(0x3c0,0x11); outp(0x3c0,0);  /* FrameColor := 0  */
   outp(0x3c0,0x20);                 /* Reset Controller */
+#else
+  if (PlatformInit() != 0)
+    InternalError(1003);
+#endif
   AsmQPalSet(Palette);
 }
 unsigned long DosGetDiskIdNum(void)

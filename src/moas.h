@@ -33,7 +33,13 @@
 #define uLong unsigned long
 #define UCHAR unsigned char
 #define uChar unsigned char
+#ifdef DOS
 #define VGA_ADRESSE ((char*)0xa0000)
+#else
+/* On SDL we treat the software Screen buffer as the "VGA" plane. */
+extern uChar *Screen;
+#define VGA_ADRESSE ((char*)Screen)
+#endif
 #define MODE  0
 #define READ  1
 #define WRITE 2
@@ -45,7 +51,11 @@
 #define DLG_OFF    1
 #define DLG_ALWAYS 2
 #define DLG_EMPTY  3
+#ifdef DOS
 #define Clearscreen() memset((char*)0xA0000,0,64000)
+#else
+#define Clearscreen() do { if (Screen) memset(Screen,0,64000); } while(0)
+#endif
 
 #define V_Verb                    Var[0]
 #define V_Par1                    Var[1]
@@ -83,7 +93,11 @@
 #define C_WALK     52             /* Command: Walk! (ist activated when    */
 #define ENTRY     999             /*   Player can't walk but is ordered to */
 
+#ifdef DOS
 #define OutpWait(Port,Value); { short c; for (c=0;c<10000;c++) if ((inp(0x22c)&0x80)==0) break; outp(Port,Value); }
+#else
+#define OutpWait(Port,Value) ((void)0)
+#endif
 #define Real(PrsNum)            GetRealPersonNum(PrsNum)
 
 #include <signal.h>
@@ -98,6 +112,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "compat.h"
+#include "platform.h"
+#include <unistd.h>
+#include <stdint.h>
+
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>

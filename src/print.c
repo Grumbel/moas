@@ -69,7 +69,7 @@ void OpenWindow(char x1,char y,char x2)
 void Line(short Col,short x1,short y1,short x2,short y2)
 {
   unsigned short c,r;
-  unsigned char *Vga=(char*)0xA0000+x1+((unsigned short)y1)*320;
+  unsigned char *Vga=VGA_ADRESSE+x1+((unsigned short)y1)*320;
 
   if (x1>x2 || y1>y2) InternalError(-77);
   r=rand();
@@ -151,7 +151,7 @@ void NeueZeile(void)
 
   for (c=0;c<=12;c++)
     Line(251,Window.x1,Window.YPos+c,Window.x2,Window.YPos+c);
-/*  memset(0xA0000+Window.x1+(c+Window.YPos)*320l,251,Window.x2-Window.x1+1);*/
+/*  memset(VGA_ADRESSE+Window.x1+(c+Window.YPos)*320l,251,Window.x2-Window.x1+1);*/
   Line(252,Window.x1-4,Window.YPos-1,Window.x1-4,Window.YPos+11);
   Line(251,Window.x1-3,Window.YPos-1,Window.x1-3,Window.YPos+11);
   Line(251,Window.x1-2,Window.YPos-1,Window.x1-2,Window.YPos+11);
@@ -773,12 +773,12 @@ void WinEnhance(void)
     for (x=0;x<300;x++)
     {
       for (y320=(y=Window.y1)*320;y<=Window.y2;y++,y320+=320)
-        if ((((unsigned char*)0xA0000)[Window.x2-x+y320-322]!=251) && (((unsigned char*)0xA0000)[Window.x2-x+y320-322]!=247)) break;
+        if (((VGA_ADRESSE)[Window.x2-x+y320-322]!=251) && ((VGA_ADRESSE)[Window.x2-x+y320-322]!=247)) break;
       if (y!=Window.y2+1) break;
     }
     for (y320=(y=Window.y1-4)*320;y<=Window.y2+4;y++,y320+=320)
-      *((long*)(0xA0000+Window.x2-x+y320-320))=
-             *((long*)(0xA0000+Window.x2+y320-320));
+      *((long*)(VGA_ADRESSE+Window.x2-x+y320-320))=
+             *((long*)(VGA_ADRESSE+Window.x2+y320-320));
     PowerRedrawArea(Window.x2-x+4,Window.y1-5,Window.x2+3,Window.y2+3);
     PowerRedrawArea(Window.x2-x+1,Window.y1-5,Window.x2-x+2,Window.y1-5);
     PowerRedrawArea(Window.x2-x+3,Window.y1-5,Window.x2-x+3,Window.y1-3);

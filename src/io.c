@@ -199,7 +199,7 @@ void LoadSaveMenu(char *Text)
   unsigned short x,y,c,d,h,hh;
   short ifil;
   char String[40];
-  unsigned char *Vga=(char*)0xA0000,*p;
+  unsigned char *Vga=VGA_ADRESSE,*p;
 
   OpenWindow(1,2,24);
   for (c=0;c<15;c++) NeueZeile();
@@ -250,7 +250,7 @@ void SaveGame(short CallerID)
   unsigned short c,d;
   short h,ofil;
   char Name[20],*MiniPic;
-  unsigned char *Vga=(char*)0xA0000;
+  unsigned char *Vga=VGA_ADRESSE;
 
   if (CallerID==0) LoadSaveMenu("Speichern:");
   for (d=0;d<143;d+=142)
@@ -443,7 +443,7 @@ void FileMenu(void)
 #ifdef DOS
       _rectangle(_GFILLINTERIOR,x-2,y*21+145,x+2,y*21+153);
 #endif
-      Rectangle3D((char*)0xA0000,x-2,y*21+145,x+2,y*21+153,4,6,320);
+      Rectangle3D(VGA_ADRESSE,x-2,y*21+145,x+2,y*21+153,4,6,320);
     }
     switch(getch())
     {
@@ -554,6 +554,10 @@ void __interrupt __far KeyboardIrq(void)
 
 short GetTicker(void)
 {
+#ifdef DOS
   kbhit();
   return(TimeCounter);
+#else
+  return PlatformGetTicker();
+#endif
 }

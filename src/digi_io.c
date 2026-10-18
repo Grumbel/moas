@@ -205,7 +205,9 @@ void *D32DosMemAlloc(long size)
   if (Regs.x.cflag) InternalError(1049);
   return((void *)((Regs.x.eax & 0xFFFF) << 4));
 #else
-  return 0;
+  void *p = malloc((size_t)size);
+  if (!p) InternalError(1049);
+  return p;
 #endif
 }
 
@@ -418,6 +420,6 @@ void StartSoundProcessing(void)
   /*EnableIRQs*/
   _enable();
   outp(0x21,inp(0x21)&127);
-  ((uChar*)(0xA0000))[1]++;
+  ((uChar*)(VGA_ADRESSE))[1]++;
 }
 

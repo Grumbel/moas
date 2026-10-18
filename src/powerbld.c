@@ -26,17 +26,18 @@
 // C++ empfehlen. Für die Grafik (für Windows) ist DirektX für Profis gut. Anfänger werden
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
+#include "moas.h"
 #define MOUSE_DEL    1
-unsigned char *WalkNLayers;
-unsigned char *Screen;
-void ShowMouse(short Flag);
-char KeyAbortState;
+static unsigned char *WalkNLayers = NULL;
+static void ShowMouse(short Flag) { (void)Flag; }
 
 void PowerBlend(short Mode)
 {
   register unsigned short c;
   register unsigned char d,Largest=0;
   long Time;
+
+  if (!WalkNLayers || !Screen) return;
 
   for (c=0;c<64000;c++)
     if (WalkNLayers[c]>Largest) Largest=WalkNLayers[c];
@@ -46,22 +47,30 @@ void PowerBlend(short Mode)
   {
     for (d=0;d<=Largest && KeyAbortState!=2;d++)
     {
+#ifdef DOS
       while (Time==*((long*)0x0000046C));
       Time=*((long*)0x0000046C);
+#else
+      PlatformDelay(16);
+#endif
       for (c=0;c<64000;c++)
         if (WalkNLayers[c]==d)
-          ((unsigned char *)(0xA0000000))[c]=Screen[c];
+          ((unsigned char *)(VGA_ADRESSE))[c]=Screen[c];
     }
   }
   else
   {
     for (d=Largest;d!=255 && KeyAbortState!=2;d--)
     {
+#ifdef DOS
       while (Time==*((long*)0x0000046C));
       Time=*((long*)0x0000046C);
+#else
+      PlatformDelay(16);
+#endif
       for (c=0;c<64000;c++)
         if (WalkNLayers[c]==d)
-          ((unsigned char *)(0xA0000000))[c]=0;
+          ((unsigned char *)(VGA_ADRESSE))[c]=0;
     }
     if (KeyAbortState==2) memset(Screen,0,64000);
   }
