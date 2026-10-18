@@ -16,7 +16,7 @@
 typedef unsigned char uChar;
 extern uChar *Screen;
 extern unsigned char *Palette;   /* 768 bytes, VGA 0-63 */
-extern short KeyAbortState;
+extern char KeyAbortState;
 
 struct MOUSE {
   short x,y;
@@ -95,6 +95,17 @@ int PlatformInit(void)
   return 0;
 }
 
+int PlatformShouldQuit(void)
+{
+  return running ? 0 : 1;
+}
+
+void PlatformRequestQuit(void)
+{
+  running = 0;
+  KeyAbortState = 2;
+}
+
 void PlatformShutdown(void)
 {
   if (pixels)   { free(pixels);   pixels   = NULL; }
@@ -149,8 +160,7 @@ void PlatformPumpEvents(void)
   while (SDL_PollEvent(&ev)) {
     switch (ev.type) {
       case SDL_QUIT:
-        running = 0;
-        KeyAbortState = 2;
+        PlatformRequestQuit();
         break;
       case SDL_MOUSEMOTION: {
         short mx, my;
@@ -183,10 +193,18 @@ void PlatformPumpEvents(void)
         }
         break;
       }
-      case SDL_KEYDOWN:
-        if (ev.key.keysym.sym == SDLK_ESCAPE)
-          KeyAbortState = 2;
+      case SDL_KEYDOWN: {
+        SDL_Keycode k = ev.key.keysym.sym;
+        SDL_Keymod mod = (SDL_Keymod)ev.key.keysym.mod;
+        if (k == SDLK_ESCAPE)
+          KeyAbortState = 2; /* script sequence abort (original) */
+        /* Process quit */
+        if (k == SDLK_q ||
+            k == SDLK_c && (mod & KMOD_CTRL) ||
+            (k == SDLK_F4 && (mod & KMOD_ALT)))
+          PlatformRequestQuit();
         break;
+      }
       default:
         break;
     }

@@ -48,6 +48,8 @@ void MouseCheck(void)
 #ifndef DOS
   /* Wait loops (title/menu) only call MouseCheck — pump events here. */
   PlatformPumpEvents();
+  if (PlatformShouldQuit())
+    return;
 #endif
   LookKeys();
   MouseRead();

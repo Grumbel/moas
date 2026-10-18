@@ -56,12 +56,16 @@ int main(int argc, char **argv)
   Execute(3,0);
 //ChkAuthorisation();
   Execute(0,0);
-  while (1) {
+#ifndef DOS
+  while (!PlatformShouldQuit()) {
     /* MouseCheck pumps events, presents, and delays on Linux. */
     MouseCheck();
   }
-#ifndef DOS
   PlatformShutdown();
+#else
+  while (1) {
+    MouseCheck();
+  }
 #endif
   return 0;
 }

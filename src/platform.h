@@ -25,6 +25,12 @@ short PlatformGetTicker(void);
 /* Sleep a few ms so we don't spin the CPU. */
 void PlatformDelay(unsigned int ms);
 
+/* Non-zero after SDL_QUIT / explicit quit request. */
+int PlatformShouldQuit(void);
+
+/* Request process exit (window close, Q, Alt+F4, etc.). */
+void PlatformRequestQuit(void);
+
 /* Optional: set the logical palette (VGA 0-63 values expected). */
 void PlatformSetPalette(const unsigned char *pal768);
 
