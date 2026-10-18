@@ -569,11 +569,11 @@ static int insn_size(const uint8_t *code, int len, int pc)
       return string_insn_size(code, len, pc, 9);
     case 90: /* string at Parameter, then return */
       return string_insn_size(code, len, pc, 1);
-    case 92: /* fall through to 99 in engine */
+    case 92: /* fall through to 99: Adresse+=8+strlen(Parameter[3]) */
     case 97:
     case 98:
-    case 99: /* +=8+strlen */
-      return string_insn_size(code, len, pc, 5);
+    case 99:
+      return string_insn_size(code, len, pc, 7);
     default:
       return 1;
   }
@@ -620,9 +620,18 @@ static void disasm_buffer(const uint8_t *code, int len, int prog_index)
       printf("   ");
 
     if (!info || !info->name) {
-      printf("; unknown op %d\n", op);
-      pc += sz;
-      continue;
+      /* Likely padding or a size error; show rest as data once. */
+      printf("; non-code/unknown 0x%02x — remaining %d bytes (padding or desync)\n",
+             op, len - pc);
+      printf("; ");
+      {
+        int j;
+        for (j = pc; j < len && j < pc + 32; j++)
+          printf("%02x ", code[j]);
+        if (len - pc > 32) printf("...");
+        printf("\n");
+      }
+      break;
     }
 
     printf("%s", info->name);
@@ -634,7 +643,7 @@ static void disasm_buffer(const uint8_t *code, int len, int prog_index)
       if (op == 62 || op == 65 || op == 89) off = 3;
       if (op == 66 || op == 81) off = 7;
       if (op == 67) off = 9;
-      if (op == 92 || op == 97 || op == 98 || op == 99) off = 5;
+      if (op == 92 || op == 97 || op == 98 || op == 99) off = 7;
       if (nshort >= 1 && off >= 3)
         printf("  %d", (int)rd_i16(code + pc + 1));
       if (pc + off < len) {
