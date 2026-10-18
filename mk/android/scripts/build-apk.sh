@@ -28,9 +28,9 @@ cp -r "$APP_DIR/res" src/res
 sed -e "s/@VERSION_NAME@/$GAME_VERSION/" -e "s/@VERSION_CODE@/$VERSION_CODE/" \
   "$APP_DIR/AndroidManifest.xml" > src/AndroidManifest.xml
 
-# The game: its sources and headers next to the module's Android.mk.
+# The game: sources and headers next to the module's Android.mk.
 cp "$GAME_SRC_DIR"/src/*.c src/jni/src/
-true
+cp "$GAME_SRC_DIR"/src/*.h src/jni/src/
 
 # SDL2, prebuilt; the game includes <SDL2/SDL.h>.
 cp "$SDL_PREBUILT_MK" src/jni/SDL/Android.mk
