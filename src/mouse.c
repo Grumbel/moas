@@ -172,9 +172,12 @@ void MouseRead(void)
   Mouse.Right=(Regs.w.bx & 2)/2;
   Mouse.Middle=(Regs.w.bx & 4)/4;
 #else
-  /* SDL already updated Mouse.x/y/buttons. */
+  /* SDL already updated Mouse.x/y/buttons in PlatformPumpEvents. */
   if (SpaceState)
     Mouse.Left = 1;
+  /* Keep hotspot flag current so cursor shape can change while moving. */
+  if (PlayerHasControl && Window.Status == None)
+    ThingAtCursor = (WhatsAt(Mouse.x, Mouse.y) != -1);
   /* VMouse save/restore — do not bake cursor into Screen (avoids trails). */
   if (Mouse.CursorState==1 && V_CursorState==1)
     VMouse(2);
@@ -349,9 +352,21 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
 {
   register unsigned short x,y;
   unsigned static ox,oy,State=0;
+  static short last_frame = -1;
+  short frame_off;
 
   if (!VMouseBuf || !Phase || !Phase[0].Data)
     return;
+
+  /*
+   * Match PowerRedrawArea cursor choice:
+   *   no control → frame @ 3520 (wait / inactive)
+   *   control    → frame @ 1760 * ThingAtCursor (hotspot vs normal)
+   */
+  if (!PlayerHasControl)
+    frame_off = 3520;
+  else
+    frame_off = (short)(1760 * (ThingAtCursor ? 1 : 0));
 
   if (Type==1 && State==0)
   {
@@ -360,21 +375,14 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
     if (V_CursorState==1)
       for (y=0;y<40 && y+Mouse.y<200;y++)
         for (x=0;x<44 && x+Mouse.x<320;x++)
-          if (RefTable[0].Num==-1)
-          {
-            if (Phase[0].Data[x+y*44+3520])
-              (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+3520];
-          }
-          else
-          {
-            if (Phase[0].Data[x+y*44+1760])
-              (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+1760];
-          }
+          if (Phase[0].Data[x+y*44+frame_off])
+            (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+frame_off];
+    last_frame = frame_off;
     State=1;
   }
   if (Type==2)
   {
-    if (Mouse.x!=ox || Mouse.y!=oy)
+    if (Mouse.x!=ox || Mouse.y!=oy || last_frame != frame_off)
     {
       VMouse(3);
       VMouse(1);

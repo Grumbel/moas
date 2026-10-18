@@ -27,6 +27,9 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#ifndef DOS
+#include "platform.h"
+#endif
 
 struct PACK
 {
@@ -447,6 +450,11 @@ void Blend(char Step,char Dir)
     {
       for (d=0;d<768;d++) VgaPal[d]=(Back[d]*c)>>6;
       AsmQPalSet(VgaPal);
+#ifndef DOS
+      PlatformPumpEvents();
+      PlatformPresent();
+      PlatformDelay(16);
+#endif
     }
     DontCyclePal=0;
   }
@@ -457,6 +465,11 @@ void Blend(char Step,char Dir)
     {
       for (d=0;d<768;d++) VgaPal[d]=(Back[d]*c)>>6;
       AsmQPalSet(VgaPal);
+#ifndef DOS
+      PlatformPumpEvents();
+      PlatformPresent();
+      PlatformDelay(16);
+#endif
     }
   }
   FREE(Back);
