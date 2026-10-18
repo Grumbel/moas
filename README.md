@@ -1,13 +1,16 @@
 # MOAS — Mouse Orientiertes Adventure System
 
-MOAS is a point-and-click adventure system originally written in C by Thomas
-Holz around 1992–2000 for DOS. This repository is a work-in-progress port
-using SDL2, intended to preserve the original game logic while replacing DOS
-hardware and services with a modern platform layer.
+MOAS is a point-and-click adventure **engine** originally written in C by
+Thomas Holz around 1992–2000 for DOS. This repository is a work-in-progress
+port using SDL2: the original game logic stays intact while DOS hardware and
+services are replaced by a modern platform layer.
 
-The included game data is for **Mänick Mänschion**. The port is still under
-active development; timing, audio, and some legacy effects may not yet match
-the original DOS release.
+The shipped product / window title is **Mänick Mänschion** (the adventure that
+runs on this engine). The binary, package id, and icon theme name remain
+`moas` / `org.grumbel.moas`.
+
+The port is still under active development; timing, audio, and some legacy
+effects may not yet match the original DOS release.
 
 ## Screenshot
 
@@ -22,12 +25,15 @@ the original DOS release.
 - DOS save-game structures adapted to a packed on-disk layout
 - Debug logging for scripts, input, waits, windows, and data loading
 - FreeDesktop integration (`.desktop`, hicolor icons, AppStream metainfo)
-- Cross builds: Windows (MinGW), Android (APK), WebAssembly, R36S/PortMaster
+  under the name **Mänick Mänschion**
+- Cross builds: Windows (MinGW), Android (APK with packed `manick/` assets),
+  WebAssembly (Emscripten + ASYNCIFY), R36S/PortMaster
+- **`moas-util`**: list/extract data resources and disassemble scripts
 
 Known limitations include unfinished speech-channel wiring and legacy effects
-such as `PowerBlend` and `WalkNLayers`. The bundled data does not include the
-`PIZZZA*.TSS` music files, so that music will be silent unless the files are
-available separately. See [TODO.md](TODO.md) for the current porting notes.
+such as `PowerBlend` and `WalkNLayers`. Optional music banks (`GAME*.TSS`) are
+not in the bundled data, so tracker music is silent unless those files are
+added separately. See [TODO.md](TODO.md) for current porting notes.
 
 ## Build and run
 
@@ -35,7 +41,7 @@ available separately. See [TODO.md](TODO.md) for the current porting notes.
 
 - C compiler with C99 support (GCC or Clang)
 - CMake 3.16 or newer
-- SDL2 development libraries
+- SDL2 development libraries (`moas-util` needs only a C99 toolchain)
 - `pkg-config` (useful for dependency discovery)
 
 On NixOS, the supplied flake provides a build environment and package:
@@ -72,8 +78,8 @@ nix run .
 
 The CMake install target installs the executable, game data, FreeDesktop
 `.desktop` entry, hicolor icons, and AppStream metainfo under the configured
-prefixes. After `cmake --install`, the game appears in application menus on
-typical Linux desktops.
+prefixes. After `cmake --install`, the game appears in application menus as
+**Mänick Mänschion**.
 
 ## Cross-platform packages (Nix)
 
@@ -130,21 +136,52 @@ Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
 binary runs on ArkOS’s glibc and SDL2. Controls and install notes:
 `mk/r36s/README.md`. Launch with `--fullscreen`.
 
+## Game data (`manick/`)
 
-### Data inspection (`moas-util`)
+| File | Role |
+|------|------|
+| **GAME.2** | Resource **catalog** (counts + 30-byte records: file, offset, length, checksum) |
+| **GAME.1 / .3 / .4** | **Containers** referenced by the catalog (`FileNum` 1 / 3 / 4) |
+| **GAME.XXX** | **Fonts** (seven bitmap faces) |
+| **GAME.PCK** | **String dictionary** for packed script text (`UnPack`) |
+| **LICENCE.DAT** | Short licence line + checksum (startup) |
+| **GAME.EXE**, **DOS4GW.EXE** | Original DOS binary + extender — **not** used by the SDL port |
+
+Catalog **kinds** (tables inside `GAME.2`):
+
+| Kind | Meaning |
+|------|---------|
+| **prog** | Script bytecode (`Execute`) |
+| **bild** | Room / background pictures |
+| **inv** | Inventory item sprites |
+| **phase** | Character / object animation frames |
+
+Optional files not in this tree: `GAME.MAP` (DOS disk-id check; skipped if
+missing), `GAME*.TSS` (music sample banks).
+
+## Data inspection (`moas-util`)
+
+Standalone helper (no SDL). Built with the same CMake tree:
 
 ```sh
 cmake -S . -B build && cmake --build build --target moas-util
+
 ./build/moas-util --datadir manick info
 ./build/moas-util --datadir manick list
-./build/moas-util --datadir manick extract --outdir /tmp/moas-out
-./build/moas-util --datadir manick disasm 0
+./build/moas-util --datadir manick extract --outdir /tmp/moas-out [all|prog|bild|inv|phase]
+./build/moas-util --datadir manick disasm [N]   # script program N, or all
+./build/moas-util --datadir manick licence
+./build/moas-util --datadir manick xxx          # GAME.XXX font summary
 ```
 
-Lists the `GAME.2` resource catalog and extracts raw blobs from `GAME.1` /
-`GAME.3` / `GAME.4`. Payloads are not decompressed (engine pack format).
+`MOAS_DATADIR` is used if `--datadir` is omitted.
 
-## Command-line options
+- **list** — every catalog entry (kind, index, container file, pos, length)
+- **extract** — raw resource blobs (not decompressed)
+- **disasm** — linear disassembly of **prog** scripts using the engine’s
+  opcode map; packed strings decoded via `GAME.PCK`
+
+## Command-line options (game)
 
 ```text
 -h, --help           Show help
@@ -169,7 +206,8 @@ MOAS_DEBUG=all ./build/moas
 ## Repository layout
 
 - `src/` — C game engine and SDL2 platform layer
-- `manick/` — game data files; original DOS executables are not used by the port
+- `tools/moas-util.c` — data list / extract / script disassembler
+- `manick/` — Mänick game data (see above)
 - `data/` — FreeDesktop `.desktop` file, hicolor icons, AppStream metainfo
 - `mk/android/` — Android NDK/APK packaging scripts and templates
 - `mk/r36s/` — PortMaster launcher, `port.json`, screenshot
