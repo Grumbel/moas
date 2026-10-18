@@ -119,7 +119,7 @@
             program = "${moas}/bin/moas";
           };
           install-android-moas = android.installApp;
-          moas-wasm-serve = wasm.serveApp;
+          moas-wasm = wasm.serveApp;
         };
 
         devShells.default = pkgs.mkShell {

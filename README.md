@@ -106,7 +106,7 @@ in the APK (assets) is not fully wired yet.
 
 ```sh
 nix build .#moas-wasm
-nix run .#moas-wasm-serve   # local HTTP server + browser
+nix run .#moas-wasm   # local HTTP server + browser
 ```
 
 Static SDL2 for wasm32 and a self-contained site (`moas.html` / `.js` /
