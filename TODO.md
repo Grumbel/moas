@@ -1,12 +1,15 @@
 # TODO / Handoff
 
-## Input / cursor
-- MouseRead was empty on Linux → software cursor never redrawn (DOS used PowerRedrawArea/VMouse)
-- Now redraws on move; SpaceState ORs into left button
-- V_CursorState=1 and BewegeMode=-1 defaults after init
-- GetClickOrEnter accepts Space/Enter via SpaceState
+## Cursor trail
+On DOS, Screen (system) and VGA (0xa0000) were separate. Here VGA_ADRESSE==Screen,
+so compositing the cursor into Screen made PowerRedrawArea re-copy old cursors → trail.
+
+Fix: VMouse save/restore for soft cursor; PowerRedrawArea undraws cursor first and
+does not bake cursor into Screen on Linux.
+
+## Mouse coords
+Letterbox-aware window→320×200 mapping (not relying on RenderWindowToLogical alone).
 
 ## Still open
-- Title may still need a specific click target / script path
+- Title screen progression
 - Heap corruption root
-- Graphics completeness

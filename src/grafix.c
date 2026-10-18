@@ -170,6 +170,11 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
 
   if (V_LockVga || KeyAbortState==2) return;
 
+#ifndef DOS
+  /* Screen is also the display buffer; remove soft-cursor so it is not recopied. */
+  VMouse(3);
+#endif
+
   if (x1<0) x1=0; else if (x1>319) x1=319;
   if (x2<0) x2=0; else if (x2>319) x2=319;
   if (y2<0) y2=0; else if (y2>199) y2=199;
@@ -320,6 +325,7 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
     }
   }
 
+#ifdef DOS
   if (Mouse.CursorState==1 && V_CursorState==1 && Mouse.BewegeMode==-1)
   {
     X1=max(x1,Mouse.x); X2=min(x2,Mouse.x+43)-X1+1; Y2=min(y2+1,Mouse.y+40)-max(y1,Mouse.y);
@@ -354,10 +360,17 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
         PrsData+=30;
       }
   }
+#endif
 
   Back=(unsigned char *)VGA_ADRESSE+x1+Tab320[y1];
   for (Tmp=PRedrawTmpBak,y=y2-y1+1;y;y--,Back+=320,Tmp+=WinXs)
     memcpy(Back,Tmp,WinXs);
+
+#ifndef DOS
+  /* Soft-cursor via VMouse (save/restore) so Screen stays trail-free. */
+  if (Mouse.CursorState==1 && V_CursorState==1)
+    VMouse(1);
+#endif
 }
 void Shake(short Milliseconds,short Staerke)
 {

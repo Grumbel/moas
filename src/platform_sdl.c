@@ -194,8 +194,12 @@ int PlatformInit(void)
     return -1;
   }
 
-  SDL_RenderSetLogicalSize(renderer, LOGICAL_W, LOGICAL_H);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  SDL_RenderSetLogicalSize(renderer, LOGICAL_W, LOGICAL_H);
+  /* Mouse events: prefer scaled coords when the backend supports it */
+#ifdef SDL_HINT_MOUSE_RELATIVE_SCALING
+  SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SCALING, "1");
+#endif
 
   texture = SDL_CreateTexture(renderer,
                               SDL_PIXELFORMAT_ARGB8888,
@@ -280,9 +284,29 @@ void PlatformPresent(void)
 
 static void mouse_to_logical(int wx, int wy, short *ox, short *oy)
 {
-  float lx = (float)wx, ly = (float)wy;
-  if (renderer)
-    SDL_RenderWindowToLogical(renderer, wx, wy, &lx, &ly);
+  float lx, ly;
+  int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
+
+  if (window)
+    SDL_GetWindowSize(window, &ww, &wh);
+  if (ww < 1) ww = 1;
+  if (wh < 1) wh = 1;
+
+  /*
+   * Letterbox-aware scale (matches SDL_RenderSetLogicalSize + default
+   * letterbox). Works even when RenderWindowToLogical is unreliable
+   * (e.g. sdl2-compat).
+   */
+  {
+    float sx = (float)ww / (float)LOGICAL_W;
+    float sy = (float)wh / (float)LOGICAL_H;
+    float scale = (sx < sy) ? sx : sy;
+    float ox0 = ((float)ww - (float)LOGICAL_W * scale) * 0.5f;
+    float oy0 = ((float)wh - (float)LOGICAL_H * scale) * 0.5f;
+    lx = ((float)wx - ox0) / scale;
+    ly = ((float)wy - oy0) / scale;
+  }
+
   if (lx < 0) lx = 0;
   if (ly < 0) ly = 0;
   if (lx > LOGICAL_W - 1) lx = (float)(LOGICAL_W - 1);
