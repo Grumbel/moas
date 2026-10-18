@@ -154,7 +154,7 @@ void InitBreakVector(void)
   signal(SIGBREAK,SIG_IGN);
   signal(SIGINT,SIG_IGN);
 
-  /* Divisor bytes only; no outp(0x43,…). BIOS ~18.2 Hz usually remains. */
+  /* PIT divisor 0x1FFF → ~145.7 Hz (lo/hi mode already set by BIOS). */
   outp(0x40,0xff); outp(0x40,0x1f);
   RealIrq9=_dos_getvect(0x9);
   RealIrq1c=_dos_getvect(0x8);

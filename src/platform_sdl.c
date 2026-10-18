@@ -485,15 +485,19 @@ void PlatformPumpEvents(void)
 short PlatformGetTicker(void)
 {
   /*
-   * IRQ0 / TimeCounter rate.
-   *
-   * InitBreakVector writes divisor bytes to port 0x40 (0xff, 0x1f) but never
-   * programs the PIT control port 0x43, so on typical DOS setups the timer
-   * stays at the BIOS rate (~18.206 Hz, period 54.925 ms). Using the 0x1FFF
-   * divisor (~145 Hz) made the whole game ~8× too fast.
+   * IRQ0 / TimeCounter rate. InitBreakVector reprograms PIT channel 0 with
+   * divisor 0x1FFF (the BIOS already left it in lo/hi access mode, so no
+   * control word is needed): 1193182 / 8191 ≈ 145.67 Hz. The DOS IRQ handler
+   * only lets the BIOS clock advance every 8th tick, and the game counts 146
+   * ticks per second, confirming the 8× rate.
    */
-  Uint32 ms = SDL_GetTicks() - start_ticks;
-  return (short)((ms * 1193182u) / (65536u * 1000u)); /* ≈ ms/54.925 */
+  Uint64 ms = SDL_GetTicks() - start_ticks;
+  return (short)((ms * 1193182u) / (8191u * 1000u));
+}
+
+unsigned int PlatformGetMillis(void)
+{
+  return SDL_GetTicks() - start_ticks;
 }
 
 void PlatformDelay(unsigned int ms)

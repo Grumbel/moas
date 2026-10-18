@@ -353,48 +353,36 @@ static void MoasPaletteCycleStep(void)
 void IveGotTooMuchTime(void)
 {
   static short LastTime,Walker=0,LastCall=0;
-  static int inited = 0;
   short ThisTime;
-  int steps;
 
-  ThisTime=GetTicker();
-  if (!inited) {
-    LastTime = ThisTime;
-    LastCall = ThisTime;
-    inited = 1;
-    return;
-  }
   /*
-   * Advance one game-tick at a time for every elapsed timer unit.
-   * Skipping intermediate ticks (LastTime = ThisTime in one jump) made the
-   * whole game run slow whenever a frame took longer than one tick (~55ms).
+   * As in the original: at most one game step per call whenever the ticker
+   * (~145.7 Hz) has advanced. Missed ticks are dropped, so walking speed is
+   * bounded by the main loop rate (~60 Hz here), like on DOS. Catching up
+   * every tick made walking far too fast.
    */
-  steps = (int)ThisTime - (int)LastTime;
-  if (steps < 0)
-    steps += 65536; /* short wrap */
-  if (steps > 64)
-    steps = 64; /* avoid spiral of death after a long stall */
-  while (steps-- > 0) {
-    LastTime++;
-
-    if ((short)(LastTime - LastCall) > 146 && WalkingAllowed==1)
+  ThisTime=GetTicker();
+  if (ThisTime!=LastTime)
+  {
+    if ((short)(ThisTime-LastCall)>146 && WalkingAllowed==1)
     {
-      LastCall=LastTime;
+      LastCall=ThisTime;
       UpDateOntimes();
       WillBeCalledEverySecond();
     }
+    else if ((short)(ThisTime-LastCall)<0) LastCall=ThisTime;
 
-    MoasPaletteCycleStep();
+    {
+      /* Palette cycling ran in the IRQ on every tick */
+      int n=(short)(ThisTime-LastTime);
+      if (n<1 || n>64) n=1;
+      while (n--) MoasPaletteCycleStep();
+    }
 
-    /* Original source: two Walker steps per timer tick */
-    Walker++;
-    if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
-    Walker++;
-    if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
-
-    /* Original gated with (TimeCounter&3)==0; with speech Time+=15/char that is very
-     * slow in real time. Drain every tick so bubble duration matches ~18Hz intent. */
-    if (WalkingAllowed==1) UpDateSayWindows();
+    LastTime=ThisTime;          /*TotalSpeed:1..8*/
+    Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+    Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+    if (WalkingAllowed==1 && (ThisTime&3)==0) UpDateSayWindows();
     if (WalkingAllowed==1) LookKeys();
   }
 }
@@ -429,24 +417,12 @@ void Wait(short Milliseconds)
   /*
    * DOS Wait uses INT 21h AH=2Ch (RTC), ~100 ms per unit when DL/10 changes.
    * Independent of the reprogrammed PIT game ticker (~145.7 Hz).
-   * 100 ms ≈ 2 game ticks at BIOS ~18.2 Hz.
+   * Measured in real milliseconds here.
    */
   {
-    int units = Milliseconds;
-    short start = GetTicker();
-    while (units > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
+    unsigned int end = PlatformGetMillis() + (unsigned int)Milliseconds * 100u;
+    while ((int)(end - PlatformGetMillis()) > 0 && KeyAbortState != 2 && !PlatformShouldQuit())
       MouseCheck();
-      {
-        short now = GetTicker();
-        int elapsed = (int)now - (int)start;
-        if (elapsed < 0) elapsed += 65536;
-        int done = elapsed / 2;
-        if (done > 0) {
-          units -= done;
-          start = (short)(start + done * 2);
-        }
-      }
-    }
   }
 #endif
 }

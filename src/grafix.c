@@ -398,26 +398,15 @@ void Shake(short Milliseconds,short Staerke)
   outp(0x3d4,12); outp(0x3d5,0);
 #else
   {
-    int units = Milliseconds;
-    short start = GetTicker();
+    unsigned int end = PlatformGetMillis() + (unsigned int)Milliseconds * 100u; /* ~100ms units like DOS Wait */
     if (Staerke < 1) Staerke = 1;
-    while (units > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
+    while ((int)(end - PlatformGetMillis()) > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
       int ox = (rand() % (Staerke * 2 + 1)) - Staerke;
       int oy = (rand() % (Staerke * 2 + 1)) - Staerke;
       PlatformSetShake(ox, oy);
       PlatformPresent();
       PlatformPumpEvents();
       PlatformDelay(16);
-      {
-        short now = GetTicker();
-        int elapsed = (int)now - (int)start;
-        if (elapsed < 0) elapsed += 65536;
-        int done = elapsed / 2; /* ~100ms units like DOS Wait */
-        if (done > 0) {
-          units -= done;
-          start = (short)(start + done * 2);
-        }
-      }
     }
     PlatformSetShake(0, 0);
     PlatformPresent();

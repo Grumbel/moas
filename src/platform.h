@@ -21,6 +21,8 @@ void PlatformPresent(void);
 
 /* Return milliseconds since start (compatible with original TimeCounter scale). */
 short PlatformGetTicker(void);
+/* Milliseconds since start. */
+unsigned int PlatformGetMillis(void);
 
 /* Sleep a few ms so we don't spin the CPU. */
 void PlatformDelay(unsigned int ms);
