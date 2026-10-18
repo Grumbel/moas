@@ -31,6 +31,9 @@
 #include "person_disk.h"
 #include "datapath.h"
 #include "platform.h"
+#ifdef __ANDROID__
+#include <SDL.h>
+#endif
 
 char *__Benutze   ="BENUTZE %s";
 char *__BenutzeMit="BENUTZE %s MIT %s";
@@ -45,12 +48,18 @@ int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
 #ifndef DOS
+#ifdef __ANDROID__
+  SDL_Log("moas: SDL_main entered argc=%d", argc);
+#endif
   MoasParseArgs(argc, argv);
 #ifdef __ANDROID__
   /* Extract APK assets to internal storage; sets MOAS_DATADIR. */
   PlatformAndroidPrepareData();
 #endif
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
+#ifdef __ANDROID__
+  SDL_Log("moas: data dir ready, calling InitAll");
+#endif
 #else
   (void)argc; (void)argv;
 #endif

@@ -30,7 +30,7 @@
 #include "datapath.h"
 
 unsigned char __b1,__b2,__b3,__b4;
-char *_FRAGEZEICHEN;
+extern char *_FRAGEZEICHEN;
 
 CHKSUM MkChk(unsigned char *Array,short Length)
 {
@@ -85,7 +85,7 @@ short ChkOpen(char *FileName,char Mode)
   else
     LastMode=Mode;
   ClrChk();
-  if (strcmp(FileName,_FRAGEZEICHEN)==0) return(-1);
+  if (_FRAGEZEICHEN && FileName && strcmp(FileName,_FRAGEZEICHEN)==0) return(-1);
   if (Mode==READ)
 #ifdef DOS
     xfil=open(FileName,O_RDONLY|O_BINARY);

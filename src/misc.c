@@ -29,15 +29,17 @@
 #include "moas.h"
 #include "platform.h"
 #include "debug.h"
+#ifdef __ANDROID__
+#include <SDL.h>
+#endif
 
 char TabNewDir[16]=
  { 0,2,6,0,4,3,5,0,0,1,7,0,0,0,0,0 } ;
 
 void InternalError(short num)
 {
-  long c;
+  const char *msg = "unknown";
 
-  
   if (num==1007) return; /* ==>+<== Ignore CHKSUM due to FastLink */
 #ifdef DOS
   _setvideomode(_DEFAULTMODE);
@@ -45,24 +47,26 @@ void InternalError(short num)
 
   switch(num)
   {
-    case 1000:printf("\nNicht genug erweiterter Speicherplatz !"); break;
-    case 1001:printf("\nDatenfile korrupt. Bitte neu installieren !"); break;
-    case 1002:printf("\nCannot open data file (see stderr for path details)!\n"); break;
-    case 1003:printf("\nVGA-Karte ist nicht vorhanden !");         break;
-    case 1047:printf("\nDOS-Handling Problem !");                  break;
-    case 1048:printf("\nKann Soundkarte nicht ansprechen !");      break;
-    case 1049:printf("\nNicht genug standart Speicherplatz !");    break;
-    default:if (num) printf("\nInterner Fehler %i",num);
+    case 1000: msg = "out of extended memory"; break;
+    case 1001: msg = "data file corrupt or missing (reinstall / check assets)"; break;
+    case 1002: msg = "cannot open data file (see log for path details)"; break;
+    case 1003: msg = "video init failed"; break;
+    case 1047: msg = "DOS handling problem"; break;
+    case 1048: msg = "sound card problem"; break;
+    case 1049: msg = "out of memory"; break;
+    default: msg = "internal error"; break;
   }
+#ifdef __ANDROID__
+  SDL_Log("InternalError %d: %s", (int)num, msg);
+#else
+  fprintf(stderr, "moas: InternalError %d: %s\n", (int)num, msg);
+  if (num) printf("\nInterner Fehler %i (%s)\n", num, msg);
+#endif
 #ifdef DOS
   outp(0x40,0xff); outp(0x40,0xff);
   _dos_setvect(0x9,RealIrq9);
   _dos_setvect(0x8,RealIrq1c);
 #endif
-  //ExitCommunicator=1;
-  //for (c=0;c<1000000;c++)
-  //  if (ExitCommunicator!=1) break;
-  //_dos_setvect(SoftIRQ[Config.IrqNum],RealSoundIrq);
   exit(-1);
 }
 /*********

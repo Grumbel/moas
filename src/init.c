@@ -399,7 +399,7 @@ void ReadLicence(void)
   CHKSUM Check;
   long fl;
 
-  if (ifil<=0) InternalError(1001);
+  if (ifil < 0) InternalError(1001);
   fl = filelength(ifil);
   if (fl < 4 || fl >= 80) InternalError(1001);
   ChkRead(ifil, Buffer, fl-4);
