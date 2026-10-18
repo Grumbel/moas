@@ -1,3 +1,6 @@
+#ifndef MOAS_H_
+#define MOAS_H_
+
 //============================================================================================
 //  MOAS - Mouse Orientiertes Adventure System
 //  Copyright (C) 2000 bei Thomas Holz
@@ -120,21 +123,34 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-struct I_LINE
+/* Desktop: -fcommon merges these header definitions.
+ * Emscripten: one TU defines (MOAS_DEFINE_GLOBALS), others see extern. */
+#if defined(__EMSCRIPTEN__)
+#  if defined(MOAS_DEFINE_GLOBALS)
+#    define MOAS_G /* define storage */
+#  else
+#    define MOAS_G extern
+#  endif
+#else
+#  define MOAS_G /* tentative common */
+#endif
+
+
+MOAS_G MOAS_G struct I_LINE
 {
   short x1,y1,x2,y2,Dir,Side,Parent;
 } iLine[600];
 
-struct LAUFREIHE
+MOAS_G MOAS_G struct LAUFREIHE
 {
   short x,y;
 } LaufReihe[30];
 
-uChar *Screen,*Display,*Info1,*Info2,AutoSaveGame;
-uChar *PRedrawTmpBak,*VMouseBuf;  /*Virtual Mouse*/
-uShort PaletteCycleFirst,PaletteCycleLast,DontCyclePal,CycleWait;
+MOAS_G uChar *Screen,*Display,*Info1,*Info2,AutoSaveGame;
+MOAS_G uChar *PRedrawTmpBak,*VMouseBuf;  /*Virtual Mouse*/
+MOAS_G uShort PaletteCycleFirst,PaletteCycleLast,DontCyclePal,CycleWait;
 
-struct PERSON
+MOAS_G struct PERSON
 {
   short Num;    /* Number On Disk [-1 = Unused] */
   short PhaseNum;
@@ -150,14 +166,14 @@ struct PERSON
   USHORT Bits;            /* Siehe LANGUAGE.DOK */
 } Person[MAX_PRS+1];  /*==>+<== Mallocen*/
 
-struct FONT /*A..Zá- .!,:;'"0..9<>()[]a..z*/
+MOAS_G struct FONT /*A..Zá- .!,:;'"0..9<>()[]a..z*/
 {
   char SizeY;
   unsigned char *Data;
   short *Begin,*Width;
 } Font[7];
 
-struct MAPFILE
+MOAS_G struct MAPFILE
 {
   char FileNum;
   long FilePos,Length;
@@ -167,7 +183,7 @@ struct MAPFILE
   CHKSUM Check;
 } *Programm,*Bilder,*Inventar,*Phase;
 
-struct SAY_WINDOW
+MOAS_G struct SAY_WINDOW
 {
   short RefPrs;               /* -1 = Unused, sonst Eintrag in Properties */
   short x,y,xs,ys,x1,x2;
@@ -177,14 +193,14 @@ struct SAY_WINDOW
   short wx,wy;                /* Additional Coordinates */
 } SayWindow[5];
 
-struct SAY_PROPERTIES
+MOAS_G struct SAY_PROPERTIES
 {
   short PrsNum;               /* -1 = Unused */
   unsigned char TxtColor;
   char StdFont;
 } SayProperties[10];
 
-struct MOUSE
+MOAS_G struct MOUSE
 {
   short x,y;                          /* Maus Position                        */
   short Left,Right,Middle;            /* Maus Knpfe   1=gedrckt             */
@@ -196,63 +212,63 @@ struct MOUSE
   char BewegeMode;                    /* -1 = Nein, sonst CursorPhase         */
 } Mouse;
 
-short AnzProgramme,AnzBilder,AnzInventar,AnzPhasen;
-short DayLightR,DayLightG,DayLightB;
+MOAS_G short AnzProgramme,AnzBilder,AnzInventar,AnzPhasen;
+MOAS_G short DayLightR,DayLightG,DayLightB;
 
-struct MARKER
+MOAS_G struct MARKER
 {
   short x1,y1,x2,y2;
   unsigned short Ref;
   enum MARKTYP { Label,Jumper,Unused } MarkTyp;
 } Marker[50];
 
-struct WALK_AREA
+MOAS_G struct WALK_AREA
 {
   short x1,y1,x2,y2,tx,ty;
 } WalkArea[20];
 
-struct
+MOAS_G struct
 {
   short x1,y1,x2,y2,XPos,YPos;
   enum { Open,None,Enhanced } Status;
 } Window;
 
-struct
+MOAS_G struct
 {
   short Num;
   enum PICTYP {Normal,InfoTyp1,InfoTyp2} Typ;
 } PicturesOnScreen[10];
 
-struct ONTIME
+MOAS_G struct ONTIME
 {
   unsigned short TimeLeft;
   unsigned short Proc,Adresse;
 } Ontimes[10];
 
-struct
+MOAS_G struct
 {
   short Number;
   char *Name;
 } Description[500];
 
-short AnzDescription,TimeCounter;
-short *Var;
-char GhostMode,ThingAtCursor;
-short CurrentProc,TotalSpeed,SpeechSpeed;
-unsigned short Tab320[200];
-char PlayerHasControl,WalkingAllowed,Eingeblendet;
+MOAS_G short AnzDescription,TimeCounter;
+MOAS_G short *Var;
+MOAS_G char GhostMode,ThingAtCursor;
+MOAS_G short CurrentProc,TotalSpeed,SpeechSpeed;
+MOAS_G unsigned short Tab320[200];
+MOAS_G char PlayerHasControl,WalkingAllowed,Eingeblendet;
 
-char KeyAbortState,SpaceState;  /* 0=Off 1=Waiting 2=Abort! */
-unsigned char KeyScanCode,LastKeyScanCode;  // aktueller Scancode des Keyboards
-short anz_codes;
-char *codes[257];
-unsigned char *Palette;    /* Die Palette des aktuellen Bildes */
-unsigned char *Paletten;   /* 16 umsortierte Paletten fr schnelle Effekte */
-unsigned char *MegaTable;
-char *SmallTextLine;
-short SmallTextLineLength;
+MOAS_G char KeyAbortState,SpaceState;  /* 0=Off 1=Waiting 2=Abort! */
+MOAS_G unsigned char KeyScanCode,LastKeyScanCode;  // aktueller Scancode des Keyboards
+MOAS_G short anz_codes;
+MOAS_G char *codes[257];
+MOAS_G unsigned char *Palette;    /* Die Palette des aktuellen Bildes */
+MOAS_G unsigned char *Paletten;   /* 16 umsortierte Paletten fr schnelle Effekte */
+MOAS_G unsigned char *MegaTable;
+MOAS_G char *SmallTextLine;
+MOAS_G short SmallTextLineLength;
 
-struct DIALOG
+MOAS_G struct DIALOG
 {
   short ReferenzNummer;  /* -1 = Leer */
   uShort TextProc;
@@ -266,48 +282,48 @@ struct DIALOG
 } Dialog[20];
 
 /*==>+<== Rename 2 DlgWinRef */
-struct REF_TABLE         /* Reference Table for the Dialog Window */
+MOAS_G struct REF_TABLE         /* Reference Table for the Dialog Window */
 {
   char Num;              /* Num : Number of the Dialog Option */
   unsigned char y1,y2;   /* y1  : Y-Beginning of the Option in the Window */
 } RefTable[12];          /* y1  : Y-Ending of the Option in the Window */
 
-struct POWER_PARSE
+MOAS_G struct POWER_PARSE
 {
   short Nummer;          /* -1 = Leer */
   uChar *String;         /* undefined wenn leer */
 } PowerParse[MAX_PARSE];
 
-char Packing;
-char RoomName[40];
+MOAS_G char Packing;
+MOAS_G char RoomName[40];
 
 /*************************************************/
 /** DigiSound - Daten ** Anfang ******************/
 /*************************************************/
 
-  uChar DMA_ADRESS_Maske;
-  uChar DMA_ADRESS_LoescheFF;
-  uChar DMA_ADRESS_Modus;
-  uChar DMA_ADRESS_Adresse;
-  uChar DMA_ADRESS_Seite;
-  uChar DMA_ADRESS_Zaehler;
-  uChar ExitCommunicator;  // 0=Nothing 1=DMA, ok to exit ?  2=DMA says ok
+  MOAS_G uChar DMA_ADRESS_Maske;
+  MOAS_G uChar DMA_ADRESS_LoescheFF;
+  MOAS_G uChar DMA_ADRESS_Modus;
+  MOAS_G uChar DMA_ADRESS_Adresse;
+  MOAS_G uChar DMA_ADRESS_Seite;
+  MOAS_G uChar DMA_ADRESS_Zaehler;
+  MOAS_G uChar ExitCommunicator;  // 0=Nothing 1=DMA, ok to exit ?  2=DMA says ok
 
-  short VolumeTab[32*256];
-  long StepTable[4*16];
-  short CurrentLine,SongBegin,SongEnd,ForNextValue,ForNextPosition;
-  uChar *SampleBuffer0,*SampleBuffer1,*SampleBuffer2;
-  short *OverdriveBuffer;
+  MOAS_G short VolumeTab[32*256];
+  MOAS_G long StepTable[4*16];
+  MOAS_G short CurrentLine,SongBegin,SongEnd,ForNextValue,ForNextPosition;
+  MOAS_G uChar *SampleBuffer0,*SampleBuffer1,*SampleBuffer2;
+  MOAS_G short *OverdriveBuffer;
 
-  uShort SampleSize;
-  uChar DefVol[10],DefIns[10],DefNote[10];
-  uLong DefInsPos[10];
-  struct SONG
+  MOAS_G uShort SampleSize;
+  MOAS_G uChar DefVol[10],DefIns[10],DefNote[10];
+  MOAS_G uLong DefInsPos[10];
+  MOAS_G struct SONG
   {
     uShort Col[8];   /* iiii:ivvv::vvoo:nnnn -> Instrument, Oktave,Volume, Note */
   } Song[8*1024];
 
-  struct SAMPLE
+  MOAS_G struct SAMPLE
   {
     uChar Name[40];
     long Rate;
@@ -315,16 +331,16 @@ char RoomName[40];
     uChar *Data;
   } Sample[64];
 
-  struct CONFIG
+  MOAS_G struct CONFIG
   {
     short DmaNum,IrqNum,BaseNum;
   } Config;
 
-  uChar SoftIRQ[16];
-  uLong SpeechSize;                                        // Speech stuff
-  uChar *SpeechData;
-  uShort SpeechVolume,GlobalVolume;                        // [0..256]
-  uChar OverdriveRemapper[5130];
+  MOAS_G uChar SoftIRQ[16];
+  MOAS_G uLong SpeechSize;                                        // Speech stuff
+  MOAS_G uChar *SpeechData;
+  MOAS_G uShort SpeechVolume,GlobalVolume;                        // [0..256]
+  MOAS_G uChar OverdriveRemapper[5130];
 
 #ifdef DOS
   void __interrupt __far MySoundIrq(void);
@@ -539,5 +555,7 @@ char *MrMalloc(long Size,char *File,short Line);                    ///
                                                                     ///
 #define MALLOC(Size) MrMalloc(Size,__FILE__,__LINE__)               ///
 #define FREE(Size) MrFree(Size,__FILE__,__LINE__)                   ///
-short MallocFile;                                                   ///
+MOAS_G short MallocFile;                                                   ///
 
+
+#endif /* MOAS_H_ */

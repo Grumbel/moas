@@ -55,6 +55,9 @@ set(MOAS_SOURCES
   src/platform_sdl.c
 )
 
+if(EMSCRIPTEN)
+  list(APPEND MOAS_SOURCES src/moas_globals.c)
+endif()
 add_executable(moas ${MOAS_SOURCES})
 
 target_include_directories(moas PRIVATE src ${SDL2_INCLUDE_DIRS})
@@ -122,6 +125,8 @@ if(EMSCRIPTEN)
     -sASYNCIFY
     -sASYNCIFY_STACK_SIZE=65536
     -sENVIRONMENT=web
+    # Header-defined DOS globals: wasm-ld has no -fcommon merge; keep first def.
+    -Wl,--allow-multiple-definition
     --preload-file ${_wasm_data}@/data
   )
   set_property(TARGET moas APPEND PROPERTY LINK_DEPENDS
