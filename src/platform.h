@@ -31,6 +31,11 @@ int PlatformShouldQuit(void);
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 
+/* Keyboard (DOS-style) */
+int PlatformKbhit(void);
+int PlatformGetch(void);
+
+
 /* Optional: set the logical palette (VGA 0-63 values expected). */
 void PlatformSetPalette(const unsigned char *pal768);
 

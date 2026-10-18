@@ -17,9 +17,11 @@ static inline void outp(unsigned short port, unsigned char val) { (void)port; (v
 static inline void _disable(void) {}
 static inline void _enable(void) {}
 
-/* conio replacements */
-static inline int kbhit(void) { return 0; }
-static inline int getch(void) { return 0; }
+/* conio replacements — backed by SDL key queue in platform_sdl.c */
+int PlatformKbhit(void);
+int PlatformGetch(void);
+static inline int kbhit(void) { return PlatformKbhit(); }
+static inline int getch(void) { return PlatformGetch(); }
 
 /* min/max macros (common in old DOS code) */
 #ifndef min

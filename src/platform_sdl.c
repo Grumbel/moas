@@ -17,6 +17,8 @@ typedef unsigned char uChar;
 extern uChar *Screen;
 extern unsigned char *Palette;   /* 768 bytes, VGA 0-63 */
 extern char KeyAbortState;
+extern unsigned char KeyScanCode;
+
 
 struct MOUSE {
   short x,y;
@@ -41,6 +43,131 @@ static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
 static Uint32        sdl_palette[256];
+
+
+/* DOS-style keyboard: scancode make/break + conio queue */
+#define KEYQ_SIZE 32
+static unsigned char key_queue[KEYQ_SIZE];
+static int key_qhead = 0, key_qtail = 0;
+
+static void key_enqueue(unsigned char c)
+{
+  int next = (key_qtail + 1) % KEYQ_SIZE;
+  if (next == key_qhead) return; /* full */
+  key_queue[key_qtail] = c;
+  key_qtail = next;
+}
+
+int PlatformKbhit(void)
+{
+  return key_qhead != key_qtail;
+}
+
+int PlatformGetch(void)
+{
+  unsigned char c;
+  if (key_qhead == key_qtail) return 0;
+  c = key_queue[key_qhead];
+  key_qhead = (key_qhead + 1) % KEYQ_SIZE;
+  return (int)c;
+}
+
+/* Map common SDL scancodes to XT/AT set-1 make codes used by LookKeys. */
+static int sdl_to_dos_scancode(SDL_Scancode sc)
+{
+  switch (sc) {
+    case SDL_SCANCODE_ESCAPE: return 1;
+    case SDL_SCANCODE_1: return 2;
+    case SDL_SCANCODE_2: return 3;
+    case SDL_SCANCODE_3: return 4;
+    case SDL_SCANCODE_4: return 5;
+    case SDL_SCANCODE_5: return 6;
+    case SDL_SCANCODE_6: return 7;
+    case SDL_SCANCODE_7: return 8;
+    case SDL_SCANCODE_8: return 9;
+    case SDL_SCANCODE_9: return 10;
+    case SDL_SCANCODE_0: return 11;
+    case SDL_SCANCODE_TAB: return 15;
+    case SDL_SCANCODE_Q: return 16;
+    case SDL_SCANCODE_W: return 17;
+    case SDL_SCANCODE_E: return 18;
+    case SDL_SCANCODE_R: return 19;
+    case SDL_SCANCODE_T: return 20;
+    case SDL_SCANCODE_Y: return 21;
+    case SDL_SCANCODE_U: return 22;
+    case SDL_SCANCODE_I: return 23;
+    case SDL_SCANCODE_O: return 24;
+    case SDL_SCANCODE_P: return 25;
+    case SDL_SCANCODE_RETURN: return 28;
+    case SDL_SCANCODE_A: return 30;
+    case SDL_SCANCODE_S: return 31;
+    case SDL_SCANCODE_D: return 32;
+    case SDL_SCANCODE_F: return 33;
+    case SDL_SCANCODE_G: return 34;
+    case SDL_SCANCODE_H: return 35;
+    case SDL_SCANCODE_J: return 36;
+    case SDL_SCANCODE_K: return 37;
+    case SDL_SCANCODE_L: return 38;
+    case SDL_SCANCODE_Z: return 44;
+    case SDL_SCANCODE_X: return 45;
+    case SDL_SCANCODE_C: return 46;
+    case SDL_SCANCODE_V: return 47;
+    case SDL_SCANCODE_B: return 48;
+    case SDL_SCANCODE_N: return 49;
+    case SDL_SCANCODE_M: return 50;
+    case SDL_SCANCODE_SPACE: return 57;
+    case SDL_SCANCODE_F1: return 59;
+    case SDL_SCANCODE_F2: return 60;
+    case SDL_SCANCODE_F3: return 61;
+    case SDL_SCANCODE_F4: return 62;
+    case SDL_SCANCODE_F5: return 63;
+    case SDL_SCANCODE_F6: return 64;
+    case SDL_SCANCODE_F7: return 65;
+    case SDL_SCANCODE_F8: return 66;
+    case SDL_SCANCODE_F9: return 67;
+    case SDL_SCANCODE_F10: return 68;
+    case SDL_SCANCODE_HOME: return 71;
+    case SDL_SCANCODE_UP: return 72;
+    case SDL_SCANCODE_PAGEUP: return 73;
+    case SDL_SCANCODE_LEFT: return 75;
+    case SDL_SCANCODE_KP_5: return 76;
+    case SDL_SCANCODE_RIGHT: return 77;
+    case SDL_SCANCODE_END: return 79;
+    case SDL_SCANCODE_DOWN: return 80;
+    case SDL_SCANCODE_PAGEDOWN: return 81;
+    case SDL_SCANCODE_INSERT: return 82;
+    case SDL_SCANCODE_DELETE: return 83;
+    default: return -1;
+  }
+}
+
+/* Extended getch second byte for arrows/function (DOS: getch()==0 then this). */
+static int dos_ext_getch(SDL_Scancode sc)
+{
+  switch (sc) {
+    case SDL_SCANCODE_UP: return 72;
+    case SDL_SCANCODE_DOWN: return 80;
+    case SDL_SCANCODE_LEFT: return 75;
+    case SDL_SCANCODE_RIGHT: return 77;
+    case SDL_SCANCODE_HOME: return 71;
+    case SDL_SCANCODE_END: return 79;
+    case SDL_SCANCODE_PAGEUP: return 73;
+    case SDL_SCANCODE_PAGEDOWN: return 81;
+    case SDL_SCANCODE_INSERT: return 82;
+    case SDL_SCANCODE_DELETE: return 83;
+    case SDL_SCANCODE_F1: return 59;
+    case SDL_SCANCODE_F2: return 60;
+    case SDL_SCANCODE_F3: return 61;
+    case SDL_SCANCODE_F4: return 62;
+    case SDL_SCANCODE_F5: return 63;
+    case SDL_SCANCODE_F6: return 64;
+    case SDL_SCANCODE_F7: return 65;
+    case SDL_SCANCODE_F8: return 66;
+    case SDL_SCANCODE_F9: return 67;
+    case SDL_SCANCODE_F10: return 68;
+    default: return -1;
+  }
+}
 
 int PlatformInit(void)
 {
@@ -203,16 +330,50 @@ void PlatformPumpEvents(void)
         }
         break;
       }
-      case SDL_KEYDOWN: {
+      case SDL_KEYDOWN:
+      case SDL_KEYUP: {
         SDL_Keycode k = ev.key.keysym.sym;
         SDL_Keymod mod = (SDL_Keymod)ev.key.keysym.mod;
-        if (k == SDLK_ESCAPE)
-          KeyAbortState = 2; /* script sequence abort (original) */
-        /* Process quit */
-        if (k == SDLK_q ||
-            k == SDLK_c && (mod & KMOD_CTRL) ||
-            (k == SDLK_F4 && (mod & KMOD_ALT)))
-          PlatformRequestQuit();
+        SDL_Scancode sc = ev.key.keysym.scancode;
+        int dos_sc = sdl_to_dos_scancode(sc);
+        int down = (ev.type == SDL_KEYDOWN);
+
+        if (dos_sc >= 0) {
+          /* XT make / break (+128) — LookKeys reads this every frame */
+          KeyScanCode = (unsigned char)(down ? dos_sc : (dos_sc + 128));
+        }
+
+        if (down) {
+          if (k == SDLK_ESCAPE)
+            KeyAbortState = 2;
+          if (k == SDLK_q ||
+              (k == SDLK_c && (mod & KMOD_CTRL)) ||
+              (k == SDLK_F4 && (mod & KMOD_ALT)))
+            PlatformRequestQuit();
+
+          /* Feed DOS conio queue for LookKeys kbhit/getch path */
+          {
+            int ext = dos_ext_getch(sc);
+            if (ext >= 0) {
+              key_enqueue(0);
+              key_enqueue((unsigned char)ext);
+            } else if (k >= 32 && k < 127) {
+              key_enqueue((unsigned char)k);
+            } else if (k == SDLK_RETURN) {
+              key_enqueue(13);
+            } else if (k == SDLK_BACKSPACE) {
+              key_enqueue(8);
+            } else if (k == SDLK_TAB) {
+              key_enqueue(9);
+            } else if (k == SDLK_ESCAPE) {
+              key_enqueue(27);
+            }
+          }
+        } else {
+          /* On release, clear KeyScanCode if it still shows this make code */
+          if (dos_sc >= 0 && KeyScanCode == (unsigned char)dos_sc)
+            KeyScanCode = (unsigned char)(dos_sc + 128);
+        }
         break;
       }
       default:
