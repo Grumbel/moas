@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #ifndef DOS
 
@@ -56,3 +57,28 @@ static inline long filelength(int fd) {
 static inline void _setcolor(short c) { (void)c; }
 static inline unsigned long _memmax(void) { return 0; }
 #endif
+
+#ifndef S_IWRITE
+#define S_IWRITE 0200
+#endif
+
+/* Case-insensitive open for DOS-era filenames on case-sensitive filesystems.
+ * Tries the given name first, then common case variants of the basename. */
+static inline int open_ci(const char *path, int flags, ...)
+{
+  int fd = open(path, flags);
+  if (fd >= 0) return fd;
+
+  /* Try uppercase and lowercase of the whole path (simple but enough for GAME.*/
+  char buf[256];
+  size_t n = strlen(path);
+  if (n >= sizeof(buf)) return -1;
+  for (size_t i = 0; i < n; i++) buf[i] = (char)toupper((unsigned char)path[i]);
+  buf[n] = 0;
+  fd = open(buf, flags);
+  if (fd >= 0) return fd;
+  for (size_t i = 0; i < n; i++) buf[i] = (char)tolower((unsigned char)path[i]);
+  buf[n] = 0;
+  fd = open(buf, flags);
+  return fd;
+}

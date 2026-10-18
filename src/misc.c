@@ -35,6 +35,7 @@ void InternalError(short num)
 {
   long c;
 
+  
   if (num==1007) return; /* ==>+<== Ignore CHKSUM due to FastLink */
 #ifdef DOS
   _setvideomode(_DEFAULTMODE);

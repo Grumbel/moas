@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "mapfile_disk.h"
 
 #define D32RealSeg(P)   ((((uLong) (P)) >> 4) & 0xFFFF)
 #define D32RealOff(P)   (((uLong) (P)) & 0xF)
@@ -124,11 +125,14 @@ void InitSystemVars(void)
 }
 void InitVars(void)
 {
-  char *Fun=(char *)0x00417l;
-
   WalkingAllowed=PlayerHasControl=Packing=1;
   GhostMode=-1;
-  *Fun=32;  /* Numlock */
+#ifdef DOS
+  {
+    char *Fun=(char *)0x00417l;
+    *Fun=32;  /* Numlock */
+  }
+#endif
   TotalSpeed=3; SpeechSpeed=8;
   KeyAbortState=0;
   Mouse.x=16;  Mouse.y=10;
@@ -159,6 +163,31 @@ void InitPersons(void)
   for (c=0;c<MAX_PRS;c++)
     Person[c].Num=-1;
 }
+static void LoadMapFileTable(short ifil, struct MAPFILE **out, short count)
+{
+  short i;
+  MapFileDisk *disk;
+  struct MAPFILE *mem;
+
+  if (count <= 0) { *out = NULL; return; }
+  disk = (MapFileDisk *)MALLOC((long)count * (long)sizeof(MapFileDisk));
+  mem  = (struct MAPFILE *)MALLOC((long)count * (long)sizeof(struct MAPFILE));
+  ChkRead(ifil, (char *)disk, (long)count * (long)sizeof(MapFileDisk));
+  for (i = 0; i < count; i++) {
+    mem[i].FileNum = disk[i].FileNum;
+    mem[i].FilePos = disk[i].FilePos;
+    mem[i].Length  = disk[i].Length;
+    mem[i].Data    = NULL; /* loaded on demand */
+    mem[i].x       = disk[i].x;
+    mem[i].y       = disk[i].y;
+    mem[i].Anz     = disk[i].Anz;
+    mem[i].InUse   = disk[i].InUse;
+    mem[i].Check   = disk[i].Check;
+  }
+  FREE((char *)disk);
+  *out = mem;
+}
+
 void InitMapData(void)
 {
   short ifil;
@@ -170,15 +199,10 @@ void InitMapData(void)
   ChkRead(ifil,(char *)&AnzInventar,2);
   ChkRead(ifil,(char *)&AnzPhasen,2);
 
-  Programm=(struct MAPFILE *)MALLOC(AnzProgramme * (long)sizeof( struct MAPFILE ));
-  Bilder  =(struct MAPFILE *)MALLOC(AnzBilder    * (long)sizeof( struct MAPFILE ));
-  Inventar=(struct MAPFILE *)MALLOC(AnzInventar  * (long)sizeof( struct MAPFILE ));
-  Phase   =(struct MAPFILE *)MALLOC(AnzPhasen    * (long)sizeof( struct MAPFILE ));
-
-  ChkRead(ifil,(char *)Programm,AnzProgramme * sizeof( struct MAPFILE ));
-  ChkRead(ifil,(char *)Bilder  ,AnzBilder    * sizeof( struct MAPFILE ));
-  ChkRead(ifil,(char *)Inventar,AnzInventar  * sizeof( struct MAPFILE ));
-  ChkRead(ifil,(char *)Phase   ,AnzPhasen    * sizeof( struct MAPFILE ));
+  LoadMapFileTable(ifil, &Programm, AnzProgramme);
+  LoadMapFileTable(ifil, &Bilder,   AnzBilder);
+  LoadMapFileTable(ifil, &Inventar, AnzInventar);
+  LoadMapFileTable(ifil, &Phase,    AnzPhasen);
 
 //printf("Bilder[0].x=%3li  Bilder[0].y=%3li  Bilder[0].Anz=%3li\n",Bilder[0].x,Bilder[0].y,Bilder[0].Anz);
 //printf("Bilder[1].x=%3li  Bilder[1].y=%3li  Bilder[1].Anz=%3li\n",Bilder[1].x,Bilder[1].y,Bilder[1].Anz);
@@ -297,25 +321,42 @@ void CoreMakeMegaTable(unsigned char *Table3D)
 }
 void ChkAuthorisation(void)
 {
+  fprintf(stderr, "ChkAuthorisation entered\n");
   short ifil;
   CHKSUM File;
 
   ifil=ChkOpen("PIZZZA.MAP",READ);
   if (ifil<0) ifil=ChkOpen("GAME.MAP",READ);
+  if (ifil < 0) {
+    fprintf(stderr, "ChkAuthorisation: no MAP file, skipping\n");
+    return;
+  }
   ChkRead(ifil,(char*)&File,4);
   ChkClose(ifil);
+#ifdef DOS
   if (DosGetDiskIdNum()!=(File^0xABCD5678)) InternalError(1001);
+#endif
 }
 void ReadLicence(void)
 {
   short ifil=ChkOpen("Licence.Dat",READ);
   char Buffer[80];
   CHKSUM Check;
+  long fl;
 
   if (ifil<=0) InternalError(1001);
-  ChkRead(ifil,Buffer,filelength(ifil)-4);
-  printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n%s%s\n\n\n\n\n\n\n\n\n\n\n\n\n","                                          \0\0\0"+strlen(Buffer)/2,Buffer);
-  if (read(ifil,(char*)&Check,sizeof( CHKSUM ))!=sizeof( CHKSUM )) InternalError(1001);
-  if (Check!=GetChk()) InternalError(1001);
+  fl = filelength(ifil);
+  if (fl < 4 || fl >= 80) InternalError(1001);
+  ChkRead(ifil, Buffer, fl-4);
+  Buffer[fl-4] = 0;
+  printf("\n%s\n", Buffer);
+  if (read(ifil, (char*)&Check, sizeof(CHKSUM)) != (ssize_t)sizeof(CHKSUM))
+    InternalError(1001);
+  if (Check != GetChk())
+    InternalError(1001);
   close(ifil);
 }
+
+
+
+

@@ -86,17 +86,17 @@ short ChkOpen(char *FileName,char Mode)
   ClrChk();
   if (strcmp(FileName,_FRAGEZEICHEN)==0) return(-1);
   if (Mode==READ)
-    xfil=open(FileName,O_RDONLY
 #ifdef DOS
-              |O_BINARY
+    xfil=open(FileName,O_RDONLY|O_BINARY);
+#else
+    xfil=open_ci(FileName,O_RDONLY);
 #endif
-      );
   if (Mode==WRITE)
-    xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY
 #ifdef DOS
-              |O_BINARY
+    xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
+#else
+    xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY,S_IWRITE);
 #endif
-              ,S_IWRITE);
   return(xfil);
 }
 void ChkRead(short xfil,char *Target,long Length)

@@ -126,7 +126,7 @@ void PrintWord(char *Text)
 {
   short c,Length=RealStringLength(Text,1);
 
-  if (Length>(Window.x2-Window.x1-1)) InternalError(1014);
+  if (Length>(Window.x2-Window.x1-1)) { fprintf(stderr,"PrintWord: text too long (%d > %d)\n",(int)Length,(int)(Window.x2-Window.x1-1)); return; }
   if (Window.XPos==-1 || Length>(Window.x2-Window.XPos-1)) NeueZeile();
 
   for (c=0;Text[c];c++)

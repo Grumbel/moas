@@ -44,19 +44,19 @@ short DataOpen(short Num)
   char Name[10];
 
   sprintf(Name,"PIZZZA.%i",Num);
-  FileHandle=open(Name,O_RDONLY
 #ifdef DOS
-                  |O_BINARY
+  FileHandle=open(Name,O_RDONLY|O_BINARY);
+#else
+  FileHandle=open_ci(Name,O_RDONLY);
 #endif
-    );
   if (FileHandle<0)
   {
     sprintf(Name,"GAME.%i",Num);
-    FileHandle=open(Name,O_RDONLY
 #ifdef DOS
-                    |O_BINARY
+    FileHandle=open(Name,O_RDONLY|O_BINARY);
+#else
+    FileHandle=open_ci(Name,O_RDONLY);
 #endif
-      );
   }
 
   if (FileHandle<0) {puts(Name);getch();InternalError(1002);}

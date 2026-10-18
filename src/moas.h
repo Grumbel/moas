@@ -27,7 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #define AsmQPalSet QuickSetPalette
-#define CHKSUM unsigned long
+#define CHKSUM uint32_t
 #define USHORT unsigned short
 #define uShort unsigned short
 #define uLong unsigned long
