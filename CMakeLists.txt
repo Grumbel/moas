@@ -87,7 +87,9 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     -Wno-sign-compare
     -Wno-missing-field-initializers
     -Wno-error=format-security
-    -fcommon
+    # Tentative globals need -fcommon on desktop; wasm32's MCStreamer
+    # crashes on common symbols (emitLocalCommonSymbol).
+    $<IF:$<BOOL:${EMSCRIPTEN}>,-fno-common,-fcommon>
   )
 endif()
 
