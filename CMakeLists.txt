@@ -96,6 +96,19 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
   )
 endif()
 
+
+# Standalone data inspection tool (no SDL).
+if(NOT EMSCRIPTEN)
+  add_executable(moas-util tools/moas-util.c)
+  target_compile_definitions(moas-util PRIVATE
+    $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>
+  )
+  if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(moas-util PRIVATE -Wall -Wextra)
+  endif()
+  install(TARGETS moas-util RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+
 if(EMSCRIPTEN)
   # Web page: moas.html + .js + .wasm (+ data pack). ASYNCIFY lets the
   # existing blocking Wait/getch loop yield to the browser.

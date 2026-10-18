@@ -130,6 +130,19 @@ Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
 binary runs on ArkOS’s glibc and SDL2. Controls and install notes:
 `mk/r36s/README.md`. Launch with `--fullscreen`.
 
+
+### Data inspection (`moas-util`)
+
+```sh
+cmake -S . -B build && cmake --build build --target moas-util
+./build/moas-util --datadir manick info
+./build/moas-util --datadir manick list
+./build/moas-util --datadir manick extract --outdir /tmp/moas-out
+```
+
+Lists the `GAME.2` resource catalog and extracts raw blobs from `GAME.1` /
+`GAME.3` / `GAME.4`. Payloads are not decompressed (engine pack format).
+
 ## Command-line options
 
 ```text
