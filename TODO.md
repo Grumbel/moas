@@ -1,17 +1,13 @@
 # TODO / Handoff
 
-## CLI / debug
-```
-moas --help
-moas --debug=wait,input,window
-moas --skip-intro --debug=script
-MOAS_DEBUG=all moas
-moas --proc=0 --addr=0
-```
+## From user debug log
+- Clicks work; GetClickOrEnter dismisses text (op=84)
+- After AddPerson x3 and op=50 (Found return), script ends
+- Further clicks obj=-1 — persons not hittable
 
-Flags: script, input, wait, window, load, all
---skip-intro skips Execute(3,0)
+## Root cause
+AddPerson read `sizeof(struct PERSON)` on 64-bit into GAME.1 records of **236 bytes**
+(stride 240). Same class of bug as MAPFILE. Fixed via PersonDisk.
 
-## Still stuck on title
-Run with: `nix run . -- --debug=wait,input,window,script`
-and share stderr lines around the hang.
+## Debug CLI remains
+`--debug=wait,input,window,script`

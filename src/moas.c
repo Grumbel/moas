@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "debug.h"
+#include "person_disk.h"
 #include "datapath.h"
 
 char *__Benutze   ="BENUTZE %s";
@@ -433,19 +434,49 @@ void SetObject(short ObjNum,short Pos)
 void AddPerson(short Prs,char Inf,short x,short y,short tx,short ty,USHORT Bits,USHORT Mask)
 {
   short ifil,c,MaxPerson;
+  PersonDisk disk;
+  int di, dj;
 
   for (c=0;c<MAX_PRS;c++) if (Person[c].Num==-1) break;
   if (c==MAX_PRS) InternalError(1026);
 
   ifil=DataOpen(1);       ChkOpen("?",READ);
-  read(ifil,(char*)&MaxPerson,2);
+  if (read(ifil,(char*)&MaxPerson,2) != 2) InternalError(1027);
   if (Prs>=MaxPerson) InternalError(1027);
-  if (lseek(ifil,(sizeof(struct PERSON)+4l)*Prs+2,SEEK_SET)==-1l) InternalError(1027);
-  ChkRead(ifil,(char*)&Person[c],sizeof(struct PERSON));
+  if (lseek(ifil,(long)PERSON_DISK_STRIDE * Prs + 2,SEEK_SET)==-1l) InternalError(1027);
+  ChkRead(ifil,(char*)&disk,sizeof(disk));
+  ChkClose(ifil);
+
+  memset(&Person[c], 0, sizeof(Person[c]));
+  Person[c].Num = disk.Num;
+  Person[c].PhaseNum = disk.PhaseNum;
+  Person[c].xs = disk.xs;
+  Person[c].ys = disk.ys;
+  Person[c].Anz = disk.Anz;
+  Person[c].Phase = NULL;
+  for (di = 0; di < 8; di++)
+    for (dj = 0; dj < 12; dj++)
+      Person[c].Sequence[di][dj] = disk.Sequence[di][dj];
+  Person[c].Counter = disk.Counter;
+  Person[c].Dir = disk.Dir;
+  Person[c].Boden = disk.Boden;
+  Person[c].GhostLevel = disk.GhostLevel;
+  Person[c].x = disk.x;
+  Person[c].y = disk.y;
+  Person[c].z = disk.z;
+  Person[c].TargetX = disk.TargetX;
+  Person[c].TargetY = disk.TargetY;
+  Person[c].gtx = disk.gtx;
+  Person[c].gty = disk.gty;
+  Person[c].iWalk = disk.iWalk;
+  Person[c].BaseSpeed = disk.BaseSpeed;
+  Person[c].StepSpeed = disk.StepSpeed;
+  Person[c].PhaseSpeed = disk.PhaseSpeed;
+  Person[c].Bits = disk.Bits;
+
   Person[c].xs=Phase[Person[c].PhaseNum].x;
   Person[c].ys=Phase[Person[c].PhaseNum].y;
   Person[c].Anz=Phase[Person[c].PhaseNum].Anz;
-  ChkClose(ifil);
 
   LadePhase(Person[c].PhaseNum);
   Phase[Person[c].PhaseNum].InUse=1;
@@ -453,6 +484,9 @@ void AddPerson(short Prs,char Inf,short x,short y,short tx,short ty,USHORT Bits,
   Person[c].Phase=Phase[Person[c].PhaseNum].Data;
   Person[c].Counter=Person[c].z=Person[c].GhostLevel=0;
   SetPersonProperties(c,Inf,x,y,tx,ty,Bits,Mask);
+  MoasDbg(MOAS_DBG_SCRIPT, "AddPerson slot=%d diskNum=%d phase=%d at %d,%d",
+          (int)c, (int)Person[c].Num, (int)Person[c].PhaseNum,
+          (int)Person[c].x, (int)Person[c].y);
 }
 void SetPerson(short Prs,char Inf,short x,short y,short tx,short ty,USHORT Bits,USHORT Mask)
 {
