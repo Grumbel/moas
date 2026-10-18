@@ -177,6 +177,71 @@ static long file_size_fd(int fd)
   return (long)st.st_size;
 }
 
+/* GAME.PCK dictionary for script UnPack. */
+static char *g_codes[257];
+static int g_anz_codes;
+static int g_pack_loaded;
+static char *g_pack_buf;
+
+static void load_pack_codes(void)
+{
+  int fd;
+  long sz;
+  int c, value = 0, NEW = 1;
+  if (g_pack_loaded) return;
+  g_pack_loaded = 1;
+  fd = open_data("GAME.PCK");
+  if (fd < 0) return;
+  sz = file_size_fd(fd);
+  if (sz < 5) { close(fd); return; }
+  g_pack_buf = xmalloc((size_t)(sz - 4));
+  if (read(fd, g_pack_buf, (size_t)(sz - 4)) != (ssize_t)(sz - 4)) {
+    free(g_pack_buf);
+    g_pack_buf = NULL;
+    close(fd);
+    return;
+  }
+  close(fd);
+  g_anz_codes = 0;
+  for (c = 1; c < (int)(sz - 4); c++, value++) {
+    g_pack_buf[c] ^= (char)(value & 0xff);
+    if (NEW) {
+      if (g_anz_codes < 256)
+        g_codes[g_anz_codes++] = g_pack_buf + c;
+      NEW = 0;
+    }
+    if (g_pack_buf[c] == 0) NEW = 1;
+  }
+}
+
+static void unpack_to(char *out, size_t outsz, const uint8_t *packed)
+{
+  size_t used = 0;
+  int i, l;
+  load_pack_codes();
+  out[0] = 0;
+  if (!packed) return;
+  if (g_anz_codes <= 0) {
+    strncpy(out, (const char *)packed, outsz - 1);
+    out[outsz - 1] = 0;
+    return;
+  }
+  l = (int)strlen((const char *)packed);
+  for (i = 0; i < l; i++) {
+    unsigned idx = (unsigned char)packed[i];
+    const char *piece = (idx < (unsigned)g_anz_codes) ? g_codes[idx] : NULL;
+    size_t plen;
+    if (!piece) continue;
+    plen = strlen(piece);
+    if (used + plen >= outsz - 1) break;
+    memcpy(out + used, piece, plen);
+    used += plen;
+    out[used] = 0;
+  }
+}
+
+
+
 static void cmd_info(void)
 {
   static const char *names[] = {
@@ -353,6 +418,296 @@ static void cmd_xxx(void)
   close(fd);
 }
 
+
+/* ---- script disassembler (prog resources) ---- */
+
+typedef struct {
+  int size;          /* fixed size in bytes including opcode; 0 = special */
+  const char *name;
+  const char *fmt;   /* printf-style over int16 params; NULL = dump raw shorts */
+} OpInfo;
+
+/* size: total bytes of instruction (opcode + payload). 0 = variable/string. */
+static const OpInfo op_table[128] = {
+  [0]  = { 5,  "var_add_const",      "var[%d] += %d" },
+  [1]  = { 5,  "var_add_var",        "var[%d] += var[%d]" },
+  [2]  = { 16, "add_person",         "person slot params (16 bytes)" },
+  [4]  = { 3,  "click_or_enter",     "mode=%d; close_window" },
+  [6]  = { 3,  "teak_effect",        "arg=%d" },
+  [7]  = { 1,  "close_window",       NULL },
+  [10] = { 3,  "abort_check",        "arg=%d" },
+  [12] = { 3,  "say_wait",           "%d" },
+  [13] = { 17, "conditional_walk",   NULL },
+  [14] = { 3,  "click_or_enter",     "mode=%d" },
+  [15] = { 5,  "get_person_x",       "person=%d -> var[%d]" },
+  [16] = { 5,  "get_person_y",       "person=%d -> var[%d]" },
+  [17] = { 3,  "set_current_proc",   "proc=%d" },
+  [18] = { 11, "if",                 "if cond -> else@param" },
+  [19] = { 5,  "set_ghost_level",    "person=%d level=%d" },
+  [20] = { 13, "if_person_in",       "region test / jump" },
+  [21] = { 5,  "if_wasnt_here",      "jump helper" },
+  [22] = { 5,  "goto_proc",          "proc=%d addr=%d" },
+  [23] = { 1,  "arm_key_abort",      NULL },
+  [26] = { 3,  "print_var",          "var[%d]" },
+  [27] = { 11, "add_area_label",     "hotspot label" },
+  [28] = { 11, "add_area_jumper",    "hotspot jumper" },
+  [29] = { 1,  "wait_abort_clear",   NULL },
+  [30] = { 7,  "ontime_jump",        "t=%d proc=%d addr=%d" },
+  [31] = { 3,  "if_not_abort",       "%d" },
+  [32] = { 5,  "var_rand_const",     "var[%d] = rand(%d)+1" },
+  [33] = { 5,  "var_rand_var",       "var[%d] = rand(var[%d])+1" },
+  [34] = { 5,  "set_person_z",       "person=%d z=%d" },
+  [35] = { 3,  "special_35",         "%d" },
+  [38] = { 5,  "var_set_const",      "var[%d] = %d" },
+  [39] = { 5,  "var_set_var",        "var[%d] = var[%d]" },
+  [40] = { 5,  "set_object",         "obj=%d val=%d" },
+  [41] = { 5,  "var_sub_var",        "var[%d] -= var[%d]" },
+  [42] = { 5,  "var_mul_const",      "var[%d] *= %d" },
+  [43] = { 5,  "var_mul_var",        "var[%d] *= var[%d]" },
+  [44] = { 0,  "print_sentence",     "text" }, /* 1+strlen */
+  [45] = { 5,  "var_div_const",      "var[%d] /= %d" },
+  [46] = { 5,  "var_div_var",        "var[%d] /= var[%d]" },
+  [47] = { 3,  "load_picture",       "bild=%d" },
+  [48] = { 3,  "wait_ticks",         "%d" },
+  [50] = { 1,  "return",             NULL },
+  [51] = { 5,  "var_mod_const",      "var[%d] %%= %d" },
+  [52] = { 5,  "var_mod_var",        "var[%d] %%= var[%d]" },
+  [53] = { 3,  "remove_person",      "%d" },
+  [54] = { 5,  "set_person_seq",     "person=%d seq=%d" },
+  [55] = { 1,  "wait_while_walking", NULL },
+  [56] = { 5,  "set_person_xy",      "person=%d ..." },
+  [57] = { 3,  "set_cursor",         "%d" },
+  [58] = { 5,  "var_and_const",      "var[%d] &= %d" },
+  [59] = { 5,  "var_or_const",       "var[%d] |= %d" },
+  [60] = { 3,  "goto_addr",          "addr=%d" },
+  [61] = { 5,  "if_var_eq_const",    "var[%d]==%d else jump" },
+  [62] = { 0,  "add_power_parse",    "text" },
+  [63] = { 3,  "clear_power_parse",  "%d" },
+  [64] = { 0,  "display_message",    "text" },
+  [65] = { 0,  "add_description",    "text" },
+  [66] = { 0,  "add_say_window",     "text" },
+  [67] = { 5,  "set_person_dir",     "person=%d dir=%d" },
+  [68] = { 3,  "set_player_control", "%d" },
+  [69] = { 5,  "set_person_speed",   "person=%d speed=%d" },
+  [70] = { 3,  "load_inventar",      "%d" },
+  [71] = { 5,  "var_xor_const",      "var[%d] ^= %d" },
+  [72] = { 5,  "var_cmp",            "var[%d] ? %d" },
+  [73] = { 7,  "toggle_dialog",      "%d %d %d" },
+  [74] = { 27, "if3",                "complex if / jump" },
+  [75] = { 3,  "toggle_screen",      "%d" },
+  [76] = { 3,  "internal_error",     "code=%d" },
+  [77] = { 1,  "packing_off",        NULL },
+  [78] = { 5,  "var_set_flag",       "var[%d] = %d" },
+  [79] = { 1,  "menu_return",        "getclick; close; return 1" },
+  [80] = { 19, "if2",                "complex if / jump" },
+  [81] = { 0,  "add_say_window2",    "text" },
+  [82] = { 13, "add_walk_area",      NULL },
+  [83] = { 1,  "remove_statists",    NULL },
+  [84] = { 0,  "print_sentence+",    "text" },
+  [85] = { 9,  "say_properties",     "slot=%d prs=%d color=%d font=%d" },
+  [86] = { 3,  "close_say",          "%d" },
+  [87] = { 9,  "blend2",             "%d %d %d %d" },
+  [88] = { 7,  "walk_person",        "person=%d x=%d y=%d" },
+  [89] = { 0,  "code_text",          "text" },
+  [90] = { 0,  "print_sentence++",   "text" },
+  [91] = { 0,  "set_room_name",      "text" },
+  [93] = { 7,  "palette_cycle",      "first=%d last=%d wait=%d" },
+  [94] = { 1,  "look_keys",          NULL },
+  [95] = { 3,  "load_music",         "%d" },
+  [96] = { 7,  "iwalk",              "person=%d x=%d y=%d" },
+  [99] = { 0,  "say_if_found",       "text" },
+};
+
+static int16_t rd_i16(const uint8_t *p)
+{
+  return (int16_t)(p[0] | (p[1] << 8));
+}
+
+/* String ops: payload after opcode is bytes until NUL; total size = base + strlen.
+ * base is bytes before the C string (including opcode). */
+static int string_insn_size(const uint8_t *code, int len, int pc, int base_before_string)
+{
+  int i = pc + base_before_string;
+  if (i >= len) return -1;
+  while (i < len && code[i] != 0) i++;
+  if (i >= len) return -1;
+  return (i + 1) - pc; /* include NUL */
+}
+
+static int insn_size(const uint8_t *code, int len, int pc)
+{
+  uint8_t op;
+  int sz;
+  if (pc >= len) return -1;
+  op = code[pc];
+  if (op >= 128 || op_table[op].name == NULL) {
+    /* unknown: skip 1 byte so we can resync later */
+    return 1;
+  }
+  sz = op_table[op].size;
+  if (sz > 0) return sz;
+  /* variable / string */
+  switch (op) {
+    case 44: /* print_sentence: op + string */
+    case 90:
+      return string_insn_size(code, len, pc, 1);
+    case 84: /* print_sentence+: Adresse+=2+strlen — 1 op + 1 pad? + string */
+      return string_insn_size(code, len, pc, 2);
+    case 91: /* set_room_name: Adresse+=2+strlen */
+      return string_insn_size(code, len, pc, 2);
+    case 62: /* add_power_parse: param0 short + string — Adresse+=? from engine */
+      /* case 62: AddPowerParse(Parameter[0],UnPack((char*)&Parameter[1])); Adresse+=... */
+      return string_insn_size(code, len, pc, 3);
+    case 64:
+      return string_insn_size(code, len, pc, 1);
+    case 65:
+      return string_insn_size(code, len, pc, 3);
+    case 66:
+    case 81:
+      return string_insn_size(code, len, pc, 7);
+    case 89:
+      return string_insn_size(code, len, pc, 3);
+    case 99:
+      return string_insn_size(code, len, pc, 5);
+    default:
+      return 1;
+  }
+}
+
+static void print_cp850_str(const uint8_t *s, int max)
+{
+  int i;
+  putchar('"');
+  for (i = 0; s[i] && i < max; i++) {
+    unsigned char c = s[i];
+    if (c >= 32 && c < 127 && c != '"' && c != '\\') putchar((char)c);
+    else if (c == '\n') fputs("\\n", stdout);
+    else if (c == 0x81) fputs("ü", stdout);
+    else if (c == 0x84) fputs("ä", stdout);
+    else if (c == 0x8e) fputs("Ä", stdout);
+    else if (c == 0x94) fputs("ö", stdout);
+    else if (c == 0x99) fputs("Ö", stdout);
+    else if (c == 0x9a) fputs("Ü", stdout);
+    else if (c == 0xe1) fputs("ß", stdout);
+    else printf("\\x%02x", c);
+  }
+  putchar('"');
+}
+
+static void disasm_buffer(const uint8_t *code, int len, int prog_index)
+{
+  int pc = 0;
+  printf("; program %d  %d bytes\n", prog_index, len);
+  while (pc < len) {
+    uint8_t op = code[pc];
+    int sz = insn_size(code, len, pc);
+    int i, nshort;
+    const OpInfo *info = (op < 128) ? &op_table[op] : NULL;
+
+    printf("%04x: ", pc);
+    if (sz < 1) {
+      printf("db 0x%02x  ; truncated\n", op);
+      break;
+    }
+    for (i = 0; i < sz && i < 12; i++)
+      printf("%02x ", code[pc + i]);
+    for (; i < 12; i++)
+      printf("   ");
+
+    if (!info || !info->name) {
+      printf("; unknown op %d\n", op);
+      pc += sz;
+      continue;
+    }
+
+    printf("%s", info->name);
+    nshort = (sz - 1) / 2;
+    if (info->size == 0) {
+      /* string-ish */
+      int off = 1;
+      if (op == 84 || op == 91) off = 2;
+      if (op == 62 || op == 89) off = 3;
+      if (op == 65) off = 3;
+      if (op == 66 || op == 81) off = 7;
+      if (op == 99) off = 5;
+      if (nshort >= 1 && off >= 3)
+        printf("  %d", (int)rd_i16(code + pc + 1));
+      if (pc + off < len) {
+        char ubuf[400];
+        unpack_to(ubuf, sizeof(ubuf), code + pc + off);
+        putchar(' ');
+        print_cp850_str((const uint8_t *)ubuf, (int)strlen(ubuf));
+      }
+    } else if (info->fmt && nshort > 0) {
+      int16_t a = 0, b = 0, c = 0, d = 0;
+      if (nshort >= 1) a = rd_i16(code + pc + 1);
+      if (nshort >= 2) b = rd_i16(code + pc + 3);
+      if (nshort >= 3) c = rd_i16(code + pc + 5);
+      if (nshort >= 4) d = rd_i16(code + pc + 7);
+      printf("  ");
+      printf(info->fmt, a, b, c, d);
+    } else if (nshort > 0) {
+      printf("  ");
+      for (i = 0; i < nshort && i < 8; i++)
+        printf("%d%s", (int)rd_i16(code + pc + 1 + i * 2),
+               i + 1 < nshort && i + 1 < 8 ? ", " : "");
+    }
+    putchar('\n');
+    pc += sz;
+  }
+}
+
+static int load_prog_blob(const Catalog *cat, int idx, uint8_t **out, int *out_len)
+{
+  char srcname[32];
+  const MapFileDisk *e;
+  int fd;
+  uint8_t *buf;
+  ssize_t n;
+
+  if (idx < 0 || idx >= cat->n_prog) return -1;
+  e = &cat->prog[idx];
+  if (e->Length <= 0 || e->FileNum < 1) {
+    *out = NULL;
+    *out_len = 0;
+    return 0;
+  }
+  snprintf(srcname, sizeof(srcname), "GAME.%d", (int)e->FileNum);
+  fd = open_data(srcname);
+  if (fd < 0) return -1;
+  if (lseek(fd, (off_t)e->FilePos, SEEK_SET) < 0) { close(fd); return -1; }
+  buf = xmalloc((size_t)e->Length);
+  n = read(fd, buf, (size_t)e->Length);
+  close(fd);
+  if (n != (ssize_t)e->Length) { free(buf); return -1; }
+  *out = buf;
+  *out_len = (int)e->Length;
+  return 0;
+}
+
+static void cmd_disasm(const Catalog *cat, int prog_index)
+{
+  uint8_t *buf = NULL;
+  int len = 0;
+  if (prog_index < 0) {
+    int i;
+    for (i = 0; i < cat->n_prog; i++) {
+      if (load_prog_blob(cat, i, &buf, &len) == 0 && buf) {
+        disasm_buffer(buf, len, i);
+        putchar('\n');
+        free(buf);
+        buf = NULL;
+      }
+    }
+    return;
+  }
+  if (load_prog_blob(cat, prog_index, &buf, &len) != 0 || !buf)
+    die("cannot load program");
+  disasm_buffer(buf, len, prog_index);
+  free(buf);
+}
+
+
 static void usage(const char *argv0)
 {
   fprintf(stderr,
@@ -371,12 +726,14 @@ static void usage(const char *argv0)
     "  extract [KIND]    Write raw resource blobs (KIND: all|prog|bild|inv|phase)\n"
     "  licence           Print LICENCE.DAT text\n"
     "  xxx               Summarise GAME.XXX font tables\n"
+    "  disasm [N]        Disassemble script program N (default: all)\n"
     "\n"
     "Examples:\n"
     "  %s --datadir manick info\n"
     "  %s --datadir manick list | less\n"
-    "  %s --datadir manick extract --outdir /tmp/moas-out bild\n",
-    argv0, argv0, argv0, argv0);
+    "  %s --datadir manick extract --outdir /tmp/moas-out bild\n"
+    "  %s --datadir manick disasm 0\n",
+    argv0, argv0, argv0, argv0, argv0);
 }
 
 int main(int argc, char **argv)
@@ -418,7 +775,7 @@ int main(int argc, char **argv)
     }
     if (!cmd) {
       cmd = argv[i];
-    } else if (!strcmp(cmd, "extract") && !strcmp(extract_kind, "all")) {
+    } else if ((!strcmp(cmd, "extract") || !strcmp(cmd, "disasm")) && !strcmp(extract_kind, "all")) {
       extract_kind = argv[i];
     } else {
       fprintf(stderr, "moas-util: unexpected argument '%s'\n", argv[i]);
@@ -443,12 +800,28 @@ int main(int argc, char **argv)
     cmd_xxx();
     return 0;
   }
-  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract")) {
+  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "disasm")) {
+    int prog_idx = -1;
     cat = load_catalog();
     if (!strcmp(cmd, "list"))
       cmd_list(&cat);
-    else
+    else if (!strcmp(cmd, "extract"))
       cmd_extract(&cat, extract_kind);
+    else {
+      /* disasm [N] — N already consumed as extract_kind if present */
+      if (strcmp(extract_kind, "all") != 0) {
+        prog_idx = atoi(extract_kind);
+      } else {
+        /* check leftover: for disasm, second arg was stored in extract_kind only if extract */
+        for (i = 1; i < argc; i++) {
+          if (!strcmp(argv[i], "disasm") && i + 1 < argc && argv[i+1][0] != '-') {
+            prog_idx = atoi(argv[i+1]);
+            break;
+          }
+        }
+      }
+      cmd_disasm(&cat, prog_idx);
+    }
     free_catalog(&cat);
     return 0;
   }

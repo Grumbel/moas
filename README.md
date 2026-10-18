@@ -138,6 +138,7 @@ cmake -S . -B build && cmake --build build --target moas-util
 ./build/moas-util --datadir manick info
 ./build/moas-util --datadir manick list
 ./build/moas-util --datadir manick extract --outdir /tmp/moas-out
+./build/moas-util --datadir manick disasm 0
 ```
 
 Lists the `GAME.2` resource catalog and extracts raw blobs from `GAME.1` /
