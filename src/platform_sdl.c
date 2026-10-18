@@ -17,6 +17,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <android/log.h>
+#define MOAS_ALOG(...) __android_log_print(ANDROID_LOG_ERROR, "MOAS", __VA_ARGS__)
+#else
+#define MOAS_ALOG(...) ((void)0)
 #endif
 
 /* Minimal declarations of the globals we touch (defined elsewhere). */
@@ -259,6 +263,7 @@ void PlatformAndroidPrepareData(void)
   struct stat st;
 
   SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+  MOAS_ALOG("MOAS Android starting");
   SDL_Log("MOAS Android starting");
 
   base = SDL_AndroidGetInternalStoragePath();
@@ -294,6 +299,7 @@ void PlatformAndroidPrepareData(void)
   if (setenv("MOAS_DATADIR", dest_dir, 1) != 0)
     SDL_Log("setenv MOAS_DATADIR failed");
   else
+    MOAS_ALOG("MOAS_DATADIR=%s", dest_dir);
     SDL_Log("MOAS_DATADIR=%s", dest_dir);
 }
 #else

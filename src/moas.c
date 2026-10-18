@@ -33,6 +33,14 @@
 #include "platform.h"
 #ifdef __ANDROID__
 #include <SDL.h>
+#include <android/log.h>
+#define MOAS_ALOG(...) __android_log_print(ANDROID_LOG_ERROR, "MOAS", __VA_ARGS__)
+__attribute__((constructor))
+static void moas_lib_loaded(void) {
+  __android_log_print(ANDROID_LOG_ERROR, "MOAS", "libmain.so constructor");
+}
+#else
+#define MOAS_ALOG(...) ((void)0)
 #endif
 
 char *__Benutze   ="BENUTZE %s";
@@ -48,18 +56,16 @@ int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
 #ifndef DOS
-#ifdef __ANDROID__
-  SDL_Log("moas: SDL_main entered argc=%d", argc);
-#endif
+  MOAS_ALOG("SDL_main entered argc=%d", argc);
   MoasParseArgs(argc, argv);
+  MOAS_ALOG("MoasParseArgs done");
 #ifdef __ANDROID__
   /* Extract APK assets to internal storage; sets MOAS_DATADIR. */
   PlatformAndroidPrepareData();
 #endif
+  MOAS_ALOG("assets prepared");
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
-#ifdef __ANDROID__
-  SDL_Log("moas: data dir ready, calling InitAll");
-#endif
+  MOAS_ALOG("data dir ready, calling InitAll");
 #else
   (void)argc; (void)argv;
 #endif

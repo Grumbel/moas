@@ -31,6 +31,7 @@
 #include "debug.h"
 #ifdef __ANDROID__
 #include <SDL.h>
+#include <android/log.h>
 #endif
 
 char TabNewDir[16]=
@@ -57,6 +58,7 @@ void InternalError(short num)
     default: msg = "internal error"; break;
   }
 #ifdef __ANDROID__
+  __android_log_print(ANDROID_LOG_ERROR, "MOAS", "InternalError %d: %s", (int)num, msg);
   SDL_Log("InternalError %d: %s", (int)num, msg);
 #else
   fprintf(stderr, "moas: InternalError %d: %s\n", (int)num, msg);

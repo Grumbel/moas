@@ -47,7 +47,7 @@ static SDL_AudioDeviceID digi_audio_dev = 0;
 static void DigiMixFrame(void);
 static void digi_audio_callback(void *userdata, Uint8 *stream, int len);
 
-static void DigiStartSdlAudio(void)
+void DigiStartSdlAudio(void)
 {
   SDL_AudioSpec want, have;
   if (SDL_WasInit(SDL_INIT_AUDIO) == 0) {
@@ -70,7 +70,7 @@ static void DigiStartSdlAudio(void)
   SDL_PauseAudioDevice(digi_audio_dev, 0);
 }
 
-static void DigiStopSdlAudio(void)
+void DigiStopSdlAudio(void)
 {
   if (digi_audio_dev) {
     SDL_CloseAudioDevice(digi_audio_dev);
@@ -124,9 +124,7 @@ void InitDigi(void)
 #endif
   InitVolumeTab();
   InitStepTable();
-#ifndef DOS
-  DigiStartSdlAudio();
-#endif
+  /* SDL audio started later from InitAll after PlatformInit (Android). */
 }
 
 void InitDSP(void)

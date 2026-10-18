@@ -45,8 +45,17 @@ struct
   unsigned char *IoBuffer;        /* Pointer to the Buffer */
 } Boot;
 
+#ifndef DOS
+void DigiStartSdlAudio(void); /* digi_io.c */
+#endif
+
 void InitAll(void)
 {
+#ifndef DOS
+  /* Video first so Android/SDL have a window before audio or heavy I/O. */
+  if (PlatformInit() != 0)
+    InternalError(1003);
+#endif
   ReadLicence();
   Screen=D32DosMemAlloc(65000*3); Info1=Screen+65000; Info2=Info1+65000; //freiwillig im DOS !
 #ifndef DOS
@@ -59,6 +68,9 @@ void InitAll(void)
   SmallTextLine=MALLOC(340*(5+2+2));  memset(SmallTextLine,0,340*(5+2+2));
   VMouseBuf=MALLOC(40*44);
   InitDialogs();             InitDigi();
+#ifndef DOS
+  DigiStartSdlAudio();
+#endif
   Init320Tab();              InitScreenData();
   InitVars();                InitPersons();
   InitPictureData();         InitOntimes();
@@ -71,9 +83,6 @@ void InitAll(void)
   inp(0x3d4+6);
   outp(0x3c0,0x11); outp(0x3c0,0);  /* FrameColor := 0  */
   outp(0x3c0,0x20);                 /* Reset Controller */
-#else
-  if (PlatformInit() != 0)
-    InternalError(1003);
 #endif
   AsmQPalSet(Palette);
 }
