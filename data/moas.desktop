@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MOAS
+GenericName=Adventure Game
+Comment=Mouse Orientiertes Adventure System — play Mänick Mänschion
+Comment[de]=Mouse Orientiertes Adventure System — Mänick Mänschion spielen
+Exec=moas
+Icon=moas
+Terminal=false
+Categories=Game;AdventureGame;
+Keywords=adventure;point-and-click;point and click;retro;DOS;MOAS;Mänick;
+StartupNotify=true

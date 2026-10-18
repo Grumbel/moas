@@ -1,6 +1,13 @@
 # TODO / Handoff
 
-## Audio (this bundle)
+## Desktop integration (this bundle)
+- FreeDesktop `.desktop` file: `data/moas.desktop`
+- hicolor icons (16–256 px, nearest-neighbor pixel art of the in-game smiley laptop)
+- AppStream metainfo: `data/metainfo/org.grumbel.moas.metainfo.xml`
+- CMake install rules for applications/, icons/hicolor/, metainfo/
+- README notes on menu integration after `cmake --install`
+
+## Audio
 - InitDigi() enabled: volume/step tables + SDL audio @ 14 kHz U8 mono
 - DigiMixFrame reimplements tracker mix; SDL callback streams SampleBuffer2
 - LoadMusic: SampleDisk (52-byte) load; data path under MoasDataDir

@@ -79,3 +79,16 @@ install(DIRECTORY manick/
 
 # Convenience: also install a small README next to the data
 install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+
+# --- Linux desktop integration ---
+install(FILES data/moas.desktop
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+
+# hicolor icon theme (multiple sizes, nearest-neighbor pixel art)
+install(DIRECTORY data/icons/hicolor/
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor
+  FILES_MATCHING PATTERN "*.png")
+
+# AppStream metadata for software centers
+install(FILES data/metainfo/org.grumbel.moas.metainfo.xml
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)

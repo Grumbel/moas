@@ -67,9 +67,13 @@ To build and run the Nix package directly:
 nix run .
 ```
 
-The CMake install target installs the executable and game data under the
-configured install prefixes. The compiled-in default data path can be changed
-with `-DMOAS_DATADIR=/path/to/data` at configure time; `MOAS_DATADIR` or the
+The CMake install target installs the executable, game data, FreeDesktop
+`.desktop` entry, hicolor icons, and AppStream metainfo under the configured
+install prefixes. After `cmake --install`, the game appears in application
+menus on typical Linux desktops.
+
+The compiled-in default data path can be changed with
+`-DMOAS_DATADIR=/path/to/data` at configure time; `MOAS_DATADIR` or the
 `--datadir=PATH` command-line option can override it at runtime.
 
 ## Command-line options
@@ -96,6 +100,7 @@ MOAS_DEBUG=all ./build/moas
 
 - `src/` — C game engine and SDL2 platform layer
 - `manick/` — game data files; original DOS executables are not used by the port
+- `data/` — FreeDesktop `.desktop` file, hicolor icons, AppStream metainfo
 - `docs/screenshot.png` — screenshot of the current port
 - `TODO.md` — current implementation notes and outstanding work
 - `flake.nix` — Nix development shell and package definition
