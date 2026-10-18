@@ -511,10 +511,13 @@ static const OpInfo op_table[128] = {
   [89] = { 0,  "code_text",          "text" },
   [90] = { 0,  "print_sentence_ret", "text" },
   [91] = { 0,  "set_room_name",      "text" },
+  [92] = { 0,  "say_if",              "text" },
   [93] = { 7,  "palette_cycle",      NULL },
   [94] = { 1,  "look_keys",          NULL },
   [95] = { 3,  "load_music",         "%d" },
   [96] = { 7,  "iwalk",              NULL },
+  [97] = { 0,  "say_if_plus",         "text" },
+  [98] = { 0,  "say_if_plus2",        "text" },
   [99] = { 0,  "say_if_found",       "text" },
 };
 
@@ -566,6 +569,9 @@ static int insn_size(const uint8_t *code, int len, int pc)
       return string_insn_size(code, len, pc, 9);
     case 90: /* string at Parameter, then return */
       return string_insn_size(code, len, pc, 1);
+    case 92: /* fall through to 99 in engine */
+    case 97:
+    case 98:
     case 99: /* +=8+strlen */
       return string_insn_size(code, len, pc, 5);
     default:
@@ -628,7 +634,7 @@ static void disasm_buffer(const uint8_t *code, int len, int prog_index)
       if (op == 62 || op == 65 || op == 89) off = 3;
       if (op == 66 || op == 81) off = 7;
       if (op == 67) off = 9;
-      if (op == 99) off = 5;
+      if (op == 92 || op == 97 || op == 98 || op == 99) off = 5;
       if (nshort >= 1 && off >= 3)
         printf("  %d", (int)rd_i16(code + pc + 1));
       if (pc + off < len) {
