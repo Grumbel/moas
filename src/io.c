@@ -288,21 +288,14 @@ short DataOpen(short Num)
   short FileHandle;
   char Name[10];
 
-  sprintf(Name,"PIZZZA.%i",Num);
+  /* PIZZZA.* was a legacy/dev data name; Mänick ships as GAME.* */
+  /* sprintf(Name,"PIZZZA.%i",Num); ... fallback removed */
+  sprintf(Name,"GAME.%i",Num);
 #ifdef DOS
   FileHandle=open(Name,O_RDONLY|O_BINARY);
 #else
   FileHandle=MoasOpenData(Name);
 #endif
-  if (FileHandle<0)
-  {
-    sprintf(Name,"GAME.%i",Num);
-#ifdef DOS
-    FileHandle=open(Name,O_RDONLY|O_BINARY);
-#else
-    FileHandle=MoasOpenData(Name);
-#endif
-  }
 
   if (FileHandle<0) {
 #ifndef DOS

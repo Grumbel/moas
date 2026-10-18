@@ -247,8 +247,8 @@ void InitFont(void)
 {
   short ifil,c,d,f,Tmp;
 
-  ifil=ChkOpen("PIZZZA.XXX",READ);
-  if (ifil<0) ifil=ChkOpen("GAME.XXX",READ);
+  /* ifil=ChkOpen("PIZZZA.XXX",READ); */
+  ifil=ChkOpen("GAME.XXX",READ);
   if (ifil<0) {
 #ifndef DOS
     MoasReportMissingData("GAME.XXX");
@@ -354,8 +354,8 @@ void ChkAuthorisation(void)
   short ifil;
   CHKSUM File;
 
-  ifil=ChkOpen("PIZZZA.MAP",READ);
-  if (ifil<0) ifil=ChkOpen("GAME.MAP",READ);
+  /* ifil=ChkOpen("PIZZZA.MAP",READ); */
+  ifil=ChkOpen("GAME.MAP",READ);
   if (ifil < 0) {
     fprintf(stderr, "ChkAuthorisation: no MAP file, skipping\n");
     return;

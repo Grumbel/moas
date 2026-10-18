@@ -508,8 +508,8 @@ void LoadPack(void)
   short NEW=1;
   CHKSUM check;
 
-  if ((ifil=ChkOpen("PIZZZA.PCK",READ))==-1)
-    ifil=ChkOpen("GAME.PCK",READ);
+  /* if ((ifil=ChkOpen("PIZZZA.PCK",READ))==-1) */
+  ifil=ChkOpen("GAME.PCK",READ);
 
   Length=(short)filelength(ifil)-4;
 

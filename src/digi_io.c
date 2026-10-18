@@ -283,7 +283,9 @@ void LoadMusic(short Num)
 #endif
 
   V_Play=CurrentLine=0;
-  sprintf(Name,"PIZZZA%i.TSS",Num);
+  /* Legacy music container name; no PIZZZA*.TSS in the Mänick data set. */
+  /* sprintf(Name,"PIZZZA%i.TSS",Num); */
+  sprintf(Name,"GAME%i.TSS",Num); /* still absent in manick/; load is optional */
 #ifndef DOS
   ifil=MoasOpenData(Name);
 #else
