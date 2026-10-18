@@ -81,6 +81,12 @@
           sdl2Win64 = SDL2-win32.packages.${system}.SDL2-win64;
           sdl2Win32 = SDL2-win32.packages.${system}.SDL2-win32;
         };
+
+        wasm = import ./nix/wasm.nix {
+          inherit pkgs version;
+          sdlSrc = sdl2-src;
+          sdlVersion = "2.30.3";
+        };
       in {
         packages = {
           default = moas;
@@ -98,6 +104,9 @@
 
           moas-android = android.apk;
           sdl2-android = android.sdlAndroidLibs;
+
+          moas-wasm = wasm.moasWasm;
+          sdl2-wasm = wasm.sdl2Wasm;
         };
 
         apps = {
@@ -110,6 +119,7 @@
             program = "${moas}/bin/moas";
           };
           install-android-moas = android.installApp;
+          moas-wasm-serve = wasm.serveApp;
         };
 
         devShells.default = pkgs.mkShell {

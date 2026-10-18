@@ -1,6 +1,7 @@
 # TODO / Handoff
 
 ## Cross ports (this bundle)
+- WebAssembly: `nix/wasm.nix`, `mk/wasm/` — Emscripten + ASYNCIFY + preload data
 - Technique mirrored from Kurvenrausch (Nix flake packages + mk/ tree)
 - Windows: `nix/windows.nix` — MinGW + SDL2-win32 flake, win32/win64 zip
 - R36S / PortMaster: `nix/r36s.nix`, `mk/r36s/` — eoan arm64 sysroot, launcher

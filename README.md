@@ -101,6 +101,19 @@ nix run .#install-android-moas   # install on a device with adb
 NDK + SDL2 2.30.3 Java side (`nix/android.nix`, `mk/android/`). Game data
 in the APK (assets) is not fully wired yet.
 
+
+### WebAssembly (Emscripten)
+
+```sh
+nix build .#moas-wasm
+nix run .#moas-wasm-serve   # local HTTP server + browser
+```
+
+Static SDL2 for wasm32 and a self-contained site (`moas.html` / `.js` /
+`.wasm` plus preloaded game data). The blocking DOS-style game loop uses
+Emscripten ASYNCIFY so `Wait` / `getch` yield to the browser
+(`nix/wasm.nix`, `mk/wasm/`).
+
 ### R36S and other PortMaster handhelds (ArkOS)
 
 ```sh

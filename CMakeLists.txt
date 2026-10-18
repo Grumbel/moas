@@ -10,7 +10,31 @@ endif()
 
 include(GNUInstallDirs)
 
-find_package(SDL2 REQUIRED)
+# --- SDL2 discovery ---
+if(EMSCRIPTEN)
+  # Static SDL2 under SDL2_ROOT (nix/wasm.nix) or Emscripten's -sUSE_SDL=2 port.
+  if(SDL2_ROOT)
+    if(NOT EXISTS "${SDL2_ROOT}/lib/libSDL2.a")
+      message(FATAL_ERROR "SDL2_ROOT=${SDL2_ROOT} has no lib/libSDL2.a")
+    endif()
+    # Official SDL2 install: include/SDL2/SDL.h — our sources use <SDL.h>
+    if(EXISTS "${SDL2_ROOT}/include/SDL2/SDL.h")
+      set(SDL2_INCLUDE_DIRS "${SDL2_ROOT}/include/SDL2")
+    elseif(EXISTS "${SDL2_ROOT}/include/SDL.h")
+      set(SDL2_INCLUDE_DIRS "${SDL2_ROOT}/include")
+    else()
+      message(FATAL_ERROR "SDL2_ROOT=${SDL2_ROOT} has no SDL.h")
+    endif()
+    set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/libSDL2.a")
+  else()
+    add_compile_options(-sUSE_SDL=2)
+    add_link_options(-sUSE_SDL=2)
+    set(SDL2_INCLUDE_DIRS "")
+    set(SDL2_LIBRARIES "")
+  endif()
+else()
+  find_package(SDL2 REQUIRED)
+endif()
 
 set(MOAS_SOURCES
   src/chk.c
@@ -42,7 +66,11 @@ endif()
 
 # Default install data dir; can be overridden (-DMOAS_DATADIR=...)
 if(NOT DEFINED MOAS_DATADIR OR MOAS_DATADIR STREQUAL "")
-  set(MOAS_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/moas")
+  if(EMSCRIPTEN)
+    set(MOAS_DATADIR "/data")
+  else()
+    set(MOAS_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/moas")
+  endif()
 endif()
 
 target_compile_definitions(moas PRIVATE
@@ -63,32 +91,70 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
   )
 endif()
 
-install(TARGETS moas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(EMSCRIPTEN)
+  # Web page: moas.html + .js + .wasm (+ data pack). ASYNCIFY lets the
+  # existing blocking Wait/getch loop yield to the browser.
+  if(NOT DEFINED MOAS_VERSION)
+    set(MOAS_VERSION "0.1.0-sdl")
+  endif()
+  set(MOAS_SOURCE_URL "https://github.com/Grumbel/moas")
+  configure_file(mk/wasm/shell.html ${CMAKE_CURRENT_BINARY_DIR}/shell.html @ONLY)
 
-# Ship game data (exclude the original DOS binaries)
-install(DIRECTORY manick/
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/moas
-  FILES_MATCHING
-    PATTERN "GAME.*"
-    PATTERN "LICENCE.DAT"
-    PATTERN "Licence.Dat"
-    PATTERN "licence.dat"
-  PATTERN "GAME.EXE" EXCLUDE
-  PATTERN "DOS4GW.EXE" EXCLUDE
-)
+  # Stage only the game data (skip original DOS executables)
+  set(_wasm_data ${CMAKE_CURRENT_BINARY_DIR}/wasm-data)
+  file(MAKE_DIRECTORY ${_wasm_data})
+  file(GLOB _manick_files "${CMAKE_SOURCE_DIR}/manick/*")
+  foreach(_f ${_manick_files})
+    get_filename_component(_name "${_f}" NAME)
+    if(NOT _name MATCHES "\\.(EXE|exe)$")
+      configure_file("${_f}" "${_wasm_data}/${_name}" COPYONLY)
+    endif()
+  endforeach()
 
-# Convenience: also install a small README next to the data
-install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+  set_target_properties(moas PROPERTIES SUFFIX ".html")
+  target_link_options(moas PRIVATE
+    --shell-file ${CMAKE_CURRENT_BINARY_DIR}/shell.html
+    -sALLOW_MEMORY_GROWTH=1
+    -sGROWABLE_ARRAYBUFFERS=0
+    -sFORCE_FILESYSTEM=1
+    -sASYNCIFY
+    -sASYNCIFY_STACK_SIZE=65536
+    -sENVIRONMENT=web
+    --preload-file ${_wasm_data}@/data
+  )
+  set_property(TARGET moas APPEND PROPERTY LINK_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/mk/wasm/shell.html)
 
-# --- Linux desktop integration ---
-install(FILES data/moas.desktop
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+  set(_web ${CMAKE_CURRENT_BINARY_DIR}/moas)
+  install(FILES ${_web}.html ${_web}.js ${_web}.wasm DESTINATION .)
+  # Emscripten also emits a .data pack for --preload-file
+  install(FILES ${_web}.data DESTINATION . OPTIONAL)
+  install(FILES ${_web}.html DESTINATION . RENAME index.html)
+else()
+  install(TARGETS moas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-# hicolor icon theme (multiple sizes, nearest-neighbor pixel art)
-install(DIRECTORY data/icons/hicolor/
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor
-  FILES_MATCHING PATTERN "*.png")
+  # Ship game data (exclude the original DOS binaries)
+  install(DIRECTORY manick/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/moas
+    FILES_MATCHING
+      PATTERN "GAME.*"
+      PATTERN "LICENCE.DAT"
+      PATTERN "Licence.Dat"
+      PATTERN "licence.dat"
+    PATTERN "GAME.EXE" EXCLUDE
+    PATTERN "DOS4GW.EXE" EXCLUDE
+  )
 
-# AppStream metadata for software centers
-install(FILES data/metainfo/org.grumbel.moas.metainfo.xml
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+  install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+
+  # --- Linux desktop integration ---
+  install(FILES data/moas.desktop
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+
+  install(DIRECTORY data/icons/hicolor/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor
+    FILES_MATCHING PATTERN "*.png")
+
+  install(FILES data/metainfo/org.grumbel.moas.metainfo.xml
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+endif()
