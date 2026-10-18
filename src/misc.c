@@ -340,7 +340,9 @@ void IveGotTooMuchTime(void)
     Walker++;
     if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
 
-    if (WalkingAllowed==1 && (LastTime&3)==0) UpDateSayWindows();
+    /* Original gated with (TimeCounter&3)==0; with speech Time+=15/char that is very
+     * slow in real time. Drain every tick so bubble duration matches ~18Hz intent. */
+    if (WalkingAllowed==1) UpDateSayWindows();
     if (WalkingAllowed==1) LookKeys();
   }
 }
@@ -375,7 +377,7 @@ void Wait(short Milliseconds)
   /*
    * DOS Wait uses INT 21h AH=2Ch (RTC), ~100 ms per unit when DL/10 changes.
    * Independent of the reprogrammed PIT game ticker (~145.7 Hz).
-   * 100 ms ≈ 15 game ticks at that rate.
+   * 100 ms ≈ 2 game ticks at BIOS ~18.2 Hz.
    */
   {
     int units = Milliseconds;
@@ -386,10 +388,10 @@ void Wait(short Milliseconds)
         short now = GetTicker();
         int elapsed = (int)now - (int)start;
         if (elapsed < 0) elapsed += 65536;
-        int done = elapsed / 15;
+        int done = elapsed / 2;
         if (done > 0) {
           units -= done;
-          start = (short)(start + done * 15);
+          start = (short)(start + done * 2);
         }
       }
     }
