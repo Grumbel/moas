@@ -1,14 +1,11 @@
 # TODO / Handoff
 
-## Fixed DOS leftovers (this bundle)
-- Palette cycle on Linux tick path (was IRQ-only)
-- SetMousePos → SDL_WarpMouseInWindow
-- Shake → soft present offset
-- ToggleScreen → blank flag
-- QuickSetSinglePal → Palette + SDL
-- Person save/load via PersonDisk (236-byte records)
+## Done
+- Packed Linux save format: Person, Marker, Pics, Dialog, SayProps, SayWindow
+- Palette cycle, Shake, ToggleScreen, SetMousePos
+- Note: Linux GAME*.SAV not compatible with DOS saves
 
 ## Still open
-- Full savegame: Marker/Dialog/SayWindow still native sizeof (pointers)
-- Sound (SB/DMA stack inert; InitDigi commented out)
-- PowerBlend/WalkNLayers
+- Sound (SB → SDL audio)
+- PowerBlend / WalkNLayers (op 11 commented out; layers never allocated)
+- DOS-compatible save byte layout (enums/pointers)

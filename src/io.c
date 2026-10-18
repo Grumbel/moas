@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "person_disk.h"
+#include "save_disk.h"
 #ifndef DOS
 #include "platform.h"
 #endif
@@ -107,6 +108,173 @@ static void ReadPersonsDisk(short ifil)
     Person[i].Phase = NULL;
   }
 }
+
+static void WriteMarkersDisk(short ofil)
+{
+  short i;
+  MarkerDisk d;
+  for (i = 0; i < 50; i++) {
+    d.x1 = Marker[i].x1; d.y1 = Marker[i].y1;
+    d.x2 = Marker[i].x2; d.y2 = Marker[i].y2;
+    d.Ref = Marker[i].Ref;
+    d.MarkTyp = (int16_t)Marker[i].MarkTyp;
+    ChkWrite(ofil, (char *)&d, sizeof(d));
+  }
+}
+
+static void ReadMarkersDisk(short ifil)
+{
+  short i;
+  MarkerDisk d;
+  for (i = 0; i < 50; i++) {
+    ChkRead(ifil, (char *)&d, sizeof(d));
+    Marker[i].x1 = d.x1; Marker[i].y1 = d.y1;
+    Marker[i].x2 = d.x2; Marker[i].y2 = d.y2;
+    Marker[i].Ref = d.Ref;
+    Marker[i].MarkTyp = (enum MARKTYP)d.MarkTyp;
+  }
+}
+
+static void WritePicsDisk(short ofil)
+{
+  short i;
+  PicOnScreenDisk d;
+  for (i = 0; i < 10; i++) {
+    d.Num = PicturesOnScreen[i].Num;
+    d.Typ = (int16_t)PicturesOnScreen[i].Typ;
+    ChkWrite(ofil, (char *)&d, sizeof(d));
+  }
+}
+
+static void ReadPicsDisk(short ifil)
+{
+  short i;
+  PicOnScreenDisk d;
+  for (i = 0; i < 10; i++) {
+    ChkRead(ifil, (char *)&d, sizeof(d));
+    PicturesOnScreen[i].Num = d.Num;
+    PicturesOnScreen[i].Typ = d.Typ;
+  }
+}
+
+static void WriteDialogsDisk(short ofil)
+{
+  short i, j;
+  DialogDisk d;
+  for (i = 0; i < 20; i++) {
+    d.ReferenzNummer = Dialog[i].ReferenzNummer;
+    d.TextProc = Dialog[i].TextProc;
+    for (j = 0; j < 30; j++) {
+      d.Inhalt[j].TextAdd = Dialog[i].Inhalt[j].TextAdd;
+      d.Inhalt[j].RefNum = Dialog[i].Inhalt[j].RefNum;
+      d.Inhalt[j].Typ = Dialog[i].Inhalt[j].Typ;
+      d.Inhalt[j].StdTyp = Dialog[i].Inhalt[j].StdTyp;
+      d.Inhalt[j].Querverweis = Dialog[i].Inhalt[j].Querverweis;
+    }
+    ChkWrite(ofil, (char *)&d, sizeof(d));
+  }
+}
+
+static void ReadDialogsDisk(short ifil)
+{
+  short i, j;
+  DialogDisk d;
+  for (i = 0; i < 20; i++) {
+    ChkRead(ifil, (char *)&d, sizeof(d));
+    Dialog[i].ReferenzNummer = d.ReferenzNummer;
+    Dialog[i].TextProc = d.TextProc;
+    for (j = 0; j < 30; j++) {
+      Dialog[i].Inhalt[j].TextAdd = d.Inhalt[j].TextAdd;
+      Dialog[i].Inhalt[j].RefNum = d.Inhalt[j].RefNum;
+      Dialog[i].Inhalt[j].Typ = d.Inhalt[j].Typ;
+      Dialog[i].Inhalt[j].StdTyp = d.Inhalt[j].StdTyp;
+      Dialog[i].Inhalt[j].Querverweis = d.Inhalt[j].Querverweis;
+    }
+  }
+}
+
+static void WriteSayPropsDisk(short ofil)
+{
+  short i;
+  SayPropDisk d;
+  for (i = 0; i < 10; i++) {
+    d.PrsNum = SayProperties[i].PrsNum;
+    d.TxtColor = SayProperties[i].TxtColor;
+    d.StdFont = SayProperties[i].StdFont;
+    ChkWrite(ofil, (char *)&d, sizeof(d));
+  }
+}
+
+static void ReadSayPropsDisk(short ifil)
+{
+  short i;
+  SayPropDisk d;
+  for (i = 0; i < 10; i++) {
+    ChkRead(ifil, (char *)&d, sizeof(d));
+    SayProperties[i].PrsNum = d.PrsNum;
+    SayProperties[i].TxtColor = d.TxtColor;
+    SayProperties[i].StdFont = d.StdFont;
+  }
+}
+
+static void WriteSayWindowsDisk(short ofil)
+{
+  short c;
+  SayWindowDisk d;
+  for (c = 0; c < 5; c++) {
+    memset(&d, 0, sizeof(d));
+    d.RefPrs = SayWindow[c].RefPrs;
+    d.x = SayWindow[c].x; d.y = SayWindow[c].y;
+    d.xs = SayWindow[c].xs; d.ys = SayWindow[c].ys;
+    d.x1 = SayWindow[c].x1; d.x2 = SayWindow[c].x2;
+    d.Font = SayWindow[c].Font;
+    d.Time = SayWindow[c].Time;
+    d.wx = SayWindow[c].wx; d.wy = SayWindow[c].wy;
+    d.hasData = (SayWindow[c].RefPrs != -1 && SayWindow[c].Data) ? 1 : 0;
+    d.hasText = (SayWindow[c].RefPrs != -1 && SayWindow[c].Text) ? 1 : 0;
+    ChkWrite(ofil, (char *)&d, sizeof(d));
+    if (d.hasData)
+      ChkWrite(ofil, SayWindow[c].Data, SayWindow[c].xs * SayWindow[c].ys);
+    if (d.hasText) {
+      short h = (short)(strlen(SayWindow[c].Text) + 1);
+      ChkWrite(ofil, (char *)&h, 2);
+      ChkWrite(ofil, SayWindow[c].Text, h);
+    }
+  }
+}
+
+static void ReadSayWindowsDisk(short ifil)
+{
+  short c;
+  SayWindowDisk d;
+  for (c = 0; c < 5; c++) {
+    ChkRead(ifil, (char *)&d, sizeof(d));
+    SayWindow[c].RefPrs = d.RefPrs;
+    SayWindow[c].x = d.x; SayWindow[c].y = d.y;
+    SayWindow[c].xs = d.xs; SayWindow[c].ys = d.ys;
+    SayWindow[c].x1 = d.x1; SayWindow[c].x2 = d.x2;
+    SayWindow[c].Font = d.Font;
+    SayWindow[c].Time = d.Time;
+    SayWindow[c].wx = d.wx; SayWindow[c].wy = d.wy;
+    SayWindow[c].Data = NULL;
+    SayWindow[c].Text = NULL;
+    if (d.RefPrs != -1) {
+      if (d.hasData) {
+        SayWindow[c].Data = MALLOC(SayWindow[c].xs * SayWindow[c].ys);
+        ChkRead(ifil, SayWindow[c].Data, SayWindow[c].xs * SayWindow[c].ys);
+      }
+      if (d.hasText) {
+        short h = 0;
+        ChkRead(ifil, (char *)&h, 2);
+        if (h > 0) {
+          SayWindow[c].Text = MALLOC(h);
+          ChkRead(ifil, SayWindow[c].Text, h);
+        }
+      }
+    }
+  }
+}
+
 #endif
 
 char *_FRAGEZEICHEN="?";
@@ -407,13 +575,15 @@ void SaveGame(short CallerID)
         ChkWrite(ofil,(char*)&V_Points,2);
         ChkWrite(ofil,(char*)&V_TotalPoints,2);
         ChkWrite(ofil,RoomName,40);
-        ChkWrite(ofil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
-        #ifndef DOS
+#ifndef DOS
+        WritePicsDisk(ofil);
         WritePersonsDisk(ofil);
+        WriteMarkersDisk(ofil);
 #else
+        ChkWrite(ofil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
         ChkWrite(ofil,(char*)Person,sizeof(Person));
-#endif
         ChkWrite(ofil,(char*)Marker,sizeof(Marker));
+#endif
         ChkWrite(ofil,(char*)Ontimes,sizeof(struct ONTIME)*10);
         ChkWrite(ofil,(char *)Var,AnzVars*2);
         ChkWrite(ofil,(char *)&CurrentProc,2);
@@ -423,13 +593,21 @@ void SaveGame(short CallerID)
         ChkWrite(ofil,(char *)&DayLightB,2);
         ChkWrite(ofil,(char *)&PaletteCycleFirst,2);
         ChkWrite(ofil,(char *)&PaletteCycleLast,2);
+#ifndef DOS
+        WriteDialogsDisk(ofil);
+        WriteSayPropsDisk(ofil);
+#else
         ChkWrite(ofil,(char *)Dialog,sizeof(struct DIALOG)*20);
         ChkWrite(ofil,(char*)SayProperties,sizeof(struct SAY_PROPERTIES)*10);
+#endif
         for (c=0;c<AnzInventar;c++)
         {
           ChkWrite(ofil,(char*)&Inventar[c].x,sizeof (Inventar[c].x));
           ChkWrite(ofil,(char*)&Inventar[c].y,sizeof (Inventar[c].y));
         }
+#ifndef DOS
+        WriteSayWindowsDisk(ofil);
+#else
         for (c=0;c<5;c++)
         {
           ChkWrite(ofil,(char*)&SayWindow[c],sizeof(struct SAY_WINDOW));
@@ -444,6 +622,7 @@ void SaveGame(short CallerID)
             }
           }
         }
+#endif
         ChkClose(ofil);
         FREE(MiniPic);
         return;
@@ -475,13 +654,15 @@ void LoadGame(void)
         Blend(4,0);
         for (c=0;c<251;c++) ChkRead(ifil,RoomName,4); /*Dummies*/
         ChkRead(ifil,RoomName,40);
-        ChkRead(ifil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
-        #ifndef DOS
+#ifndef DOS
+        ReadPicsDisk(ifil);
         ReadPersonsDisk(ifil);
+        ReadMarkersDisk(ifil);
 #else
+        ChkRead(ifil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
         ChkRead(ifil,(char*)Person,sizeof(Person));
-#endif
         ChkRead(ifil,(char*)Marker,sizeof(Marker));
+#endif
         ChkRead(ifil,(char*)Ontimes,sizeof(struct ONTIME)*10);
         ChkRead(ifil,(char *)Var,AnzVars*2);
         ChkRead(ifil,(char *)&CurrentProc,2);
@@ -491,14 +672,21 @@ void LoadGame(void)
         ChkRead(ifil,(char *)&DayLightB,2);
         ChkRead(ifil,(char *)&PaletteCycleFirst,2);
         ChkRead(ifil,(char *)&PaletteCycleLast,2);
+#ifndef DOS
+        ReadDialogsDisk(ifil);
+        ReadSayPropsDisk(ifil);
+#else
         ChkRead(ifil,(char *)Dialog,sizeof(struct DIALOG)*20);
         ChkRead(ifil,(char*)SayProperties,sizeof(struct SAY_PROPERTIES)*10);
+#endif
         for (c=0;c<AnzInventar;c++)
         {
           ChkRead(ifil,(char*)&Inventar[c].x,sizeof (Inventar[c].x));
           ChkRead(ifil,(char*)&Inventar[c].y,sizeof (Inventar[c].y));
         }
-
+#ifndef DOS
+        ReadSayWindowsDisk(ifil);
+#else
         for (c=0;c<5;c++)
         {
           ChkRead(ifil,(char*)&SayWindow[c],sizeof(struct SAY_WINDOW));
@@ -518,6 +706,7 @@ void LoadGame(void)
             }
           }
         }
+#endif
         ChkClose(ifil);
         if (GhostMode==1)
         {
