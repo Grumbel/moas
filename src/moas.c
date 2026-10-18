@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "debug.h"
 #include "datapath.h"
 
 char *__Benutze   ="BENUTZE %s";
@@ -41,21 +42,32 @@ void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty);
 int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
-  (void)argc;
 #ifndef DOS
+  MoasParseArgs(argc, argv);
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
+#else
+  (void)argc; (void)argv;
 #endif
 
   DontCyclePal=1;
   InitAll();
   DontCyclePal=0;
 #ifndef DOS
-  /* Without game data the script loader will fail; still show a window. */
   PlatformPresent();
 #endif
-  Execute(3,0);
+  if (!moas_skip_intro) {
+    MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
+    Execute(3, 0);
+  } else {
+    MoasDbg(MOAS_DBG_SCRIPT, "skipping intro (--skip-intro)");
+  }
 //ChkAuthorisation();
-  Execute(0,0);
+  {
+    short proc = (moas_start_proc >= 0) ? (short)moas_start_proc : 0;
+    unsigned short addr = (unsigned short)moas_start_addr;
+    MoasDbg(MOAS_DBG_SCRIPT, "Execute main proc=%d addr=%u", (int)proc, (unsigned)addr);
+    Execute(proc, addr);
+  }
 #ifndef DOS
   while (!PlatformShouldQuit()) {
     /* MouseCheck pumps events, presents, and delays on Linux. */
@@ -87,6 +99,18 @@ short Execute(short ProcNum,unsigned short Adresse)
       return(0);
     }
     Parameter=(short*)(Prg+1+Adresse);
+    if (moas_debug & MOAS_DBG_SCRIPT) {
+      unsigned char op = Prg[Adresse];
+      /* Log wait-ish / control ops at higher visibility; others only every op */
+      if (op == 4 || op == 14 || op == 7 || op == 10 || op == 48 || op == 50 ||
+          op == 60 || op == 61 || op == 79 || op == 23 || op == 29)
+        MoasDbg(MOAS_DBG_SCRIPT, "proc=%d addr=%u op=%u p0=%d p1=%d",
+                (int)ProcNum, (unsigned)Adresse, (unsigned)op,
+                (int)Parameter[0], (int)Parameter[1]);
+      else
+        MoasDbg(MOAS_DBG_SCRIPT, "proc=%d addr=%u op=%u",
+                (int)ProcNum, (unsigned)Adresse, (unsigned)op);
+    }
     switch(Prg[Adresse])
     {
       case 0:SetVar(Parameter[0],Var[Parameter[0]]+Parameter[1]);

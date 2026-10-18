@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "platform.h"
+#include "debug.h"
 
 char TabNewDir[16]=
  { 0,2,6,0,4,3,5,0,0,1,7,0,0,0,0,0 } ;
@@ -364,6 +365,8 @@ void Wait(short Milliseconds)
 }
 void GetClickOrEnter(short Time)
 {
+  MoasDbg(MOAS_DBG_WAIT, "GetClickOrEnter(Time=%d) enter CursorState=%d WinStatus=%d",
+          (int)Time, (int)Mouse.CursorState, (int)Window.Status);
   WinEnhance();
   WalkingAllowed=0;
 #ifdef DOS
@@ -423,6 +426,8 @@ void GetClickOrEnter(short Time)
   WalkingAllowed = 1;
   if (Window.Status == None)
     Mouse.CursorState = 1;
+  MoasDbg(MOAS_DBG_WAIT, "GetClickOrEnter leave CursorState=%d WinStatus=%d",
+          (int)Mouse.CursorState, (int)Window.Status);
 }
 void LoadPack(void)
 {

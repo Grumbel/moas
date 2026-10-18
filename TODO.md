@@ -1,11 +1,17 @@
 # TODO / Handoff
 
-## Cursor disabled / stuck on title
-- OpenWindow sets CursorState=0; restore when Window.Status==None
-- GetClickOrEnter: press-then-release, Space/Enter/Esc via kbhit
-- PowerSelectFromWindow: no longer infinite if RefTable empty; any click works
-- VMouse null-safe if Phase[0] not loaded
+## CLI / debug
+```
+moas --help
+moas --debug=wait,input,window
+moas --skip-intro --debug=script
+MOAS_DEBUG=all moas
+moas --proc=0 --addr=0
+```
 
-## Still open
-- Full title→game path verification
-- Heap root cause
+Flags: script, input, wait, window, load, all
+--skip-intro skips Execute(3,0)
+
+## Still stuck on title
+Run with: `nix run . -- --debug=wait,input,window,script`
+and share stderr lines around the hang.

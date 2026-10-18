@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "platform.h"
+#include "debug.h"
 
 char _SPACE_STRING[]=" ";
 
@@ -42,6 +43,7 @@ void OpenWindow(char x1,char y,char x2)
 {
   short c;
 
+  MoasDbg(MOAS_DBG_WINDOW, "OpenWindow(%d,%d,%d)", (int)x1, (int)y, (int)x2);
   DontCyclePal++;
   RefTable[0].Num=-1;
   if (Window.Status!=None) InternalError(1008);
@@ -95,6 +97,7 @@ void Line(short Col,short x1,short y1,short x2,short y2)
 }
 void CloseWindow(void)
 {
+  MoasDbg(MOAS_DBG_WINDOW, "CloseWindow status=%d", (int)Window.Status);
   VMouse(3);
   if (Window.Status==None) return;
   DontCyclePal--;
@@ -440,6 +443,7 @@ short PowerSelectFromWindow(void)   /* RefTable is Global Parameter */
   for (i = 0; i < 12; i++)
     if (RefTable[i].Num != -1) { has_refs = 1; break; }
 
+  MoasDbg(MOAS_DBG_WAIT, "PowerSelectFromWindow has_refs=%d", (int)has_refs);
   WalkingAllowed=0;
   while (Mouse.Left | Mouse.Right) MouseCheck();
   MouseCheck();

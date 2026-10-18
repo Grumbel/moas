@@ -15,6 +15,7 @@ find_package(SDL2 REQUIRED)
 set(MOAS_SOURCES
   src/chk.c
   src/datapath.c
+  src/debug.c
   src/digi_io.c
   src/digicore.c
   src/grafix.c

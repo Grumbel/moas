@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "platform.h"
+#include "debug.h"
 #define HIGHLIGHT 40
 
 char _sString[]=">%s<";
@@ -98,11 +99,14 @@ void MouseCheck(void)
     Mouse.ClickX=Mouse.x;
     Mouse.ClickY=Mouse.y;
     Mouse.ClickObject=WhatsAt(Mouse.x,Mouse.y);
+    MoasDbg(MOAS_DBG_INPUT, "L-down at %d,%d obj=%d CursorState=%d",
+            (int)Mouse.x, (int)Mouse.y, (int)Mouse.ClickObject, (int)Mouse.CursorState);
   }
   if (Mouse.Left==0 && Mouse.LastLeft==1)
   {
     Mouse.ReleaseX=Mouse.x;
     Mouse.ReleaseY=Mouse.y;
+    MoasDbg(MOAS_DBG_INPUT, "L-up at %d,%d", (int)Mouse.x, (int)Mouse.y);
   }
   if (PlayerHasControl)
     MouseIntelligence();
