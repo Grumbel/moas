@@ -317,7 +317,7 @@ int PlatformInit(void)
     Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     if (moas_fullscreen)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    window = SDL_CreateWindow("MOAS",
+    window = SDL_CreateWindow("Mänick Mänschion",
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               LOGICAL_W * SCALE, LOGICAL_H * SCALE,
                               flags);

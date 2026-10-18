@@ -9,14 +9,14 @@
   <uses-sdk android:minSdkVersion="22" android:targetSdkVersion="34" />
   <uses-feature android:glEsVersion="0x00020000" android:required="false" />
   <application
-      android:label="MOAS"
+      android:label="Mänick Mänschion"
       android:icon="@mipmap/ic_launcher"
       android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:hardwareAccelerated="true"
       android:allowBackup="true">
     <activity
         android:name="org.libsdl.app.SDLActivity"
-        android:label="MOAS"
+        android:label="Mänick Mänschion"
         android:configChanges="keyboardHidden|orientation|screenSize"
         android:exported="true"
         android:screenOrientation="landscape">

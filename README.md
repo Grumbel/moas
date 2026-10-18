@@ -11,7 +11,7 @@ the original DOS release.
 
 ## Screenshot
 
-![MOAS running with the SDL2 Linux port](docs/screenshot.png)
+![Mänick Mänschion running with the SDL2 port](docs/screenshot.png)
 
 ## Current status
 

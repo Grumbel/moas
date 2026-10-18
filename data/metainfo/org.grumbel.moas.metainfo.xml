@@ -3,16 +3,13 @@
   <id>org.grumbel.moas</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
-  <name>MOAS</name>
-  <summary>Mouse Orientiertes Adventure System — Mänick Mänschion</summary>
+  <name>Mänick Mänschion</name>
+  <summary>Point-and-click adventure powered by the MOAS engine</summary>
   <description>
     <p>
-      MOAS is a point-and-click adventure system originally written for DOS
-      around 1992–2000. This package is a Linux port using SDL2 that preserves
-      the original game logic while replacing the DOS hardware layer.
-    </p>
-    <p>
-      The included game data is for Mänick Mänschion.
+      Mänick Mänschion is a point-and-click adventure. This package runs the
+      original game data on a modern SDL2 port of MOAS (Mouse Orientiertes
+      Adventure System), the DOS adventure engine by Thomas Holz (1992–2000).
     </p>
   </description>
   <launchable type="desktop-id">moas.desktop</launchable>
