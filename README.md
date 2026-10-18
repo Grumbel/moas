@@ -9,6 +9,8 @@ The shipped product / window title is **Mänick Mänschion** (the adventure that
 runs on this engine). The binary, package id, and icon theme name remain
 `moas` / `org.grumbel.moas`.
 
+**Original game (Thomas Holz):** <http://www.thomasholz.de/manick.htm>
+
 The port is still under active development; timing, audio, and some legacy
 effects may not yet match the original DOS release.
 
