@@ -127,13 +127,18 @@ void MoasInitDataPath(const char *argv0)
   } while (0)
 
   env = getenv("MOAS_DATADIR");
-  if (env) {
+  if (env && env[0]) {
     REMEMBER(env);
     if (looks_like_data_dir(env)) {
       set_data_dir(env);
       data_log("moas: data directory (env MOAS_DATADIR): %s", data_dir);
       return;
     }
+    /* Trust an explicit path even if markers are not found yet (e.g. first
+     * extract race); open() will still fail clearly per file. */
+    set_data_dir(env);
+    data_log("moas: MOAS_DATADIR set but markers missing, trying anyway: %s", data_dir);
+    return;
   }
 
   if (MOAS_DATADIR[0]) {
