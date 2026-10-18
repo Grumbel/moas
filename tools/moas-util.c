@@ -427,94 +427,94 @@ typedef struct {
   const char *fmt;   /* printf-style over int16 params; NULL = dump raw shorts */
 } OpInfo;
 
-/* size: total bytes of instruction (opcode + payload). 0 = variable/string. */
+/* size: total bytes including opcode for sequential path. 0 = string (see insn_size). */
 static const OpInfo op_table[128] = {
   [0]  = { 5,  "var_add_const",      "var[%d] += %d" },
   [1]  = { 5,  "var_add_var",        "var[%d] += var[%d]" },
-  [2]  = { 16, "add_person",         "person slot params (16 bytes)" },
-  [4]  = { 3,  "click_or_enter",     "mode=%d; close_window" },
-  [6]  = { 3,  "teak_effect",        "arg=%d" },
+  [2]  = { 16, "add_person",         NULL },
+  [4]  = { 3,  "click_close",        "mode=%d" },
+  [6]  = { 3,  "teak_effect",        "%d" },
   [7]  = { 1,  "close_window",       NULL },
-  [10] = { 3,  "abort_check",        "arg=%d" },
+  [10] = { 1,  "abort_redraw",       NULL },
   [12] = { 3,  "say_wait",           "%d" },
   [13] = { 17, "conditional_walk",   NULL },
   [14] = { 3,  "click_or_enter",     "mode=%d" },
   [15] = { 5,  "get_person_x",       "person=%d -> var[%d]" },
   [16] = { 5,  "get_person_y",       "person=%d -> var[%d]" },
-  [17] = { 3,  "set_current_proc",   "proc=%d" },
-  [18] = { 11, "if",                 "if cond -> else@param" },
+  [17] = { 3,  "call_proc",          "proc=%d" },
+  [18] = { 11, "if",                 NULL },
   [19] = { 5,  "set_ghost_level",    "person=%d level=%d" },
-  [20] = { 13, "if_person_in",       "region test / jump" },
-  [21] = { 5,  "if_wasnt_here",      "jump helper" },
+  [20] = { 13, "if_person_in",       NULL },
+  [21] = { 5,  "if_wasnt_here",      "var=%d else_addr=%d" },
   [22] = { 5,  "goto_proc",          "proc=%d addr=%d" },
   [23] = { 1,  "arm_key_abort",      NULL },
   [26] = { 3,  "print_var",          "var[%d]" },
-  [27] = { 11, "add_area_label",     "hotspot label" },
-  [28] = { 11, "add_area_jumper",    "hotspot jumper" },
-  [29] = { 1,  "wait_abort_clear",   NULL },
+  [27] = { 11, "add_area_label",     NULL },
+  [28] = { 11, "add_area_jumper",    NULL },
+  [29] = { 1,  "clear_screen_init",  NULL },
   [30] = { 7,  "ontime_jump",        "t=%d proc=%d addr=%d" },
-  [31] = { 3,  "if_not_abort",       "%d" },
+  [31] = { 3,  "open_window",        "%d" },
   [32] = { 5,  "var_rand_const",     "var[%d] = rand(%d)+1" },
   [33] = { 5,  "var_rand_var",       "var[%d] = rand(var[%d])+1" },
   [34] = { 5,  "set_person_z",       "person=%d z=%d" },
-  [35] = { 3,  "special_35",         "%d" },
+  [35] = { 3,  "remove_person",      "%d" },
   [38] = { 5,  "var_set_const",      "var[%d] = %d" },
   [39] = { 5,  "var_set_var",        "var[%d] = var[%d]" },
   [40] = { 5,  "set_object",         "obj=%d val=%d" },
-  [41] = { 5,  "var_sub_var",        "var[%d] -= var[%d]" },
-  [42] = { 5,  "var_mul_const",      "var[%d] *= %d" },
-  [43] = { 5,  "var_mul_var",        "var[%d] *= var[%d]" },
-  [44] = { 0,  "print_sentence",     "text" }, /* 1+strlen */
-  [45] = { 5,  "var_div_const",      "var[%d] /= %d" },
-  [46] = { 5,  "var_div_var",        "var[%d] /= var[%d]" },
-  [47] = { 3,  "load_picture",       "bild=%d" },
-  [48] = { 3,  "wait_ticks",         "%d" },
-  [50] = { 1,  "return",             NULL },
-  [51] = { 5,  "var_mod_const",      "var[%d] %%= %d" },
-  [52] = { 5,  "var_mod_var",        "var[%d] %%= var[%d]" },
-  [53] = { 3,  "remove_person",      "%d" },
-  [54] = { 5,  "set_person_seq",     "person=%d seq=%d" },
+  [41] = { 7,  "blend",              NULL },
+  [42] = { 7,  "load_bild",          NULL },
+  [43] = { 1,  "stop_all_walking",   NULL },
+  [44] = { 0,  "print_sentence",     "text" },
+  [45] = { 3,  "unmark_area",        "%d" },
+  [46] = { 3,  "unmark_area2",       "%d" },
+  [47] = { 3,  "wait",               "%d" },
+  [48] = { 1,  "return_not_found",   NULL },
+  [50] = { 1,  "return_found",       NULL },
+  [51] = { 1,  "restart",            NULL },
+  [52] = { 3,  "blend_in",           "%d" },
+  [53] = { 3,  "blend_out",          "%d" },
+  [54] = { 5,  "adress",             "%d %d" },
   [55] = { 1,  "wait_while_walking", NULL },
-  [56] = { 5,  "set_person_xy",      "person=%d ..." },
-  [57] = { 3,  "set_cursor",         "%d" },
-  [58] = { 5,  "var_and_const",      "var[%d] &= %d" },
-  [59] = { 5,  "var_or_const",       "var[%d] |= %d" },
-  [60] = { 3,  "goto_addr",          "addr=%d" },
-  [61] = { 5,  "if_var_eq_const",    "var[%d]==%d else jump" },
+  [56] = { 13, "parse_if",           NULL },
+  [57] = { 16, "set_person",         NULL },
+  [58] = { 5,  "shake",              "%d %d" },
+  [59] = { 1,  "init_ontimes",       NULL },
+  [60] = { 0,  "if_eq_print",        "text" },
+  [61] = { 5,  "execute",            "proc=%d addr=%d" },
   [62] = { 0,  "add_power_parse",    "text" },
-  [63] = { 3,  "clear_power_parse",  "%d" },
+  [63] = { 9,  "check_file",         NULL },
   [64] = { 0,  "display_message",    "text" },
   [65] = { 0,  "add_description",    "text" },
   [66] = { 0,  "add_say_window",     "text" },
-  [67] = { 5,  "set_person_dir",     "person=%d dir=%d" },
-  [68] = { 3,  "set_player_control", "%d" },
-  [69] = { 5,  "set_person_speed",   "person=%d speed=%d" },
-  [70] = { 3,  "load_inventar",      "%d" },
-  [71] = { 5,  "var_xor_const",      "var[%d] ^= %d" },
-  [72] = { 5,  "var_cmp",            "var[%d] ? %d" },
-  [73] = { 7,  "toggle_dialog",      "%d %d %d" },
-  [74] = { 27, "if3",                "complex if / jump" },
+  [67] = { 0,  "add_option",         "text" },
+  [68] = { 3,  "add_dialog",         "%d" },
+  [69] = { 1,  "init_dialogs",       NULL },
+  [70] = { 3,  "remove_dialog",      "%d" },
+  [71] = { 3,  "reset_dialog",       "%d" },
+  [72] = { 5,  "select_from_dialog", "%d %d" },
+  [73] = { 7,  "toggle_dialog_point","%d %d %d" },
+  [74] = { 27, "if3",                NULL },
   [75] = { 3,  "toggle_screen",      "%d" },
   [76] = { 3,  "internal_error",     "code=%d" },
   [77] = { 1,  "packing_off",        NULL },
-  [78] = { 5,  "var_set_flag",       "var[%d] = %d" },
-  [79] = { 1,  "menu_return",        "getclick; close; return 1" },
-  [80] = { 19, "if2",                "complex if / jump" },
+  [78] = { 5,  "select_from_dialog", "%d %d" },
+  [79] = { 1,  "menu_return",        NULL },
+  [80] = { 19, "if2",                NULL },
   [81] = { 0,  "add_say_window2",    "text" },
   [82] = { 13, "add_walk_area",      NULL },
   [83] = { 1,  "remove_statists",    NULL },
-  [84] = { 0,  "print_sentence+",    "text" },
-  [85] = { 9,  "say_properties",     "slot=%d prs=%d color=%d font=%d" },
+  [84] = { 0,  "print_sentence_plus","text" },
+  [85] = { 9,  "say_properties",     NULL },
   [86] = { 3,  "close_say",          "%d" },
-  [87] = { 9,  "blend2",             "%d %d %d %d" },
-  [88] = { 7,  "walk_person",        "person=%d x=%d y=%d" },
+  [87] = { 9,  "blend2",             NULL },
+  [88] = { 7,  "walk_person",        "p=%d x=%d y=%d" },
   [89] = { 0,  "code_text",          "text" },
-  [90] = { 0,  "print_sentence++",   "text" },
+  [90] = { 0,  "print_sentence_ret", "text" },
   [91] = { 0,  "set_room_name",      "text" },
-  [93] = { 7,  "palette_cycle",      "first=%d last=%d wait=%d" },
+  [93] = { 7,  "palette_cycle",      NULL },
   [94] = { 1,  "look_keys",          NULL },
   [95] = { 3,  "load_music",         "%d" },
-  [96] = { 7,  "iwalk",              "person=%d x=%d y=%d" },
+  [96] = { 7,  "iwalk",              NULL },
   [99] = { 0,  "say_if_found",       "text" },
 };
 
@@ -541,33 +541,32 @@ static int insn_size(const uint8_t *code, int len, int pc)
   if (pc >= len) return -1;
   op = code[pc];
   if (op >= 128 || op_table[op].name == NULL) {
-    /* unknown: skip 1 byte so we can resync later */
     return 1;
   }
   sz = op_table[op].size;
   if (sz > 0) return sz;
-  /* variable / string */
+  /* Variable: Adresse += base + strlen(string); string starts after base-1 bytes from pc
+   * (base includes the opcode). */
   switch (op) {
-    case 44: /* print_sentence: op + string */
-    case 90:
-      return string_insn_size(code, len, pc, 1);
-    case 84: /* print_sentence+: Adresse+=2+strlen — 1 op + 1 pad? + string */
-      return string_insn_size(code, len, pc, 2);
-    case 91: /* set_room_name: Adresse+=2+strlen */
-      return string_insn_size(code, len, pc, 2);
-    case 62: /* add_power_parse: param0 short + string — Adresse+=? from engine */
-      /* case 62: AddPowerParse(Parameter[0],UnPack((char*)&Parameter[1])); Adresse+=... */
-      return string_insn_size(code, len, pc, 3);
-    case 64:
-      return string_insn_size(code, len, pc, 1);
+    case 44: /* +=2+strlen, string at Parameter[0] = pc+1 — wait: +=2+strlen means base 2 */
+    case 64: /* +=2+strlen */
+    case 84:
+    case 91:
+      return string_insn_size(code, len, pc, 1); /* string at pc+1; size=2+strlen => base_before=1 includes only op, +strlen+NUL = 2+strlen if string at pc+1 */
+    case 60: /* +=6+strlen — short, short, string */
+      return string_insn_size(code, len, pc, 5);
+    case 62: /* +=4+strlen */
     case 65:
-      return string_insn_size(code, len, pc, 3);
-    case 66:
-    case 81:
-      return string_insn_size(code, len, pc, 7);
     case 89:
       return string_insn_size(code, len, pc, 3);
-    case 99:
+    case 66: /* +=8+strlen */
+    case 81:
+      return string_insn_size(code, len, pc, 7);
+    case 67: /* +=10+strlen */
+      return string_insn_size(code, len, pc, 9);
+    case 90: /* string at Parameter, then return */
+      return string_insn_size(code, len, pc, 1);
+    case 99: /* +=8+strlen */
       return string_insn_size(code, len, pc, 5);
     default:
       return 1;
@@ -625,10 +624,10 @@ static void disasm_buffer(const uint8_t *code, int len, int prog_index)
     if (info->size == 0) {
       /* string-ish */
       int off = 1;
-      if (op == 84 || op == 91) off = 2;
-      if (op == 62 || op == 89) off = 3;
-      if (op == 65) off = 3;
+      if (op == 60) off = 5;
+      if (op == 62 || op == 65 || op == 89) off = 3;
       if (op == 66 || op == 81) off = 7;
+      if (op == 67) off = 9;
       if (op == 99) off = 5;
       if (nshort >= 1 && off >= 3)
         printf("  %d", (int)rd_i16(code + pc + 1));
