@@ -678,7 +678,7 @@ void UpDateSayWindows(void)
 #ifdef DOS
   uChar Extra=*((uChar*)0x417);
 #else
-  uChar Extra=0; /* Shift state: wire to SDL modifiers later if needed */
+  uChar Extra = PlatformShiftDown() ? 3 : 0; /* bit0/1 = Shift like DOS 0x417 */
 #endif
   short c,d;
   short ox,oy,ox2,oy2;
@@ -734,16 +734,29 @@ void Rectangle3D(unsigned char *Vga,long x1,long y1,long x2,long y2,uChar c1,uCh
 void SayWait(short Win)
 {
   register short c,Ok=0;
+  short prev_walk;
 
   WinEnhance();
+  prev_walk = WalkingAllowed;
+  WalkingAllowed = 1; /* UpDateSayWindows only runs when walking allowed */
   if (Win==-1) Win=Person[GetRealPersonNum(-1)].Num;
-  while (Ok==0 && KeyAbortState!=2)
+  while (Ok==0 && KeyAbortState!=2
+#ifndef DOS
+        && !PlatformShouldQuit()
+#endif
+        )
   {
     MouseCheck();
+    /* Click or Shift skips remaining text faster (DOS: shift sets Time=-1) */
+    if ((Mouse.LastLeft || Mouse.LastRight) && !(Mouse.Left || Mouse.Right)) {
+      for (c=0;c<5;c++)
+        if (SayWindow[c].RefPrs!=-1) SayWindow[c].Time = -1;
+    }
     for (Ok=1,c=0;c<5;c++)
       if (SayWindow[c].RefPrs!=-1 && ((SayWindow[c].Text!=NULL && Win==SayWindow[c].RefPrs) || Win==32000))
         Ok=0;
   }
+  WalkingAllowed = prev_walk;
   CloseSay(Win);
 }
 short ShiftCharLeft(char c1,char c2,short FontNum)

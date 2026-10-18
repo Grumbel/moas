@@ -43,7 +43,13 @@ static SDL_Texture  *texture  = NULL;
 static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
+static int           moas_shift_down = 0;
 static Uint32        sdl_palette[256];
+
+int PlatformShiftDown(void)
+{
+  return moas_shift_down;
+}
 
 
 /* DOS-style keyboard: scancode make/break + conio queue */
@@ -393,6 +399,7 @@ void PlatformPumpEvents(void)
         SDL_Scancode sc = ev.key.keysym.scancode;
         int dos_sc = sdl_to_dos_scancode(sc);
         int down = (ev.type == SDL_KEYDOWN);
+        moas_shift_down = (mod & KMOD_SHIFT) ? 1 : 0;
 
         if (dos_sc >= 0) {
           /* XT make / break (+128) — LookKeys reads this every frame */

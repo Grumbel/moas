@@ -323,7 +323,8 @@ void IveGotTooMuchTime(void)
       UpDateWalking();
       Walker = 0;
     }
-    if (WalkingAllowed==1 && (ThisTime&3)==0) UpDateSayWindows();
+    /* Every tick (was every 4th — made speech/intro text ~4x too slow). */
+    if (WalkingAllowed==1) UpDateSayWindows();
     if (WalkingAllowed==1) LookKeys();
   }
 }
@@ -355,15 +356,24 @@ void Wait(short Milliseconds)
     }
   }
 #else
-  /* ~1 unit ≈ 10 ms on DOS clock; sleep in 10 ms steps and pump events */
-  while (Milliseconds > 0 && KeyAbortState != 2
-#ifndef DOS
-         && !PlatformShouldQuit()
-#endif
-        )
+  /*
+   * DOS Wait: INT 21h AH=2Ch, decrement when DL/10 changes (~100 ms/unit).
+   * GetTicker is ~18.2 Hz → 2 ticks ≈ 110 ms per unit.
+   */
   {
-    MouseCheck();
-    Milliseconds--;
+    int units = Milliseconds;
+    int start_tick = GetTicker();
+    while (units > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
+      MouseCheck();
+      {
+        int elapsed = GetTicker() - start_tick;
+        int done = elapsed / 2;
+        if (done > 0) {
+          units -= done;
+          start_tick += done * 2;
+        }
+      }
+    }
   }
 #endif
 }

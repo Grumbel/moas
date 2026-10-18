@@ -33,6 +33,7 @@ void PlatformRequestQuit(void);
 
 /* Keyboard (DOS-style) */
 int PlatformKbhit(void);
+int PlatformShiftDown(void);
 int PlatformGetch(void);
 
 
