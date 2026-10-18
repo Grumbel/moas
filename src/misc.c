@@ -372,7 +372,11 @@ void Wait(short Milliseconds)
     }
   }
 #else
-  /* DOS: decrement when clock DL/10 changes (~100 ms/unit). ~2 ticks @ 18.2 Hz. */
+  /*
+   * DOS Wait uses INT 21h AH=2Ch (RTC), ~100 ms per unit when DL/10 changes.
+   * Independent of the reprogrammed PIT game ticker (~145.7 Hz).
+   * 100 ms ≈ 15 game ticks at that rate.
+   */
   {
     int units = Milliseconds;
     short start = GetTicker();
@@ -382,10 +386,10 @@ void Wait(short Milliseconds)
         short now = GetTicker();
         int elapsed = (int)now - (int)start;
         if (elapsed < 0) elapsed += 65536;
-        int done = elapsed / 2;
+        int done = elapsed / 15;
         if (done > 0) {
           units -= done;
-          start = (short)(start + done * 2);
+          start = (short)(start + done * 15);
         }
       }
     }

@@ -449,8 +449,14 @@ void PlatformPumpEvents(void)
 
 short PlatformGetTicker(void)
 {
+  /*
+   * DOS InitBreakVector reprograms PIT channel 0:
+   *   outp(0x40, 0xff); outp(0x40, 0x1f);  => divisor 0x1FFF = 8191
+   * rate = 1193182 / 8191 ≈ 145.67 Hz  (period ≈ 6.865 ms)
+   * Default BIOS tick is 18.2 Hz — we were using that and ran ~8× slow.
+   */
   Uint32 ms = SDL_GetTicks() - start_ticks;
-  return (short)(ms / 55);
+  return (short)((ms * 1193182u) / (8191u * 1000u));
 }
 
 void PlatformDelay(unsigned int ms)

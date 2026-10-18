@@ -154,6 +154,7 @@ void InitBreakVector(void)
   signal(SIGBREAK,SIG_IGN);
   signal(SIGINT,SIG_IGN);
 
+  /* PIT divisor 0x1FFF → ~145.7 Hz (not BIOS 18.2 Hz). See PlatformGetTicker. */
   outp(0x40,0xff); outp(0x40,0x1f);
   RealIrq9=_dos_getvect(0x9);
   RealIrq1c=_dos_getvect(0x8);
