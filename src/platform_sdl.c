@@ -195,11 +195,7 @@ int PlatformInit(void)
   }
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-  SDL_RenderSetLogicalSize(renderer, LOGICAL_W, LOGICAL_H);
-  /* Mouse events: prefer scaled coords when the backend supports it */
-#ifdef SDL_HINT_MOUSE_RELATIVE_SCALING
-  SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SCALING, "1");
-#endif
+  /* No SDL_RenderSetLogicalSize — we letterbox manually so mouse and video share math. */
 
   texture = SDL_CreateTexture(renderer,
                               SDL_PIXELFORMAT_ARGB8888,
@@ -267,45 +263,69 @@ void PlatformSetPalette(const unsigned char *pal768)
   }
 }
 
+/* Shared letterbox geometry for present + mouse (output-pixel space). */
+static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
+                           int *out_ww, int *out_wh)
+{
+  int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
+  if (renderer)
+    SDL_GetRendererOutputSize(renderer, &ww, &wh);
+  else if (window)
+    SDL_GetWindowSize(window, &ww, &wh);
+  if (ww < 1) ww = 1;
+  if (wh < 1) wh = 1;
+
+  float sx = (float)ww / (float)LOGICAL_W;
+  float sy = (float)wh / (float)LOGICAL_H;
+  float scale = (sx < sy) ? sx : sy;
+  int dw = (int)(LOGICAL_W * scale + 0.5f);
+  int dh = (int)(LOGICAL_H * scale + 0.5f);
+  int dx = (ww - dw) / 2;
+  int dy = (wh - dh) / 2;
+
+  if (out_x) *out_x = dx;
+  if (out_y) *out_y = dy;
+  if (out_w) *out_w = dw;
+  if (out_h) *out_h = dh;
+  if (out_ww) *out_ww = ww;
+  if (out_wh) *out_wh = wh;
+}
+
 void PlatformPresent(void)
 {
+  SDL_Rect dst;
+  int dx, dy, dw, dh;
+
   if (!Screen || !pixels || !texture || !renderer) return;
 
-  const unsigned char *src = Screen;
-  Uint32 *dst = pixels;
-  for (int i = 0; i < LOGICAL_W * LOGICAL_H; i++)
-    dst[i] = sdl_palette[src[i]];
+  {
+    const unsigned char *src = Screen;
+    Uint32 *d = pixels;
+    for (int i = 0; i < LOGICAL_W * LOGICAL_H; i++)
+      d[i] = sdl_palette[src[i]];
+  }
 
-  SDL_UpdateTexture(texture, NULL, pixels, LOGICAL_W * sizeof(Uint32));
+  SDL_UpdateTexture(texture, NULL, pixels, LOGICAL_W * (int)sizeof(Uint32));
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  dst.x = dx; dst.y = dy; dst.w = dw; dst.h = dh;
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderCopy(renderer, texture, NULL, &dst);
   SDL_RenderPresent(renderer);
 }
 
 static void mouse_to_logical(int wx, int wy, short *ox, short *oy)
 {
+  int dx, dy, dw, dh;
   float lx, ly;
-  int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
 
-  if (window)
-    SDL_GetWindowSize(window, &ww, &wh);
-  if (ww < 1) ww = 1;
-  if (wh < 1) wh = 1;
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  if (dw < 1) dw = 1;
+  if (dh < 1) dh = 1;
 
-  /*
-   * Letterbox-aware scale (matches SDL_RenderSetLogicalSize + default
-   * letterbox). Works even when RenderWindowToLogical is unreliable
-   * (e.g. sdl2-compat).
-   */
-  {
-    float sx = (float)ww / (float)LOGICAL_W;
-    float sy = (float)wh / (float)LOGICAL_H;
-    float scale = (sx < sy) ? sx : sy;
-    float ox0 = ((float)ww - (float)LOGICAL_W * scale) * 0.5f;
-    float oy0 = ((float)wh - (float)LOGICAL_H * scale) * 0.5f;
-    lx = ((float)wx - ox0) / scale;
-    ly = ((float)wy - oy0) / scale;
-  }
+  lx = ((float)wx - (float)dx) * (float)LOGICAL_W / (float)dw;
+  ly = ((float)wy - (float)dy) * (float)LOGICAL_H / (float)dh;
 
   if (lx < 0) lx = 0;
   if (ly < 0) ly = 0;
@@ -313,6 +333,17 @@ static void mouse_to_logical(int wx, int wy, short *ox, short *oy)
   if (ly > LOGICAL_H - 1) ly = (float)(LOGICAL_H - 1);
   *ox = (short)lx;
   *oy = (short)ly;
+}
+
+/* Poll OS mouse in window/client coords and map to 320x200. */
+static void sync_mouse_position(void)
+{
+  int wx, wy;
+  short mx, my;
+  SDL_GetMouseState(&wx, &wy);
+  mouse_to_logical(wx, wy, &mx, &my);
+  Mouse.x = mx;
+  Mouse.y = my;
 }
 
 void PlatformPumpEvents(void)
@@ -404,6 +435,8 @@ void PlatformPumpEvents(void)
         break;
     }
   }
+  /* Always re-sample mouse — event coords are unreliable with dpi/logical size. */
+  sync_mouse_position();
 }
 
 short PlatformGetTicker(void)
