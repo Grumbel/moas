@@ -73,8 +73,19 @@ short DataOpen(short Num)
 }
 void LadeProgramm(short Num)
 {
-  if (Num>=AnzProgramme) InternalError(1025);
+  if (Num < 0)
+    return;
+  if (Num>=AnzProgramme) {
+    fprintf(stderr, "moas: LadeProgramm(%d) out of range (AnzProgramme=%d)\n",
+            (int)Num, (int)AnzProgramme);
+    InternalError(1025);
+  }
   if (Programm[Num].Data) return;
+  if (Programm[Num].Length <= 0) {
+    Programm[Num].Data = (uChar *)MALLOC(1);
+    Programm[Num].Data[0] = 0;
+    return;
+  }
   Programm[Num].Data=(char *)MALLOC(Programm[Num].Length);
   LadeBereich(Programm[Num].FileNum,Programm[Num].FilePos,Programm[Num].Length,Programm[Num].Data,Programm[Num].Check);
 }
@@ -83,10 +94,23 @@ void LadePhase(short Num)
   register long Length;
   char *Tmp;
 
-  if (Num>=AnzPhasen) InternalError(1022);
+  if (Num < 0)
+    return; /* unused person / not yet assigned */
+  if (Num>=AnzPhasen) {
+    fprintf(stderr, "moas: LadePhase(%d) out of range (AnzPhasen=%d)\n",
+            (int)Num, (int)AnzPhasen);
+    InternalError(1022);
+  }
   if (Phase[Num].Data) return;
+  if (Phase[Num].Length <= 0 || Phase[Num].x <= 0 || Phase[Num].y <= 0) {
+    fprintf(stderr, "moas: LadePhase(%d): empty/invalid (len=%ld x=%ld y=%ld)\n",
+            (int)Num, (long)Phase[Num].Length, (long)Phase[Num].x, (long)Phase[Num].y);
+    Phase[Num].Data = (uChar *)MALLOC(1);
+    return;
+  }
 
   Length=Phase[Num].x*Phase[Num].y*Phase[Num].Anz;
+  if (Length <= 0) Length = 1;
 
   Phase[Num].Data=(char *)MALLOC(Length+5);
   Tmp=MALLOC(Phase[Num].Length+5);
@@ -194,18 +218,39 @@ void LadeInventar(short Num)
 }
 void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSum)
 {
+  short ifil;
+
+  /* Empty / stub catalog entries (Length 0 or 1) appear in GAME.2; skip. */
+  if (Length <= 0) {
+    return;
+  }
   if (FileNum < 1) {
-    fprintf(stderr, "moas: LadeBereich: invalid FileNum=%d pos=%ld len=%ld\n",
+    fprintf(stderr,
+            "moas: LadeBereich: bad FileNum=%d pos=%ld len=%ld (skipping stub)\n",
             (int)FileNum, (long)FilePos, (long)Length);
 #ifndef DOS
     fprintf(stderr, "  data dir: %s\n", MoasDataDir());
 #endif
+    /* Original data never uses FileNum 0 for real resources; treat as empty. */
+    if (Length <= 1)
+      return;
     InternalError(1002);
   }
-
-  short ifil;
+  if (Data == NULL) {
+    fprintf(stderr, "moas: LadeBereich: NULL buffer FileNum=%d len=%ld\n",
+            (int)FileNum, (long)Length);
+    InternalError(1000);
+  }
 
   ifil=DataOpen(FileNum);     ChkOpen(_FRAGEZEICHEN,READ);
+  if (ifil < 0) {
+#ifndef DOS
+    char name[32];
+    snprintf(name, sizeof(name), "GAME.%d", (int)FileNum);
+    MoasReportMissingData(name);
+#endif
+    InternalError(1002);
+  }
   if (lseek(ifil,FilePos,SEEK_SET)==-1) InternalError(1027);
   ChkRead(ifil,Data,Length);
   close(ifil);

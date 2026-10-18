@@ -1,24 +1,21 @@
 # TODO / Handoff
 
 ## Base
-- `8d399e6` — work-line base for bundles
+- `8d399e6`
 
 ## Status
 ### Latest
-- Clearer data-dir diagnostics: log chosen dir, list searched paths, `MoasReportMissingData`
-- Reject `FileNum < 1` in `LadeBereich` with context (GAME.0 was a symptom)
-- `PutCharAt` null/bounds guards (segfault during PrintCharacter)
-- Debug builds: CMake default `RelWithDebInfo`; flake `dontStrip = true` + RelWithDebInfo
+- Soft-skip empty map stubs (`Length<=0` / `FileNum<1 && Length<=1`)
+- `LadePhase`/`LadeProgramm` ignore `Num < 0` (unused persons had PhaseNum=-1 → 1022)
+- Dialog structs fully zeroed on init
+- Data-dir diagnostics + debug symbols (prior)
 
-### Run
-```bash
-nix run .
-# if data missing:
-MOAS_DATADIR=/path/to/manick nix run .
-gdb --args result/bin/moas   # symbols retained
-```
+Smoke test with `MOAS_DATADIR=manick` runs past licence without fatal load errors.
 
 ### Still open
-- Present-on-redraw for visible graphics
-- SDL shift modifiers for say windows
-- Sound
+- Visible graphics (present on redraw)
+- Confirm in-game umlauts / no more FileNum=0 from real loads
+- Sound, SDL modifiers
+
+## Bundle
+`moas-013.1-empty-load-skip-8d399e6.bundle`

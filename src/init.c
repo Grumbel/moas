@@ -269,8 +269,10 @@ void InitDialogs(void)
 {
   short c;
 
-  for (c=0;c<20;c++)
+  for (c=0;c<20;c++) {
+    memset(&Dialog[c], 0, sizeof(Dialog[c]));
     Dialog[c].ReferenzNummer=-1;
+  }
 }
 void MakeMegaTable(short Percent)
 {
