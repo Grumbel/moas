@@ -40,6 +40,16 @@ int PlatformGetch(void);
 /* Optional: set the logical palette (VGA 0-63 values expected). */
 void PlatformSetPalette(const unsigned char *pal768);
 
+/* Warp OS cursor so soft cursor and SDL agree (game coords 0..319 / 0..199). */
+void PlatformSetMousePos(short x, short y);
+
+/* Soft screen shake offset in pixels (logical). */
+void PlatformSetShake(int ox, int oy);
+
+/* 1 = force black present (ToggleScreen off). */
+void PlatformSetBlank(int blank);
+
+
 #ifdef __cplusplus
 }
 #endif

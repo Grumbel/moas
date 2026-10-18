@@ -44,6 +44,8 @@ static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
 static int           moas_shift_down = 0;
+static int           shake_ox = 0, shake_oy = 0;
+static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
 
 int PlatformShiftDown(void)
@@ -318,8 +320,41 @@ void PlatformPresent(void)
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, texture, NULL, &dst);
+  if (!screen_blank) {
+    dst.x += shake_ox;
+    dst.y += shake_oy;
+    SDL_RenderCopy(renderer, texture, NULL, &dst);
+  }
   SDL_RenderPresent(renderer);
+}
+
+void PlatformSetShake(int ox, int oy)
+{
+  shake_ox = ox;
+  shake_oy = oy;
+}
+
+void PlatformSetBlank(int blank)
+{
+  screen_blank = blank ? 1 : 0;
+}
+
+void PlatformSetMousePos(short x, short y)
+{
+  int dx, dy, dw, dh, ww, wh;
+  if (!window) return;
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x > LOGICAL_W - 1) x = LOGICAL_W - 1;
+  if (y > LOGICAL_H - 1) y = LOGICAL_H - 1;
+  Mouse.x = x;
+  Mouse.y = y;
+  letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
+  {
+    int wx = dx + (int)((float)x * (float)dw / (float)LOGICAL_W);
+    int wy = dy + (int)((float)y * (float)dh / (float)LOGICAL_H);
+    SDL_WarpMouseInWindow(window, wx, wy);
+  }
 }
 
 static void mouse_to_logical(int wx, int wy, short *ox, short *oy)

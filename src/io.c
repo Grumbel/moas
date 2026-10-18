@@ -27,10 +27,86 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "person_disk.h"
+#ifndef DOS
+#include "platform.h"
+#endif
+
 #include "datapath.h"
 
 #ifdef DOS
 void (interrupt far *RealIrq1c)();
+#endif
+
+#ifndef DOS
+static void WritePersonsDisk(short ofil)
+{
+  short i, di, dj;
+  PersonDisk disk;
+  for (i = 0; i < MAX_PRS + 1; i++) {
+    memset(&disk, 0, sizeof(disk));
+    disk.Num = Person[i].Num;
+    disk.PhaseNum = Person[i].PhaseNum;
+    disk.xs = (int32_t)Person[i].xs;
+    disk.ys = (int32_t)Person[i].ys;
+    disk.Anz = (int32_t)Person[i].Anz;
+    for (di = 0; di < 8; di++)
+      for (dj = 0; dj < 12; dj++)
+        disk.Sequence[di][dj] = Person[i].Sequence[di][dj];
+    disk.Counter = Person[i].Counter;
+    disk.Dir = Person[i].Dir;
+    disk.Boden = Person[i].Boden;
+    disk.GhostLevel = Person[i].GhostLevel;
+    disk.x = Person[i].x;
+    disk.y = Person[i].y;
+    disk.z = Person[i].z;
+    disk.TargetX = Person[i].TargetX;
+    disk.TargetY = Person[i].TargetY;
+    disk.gtx = Person[i].gtx;
+    disk.gty = Person[i].gty;
+    disk.iWalk = Person[i].iWalk;
+    disk.BaseSpeed = Person[i].BaseSpeed;
+    disk.StepSpeed = Person[i].StepSpeed;
+    disk.PhaseSpeed = Person[i].PhaseSpeed;
+    disk.Bits = Person[i].Bits;
+    ChkWrite(ofil, (char *)&disk, sizeof(disk));
+  }
+}
+
+static void ReadPersonsDisk(short ifil)
+{
+  short i, di, dj;
+  PersonDisk disk;
+  for (i = 0; i < MAX_PRS + 1; i++) {
+    ChkRead(ifil, (char *)&disk, sizeof(disk));
+    memset(&Person[i], 0, sizeof(Person[i]));
+    Person[i].Num = disk.Num;
+    Person[i].PhaseNum = disk.PhaseNum;
+    Person[i].xs = disk.xs;
+    Person[i].ys = disk.ys;
+    Person[i].Anz = disk.Anz;
+    for (di = 0; di < 8; di++)
+      for (dj = 0; dj < 12; dj++)
+        Person[i].Sequence[di][dj] = disk.Sequence[di][dj];
+    Person[i].Counter = disk.Counter;
+    Person[i].Dir = disk.Dir;
+    Person[i].Boden = disk.Boden;
+    Person[i].GhostLevel = disk.GhostLevel;
+    Person[i].x = disk.x;
+    Person[i].y = disk.y;
+    Person[i].z = disk.z;
+    Person[i].TargetX = disk.TargetX;
+    Person[i].TargetY = disk.TargetY;
+    Person[i].gtx = disk.gtx;
+    Person[i].gty = disk.gty;
+    Person[i].iWalk = disk.iWalk;
+    Person[i].BaseSpeed = disk.BaseSpeed;
+    Person[i].StepSpeed = disk.StepSpeed;
+    Person[i].PhaseSpeed = disk.PhaseSpeed;
+    Person[i].Bits = disk.Bits;
+    Person[i].Phase = NULL;
+  }
+}
 #endif
 
 char *_FRAGEZEICHEN="?";
@@ -332,7 +408,11 @@ void SaveGame(short CallerID)
         ChkWrite(ofil,(char*)&V_TotalPoints,2);
         ChkWrite(ofil,RoomName,40);
         ChkWrite(ofil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
+        #ifndef DOS
+        WritePersonsDisk(ofil);
+#else
         ChkWrite(ofil,(char*)Person,sizeof(Person));
+#endif
         ChkWrite(ofil,(char*)Marker,sizeof(Marker));
         ChkWrite(ofil,(char*)Ontimes,sizeof(struct ONTIME)*10);
         ChkWrite(ofil,(char *)Var,AnzVars*2);
@@ -396,7 +476,11 @@ void LoadGame(void)
         for (c=0;c<251;c++) ChkRead(ifil,RoomName,4); /*Dummies*/
         ChkRead(ifil,RoomName,40);
         ChkRead(ifil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
+        #ifndef DOS
+        ReadPersonsDisk(ifil);
+#else
         ChkRead(ifil,(char*)Person,sizeof(Person));
+#endif
         ChkRead(ifil,(char*)Marker,sizeof(Marker));
         ChkRead(ifil,(char*)Ontimes,sizeof(struct ONTIME)*10);
         ChkRead(ifil,(char *)Var,AnzVars*2);

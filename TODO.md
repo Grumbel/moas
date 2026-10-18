@@ -1,15 +1,14 @@
 # TODO / Handoff
 
-## Struct audit
-- MAPFILE: fixed (30-byte disk)
-- PERSON: fixed (236-byte disk, stride 240)
-- Save/load still uses native sizeof(Person)/Dialog — broken for old saves on 64-bit
+## Fixed DOS leftovers (this bundle)
+- Palette cycle on Linux tick path (was IRQ-only)
+- SetMousePos → SDL_WarpMouseInWindow
+- Shake → soft present offset
+- ToggleScreen → blank flag
+- QuickSetSinglePal → Palette + SDL
+- Person save/load via PersonDisk (236-byte records)
 
-## Trails
-Screen was also VGA_ADRESSE → PowerRedraw baked sprites into the background.
-Now: Screen = clean BG, Display = composite (VGA_ADRESSE), SDL presents Display.
-
-## Timing
-- Guard PhaseSpeed/BaseSpeed == 0
-- Single Walker step per DOS tick (removed duplicate Walker++)
-- Ticker still ms/55 (~18.2 Hz)
+## Still open
+- Full savegame: Marker/Dialog/SayWindow still native sizeof (pointers)
+- Sound (SB/DMA stack inert; InitDigi commented out)
+- PowerBlend/WalkNLayers

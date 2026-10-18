@@ -396,6 +396,32 @@ void Shake(short Milliseconds,short Staerke)
   }
   outp(0x3d4,13); outp(0x3d5,0);
   outp(0x3d4,12); outp(0x3d5,0);
+#else
+  {
+    int units = Milliseconds;
+    short start = GetTicker();
+    if (Staerke < 1) Staerke = 1;
+    while (units > 0 && KeyAbortState != 2 && !PlatformShouldQuit()) {
+      int ox = (rand() % (Staerke * 2 + 1)) - Staerke;
+      int oy = (rand() % (Staerke * 2 + 1)) - Staerke;
+      PlatformSetShake(ox, oy);
+      PlatformPresent();
+      PlatformPumpEvents();
+      PlatformDelay(16);
+      {
+        short now = GetTicker();
+        int elapsed = (int)now - (int)start;
+        if (elapsed < 0) elapsed += 65536;
+        int done = elapsed / 2; /* ~100ms units like DOS Wait */
+        if (done > 0) {
+          units -= done;
+          start = (short)(start + done * 2);
+        }
+      }
+    }
+    PlatformSetShake(0, 0);
+    PlatformPresent();
+  }
 #endif
 }
 
@@ -405,11 +431,19 @@ void QuickSetSinglePal(short Color,short r,short g,short b)
 
    if (V_Colored==0) r=g=b=(r+g+b)/3;
 
+#ifdef DOS
    outp(0x3c8,Color);
 
    tmp=r*DayLightR/100;  if (tmp>63) tmp=63;  outp(0x3c9,tmp);
    tmp=g*DayLightG/100;  if (tmp>63) tmp=63;  outp(0x3c9,tmp);
    tmp=b*DayLightB/100;  if (tmp>63) tmp=63;  outp(0x3c9,tmp);
+#else
+   if (Color < 0 || Color > 255 || !Palette) return;
+   tmp=r*DayLightR/100;  if (tmp>63) tmp=63;  Palette[Color*3+0]=(unsigned char)tmp;
+   tmp=g*DayLightG/100;  if (tmp>63) tmp=63;  Palette[Color*3+1]=(unsigned char)tmp;
+   tmp=b*DayLightB/100;  if (tmp>63) tmp=63;  Palette[Color*3+2]=(unsigned char)tmp;
+   PlatformSetPalette(Palette);
+#endif
 }
 void QuickSetPalette(char *Pal)
 {

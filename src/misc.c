@@ -300,6 +300,56 @@ void LookKeys(void)
   }
   LastTime=Time; LastStrg=Strg;
 }
+/* Port of MyTickerIrq palette scrolling (DOS IRQ0). */
+static void MoasPaletteCycleStep(void)
+{
+  static short CycleCounter;
+  short c, Von, Bis;
+  uChar Tmp, x, y;
+#ifdef DOS
+  uChar r, g, b;
+#endif
+
+  if (DontCyclePal!=0 || PaletteCycleFirst>=PaletteCycleLast ||
+      PaletteCycleFirst>=256 || PaletteCycleLast>=256 || !Palette)
+    return;
+
+  CycleCounter++;
+  if (CycleCounter<=CycleWait)
+    return;
+  CycleCounter=0;
+
+  Von=(short)(PaletteCycleFirst*3);
+  Bis=(short)(PaletteCycleLast*3);
+
+  Tmp=Palette[Bis];
+  x=Palette[Bis+1];
+  y=Palette[Bis+2];
+
+  for (c=Bis-1;c>=Von;c--)
+    Palette[c+3]=Palette[c];
+
+  Palette[Von]=Tmp;
+  Palette[Von+1]=x;
+  Palette[Von+2]=y;
+
+#ifndef DOS
+  PlatformSetPalette(Palette);
+#else
+  for (c=PaletteCycleFirst;c<=PaletteCycleLast;c++)
+  {
+    r=Palette[c+c+c];
+    g=Palette[c+c+c+1];
+    b=Palette[c+c+c+2];
+    if (V_Colored==0) r=g=b=(r+g+b)/3;
+    outp(0x3c8,c);
+    outp(0x3c9,r*DayLightR/100);
+    outp(0x3c9,g*DayLightG/100);
+    outp(0x3c9,b*DayLightB/100);
+  }
+#endif
+}
+
 void IveGotTooMuchTime(void)
 {
   static short LastTime,Walker=0,LastCall=0;
@@ -333,6 +383,8 @@ void IveGotTooMuchTime(void)
       UpDateOntimes();
       WillBeCalledEverySecond();
     }
+
+    MoasPaletteCycleStep();
 
     /* Original source: two Walker steps per timer tick */
     Walker++;

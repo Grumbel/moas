@@ -464,6 +464,8 @@ void SetMousePos(short x,short y)
   Regs.w.cx=x;
   Regs.w.dx=y;
   int386(51,&Regs,&Regs);
+#else
+  PlatformSetMousePos(x, y);
 #endif
 }
 
