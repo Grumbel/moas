@@ -130,6 +130,19 @@ void PlatformPresent(void)
   SDL_RenderPresent(renderer);
 }
 
+static void mouse_to_logical(int wx, int wy, short *ox, short *oy)
+{
+  float lx = (float)wx, ly = (float)wy;
+  if (renderer)
+    SDL_RenderWindowToLogical(renderer, wx, wy, &lx, &ly);
+  if (lx < 0) lx = 0;
+  if (ly < 0) ly = 0;
+  if (lx > LOGICAL_W - 1) lx = (float)(LOGICAL_W - 1);
+  if (ly > LOGICAL_H - 1) ly = (float)(LOGICAL_H - 1);
+  *ox = (short)lx;
+  *oy = (short)ly;
+}
+
 void PlatformPumpEvents(void)
 {
   SDL_Event ev;
@@ -139,19 +152,22 @@ void PlatformPumpEvents(void)
         running = 0;
         KeyAbortState = 2;
         break;
-      case SDL_MOUSEMOTION:
-        Mouse.x = (short)ev.motion.x;
-        Mouse.y = (short)ev.motion.y;
-        if (Mouse.x < 0) Mouse.x = 0;
-        if (Mouse.y < 0) Mouse.y = 0;
-        if (Mouse.x >= LOGICAL_W) Mouse.x = LOGICAL_W - 1;
-        if (Mouse.y >= LOGICAL_H) Mouse.y = LOGICAL_H - 1;
+      case SDL_MOUSEMOTION: {
+        short mx, my;
+        mouse_to_logical(ev.motion.x, ev.motion.y, &mx, &my);
+        Mouse.x = mx;
+        Mouse.y = my;
         break;
+      }
       case SDL_MOUSEBUTTONDOWN:
       case SDL_MOUSEBUTTONUP: {
+        /* Only update current button state. MouseCheck latches Last* each frame. */
         int down = (ev.type == SDL_MOUSEBUTTONDOWN);
+        short mx, my;
+        mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
+        Mouse.x = mx;
+        Mouse.y = my;
         if (ev.button.button == SDL_BUTTON_LEFT) {
-          Mouse.LastLeft = Mouse.Left;
           Mouse.Left = down ? 1 : 0;
           if (down) {
             Mouse.ClickX = Mouse.x;
@@ -161,10 +177,8 @@ void PlatformPumpEvents(void)
             Mouse.ReleaseY = Mouse.y;
           }
         } else if (ev.button.button == SDL_BUTTON_RIGHT) {
-          Mouse.LastRight = Mouse.Right;
           Mouse.Right = down ? 1 : 0;
         } else if (ev.button.button == SDL_BUTTON_MIDDLE) {
-          Mouse.LastMiddle = Mouse.Middle;
           Mouse.Middle = down ? 1 : 0;
         }
         break;

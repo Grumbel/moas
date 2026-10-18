@@ -4,18 +4,15 @@
 - `8d399e6`
 
 ## Status
-### Latest
-- Soft-skip empty map stubs (`Length<=0` / `FileNum<1 && Length<=1`)
-- `LadePhase`/`LadeProgramm` ignore `Num < 0` (unused persons had PhaseNum=-1 → 1022)
-- Dialog structs fully zeroed on init
-- Data-dir diagnostics + debug symbols (prior)
+### Mouse / title screen
+- `MouseCheck` now calls `PlatformPumpEvents` + Present + Delay (wait loops never pumped events before)
+- Button edge: latch `Last*` at end of `MouseCheck` (not on SDL event)
+- Mouse coords via `SDL_RenderWindowToLogical` (window → 320×200)
 
-Smoke test with `MOAS_DATADIR=manick` runs past licence without fatal load errors.
+### Stdout umlauts
+- `ReadLicence` prints CP850 → UTF-8 for the console only
+- In-game CharAvail/font path remains CP850 bytes
 
 ### Still open
-- Visible graphics (present on redraw)
-- Confirm in-game umlauts / no more FileNum=0 from real loads
-- Sound, SDL modifiers
-
-## Bundle
-`moas-013.1-empty-load-skip-8d399e6.bundle`
+- Dirty-rect / room graphics completeness
+- Sound, modifiers

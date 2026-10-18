@@ -346,6 +346,41 @@ void ChkAuthorisation(void)
   if (DosGetDiskIdNum()!=(File^0xABCD5678)) InternalError(1001);
 #endif
 }
+/* CP850 → UTF-8 for console only (in-game font path unchanged). */
+static void print_cp850_line(const char *s)
+{
+#ifndef DOS
+  fputc('\n', stdout);
+  for (; *s; s++) {
+    unsigned char c = (unsigned char)*s;
+    if (c < 128) {
+      fputc((char)c, stdout);
+      continue;
+    }
+    /* Common German + a few others from CP850 */
+    switch (c) {
+      case 0x81: fputs("ü", stdout); break;
+      case 0x84: fputs("ä", stdout); break;
+      case 0x8e: fputs("Ä", stdout); break;
+      case 0x94: fputs("ö", stdout); break;
+      case 0x99: fputs("Ö", stdout); break;
+      case 0x9a: fputs("Ü", stdout); break;
+      case 0xe1: fputs("ß", stdout); break;
+      case 0x82: fputs("é", stdout); break;
+      case 0xa0: fputs("á", stdout); break;
+      case 0xa1: fputs("í", stdout); break;
+      case 0xa2: fputs("ó", stdout); break;
+      case 0xa3: fputs("ú", stdout); break;
+      default:   fprintf(stdout, "\\u%04x", c); break;
+    }
+  }
+  fputc('\n', stdout);
+  fflush(stdout);
+#else
+  printf("\n%s\n", s);
+#endif
+}
+
 void ReadLicence(void)
 {
   short ifil=ChkOpen("Licence.Dat",READ);
@@ -358,13 +393,14 @@ void ReadLicence(void)
   if (fl < 4 || fl >= 80) InternalError(1001);
   ChkRead(ifil, Buffer, fl-4);
   Buffer[fl-4] = 0;
-  printf("\n%s\n", Buffer);
+  print_cp850_line(Buffer);
   if (read(ifil, (char*)&Check, sizeof(CHKSUM)) != (ssize_t)sizeof(CHKSUM))
     InternalError(1001);
   if (Check != GetChk())
     InternalError(1001);
   close(ifil);
 }
+
 
 
 

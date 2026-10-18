@@ -57,14 +57,8 @@ int main(int argc, char **argv)
 //ChkAuthorisation();
   Execute(0,0);
   while (1) {
-#ifndef DOS
-    PlatformPumpEvents();
-#endif
+    /* MouseCheck pumps events, presents, and delays on Linux. */
     MouseCheck();
-#ifndef DOS
-    PlatformPresent();
-    PlatformDelay(16);
-#endif
   }
 #ifndef DOS
   PlatformShutdown();

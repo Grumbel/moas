@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "platform.h"
 #define HIGHLIGHT 40
 
 char _sString[]=">%s<";
@@ -44,6 +45,10 @@ void MouseRead(void);
 
 void MouseCheck(void)
 {
+#ifndef DOS
+  /* Wait loops (title/menu) only call MouseCheck — pump events here. */
+  PlatformPumpEvents();
+#endif
   LookKeys();
   MouseRead();
   if (Mouse.Left==0 && Mouse.LastLeft==0) Mouse.ClickObject=-1;
@@ -90,6 +95,14 @@ void MouseCheck(void)
     MouseIntelligence();
 
   IveGotTooMuchTime();
+#ifndef DOS
+  /* Latch previous-frame buttons after edge detection used Last*. */
+  Mouse.LastLeft = Mouse.Left;
+  Mouse.LastRight = Mouse.Right;
+  Mouse.LastMiddle = Mouse.Middle;
+  PlatformPresent();
+  PlatformDelay(16);
+#endif
 }
 short IsMousePresent(void)
 {
