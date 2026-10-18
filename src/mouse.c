@@ -282,7 +282,7 @@ void DisplayMouseText(short Color)
             for (c=0;c<MAX_PARSE;c++)
               if (PowerParse[c].Nummer==V_Par1) break;
             if (c==MAX_PARSE) sprintf(String,__Benutze,s1);
-                         else sprintf(String,PowerParse[c].String);
+                         else snprintf(String, sizeof(String), "%s", (const char *)PowerParse[c].String);
           }
           else
           {
@@ -290,7 +290,13 @@ void DisplayMouseText(short Color)
             for (c=0;c<MAX_PARSE;c++)
               if (PowerParse[c].Nummer==V_Par1+10000) break;
             if (c==MAX_PARSE) sprintf(String,__BenutzeMit,s1,s2);
-                         else sprintf(String,PowerParse[c].String,s2);
+                         else {
+              /* Format string comes from game data; must not trip -Wformat-security. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+              snprintf(String, sizeof(String), (const char *)PowerParse[c].String, s2);
+#pragma GCC diagnostic pop
+            }
           }
         }
     }

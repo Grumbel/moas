@@ -53,6 +53,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     -Wno-unused-variable
     -Wno-sign-compare
     -Wno-missing-field-initializers
+    -Wno-error=format-security
     -fcommon
   )
 endif()

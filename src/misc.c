@@ -234,7 +234,7 @@ void LookKeys(void)
                           printf("Exportiere Label! Bitte Namen eingeben.\n");
                           printf("Danach per Drag&Drop ein Rechteck markieren.\nName:");
 
-                          gets(Buffer);
+                          if (fgets(Buffer, sizeof(Buffer), stdin)) { size_t n=strlen(Buffer); if (n && Buffer[n-1]=='\n') Buffer[n-1]=0; }
 
                           PowerRedrawArea(0,0,320,200);
                           if (Buffer)
