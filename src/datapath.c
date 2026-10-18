@@ -3,12 +3,30 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#endif
+
+static void data_log(const char *fmt, ...)
+{
+  char buf[512];
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+#ifdef __ANDROID__
+  SDL_Log("%s", buf);
+#else
+  fprintf(stderr, "%s\n", buf);
+#endif
+}
 
 #ifndef MOAS_DATADIR
 #define MOAS_DATADIR ""
@@ -62,6 +80,7 @@ static void set_data_dir(const char *dir)
       data_dir[--n] = 0;
   }
   data_dir_resolved = 1;
+  data_log("moas: using data directory: %s", data_dir);
 }
 
 static void dirname_of(const char *path, char *out, size_t outsz)
@@ -92,6 +111,7 @@ static void dirname_of(const char *path, char *out, size_t outsz)
 
 void MoasInitDataPath(const char *argv0)
 {
+
   const char *env;
   char buf[PATH_MAX];
   char exe_dir[PATH_MAX];
@@ -111,7 +131,7 @@ void MoasInitDataPath(const char *argv0)
     REMEMBER(env);
     if (looks_like_data_dir(env)) {
       set_data_dir(env);
-      fprintf(stderr, "moas: data directory (env MOAS_DATADIR): %s\n", data_dir);
+      data_log("moas: data directory (env MOAS_DATADIR): %s", data_dir);
       return;
     }
   }
@@ -239,24 +259,18 @@ int MoasOpenData(const char *name)
     if (fd >= 0) return fd;
   }
 
+  data_log("moas: MoasOpenData failed for '%s' (dir=%s)", name, data_dir);
   return -1;
 }
 
 void MoasReportMissingData(const char *name)
 {
-  fprintf(stderr,
-          "moas: cannot open data file '%s'\n"
-          "  data directory: %s\n"
-          "  cwd:            ",
-          name ? name : "(null)", data_dir);
-  {
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)))
-      fprintf(stderr, "%s\n", cwd);
-    else
-      fprintf(stderr, "(unknown)\n");
-  }
-  fprintf(stderr,
-          "  Hint: install places data in share/moas next to the binary,\n"
-          "        or set MOAS_DATADIR to the manick/ folder.\n");
+  char cwd[PATH_MAX];
+  data_log("moas: cannot open data file '%s'", name ? name : "(null)");
+  data_log("  data directory: %s", data_dir);
+  if (getcwd(cwd, sizeof(cwd)))
+    data_log("  cwd: %s", cwd);
+  else
+    data_log("  cwd: (unknown)");
+  data_log("  Hint: set MOAS_DATADIR or install game data (Android: APK assets)");
 }

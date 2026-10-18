@@ -12,6 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#ifdef __ANDROID__
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#endif
 
 /* Minimal declarations of the globals we touch (defined elsewhere). */
 typedef unsigned char uChar;
@@ -186,10 +192,118 @@ static int dos_ext_getch(SDL_Scancode sc)
   }
 }
 
+
+static void platform_log(const char *fmt, ...)
+{
+  char buf[512];
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+#ifdef __ANDROID__
+  SDL_Log("%s", buf);
+#else
+  fprintf(stderr, "%s\n", buf);
+#endif
+}
+
+#ifdef __ANDROID__
+/* Known game data files shipped under APK assets/ (see build-apk.sh). */
+static const char *const android_data_files[] = {
+  "GAME.1", "GAME.2", "GAME.3", "GAME.4",
+  "GAME.PCK", "GAME.XXX", "GAME.MAP",
+  "LICENCE.DAT", "Licence.Dat", "licence.dat",
+  NULL
+};
+
+static int copy_asset_to(const char *asset_name, const char *dest_path)
+{
+  SDL_RWops *rw;
+  FILE *out;
+  char buf[8192];
+  size_t n;
+  long size;
+
+  rw = SDL_RWFromFile(asset_name, "rb");
+  if (!rw) {
+    SDL_Log("asset missing: %s (%s)", asset_name, SDL_GetError());
+    return -1;
+  }
+  size = (long)SDL_RWsize(rw);
+  out = fopen(dest_path, "wb");
+  if (!out) {
+    SDL_Log("cannot write %s: %s", dest_path, strerror(errno));
+    SDL_RWclose(rw);
+    return -1;
+  }
+  while ((n = SDL_RWread(rw, buf, 1, sizeof(buf))) > 0) {
+    if (fwrite(buf, 1, n, out) != n) {
+      SDL_Log("short write to %s", dest_path);
+      fclose(out);
+      SDL_RWclose(rw);
+      return -1;
+    }
+  }
+  fclose(out);
+  SDL_RWclose(rw);
+  SDL_Log("extracted %s (%ld bytes) -> %s", asset_name, size, dest_path);
+  return 0;
+}
+
+void PlatformAndroidPrepareData(void)
+{
+  const char *base;
+  char dest_dir[512];
+  char dest_file[640];
+  int i, ok = 0, fail = 0;
+  struct stat st;
+
+  SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+  SDL_Log("MOAS Android starting");
+
+  base = SDL_AndroidGetInternalStoragePath();
+  if (!base || !base[0]) {
+    SDL_Log("SDL_AndroidGetInternalStoragePath failed: %s", SDL_GetError());
+    return;
+  }
+  SDL_Log("internal storage: %s", base);
+
+  snprintf(dest_dir, sizeof(dest_dir), "%s/data", base);
+  if (stat(dest_dir, &st) != 0) {
+    if (mkdir(dest_dir, 0755) != 0 && errno != EEXIST) {
+      SDL_Log("mkdir %s failed: %s", dest_dir, strerror(errno));
+      return;
+    }
+  }
+  SDL_Log("data directory: %s", dest_dir);
+
+  for (i = 0; android_data_files[i]; i++) {
+    snprintf(dest_file, sizeof(dest_file), "%s/%s", dest_dir, android_data_files[i]);
+    if (stat(dest_file, &st) == 0 && st.st_size > 0) {
+      SDL_Log("already present: %s (%ld bytes)", dest_file, (long)st.st_size);
+      ok++;
+      continue;
+    }
+    if (copy_asset_to(android_data_files[i], dest_file) == 0)
+      ok++;
+    else
+      fail++;
+  }
+  SDL_Log("asset extract: %d ok, %d failed/missing", ok, fail);
+
+  if (setenv("MOAS_DATADIR", dest_dir, 1) != 0)
+    SDL_Log("setenv MOAS_DATADIR failed");
+  else
+    SDL_Log("MOAS_DATADIR=%s", dest_dir);
+}
+#else
+void PlatformAndroidPrepareData(void) { /* no-op on non-Android */ }
+#endif
+
 int PlatformInit(void)
 {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
-    fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+    platform_log("SDL_Init failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -203,7 +317,7 @@ int PlatformInit(void)
                               flags);
   }
   if (!window) {
-    fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
+    platform_log("SDL_CreateWindow failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -212,7 +326,7 @@ int PlatformInit(void)
   if (!renderer)
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
   if (!renderer) {
-    fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
+    platform_log("SDL_CreateRenderer failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -224,13 +338,13 @@ int PlatformInit(void)
                               SDL_TEXTUREACCESS_STREAMING,
                               LOGICAL_W, LOGICAL_H);
   if (!texture) {
-    fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
+    platform_log("SDL_CreateTexture failed: %s", SDL_GetError());
     return -1;
   }
 
   pixels = (Uint32 *)malloc(LOGICAL_W * LOGICAL_H * sizeof(Uint32));
   if (!pixels) {
-    fprintf(stderr, "Out of memory for pixel buffer\n");
+    platform_log("Out of memory for pixel buffer");
     return -1;
   }
 
@@ -241,6 +355,12 @@ int PlatformInit(void)
 
   start_ticks = SDL_GetTicks();
   running = 1;
+  {
+    int w = 0, h = 0;
+    SDL_GetWindowSize(window, &w, &h);
+    platform_log("PlatformInit ok: window %dx%d scale=%d fullscreen=%d",
+                 w, h, SCALE, moas_fullscreen);
+  }
   return 0;
 }
 

@@ -30,6 +30,7 @@
 #include "debug.h"
 #include "person_disk.h"
 #include "datapath.h"
+#include "platform.h"
 
 char *__Benutze   ="BENUTZE %s";
 char *__BenutzeMit="BENUTZE %s MIT %s";
@@ -45,6 +46,10 @@ int main(int argc, char **argv)
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
 #ifndef DOS
   MoasParseArgs(argc, argv);
+#ifdef __ANDROID__
+  /* Extract APK assets to internal storage; sets MOAS_DATADIR. */
+  PlatformAndroidPrepareData();
+#endif
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
 #else
   (void)argc; (void)argv;

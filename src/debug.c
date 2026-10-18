@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#endif
 
 unsigned moas_debug = 0;
 int moas_skip_intro = 0;
@@ -76,6 +79,11 @@ void MoasParseArgs(int argc, char **argv)
   env = getenv("MOAS_DEBUG");
   if (env && *env)
     moas_debug |= parse_debug_list(env);
+#ifdef __ANDROID__
+  /* Always surface load diagnostics on logcat until the port is solid. */
+  if (!env || !*env)
+    moas_debug |= MOAS_DBG_LOAD;
+#endif
 
   for (i = 1; i < argc; i++) {
     const char *a = argv[i];
@@ -120,19 +128,32 @@ void MoasParseArgs(int argc, char **argv)
     exit(1);
   }
 
-  if (moas_debug)
+  if (moas_debug) {
+#ifdef __ANDROID__
+    SDL_Log("moas: debug flags=0x%x skip_intro=%d proc=%d addr=%d",
+            moas_debug, moas_skip_intro, moas_start_proc, moas_start_addr);
+#else
     fprintf(stderr, "moas: debug flags=0x%x skip_intro=%d proc=%d addr=%d\n",
             moas_debug, moas_skip_intro, moas_start_proc, moas_start_addr);
+#endif
+  }
 }
 
 void MoasDbg(unsigned flag, const char *fmt, ...)
 {
   va_list ap;
   if (!(moas_debug & flag)) return;
-  fputs("moas: ", stderr);
   va_start(ap, fmt);
+#ifdef __ANDROID__
+  {
+    char buf[512];
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    SDL_Log("[dbg] %s", buf);
+  }
+#else
+  fprintf(stderr, "moas: ");
   vfprintf(stderr, fmt, ap);
-  va_end(ap);
   fputc('\n', stderr);
-  fflush(stderr);
+#endif
+  va_end(ap);
 }

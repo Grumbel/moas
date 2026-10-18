@@ -1,5 +1,7 @@
 # TODO / Handoff
 
+- Android: APK assets + extract to internal storage; SDL_Log diagnostics
+
 ## Cross ports (this bundle)
 - WebAssembly: `nix/wasm.nix`, `mk/wasm/` — Emscripten + ASYNCIFY + preload data
 - Technique mirrored from Kurvenrausch (Nix flake packages + mk/ tree)

@@ -8,6 +8,8 @@ extern "C" {
 
 /* Initialise video, input and timer. Returns 0 on success. */
 int PlatformInit(void);
+/* Android: extract APK assets to internal storage and set MOAS_DATADIR. */
+void PlatformAndroidPrepareData(void);
 
 /* Shut everything down. */
 void PlatformShutdown(void);

@@ -282,27 +282,19 @@ void LoadMusic(short Num)
     uint32_t DataFlag; /* non-zero => sample payload follows */
   } disk;
 #pragma pack(pop)
-  char path[512];
 #endif
 
   V_Play=CurrentLine=0;
   sprintf(Name,"PIZZZA%i.TSS",Num);
 #ifndef DOS
-  {
-    const char *dir = MoasDataDir();
-    if (dir && dir[0])
-      snprintf(path, sizeof(path), "%s/%s", dir, Name);
-    else
-      snprintf(path, sizeof(path), "%s", Name);
-    ifil=open(path,O_RDONLY);
-  }
+  ifil=MoasOpenData(Name);
 #else
   ifil=open(Name,O_RDONLY|O_BINARY);
 #endif
 
   if (ifil<0) {
 #ifndef DOS
-    fprintf(stderr, "moas: LoadMusic: cannot open %s\n", Name);
+    /* Music is optional; MoasOpenData already logs on failure when verbose. */
 #endif
     return;
   }

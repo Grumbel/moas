@@ -4,7 +4,7 @@
 #
 # Builds the APK: the game's sources as libmain.so with ndk-build against the
 # prebuilt SDL2, packaged with SDL's Java side, aligned and signed (after
-# Pingus's pipeline, without data or extra libraries).
+# Pingus's pipeline, including game data under assets/).
 #
 # Env: ANDROID_HOME, BUILD_TOOLS_VERSION, PACKAGE_PLATFORM, TARGET_ABIS,
 #      APP_NAME, APP_DIR (manifest, res/, jni/Android.mk), GAME_SRC_DIR (the
@@ -32,6 +32,25 @@ sed -e "s/@VERSION_NAME@/$GAME_VERSION/" -e "s/@VERSION_CODE@/$VERSION_CODE/" \
 cp "$GAME_SRC_DIR"/src/*.c src/jni/src/
 cp "$GAME_SRC_DIR"/src/*.h src/jni/src/
 
+# Game data into APK assets/ (extracted at runtime to internal storage).
+mkdir -p src/assets
+for f in GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX GAME.MAP \
+         LICENCE.DAT Licence.Dat licence.dat; do
+  if [ -f "$GAME_SRC_DIR/manick/$f" ]; then
+    cp "$GAME_SRC_DIR/manick/$f" "src/assets/$f"
+  fi
+done
+# Any extra GAME.* data (skip DOS executables)
+for f in "$GAME_SRC_DIR"/manick/GAME.*; do
+  [ -f "$f" ] || continue
+  base=$(basename "$f")
+  case "$base" in
+    *.EXE|*.exe) continue ;;
+  esac
+  cp -n "$f" "src/assets/$base" 2>/dev/null || cp "$f" "src/assets/$base"
+done
+echo "==> assets:"; ls -la src/assets
+
 # SDL2, prebuilt; sources use #include <SDL.h> (headers at SDL/include/).
 cp "$SDL_PREBUILT_MK" src/jni/SDL/Android.mk
 # Use /. so we fill SDL/include/ instead of nesting include/include/
@@ -46,7 +65,7 @@ chmod -R u+rwX src
   -j"${NIX_BUILD_CORES:-$(nproc)}"
 
 mkdir -p out
-"$BT/aapt" package -f -M src/AndroidManifest.xml -S src/res -I "$PACKAGE_JAR" -F out/base.apk
+"$BT/aapt" package -f -M src/AndroidManifest.xml -S src/res -A src/assets -I "$PACKAGE_JAR" -F out/base.apk
 cp "$SDL_ANDROID_LIBS/dex/classes.dex" out/classes.dex
 for abi in $TARGET_ABIS; do
   mkdir -p "out/lib/$abi"
