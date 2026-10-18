@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "datapath.h"
 
 char *__Benutze   ="BENUTZE %s";
 char *__BenutzeMit="BENUTZE %s MIT %s";
@@ -37,9 +38,13 @@ char *__BewegeMit ="BEWEGE %s IN RICHTUNG %s";
 
 void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty);
 
-int main(void)
+int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
+  (void)argc;
+#ifndef DOS
+  MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
+#endif
 
   DontCyclePal=1;
   InitAll();

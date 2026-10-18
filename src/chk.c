@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "datapath.h"
 
 unsigned char __b1,__b2,__b3,__b4;
 char *_FRAGEZEICHEN;
@@ -89,7 +90,7 @@ short ChkOpen(char *FileName,char Mode)
 #ifdef DOS
     xfil=open(FileName,O_RDONLY|O_BINARY);
 #else
-    xfil=open_ci(FileName,O_RDONLY);
+    xfil=MoasOpenData(FileName);
 #endif
   if (Mode==WRITE)
 #ifdef DOS

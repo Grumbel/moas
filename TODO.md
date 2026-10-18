@@ -1,39 +1,44 @@
 # TODO / Handoff
 
 ## Base
-- Original tip: `8d399e6` (Converted source from Latin1 to UTF-8)
+- Original tip: `8d399e6`
 - Work line base for bundles: `8d399e6`
-- GitHub tip that included data + previous scaffold: `c92cb55`
 
 ## Status (2026-10-18)
-Continued from GitHub tree (scaffold + `manick/` game data).
+### Done
+- SDL2 platform layer, CMake, flake (earlier)
+- manick data load on 64-bit (packed MAPFILE, uint32 CHKSUM, case-insensitive open)
+- **Install + data path integration**
+  - `src/datapath.c`: resolves data dir from `MOAS_DATADIR` env → compile-time `MOAS_DATADIR` → `./manick` → `$exe/../share/moas`
+  - CMake installs binary to `bin/` and game data to `share/moas/` (excludes DOS EXEs)
+  - flake `packages.default` bakes store data path; `apps.default` / `apps.moas` run the game
+  - `devShell` sets `MOAS_DATADIR=$PWD/manick` for local work
 
-### Done in this session
-- Case-insensitive file open (`open_ci`) for DOS-style names on Linux
-- `CHKSUM` fixed to `uint32_t` (was 64-bit `unsigned long` → licence/checksum reads failed)
-- `S_IWRITE` compatibility define
-- BIOS keyboard flag write at 0x417 guarded (`InitVars`)
-- Copy-protection disk-ID check skipped on non-DOS (`ChkAuthorisation`)
-- **MAPFILE on-disk format**: packed 30-byte records loaded via `MapFileDisk` + conversion
-  (`src/mapfile_disk.h`, `LoadMapFileTable` in `init.c`)
-- Softened fatal `PrintWord` length check (1014) so script text issues don’t abort
-- Binary runs under Xvfb with `manick/` data in cwd; reaches script execution / text output
-
-### Still broken / next
-1. Font / character encoding: source was converted to UTF-8; game strings and `CharNum` expect Latin1 / custom encoding → InternalError 1013 and nonsense lengths.
-2. Present path: call `PlatformPresent` from `PowerRedrawArea` / palette updates for visible graphics.
-3. Sound still stubbed.
-4. Header globals still rely on `-fcommon`.
-5. Install data path: document `cd manick && ../build/moas` or add a search path.
-6. Soft-fail remaining InternalErrors where safe; improve diagnostics.
-
-### How to run (current)
+### Run
 ```bash
+# from source tree
 cmake -B build && cmake --build build
-cp manick/* build/   # or run from manick/ with binary on PATH
-cd build && xvfb-run -a ./moas   # or with a real DISPLAY
+./build/moas                    # finds ./manick automatically
+# or
+MOAS_DATADIR=$PWD/manick ./build/moas
+
+# install prefix test
+cmake -B build -DCMAKE_INSTALL_PREFIX=/tmp/moas-prefix
+cmake --build build && cmake --install build
+/tmp/moas-prefix/bin/moas
+
+# Nix
+nix run .#                    # apps.default
+nix build
+./result/bin/moas
 ```
 
-## Bundle naming
-Next: `moas-008.1-data-load-fixes-8d399e6.bundle`
-(revCount: original 5 + scaffold 1 + github data/lock 2 + this work)
+### Still open
+1. Font / Latin1 encoding vs UTF-8 source strings
+2. PlatformPresent on dirty redraws for visible graphics
+3. Sound stub
+4. Move header globals out of moas.h
+5. Optionally soft-fail more InternalErrors
+
+## Bundle
+Next: `moas-009.1-install-datapath-8d399e6.bundle`

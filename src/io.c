@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "datapath.h"
 
 #ifdef DOS
 void (interrupt far *RealIrq1c)();
@@ -47,7 +48,7 @@ short DataOpen(short Num)
 #ifdef DOS
   FileHandle=open(Name,O_RDONLY|O_BINARY);
 #else
-  FileHandle=open_ci(Name,O_RDONLY);
+  FileHandle=MoasOpenData(Name);
 #endif
   if (FileHandle<0)
   {
@@ -55,7 +56,7 @@ short DataOpen(short Num)
 #ifdef DOS
     FileHandle=open(Name,O_RDONLY|O_BINARY);
 #else
-    FileHandle=open_ci(Name,O_RDONLY);
+    FileHandle=MoasOpenData(Name);
 #endif
   }
 
