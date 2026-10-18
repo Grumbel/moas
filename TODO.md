@@ -2,7 +2,7 @@
 
 ## Desktop integration (this bundle)
 - FreeDesktop `.desktop` file: `data/moas.desktop`
-- hicolor icons (16–256 px, nearest-neighbor pixel art of the in-game smiley laptop)
+- hicolor icons (16–256 px): large red “M” with protagonist, night path scene
 - AppStream metainfo: `data/metainfo/org.grumbel.moas.metainfo.xml`
 - CMake install rules for applications/, icons/hicolor/, metainfo/
 - README notes on menu integration after `cmake --install`
