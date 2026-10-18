@@ -393,21 +393,36 @@ void GetClickOrEnter(short Time)
    */
   {
     int forever = (Time == 32000);
+    short saw_down = 0;
     while (KeyAbortState != 2 && !PlatformShouldQuit() && (forever || Time > 0))
     {
       MouseCheck(); /* pumps SDL, presents, latches buttons, delays */
+      if (Mouse.Left || Mouse.Right || SpaceState)
+        saw_down = 1;
+      /* Release after a press (DOS behaviour) */
+      if (saw_down && !(Mouse.Left | Mouse.Right) && !SpaceState)
+        break;
+      /* Also accept pure edge in case we entered already held */
       if ((!(Mouse.Left | Mouse.Right)) && (Mouse.LastLeft | Mouse.LastRight))
         break;
-      /* Space/Enter (SpaceState) — same as DOS OR into left button */
-      if (SpaceState)
-        break;
+      /* conio queue: Enter / Space */
+      if (kbhit()) {
+        int ch = getch();
+        if (ch == 13 || ch == 10 || ch == 32 || ch == 27)
+          break;
+        if (ch == 0 && kbhit())
+          (void)getch();
+      }
       if (!forever)
         Time--;
     }
   }
 #endif
-  Mouse.LastRight=Mouse.LastLeft=0;
-  WalkingAllowed=1;
+  Mouse.LastRight = Mouse.LastLeft = 0;
+  SpaceState = 0;
+  WalkingAllowed = 1;
+  if (Window.Status == None)
+    Mouse.CursorState = 1;
 }
 void LoadPack(void)
 {

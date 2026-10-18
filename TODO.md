@@ -1,9 +1,11 @@
 # TODO / Handoff
 
-## Mouse scaling
-Removed SDL_RenderSetLogicalSize. Present and mouse share letterbox_geom() based on
-SDL_GetRendererOutputSize. Mouse position re-sampled every pump via SDL_GetMouseState.
+## Cursor disabled / stuck on title
+- OpenWindow sets CursorState=0; restore when Window.Status==None
+- GetClickOrEnter: press-then-release, Space/Enter/Esc via kbhit
+- PowerSelectFromWindow: no longer infinite if RefTable empty; any click works
+- VMouse null-safe if Phase[0] not loaded
 
 ## Still open
-- Title screen
+- Full title→game path verification
 - Heap root cause

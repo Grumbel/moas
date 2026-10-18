@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "platform.h"
 
 char _SPACE_STRING[]=" ";
 
@@ -433,12 +434,23 @@ void SelectFromDialog(short VarNum,short DlgNum,char Respond)
 short PowerSelectFromWindow(void)   /* RefTable is Global Parameter */
 {
   long y=-99,LastY,cx,cy,y320;
+  short has_refs = 0;
+  short i;
+
+  for (i = 0; i < 12; i++)
+    if (RefTable[i].Num != -1) { has_refs = 1; break; }
 
   WalkingAllowed=0;
   while (Mouse.Left | Mouse.Right) MouseCheck();
   MouseCheck();
   while (1)
   {
+#ifndef DOS
+    if (PlatformShouldQuit()) {
+      WalkingAllowed = 1;
+      return 0;
+    }
+#endif
     LastY=y;  y=GetCursorPosInWindow();
     if (LastY!=y)
     {
@@ -458,10 +470,22 @@ short PowerSelectFromWindow(void)   /* RefTable is Global Parameter */
 
     MouseCheck();
 
-    if ((Mouse.Left | Mouse.Right)==0 && (Mouse.LastLeft | Mouse.LastRight) && GetCursorPosInWindow()!=-1)
+    if ((Mouse.Left | Mouse.Right)==0 && (Mouse.LastLeft | Mouse.LastRight))
     {
-      WalkingAllowed=1;
-      return(GetCursorPosInWindow());
+      short sel = GetCursorPosInWindow();
+      if (sel != -1 || !has_refs)
+      {
+        WalkingAllowed=1;
+        return (sel != -1) ? sel : 0;
+      }
+    }
+    if (kbhit()) {
+      int ch = getch();
+      if (ch == 13 || ch == 10 || ch == 27) {
+        WalkingAllowed = 1;
+        return (y != -1 && y != -99) ? (short)y : 0;
+      }
+      if (ch == 0 && kbhit()) (void)getch();
     }
   }
 }

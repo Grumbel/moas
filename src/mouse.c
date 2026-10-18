@@ -58,6 +58,9 @@ void MouseCheck(void)
   Mouse.LastMiddle = prevM;
   if (PlatformShouldQuit())
     return;
+  /* Dialogs turn CursorState off; restore when no window is open. */
+  if (Window.Status == None && Mouse.CursorState == 0)
+    Mouse.CursorState = 1;
 #endif
   LookKeys();
   MouseRead();
@@ -342,6 +345,9 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
 {
   register unsigned short x,y;
   unsigned static ox,oy,State=0;
+
+  if (!VMouseBuf || !Phase || !Phase[0].Data)
+    return;
 
   if (Type==1 && State==0)
   {
