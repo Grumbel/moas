@@ -676,6 +676,33 @@ void WalkClick(short x,short y) /* Click an legale Position umleiten */
     }
   }
 }
+
+#ifndef DOS
+/*
+ * Gamepad left stick / D-pad: walk toward a point offset from the player.
+ * ax,ay in roughly -1000..1000 (platform scales stick axes).
+ */
+void MoasPadWalk(int ax, int ay)
+{
+  short pn, px, py, tx, ty;
+  if (ax > -180 && ax < 180 && ay > -180 && ay < 180)
+    return;
+  if (!PlayerHasControl || V_NoWalk || Window.Status != None)
+    return;
+  pn = GetPlayerPersonNumber();
+  if (pn < 0 || pn > MAX_PRS)
+    return;
+  px = (short)(Person[pn].x + Person[pn].xs / 2);
+  py = (short)(Person[pn].y + Person[pn].ys);
+  tx = (short)(px + (ax * 55) / 1000);
+  ty = (short)(py + (ay * 40) / 1000);
+  if (tx < 0) tx = 0;
+  if (ty < 0) ty = 0;
+  if (tx > 319) tx = 319;
+  if (ty > 199) ty = 199;
+  WalkClick(tx, ty);
+}
+#endif
 void SetMousePos(short x,short y)
 {
 #ifdef DOS

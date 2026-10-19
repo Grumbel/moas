@@ -66,6 +66,14 @@ static SDL_Texture  *texture  = NULL;
 static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
+static SDL_GameController *pad = NULL;
+static int           pad_use = 0;   /* RT → left click */
+static int           pad_look = 0;  /* LT → right click */
+static int           pad_walk_cooldown = 0;
+static int           phys_left = 0, phys_right = 0, phys_middle = 0;
+#ifndef DOS
+extern void MoasPadWalk(int ax, int ay);
+#endif
 #ifdef __EMSCRIPTEN__
 static volatile int  wasm_paused = 0;
 static void wasm_pause_spin(void);
@@ -81,10 +89,9 @@ static Uint32        sdl_palette[256];
 
 int PlatformShiftDown(void)
 {
-#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+  /* Overlay SKIP button and gamepad A synthesize Shift for speech skip. */
   if (overlay_shift_hold > 0)
     return 1;
-#endif
   return moas_shift_down;
 }
 
@@ -398,7 +405,7 @@ void PlatformAndroidPrepareData(void) { /* no-op on non-Android */ }
 
 int PlatformInit(void)
 {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER) < 0) {
     platform_log("SDL_Init failed: %s", SDL_GetError());
     return -1;
   }
@@ -468,6 +475,22 @@ int PlatformInit(void)
     SDL_GetWindowSize(window, &w, &h);
     platform_log("PlatformInit ok: window %dx%d scale=%d fullscreen=%d",
                  w, h, SCALE, moas_fullscreen);
+  }
+  /* Prefer XInput/standard mappings when present. */
+  SDL_GameControllerEventState(SDL_ENABLE);
+  {
+    int i, n = SDL_NumJoysticks();
+    for (i = 0; i < n; i++) {
+      if (SDL_IsGameController(i)) {
+        pad = SDL_GameControllerOpen(i);
+        if (pad) {
+          platform_log("gamepad: %s", SDL_GameControllerName(pad));
+          break;
+        }
+      }
+    }
+    if (!pad)
+      platform_log("gamepad: none at startup (hotplug ok)");
   }
   return 0;
 }
@@ -578,6 +601,7 @@ void PlatformShutdown(void)
   if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
   if (window)   { SDL_DestroyWindow(window);     window   = NULL; }
   if (pixels)   { free(pixels);   pixels   = NULL; }
+  if (pad) { SDL_GameControllerClose(pad); pad = NULL; }
 #ifdef __ANDROID__
   /* Full quit so SDLActivity tears down cleanly after main returns. */
   SDL_Quit();
@@ -1045,8 +1069,7 @@ static void overlay_draw(void)
 
   if (!renderer)
     return;
-  if (overlay_shift_hold > 0)
-    overlay_shift_hold--;
+  /* overlay_shift_hold decays in pad_apply / end of pump */
 
   overlay_rects(r);
   for (i = 0; i < 6; i++) {
@@ -1216,6 +1239,107 @@ static void sync_mouse_position(void)
   Mouse.y = my;
 }
 
+
+/* ---- Gamepad (SDL GameController) ------------------------------------- */
+/*
+ * Left stick / D-pad  → walk (MoasPadWalk)
+ * Right stick         → cursor
+ * RT                  → use (left click)
+ * LT                  → look (right click / SIEHE)
+ * A                   → skip speech (Shift)
+ * B                   → Esc / abort sequence
+ * Start               → Esc / abort sequence
+ * Back                → quit request
+ * X / Y               → USE / LOOK touch mode (overlay parity)
+ */
+static int axis_dead(int v, int dead)
+{
+  if (v > -dead && v < dead) return 0;
+  return v;
+}
+
+static void pad_apply(void)
+{
+  Sint16 lx, ly, rx, ry, lt, rt;
+  int walk_x, walk_y, dx, dy;
+  const int stick_dead = 8000;
+  const int trig_dead = 12000;
+  int use, look;
+
+  if (overlay_shift_hold > 0)
+    overlay_shift_hold--;
+
+  if (!pad)
+    return;
+
+  lx = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTX);
+  ly = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTY);
+  rx = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTX);
+  ry = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTY);
+  lt = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+  rt = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+
+  /* D-pad overrides left stick when pressed. */
+  walk_x = axis_dead(lx, stick_dead);
+  walk_y = axis_dead(ly, stick_dead);
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_LEFT))
+    walk_x = -32767;
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
+    walk_x = 32767;
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_UP))
+    walk_y = -32767;
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_DOWN))
+    walk_y = 32767;
+
+  /* Right stick → soft cursor (pixels per frame at full deflection). */
+  dx = axis_dead(rx, stick_dead);
+  dy = axis_dead(ry, stick_dead);
+  if (dx || dy) {
+    int mx = (int)Mouse.x + (dx * 6) / 32767;
+    int my = (int)Mouse.y + (dy * 6) / 32767;
+    if (mx < 0) mx = 0;
+    if (my < 0) my = 0;
+    if (mx > LOGICAL_W - 1) mx = LOGICAL_W - 1;
+    if (my > LOGICAL_H - 1) my = LOGICAL_H - 1;
+    Mouse.x = (short)mx;
+    Mouse.y = (short)my;
+  }
+
+  use = (rt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+  look = (lt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+  pad_use = use ? 1 : 0;
+  pad_look = look ? 1 : 0;
+  Mouse.Left = phys_left || pad_use;
+  Mouse.Right = phys_right || pad_look;
+  Mouse.Middle = phys_middle;
+
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A))
+    overlay_shift_hold = 20; /* skip speech */
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_B) ||
+      SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START)) {
+    if (KeyAbortState == 1)
+      KeyAbortState = 2;
+    KeyScanCode = 1; /* Esc make */
+  }
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_BACK))
+    PlatformRequestQuit();
+#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_X))
+    touch_mode = 0;
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_Y))
+    touch_mode = 1;
+#endif
+
+#ifndef DOS
+  if (pad_walk_cooldown > 0)
+    pad_walk_cooldown--;
+  else if (walk_x || walk_y) {
+    MoasPadWalk((walk_x * 1000) / 32767, (walk_y * 1000) / 32767);
+    pad_walk_cooldown = 4; /* ~throttle WalkClick spam */
+  }
+#endif
+}
+
 void PlatformPumpEvents(void)
 {
   SDL_Event ev;
@@ -1223,6 +1347,21 @@ void PlatformPumpEvents(void)
     switch (ev.type) {
       case SDL_QUIT:
         PlatformRequestQuit();
+        break;
+      case SDL_CONTROLLERDEVICEADDED:
+        if (!pad) {
+          pad = SDL_GameControllerOpen(ev.cdevice.which);
+          if (pad)
+            platform_log("gamepad connected: %s", SDL_GameControllerName(pad));
+        }
+        break;
+      case SDL_CONTROLLERDEVICEREMOVED:
+        if (pad && ev.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad))) {
+          SDL_GameControllerClose(pad);
+          pad = NULL;
+          pad_use = pad_look = 0;
+          platform_log("gamepad disconnected");
+        }
         break;
 #ifdef __ANDROID__
       /*
@@ -1287,7 +1426,8 @@ void PlatformPumpEvents(void)
           Mouse.y = my;
         }
         if (ev.button.button == SDL_BUTTON_LEFT) {
-          Mouse.Left = down ? 1 : 0;
+          phys_left = down ? 1 : 0;
+          Mouse.Left = phys_left || pad_use;
           if (down) {
             Mouse.ClickX = Mouse.x;
             Mouse.ClickY = Mouse.y;
@@ -1296,9 +1436,11 @@ void PlatformPumpEvents(void)
             Mouse.ReleaseY = Mouse.y;
           }
         } else if (ev.button.button == SDL_BUTTON_RIGHT) {
-          Mouse.Right = down ? 1 : 0;
+          phys_right = down ? 1 : 0;
+          Mouse.Right = phys_right || pad_look;
         } else if (ev.button.button == SDL_BUTTON_MIDDLE) {
-          Mouse.Middle = down ? 1 : 0;
+          phys_middle = down ? 1 : 0;
+          Mouse.Middle = phys_middle;
         }
         break;
       }
@@ -1320,6 +1462,7 @@ void PlatformPumpEvents(void)
           mouse_to_logical(wx, wy, &mx, &my);
           Mouse.x = mx;
           Mouse.y = my;
+          phys_left = 1;
           Mouse.Left = 1;
           Mouse.ClickX = Mouse.x;
           Mouse.ClickY = Mouse.y;
@@ -1343,7 +1486,8 @@ void PlatformPumpEvents(void)
           mouse_to_logical(wx, wy, &mx, &my);
           Mouse.x = mx;
           Mouse.y = my;
-          Mouse.Left = 0;
+          phys_left = 0;
+          Mouse.Left = pad_use ? 1 : 0;
           Mouse.ReleaseX = Mouse.x;
           Mouse.ReleaseY = Mouse.y;
         }
@@ -1420,8 +1564,20 @@ void PlatformPumpEvents(void)
         break;
     }
   }
-  /* Always re-sample mouse — event coords are unreliable with dpi/logical size. */
-  sync_mouse_position();
+  /*
+   * OS mouse sample when the right stick is idle so pad cursor aim is not
+   * overwritten every frame. Buttons are merged in pad_apply.
+   */
+  {
+    int rs_x = 0, rs_y = 0;
+    if (pad) {
+      rs_x = axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTX), 8000);
+      rs_y = axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTY), 8000);
+    }
+    if (!rs_x && !rs_y)
+      sync_mouse_position();
+  }
+  pad_apply();
 #ifdef __EMSCRIPTEN__
   wasm_pause_spin();
 #endif

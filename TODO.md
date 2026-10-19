@@ -94,6 +94,7 @@ Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_are
 Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame only).
 
 ## Done this stack
+- Gamepad: left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc
 - WASM fullscreen/window: CSS aspect matches overlay window so buttons stay in letterbox
 - WASM: link -lidbfs.js so FS.filesystems.IDBFS exists at preRun
 - WASM shell: fullscreen/pause/download-upload saves (IDBFS), better key help; touch overlay on web

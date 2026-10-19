@@ -184,6 +184,7 @@ The HTML shell (`mk/wasm/shell.html`) provides:
 - Help text for mouse, touch, and keyboard
 - **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
 - On-canvas touch overlay (Save / Load / USE / LOOK / Esc / Skip), same as Android
+- **Gamepad:** left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc
 
 Save files are exported as `moas-saves.json` and can be imported on another browser.
 
