@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 /* SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com> */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*

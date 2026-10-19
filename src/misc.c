@@ -282,7 +282,7 @@ void LookKeys(void)
                           if (fgets(Buffer, sizeof(Buffer), stdin)) { size_t n=strlen(Buffer); if (n && Buffer[n-1]=='\n') Buffer[n-1]=0; }
 
                           PowerRedrawArea(0,0,320,200);
-                          if (Buffer)
+                          if (Buffer[0])
                           {
                             char *Tmp;
                             short l;
@@ -773,7 +773,7 @@ void NextPersonPhase(short PrsNum)
   do
   {
     Person[PrsNum].Counter++;
-    if (Person[PrsNum].Counter>7)
+    if (Person[PrsNum].Counter>7) {
       if (Person[PrsNum].Bits & 8192)    /* Consekutive ? */
       {
         Person[PrsNum].Counter=0;
@@ -791,6 +791,7 @@ void NextPersonPhase(short PrsNum)
         if (Person[PrsNum].Bits & 4096)
           StopPerson(PrsNum);
       }
+    }
   } while (Person[PrsNum].Sequence[Person[PrsNum].Counter][Person[PrsNum].Dir]==-1);
 }
 short IsPositionOk(short PrsNum,short x,short y)
@@ -845,9 +846,10 @@ void SortPersons(void)                                                          
 
   for (c=0;c<14;c++)
   {
-    if (Person[c].Num==-1)
+    if (Person[c].Num==-1) {
       if (Person[c+1].Num==-1) continue;
       else goto ChangePlaces;
+    }
     if (Person[c+1].Num==-1) continue;
     if (Person[c].ys+Person[c].z+Person[c].y<=Person[c+1].z+Person[c+1].y+Person[c+1].ys) continue;
 
@@ -1003,11 +1005,12 @@ void WaitWhileSomeBodyIsWalking(short PersonNum)
   {
     MouseCheck();
     for (Ok=1,c=0;c<MAX_PRS;c++)
-      if ((Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) && (Person[c].StepSpeed>0 || (Person[c].Bits&4096)==4096))
-      if (PersonNum==-1)
-      {
-        if (Person[c].Num!=-1) Ok=0;
-      } else if (Person[c].Num==PersonNum) Ok=0;
+      if ((Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY) && (Person[c].StepSpeed>0 || (Person[c].Bits&4096)==4096)) {
+        if (PersonNum==-1)
+        {
+          if (Person[c].Num!=-1) Ok=0;
+        } else if (Person[c].Num==PersonNum) Ok=0;
+      }
   }
 }
 void TurnInventar(short State)

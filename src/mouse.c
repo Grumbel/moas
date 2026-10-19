@@ -188,6 +188,8 @@ short IsMousePresent(void)
     SetMousePos(100,100);
     return (MousePres=1);
   } else return (MousePres=0);
+#else
+  return 1; /* SDL always has a pointer device */
 #endif
 }
 

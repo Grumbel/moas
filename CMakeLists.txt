@@ -98,6 +98,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     -Wno-implicit-fallthrough
     -Wno-unused-result
     -Wno-format-truncation
+    -Wno-stringop-truncation
     -Wno-format-overflow
     -Wno-absolute-value
     -Wno-error=format-security

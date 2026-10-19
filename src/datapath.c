@@ -126,10 +126,12 @@ void MoasInitDataPath(const char *argv0)
   int ntried = 0;
 
 #define REMEMBER(p) do { \
-    if (ntried < 8 && (p) && (p)[0]) { \
-      strncpy(tried[ntried], (p), PATH_MAX - 1); \
-      tried[ntried][PATH_MAX - 1] = 0; \
-      ntried++; \
+    if (ntried < 8) { \
+      const char *_rp = (p); \
+      if (_rp != NULL && _rp[0] != '\0') { \
+        snprintf(tried[ntried], PATH_MAX, "%s", _rp); \
+        ntried++; \
+      } \
     } \
   } while (0)
 

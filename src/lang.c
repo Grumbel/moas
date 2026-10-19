@@ -489,16 +489,6 @@ static int open_lang_file(char *path, size_t pathsz, const char *suffix)
   return -1;
 }
 
-static void trim_inplace(char *s)
-{
-  char *e;
-  while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n')
-    memmove(s, s + 1, strlen(s));
-  e = s + strlen(s);
-  while (e > s && (e[-1] == ' ' || e[-1] == '\t' || e[-1] == '\r' || e[-1] == '\n'))
-    *--e = 0;
-}
-
 static void apply_verb_globals(void)
 {
   __Benutze    = (char *)Ui(UI_VERB_USE);

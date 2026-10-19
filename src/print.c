@@ -114,9 +114,12 @@ void PrintSentence(char *Text)
   if (KeyAbortState==2) return;
 
   if (Window.Status!=Open) OpenWindow(1,1,24);
-  if (Window.XPos!=-1)
+  if (Window.XPos!=-1) {
     if (RealStringLength(_SPACE_STRING,1)>(Window.x2-Window.XPos))
-      NeueZeile(); else if (Window.XPos!=Window.x1) PrintCharacter(32);
+      NeueZeile();
+    else if (Window.XPos!=Window.x1)
+      PrintCharacter(32);
+  }
 
   strncpy((char *)Buffer, Text ? Text : "", sizeof(Buffer)-1);
   Buffer[sizeof(Buffer)-1] = 0;
@@ -125,9 +128,10 @@ void PrintSentence(char *Text)
     if ((Word=strtok(AnzPointer ? NULL : Buffer,_SPACE_STRING))==NULL) break;
     AnzPointer++;
     if (strcmp(Word,"NW")==0) { NeueZeile(); ThereWasAlreadyWord=0; continue; }
-    if (ThereWasAlreadyWord==1 && Window.XPos!=Window.x1)
+    if (ThereWasAlreadyWord==1 && Window.XPos!=Window.x1) {
       if (RealStringLength(_SPACE_STRING,1)>(Window.x2-Window.XPos)) NeueZeile();
       else PrintCharacter(' ');
+    }
     PrintWord(Word);   ThereWasAlreadyWord=1;
   }
 }
@@ -236,9 +240,9 @@ void DisplayMessage(char *Message,short Color)
   static char LastText[80];
   static short LastXs,LastColor;
 
-  if (strcmp(Message,">???<")==0 && V_Master)
+  if (strcmp(Message,">" "???" "<")==0 && V_Master)
   {
-    sprintf(Message,"Max free memory:%u",_memmax());
+    sprintf(Message,"Max free memory:%lu",(unsigned long)_memmax());
     Color=45;
   }
   if (strcmp(LastText,Message)==0 && Color==LastColor) return;
@@ -826,7 +830,7 @@ void WinEnhance(void)
     for (x=0;x<300;x++)
     {
       for (y320=(y=Window.y1)*320;y<=Window.y2;y++,y320+=320)
-        if (((VGA_ADRESSE)[Window.x2-x+y320-322]!=251) && ((VGA_ADRESSE)[Window.x2-x+y320-322]!=247)) break;
+        if (((unsigned char)(VGA_ADRESSE)[Window.x2-x+y320-322]!=251) && ((unsigned char)(VGA_ADRESSE)[Window.x2-x+y320-322]!=247)) break;
       if (y!=Window.y2+1) break;
     }
     for (y320=(y=Window.y1-4)*320;y<=Window.y2+4;y++,y320+=320)
