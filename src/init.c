@@ -267,12 +267,27 @@ void InitMapData(void)
   ChkClose(ifil);
   LadePhase(0);
   LadePhase(1);
-#ifdef DOS
-  /* Cursor sprites must be 44x40x3 and 30x30x16 — catalog mis-read shows here. */
+  /* Cursor sprites must be 44x40x3 and 30x30x16 — catalog mis-read shows here.
+   * DOS hard-fails; host builds log so a bad GAME.2 is obvious without abort. */
   if (Phase[0].x != 44 || Phase[0].y != 40 || Phase[0].Anz != 3)
+  {
+#ifdef DOS
     InternalError(1022);
+#else
+    fprintf(stderr, "moas: Phase[0] expected 44x40x3, got %ldx%ldx%ld\n",
+            (long)Phase[0].x, (long)Phase[0].y, (long)Phase[0].Anz);
+#endif
+  }
   if (Phase[1].x != 30 || Phase[1].y != 30 || Phase[1].Anz != 16)
+  {
+#ifdef DOS
     InternalError(1022);
+#else
+    fprintf(stderr, "moas: Phase[1] (Bewege arrows) expected 30x30x16, got %ldx%ldx%ld\n",
+            (long)Phase[1].x, (long)Phase[1].y, (long)Phase[1].Anz);
+#endif
+  }
+#ifdef DOS
   /* Host unpack of Phase[0] frame 0 has ~148 non-zero texels. Far outside
    * that range means UniversalUnpack/LadeBereich produced garbage. */
   {

@@ -53,12 +53,18 @@
 ## Still open
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
-- Confirm Bewege arrow frames (Phase[1], 16 directions) look correct in-game
 - PowerBlend/WalkNLayers: no data path and op 11 still commented (upstream); inert by design
+- In-game confirm: Bewege arrow (drag person/object 0–999 or ≥2000 away from click point; inventar 1000–1999 uses Phase[0] icon embed, not arrow)
+
+## Bewege arrow (2026-10-19)
+- Not missing from the port: DOS baked Phase[1] only in PowerRedrawArea; SDL uses VMouse + Phase[1] (commit 130d221).
+- Bug: MouseRead called VMouse(2) *before* DisplayMouseText set BewegeMode / inventar embed, so the arrow (and inventar grab icon) could lag one frame or never refresh when frame_off was unchanged.
+- Fix: MouseIntelligence forces VMouse(2) on BewegeMode change and VMouse(3)+VMouse(1) after inventar Phase[0] texel embed/clear.
+- Host Phase[0]/[1] size checks now log to stderr (DOS still InternalError).
 
 ## Done this stack
 - Esc only sets KeyAbortState=2 when armed (KeyAbortState==1), matching DOS IRQ
-- Bewege arrow cursor (VMouse + Phase[1])
+- Bewege arrow cursor (VMouse + Phase[1]) + same-frame refresh after mode/embed change
 - ToggleScreen → PlatformSetBlank (op 75)
 - ShowMarker: draw Label/Jumper outlines on framebuffer (Master key `2`)
 - ShowHercBak: stderr dump instead of 0xB8000 (Master key `#`)

@@ -212,16 +212,22 @@ void MouseRead(void)
 void MouseIntelligence(void)
 {
   register short y;
+  char prev_bewege = Mouse.BewegeMode;
+  short inventar_embed = 0;
 
   DisplayMouseText(42);
   if (Mouse.Left && Mouse.LastLeft==0 && Mouse.ClickObject<2000 && Mouse.ClickObject>999)
+  {
+    inventar_embed = 1;
     for (y=0;y<24;y++)
     {
       memcpy(Phase[0].Data+12+44*(16+y),Inventar[Mouse.ClickObject-1000].Data+y*32,32);
       memcpy(Phase[0].Data+12+44*(16+y)+1760,Inventar[Mouse.ClickObject-1000].Data+y*32,32);
     }
+  }
   if (Window.Status==None && ((Mouse.LastLeft==1 && Mouse.Left==0) || (Mouse.Left==0 && Phase[0].Data[767])))
   {
+    inventar_embed = 1;
     for (y=0;y<24;y++) { memset(Phase[0].Data+12+44*(16+y),0,32);
                          memset(Phase[0].Data+12+44*(16+y)+1760,0,32); }
   }
@@ -239,6 +245,25 @@ void MouseIntelligence(void)
     }
     Mouse.ClickObject=-1;
   }
+#ifndef DOS
+  /*
+   * MouseRead already ran VMouse(2) before DisplayMouseText. BewegeMode and
+   * inventar embeds into Phase[0] change after that:
+   * - BewegeMode change is seen by Type==2 (last_bewege).
+   * - Inventar embed mutates Phase[0] texels without changing frame_off, so
+   *   Type==2 would skip — force remove+create.
+   */
+  if (Window.Status!=None || (Mouse.CursorState==1 && V_CursorState==1))
+  {
+    if (inventar_embed)
+    {
+      VMouse(3);
+      VMouse(1);
+    }
+    else if (Mouse.BewegeMode != prev_bewege)
+      VMouse(2);
+  }
+#endif
 }
 short WhatsAt(short x,short y)
 {
