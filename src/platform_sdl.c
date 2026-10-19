@@ -579,31 +579,36 @@ static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 
   }
 }
 
-/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE [5]=LOOK */
+/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE [5]=LOOK
+ * Left column: Save, Load, USE, LOOK. Right column: Esc, Skip. */
 static void overlay_rects(SDL_Rect out[6])
 {
   int dx, dy, dw, dh, ww, wh;
   int btn_w, btn_h, gap, margin;
-  int left_x, right_x, col_y0;
+  int left_x, right_x, left_y0, right_y0;
   int side;
-  int mode_w, mode_h, mode_y, mode_gap;
+  int left_stack_h, right_stack_h;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
-  gap = 12;
+  gap = 10;
   margin = 8;
   side = dx;
   if (side < ww - (dx + dw))
     side = ww - (dx + dw);
   btn_w = side - margin * 2;
-  if (btn_w > 132)
-    btn_w = 132;
-  if (btn_w < 72)
-    btn_w = 72;
-  btn_h = (btn_w * 6) / 7;
-  if (btn_h < 64)
-    btn_h = 64;
-  if (btn_h > 112)
-    btn_h = 112;
+  if (btn_w > 120)
+    btn_w = 120;
+  if (btn_w < 64)
+    btn_w = 64;
+  /* Four stacked left buttons — slightly shorter so they fit the game height. */
+  btn_h = (btn_w * 5) / 7;
+  if (btn_h < 52)
+    btn_h = 52;
+  if (btn_h > 88)
+    btn_h = 88;
+
+  left_stack_h = btn_h * 4 + gap * 3;
+  right_stack_h = btn_h * 2 + gap;
 
   if (dx >= btn_w + margin * 2) {
     left_x = (dx - btn_w) / 2;
@@ -612,53 +617,44 @@ static void overlay_rects(SDL_Rect out[6])
     right_x = dx + dw + (ww - (dx + dw) - btn_w) / 2;
     if (right_x + btn_w > ww - margin)
       right_x = ww - margin - btn_w;
-    col_y0 = dy + (dh - (btn_h * 2 + gap)) / 2;
-    if (col_y0 < margin)
-      col_y0 = margin;
+    left_y0 = dy + (dh - left_stack_h) / 2;
+    if (left_y0 < margin)
+      left_y0 = margin;
+    right_y0 = dy + (dh - right_stack_h) / 2;
+    if (right_y0 < margin)
+      right_y0 = margin;
   } else {
-    btn_w = 80;
-    btn_h = 72;
+    btn_w = 72;
+    btn_h = 56;
+    left_stack_h = btn_h * 4 + gap * 3;
+    right_stack_h = btn_h * 2 + gap;
     left_x = margin;
     right_x = ww - margin - btn_w;
-    if (dy + dh < wh - (btn_h * 2 + gap + margin)) {
-      col_y0 = dy + dh + margin;
-    } else if (dy > btn_h * 2 + gap + margin) {
-      col_y0 = margin;
+    if (dy + dh < wh - (left_stack_h + margin)) {
+      left_y0 = dy + dh + margin;
+      right_y0 = left_y0;
+    } else if (dy > left_stack_h + margin) {
+      left_y0 = margin;
+      right_y0 = margin;
     } else {
-      col_y0 = dy + margin;
-      if (col_y0 + btn_h * 2 + gap > dy + dh) {
-        btn_h = (dh - gap - margin * 2) / 2;
-        if (btn_h < 56)
-          btn_h = 56;
+      left_y0 = dy + margin;
+      right_y0 = dy + margin;
+      if (left_y0 + left_stack_h > dy + dh) {
+        btn_h = (dh - gap * 3 - margin * 2) / 4;
+        if (btn_h < 44)
+          btn_h = 44;
+        left_stack_h = btn_h * 4 + gap * 3;
+        right_stack_h = btn_h * 2 + gap;
       }
     }
   }
 
-  out[0].x = left_x;  out[0].y = col_y0;                out[0].w = btn_w; out[0].h = btn_h;
-  out[1].x = left_x;  out[1].y = col_y0 + btn_h + gap;  out[1].w = btn_w; out[1].h = btn_h;
-  out[2].x = right_x; out[2].y = col_y0;                out[2].w = btn_w; out[2].h = btn_h;
-  out[3].x = right_x; out[3].y = col_y0 + btn_h + gap; out[3].w = btn_w; out[3].h = btn_h;
-
-  /* USE / LOOK mode toggles: bottom of the game letterbox (or under it). */
-  mode_gap = 10;
-  mode_w = dw / 2 - mode_gap;
-  if (mode_w > 160)
-    mode_w = 160;
-  if (mode_w < 88)
-    mode_w = 88;
-  mode_h = 48;
-  if (dy + dh + mode_h + margin <= wh)
-    mode_y = dy + dh + 6;
-  else
-    mode_y = dy + dh - mode_h - 6;
-  out[4].x = dx + (dw - (mode_w * 2 + mode_gap)) / 2;
-  out[4].y = mode_y;
-  out[4].w = mode_w;
-  out[4].h = mode_h;
-  out[5].x = out[4].x + mode_w + mode_gap;
-  out[5].y = mode_y;
-  out[5].w = mode_w;
-  out[5].h = mode_h;
+  out[0].x = left_x;  out[0].y = left_y0;                     out[0].w = btn_w; out[0].h = btn_h; /* Save */
+  out[1].x = left_x;  out[1].y = left_y0 + (btn_h + gap);      out[1].w = btn_w; out[1].h = btn_h; /* Load */
+  out[4].x = left_x;  out[4].y = left_y0 + 2 * (btn_h + gap);  out[4].w = btn_w; out[4].h = btn_h; /* USE  */
+  out[5].x = left_x;  out[5].y = left_y0 + 3 * (btn_h + gap);  out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
+  out[2].x = right_x; out[2].y = right_y0;                     out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
+  out[3].x = right_x; out[3].y = right_y0 + (btn_h + gap);     out[3].w = btn_w; out[3].h = btn_h; /* Skip */
 }
 
 /* ox/oy are renderer-output pixels (after window_to_output). */
@@ -964,18 +960,13 @@ static void overlay_draw(void)
     else if (i == 3) ov_icon_skip(&face, pressed);
     /* USE/LOOK: text only */
 
-    ts = (face.w >= 100) ? 2 : 1;
+    ts = (face.w >= 80) ? 2 : 1;
     {
       int text_w = (int)strlen(labels[i]) * 6 * ts;
       int tx = face.x + (face.w - text_w) / 2;
-      int ty;
-      if (i >= 4)
+      int ty = face.y + face.h - 7 * ts - 6;
+      if (ty < face.y + face.h / 2)
         ty = face.y + (face.h - 7 * ts) / 2;
-      else {
-        ty = face.y + face.h - 7 * ts - 8;
-        if (ty < face.y + face.h / 2)
-          ty = face.y + face.h - 7 * ts - 4;
-      }
       ov_draw_text(tx + 1, ty + 1, labels[i], ts, 0, 0, 0);
       ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }

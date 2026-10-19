@@ -270,7 +270,7 @@ You need **player control** and no dialogue window open (`Window.Status == None`
 | **Right click** | Empty ground: walk (original DOS). On object: look (`SIEHE`). Also **S** key. |
 | **Drag (grab+pull)** | Bewege mode — cursor becomes a **directional arrow** |
 
-On Android there is no right button. The HUD adds **USE** / **LOOK** mode toggles (bottom of the game view):
+On Android there is no right button. The HUD adds **USE** / **LOOK** mode toggles (left column under Save/Load):
 
 | Mode | Empty ground | Object |
 |------|----------------|--------|
