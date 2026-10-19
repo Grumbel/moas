@@ -631,6 +631,9 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
                            int *out_ww, int *out_wh)
 {
   int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
+  int dw, dh, dx, dy;
+  float sx, sy, scale;
+
   if (renderer)
     SDL_GetRendererOutputSize(renderer, &ww, &wh);
   else if (window)
@@ -638,13 +641,39 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (ww < 1) ww = 1;
   if (wh < 1) wh = 1;
 
-  float sx = (float)ww / (float)LOGICAL_W;
-  float sy = (float)wh / (float)LOGICAL_H;
-  float scale = (sx < sy) ? sx : sy;
-  int dw = (int)(LOGICAL_W * scale + 0.5f);
-  int dh = (int)(LOGICAL_H * scale + 0.5f);
-  int dx = (ww - dw) / 2;
-  int dy = (wh - dh) / 2;
+  sx = (float)ww / (float)LOGICAL_W;
+  sy = (float)wh / (float)LOGICAL_H;
+  scale = (sx < sy) ? sx : sy;
+  dw = (int)(LOGICAL_W * scale + 0.5f);
+  dh = (int)(LOGICAL_H * scale + 0.5f);
+  dx = (ww - dw) / 2;
+  dy = (wh - dh) / 2;
+
+#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+  /*
+   * Keep side columns free for the touch overlay (Save/Load/USE/LOOK, Esc/Skip).
+   * overlay_rects needs dx >= btn_w + margins (~80–136). If the natural
+   * letterbox is narrower (near-16:10 panels), shrink the game viewport so
+   * buttons sit beside the picture instead of on top of it.
+   */
+  {
+    int min_side = ww / 9;
+    if (min_side < 88)
+      min_side = 88;
+    if (min_side > 180)
+      min_side = 180;
+    if (dx < min_side && ww > 2 * min_side + 64) {
+      int avail_w = ww - 2 * min_side;
+      float sx2 = (float)avail_w / (float)LOGICAL_W;
+      float sy2 = (float)wh / (float)LOGICAL_H;
+      float sc2 = (sx2 < sy2) ? sx2 : sy2;
+      dw = (int)(LOGICAL_W * sc2 + 0.5f);
+      dh = (int)(LOGICAL_H * sc2 + 0.5f);
+      dx = min_side + (avail_w - dw) / 2;
+      dy = (wh - dh) / 2;
+    }
+  }
+#endif
 
   if (out_x) *out_x = dx;
   if (out_y) *out_y = dy;
