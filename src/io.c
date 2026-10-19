@@ -354,6 +354,9 @@ void LadePhase(short Num)
   if (Length <= 0) Length = 1;
 
   Phase[Num].Data=(char *)MALLOC(Length+5);
+  /* Glass=254 leaves holes unwritten; soft cursor uses if(pix!=0). Unzeroed
+   * heap (Open Watcom DOS) left random bars in Phase[0]/[1] frames. */
+  memset(Phase[Num].Data, 0, (size_t)Length);
   Tmp=MALLOC(Phase[Num].Length+5);
   LadeBereich(Phase[Num].FileNum,Phase[Num].FilePos,Phase[Num].Length,Tmp,Phase[Num].Check);
   UniversalUnpack(Tmp+1,Phase[Num].Data,Phase[Num].Length-1,254,Phase[Num].x);
@@ -413,6 +416,7 @@ void LadeBild(short Num)
     if (Tmp==NULL)
     {
       Bilder[Num].Data=(char *)MALLOC(Bilder[Num].x*Bilder[Num].y+5);
+      memset(Bilder[Num].Data, 0, (size_t)(Bilder[Num].x*Bilder[Num].y));
       Tmp=Bilder[Num].Data+Bilder[Num].x*Bilder[Num].y-Bilder[Num].Length+5;
       LadeBereich(Bilder[Num].FileNum,Bilder[Num].FilePos,Bilder[Num].Length,Tmp,Bilder[Num].Check);
       UniversalUnpack(Tmp+1,Bilder[Num].Data,Bilder[Num].Length-1,254,Bilder[Num].x);
@@ -452,6 +456,7 @@ void LadeInventar(short Num)
   if (Inventar[Num].Data) return;
 
   Inventar[Num].Data=(char *)MALLOC(32*24+5);
+  memset(Inventar[Num].Data, 0, 32*24);
   Tmp=MALLOC(Inventar[Num].Length+5);
   LadeBereich(Inventar[Num].FileNum,Inventar[Num].FilePos,Inventar[Num].Length,Tmp,Inventar[Num].Check);
   UniversalUnpack(Tmp+1,Inventar[Num].Data,Inventar[Num].Length-1,254,32);

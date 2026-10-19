@@ -265,3 +265,14 @@ table → corrupted soft cursor; input still used mouse.c’s `Mouse` (coordinat
 
 DOS builds now use the same pattern as Emscripten: `moas_globals.c` defines
 storage (`MOAS_DEFINE_GLOBALS`); every other TU sees `extern` via `MOAS_G`.
+
+## Soft-cursor garbage (Glass=254)
+
+`UniversalUnpack(..., Glass=254)` does **not** write transparent texels; it
+leaves `Target[tCnt]` unchanged. `LadePhase` allocated with `malloc` and did
+not zero the buffer. On Linux the heap is often already zero; Open Watcom’s
+DOS heap is not — Phase[0]/[1] kept random bytes, and `if (PrsData[x])` in
+`PowerRedrawArea` drew them as multicoloured horizontal bars.
+
+Fix: `memset` the destination to 0 before Glass=254 unpack (phases, inventar,
+sprite Bilder).
