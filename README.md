@@ -219,6 +219,8 @@ from the SDL port are included under `ui.*`.
 
 ```sh
 moas --lang=en
+
+SDL host: press **F12** for the engine menu (language, fullscreen, game/speech speed, quit).
 # or: MOAS_LANG=en moas
 ```
 

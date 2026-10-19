@@ -43,6 +43,8 @@ extern uChar *Display;
 extern unsigned char *Palette;   /* 768 bytes, VGA 0-63 */
 extern char KeyAbortState;
 extern unsigned char KeyScanCode;
+extern short TotalSpeed, SpeechSpeed;
+extern void PowerRedrawArea(short x1, short y1, short x2, short y2);
 
 
 struct MOUSE {
@@ -573,6 +575,8 @@ void PlatformRequestQuit(void)
 }
 
 #ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE void PlatformEngineMenu(void);
+
 EMSCRIPTEN_KEEPALIVE void PlatformSetPaused(int paused)
 {
   wasm_paused = paused ? 1 : 0;
@@ -1161,7 +1165,248 @@ int PlatformPollOverlayCmd(void) { return 0; }
 int PlatformGetTouchMode(void) { return 0; }
 #endif
 
-void PlatformPresent(void)
+
+/* ---- Engine settings menu (SDL port; not the in-game script system menu) ---- */
+static int engine_menu_visible;
+
+static const unsigned char eng_font_digit[10][7] = {
+  {0x0e,0x11,0x13,0x15,0x19,0x11,0x0e},
+  {0x04,0x0c,0x04,0x04,0x04,0x04,0x0e},
+  {0x0e,0x11,0x01,0x06,0x08,0x10,0x1f},
+  {0x1f,0x01,0x02,0x06,0x01,0x11,0x0e},
+  {0x02,0x06,0x0a,0x12,0x1f,0x02,0x02},
+  {0x1f,0x10,0x1e,0x01,0x01,0x11,0x0e},
+  {0x06,0x08,0x10,0x1e,0x11,0x11,0x0e},
+  {0x1f,0x01,0x02,0x04,0x08,0x08,0x08},
+  {0x0e,0x11,0x11,0x0e,0x11,0x11,0x0e},
+  {0x0e,0x11,0x11,0x0f,0x01,0x02,0x0c},
+};
+static const unsigned char eng_font_A[26][7] = {
+  {0x0e,0x11,0x11,0x1f,0x11,0x11,0x11},{0x1e,0x11,0x11,0x1e,0x11,0x11,0x1e},
+  {0x0e,0x11,0x10,0x10,0x10,0x11,0x0e},{0x1e,0x11,0x11,0x11,0x11,0x11,0x1e},
+  {0x1f,0x10,0x10,0x1e,0x10,0x10,0x1f},{0x1f,0x10,0x10,0x1e,0x10,0x10,0x10},
+  {0x0e,0x11,0x10,0x17,0x11,0x11,0x0e},{0x11,0x11,0x11,0x1f,0x11,0x11,0x11},
+  {0x0e,0x04,0x04,0x04,0x04,0x04,0x0e},{0x01,0x01,0x01,0x01,0x11,0x11,0x0e},
+  {0x11,0x12,0x14,0x18,0x14,0x12,0x11},{0x10,0x10,0x10,0x10,0x10,0x10,0x1f},
+  {0x11,0x1b,0x15,0x15,0x11,0x11,0x11},{0x11,0x19,0x15,0x13,0x11,0x11,0x11},
+  {0x0e,0x11,0x11,0x11,0x11,0x11,0x0e},{0x1e,0x11,0x11,0x1e,0x10,0x10,0x10},
+  {0x0e,0x11,0x11,0x11,0x15,0x12,0x0d},{0x1e,0x11,0x11,0x1e,0x14,0x12,0x11},
+  {0x0e,0x11,0x10,0x0e,0x01,0x11,0x0e},{0x1f,0x04,0x04,0x04,0x04,0x04,0x04},
+  {0x11,0x11,0x11,0x11,0x11,0x11,0x0e},{0x11,0x11,0x11,0x11,0x11,0x0a,0x04},
+  {0x11,0x11,0x11,0x15,0x15,0x1b,0x11},{0x11,0x11,0x0a,0x04,0x0a,0x11,0x11},
+  {0x11,0x11,0x0a,0x04,0x04,0x04,0x04},{0x1f,0x01,0x02,0x04,0x08,0x10,0x1f},
+};
+
+static void eng_draw_char(int x, int y, char ch, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  const unsigned char *glyph = NULL;
+  int row, col;
+  if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
+  if (ch >= 'A' && ch <= 'Z') glyph = eng_font_A[ch - 'A'];
+  else if (ch >= '0' && ch <= '9') glyph = eng_font_digit[ch - '0'];
+  else if (ch == ':') {
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    { SDL_Rect p; p.x = x+2*scale; p.y = y+2*scale; p.w = scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
+    { SDL_Rect p; p.x = x+2*scale; p.y = y+4*scale; p.w = scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
+    return;
+  } else if (ch == '-' || ch == '/') {
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    { SDL_Rect p; p.x = x; p.y = y+3*scale; p.w = 5*scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
+    return;
+  } else return;
+  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+  for (row = 0; row < 7; row++) {
+    unsigned char bits = glyph[row];
+    for (col = 0; col < 5; col++) {
+      if (bits & (1 << (4 - col))) {
+        SDL_Rect p;
+        p.x = x + col * scale; p.y = y + row * scale; p.w = scale; p.h = scale;
+        SDL_RenderFillRect(renderer, &p);
+      }
+    }
+  }
+}
+
+static void eng_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  int cx = x;
+  for (; *s; s++) {
+    if (*s == ' ') { cx += 4 * scale; continue; }
+    eng_draw_char(cx, y, *s, scale, r, g, b);
+    cx += 6 * scale;
+  }
+}
+
+static int eng_is_fullscreen(void)
+{
+  if (!window) return 0;
+  return (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
+}
+
+static void eng_toggle_fullscreen(void)
+{
+  if (!window) return;
+  if (eng_is_fullscreen())
+    SDL_SetWindowFullscreen(window, 0);
+  else
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
+enum { ENG_LANG=0, ENG_FULLSCREEN, ENG_SPEED, ENG_SPEECH, ENG_RESUME, ENG_QUIT, ENG_COUNT };
+
+static void eng_menu_draw(int sel)
+{
+  int dx, dy, dw, dh;
+  int out_w = 640, out_h = 400;
+  SDL_Rect panel, bar, dim;
+  static char L[ENG_COUNT][48];
+  int i, scale, ty, item_h;
+  const char *lang;
+
+  if (!renderer) return;
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
+
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  dim.x = 0; dim.y = 0; dim.w = out_w; dim.h = out_h;
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 160);
+  SDL_RenderFillRect(renderer, &dim);
+
+  panel.w = dw > 400 ? 360 : (dw * 9) / 10;
+  if (panel.w < 260) panel.w = 260;
+  panel.h = 230;
+  panel.x = dx + (dw - panel.w) / 2;
+  panel.y = dy + (dh - panel.h) / 2;
+  if (panel.y < 8) panel.y = 8;
+
+  SDL_SetRenderDrawColor(renderer, 24, 28, 40, 245);
+  SDL_RenderFillRect(renderer, &panel);
+  SDL_SetRenderDrawColor(renderer, 200, 200, 220, 255);
+  SDL_RenderDrawRect(renderer, &panel);
+
+  scale = panel.w >= 320 ? 2 : 1;
+  eng_draw_text(panel.x + 16, panel.y + 12, "ENGINE MENU", scale, 255, 220, 80);
+
+  lang = LangGetCode();
+  if (!lang || !lang[0]) lang = "de";
+  snprintf(L[ENG_LANG], sizeof(L[0]), "LANGUAGE  %s", lang);
+  snprintf(L[ENG_FULLSCREEN], sizeof(L[0]), "FULLSCREEN  %s", eng_is_fullscreen() ? "ON" : "OFF");
+  snprintf(L[ENG_SPEED], sizeof(L[0]), "GAME SPEED  %d", (int)TotalSpeed);
+  snprintf(L[ENG_SPEECH], sizeof(L[0]), "SPEECH SPEED  %d", (int)SpeechSpeed);
+  snprintf(L[ENG_RESUME], sizeof(L[0]), "RESUME");
+  snprintf(L[ENG_QUIT], sizeof(L[0]), "QUIT");
+
+  item_h = 7 * scale + 12;
+  for (i = 0; i < ENG_COUNT; i++) {
+    ty = panel.y + 44 + i * item_h;
+    if (i == sel) {
+      bar.x = panel.x + 8; bar.y = ty - 4; bar.w = panel.w - 16; bar.h = item_h;
+      SDL_SetRenderDrawColor(renderer, 60, 90, 160, 255);
+      SDL_RenderFillRect(renderer, &bar);
+    }
+    eng_draw_text(panel.x + 20, ty, L[i], scale, 255, 255, 255);
+  }
+  eng_draw_text(panel.x + 16, panel.y + panel.h - 20, "ARROWS ENTER ESC  F12", 1, 150, 150, 170);
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+}
+
+static void eng_menu_activate(int sel)
+{
+  const char *code;
+  switch (sel) {
+    case ENG_LANG:
+      code = LangGetCode();
+      if (code && strcmp(code, "en") == 0)
+        LangSetCode("de");
+      else
+        LangSetCode("en");
+      LangInit();
+      break;
+    case ENG_FULLSCREEN:
+      eng_toggle_fullscreen();
+      break;
+    case ENG_SPEED:
+      TotalSpeed++;
+      if (TotalSpeed < 1) TotalSpeed = 1;
+      if (TotalSpeed > 8) TotalSpeed = 1;
+      break;
+    case ENG_SPEECH:
+      SpeechSpeed++;
+      if (SpeechSpeed < 1) SpeechSpeed = 1;
+      if (SpeechSpeed > 24) SpeechSpeed = 1;
+      break;
+    case ENG_RESUME:
+      engine_menu_visible = 0;
+      break;
+    case ENG_QUIT:
+      engine_menu_visible = 0;
+      PlatformRequestQuit();
+      break;
+  }
+}
+
+/* Forward: PlatformPresent draws the menu when visible. */
+static void platform_present_frame(void);
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE
+#endif
+void PlatformEngineMenu(void)
+{
+  int sel = 0;
+  SDL_Event ev;
+
+  if (!renderer || !window)
+    return;
+  engine_menu_visible = 1;
+  while (engine_menu_visible && running) {
+    platform_present_frame();
+    eng_menu_draw(sel);
+    SDL_RenderPresent(renderer);
+
+    while (SDL_PollEvent(&ev)) {
+      if (ev.type == SDL_QUIT) {
+        PlatformRequestQuit();
+        engine_menu_visible = 0;
+        break;
+      }
+      if (ev.type == SDL_KEYDOWN) {
+        SDL_Keycode k = ev.key.keysym.sym;
+        if (k == SDLK_ESCAPE || k == SDLK_F12) {
+          engine_menu_visible = 0;
+          break;
+        }
+        if (k == SDLK_UP || k == SDLK_w) {
+          sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+        } else if (k == SDLK_DOWN || k == SDLK_s) {
+          sel = (sel + 1) % ENG_COUNT;
+        } else if (k == SDLK_LEFT || k == SDLK_RIGHT || k == SDLK_RETURN || k == SDLK_SPACE) {
+          eng_menu_activate(sel);
+          if (sel == ENG_RESUME || sel == ENG_QUIT)
+            break;
+        }
+      }
+      if (ev.type == SDL_CONTROLLERBUTTONDOWN) {
+        if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+          sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+          sel = (sel + 1) % ENG_COUNT;
+        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A ||
+                 ev.cbutton.button == SDL_CONTROLLER_BUTTON_X)
+          eng_menu_activate(sel);
+        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_B ||
+                 ev.cbutton.button == SDL_CONTROLLER_BUTTON_START)
+          engine_menu_visible = 0;
+      }
+    }
+    SDL_Delay(16);
+  }
+  engine_menu_visible = 0;
+  if (Screen)
+    PowerRedrawArea(0, 0, 319, 199);
+}
+
+static void platform_present_frame(void)
 {
   SDL_Rect dst;
   int dx, dy, dw, dh;
@@ -1188,8 +1433,14 @@ void PlatformPresent(void)
   }
   /* Android (and optional desktop) touch buttons sit in letterbox, above the game. */
   overlay_draw();
+}
+
+void PlatformPresent(void)
+{
+  platform_present_frame();
   SDL_RenderPresent(renderer);
 }
+
 
 void PlatformSetShake(int ox, int oy)
 {
@@ -1566,6 +1817,10 @@ void PlatformPumpEvents(void)
            */
           if (k == SDLK_ESCAPE && KeyAbortState == 1)
             KeyAbortState = 2;
+          if (k == SDLK_F12) {
+            PlatformEngineMenu();
+            continue;
+          }
           if (k == SDLK_q ||
               (k == SDLK_c && (mod & KMOD_CTRL)) ||
               (k == SDLK_F4 && (mod & KMOD_ALT)) ||

@@ -94,6 +94,7 @@
     <div id="progress"><div id="progress-bar"></div></div>
     <div class="toolbar">
       <button type="button" id="btn-fullscreen">Fullscreen</button>
+      <button type="button" id="btn-settings" disabled>Settings</button>
       <button type="button" id="btn-pause" disabled>Pause</button>
       <button type="button" id="btn-download" disabled
         title="Export savegames from this browser (IndexedDB) to a JSON file">Download saves</button>
@@ -239,6 +240,12 @@
       var pause = document.getElementById('btn-pause');
       pause.disabled = false;
       pause.onclick = togglePause;
+      var settings = document.getElementById('btn-settings');
+      settings.disabled = false;
+      settings.onclick = function () {
+        if (Module && Module._PlatformEngineMenu) Module._PlatformEngineMenu();
+        else if (typeof _PlatformEngineMenu === 'function') _PlatformEngineMenu();
+      };
       document.addEventListener('visibilitychange', function() {
         if (document.hidden) setPaused(true);
       });

@@ -38,6 +38,9 @@ int PlatformPollOverlayCmd(void);
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 
+/* Modal engine settings (language, speed, fullscreen). F12. */
+void PlatformEngineMenu(void);
+
 /* Touch interaction mode: 0=USE (default verbs), 1=LOOK (SIEHE on object tap). */
 #define MOAS_TOUCH_USE  0
 #define MOAS_TOUCH_LOOK 1
