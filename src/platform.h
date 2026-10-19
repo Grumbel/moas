@@ -32,6 +32,9 @@ void PlatformDelay(unsigned int ms);
 /* Non-zero after SDL_QUIT / explicit quit request. */
 int PlatformShouldQuit(void);
 
+/* Android/overlay: 1=Save 2=Load pending after button release; 0 if none. */
+int PlatformPollOverlayCmd(void);
+
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 

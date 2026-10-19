@@ -54,6 +54,11 @@
   Separate from script slot 9 (`GAME9.SAV` / `AutoSaveGame`). Refactored `SaveGameToFile` /
   `SaveGameSlot` so path saves share one writer.
 
+## Android overlay SAVE/LOAD feed (2026-10-19)
+- Opening on press + residual mouse edge closed LoadSaveMenu in one frame.
+- SAVE/LOAD queue on *release*; LookKeys runs SaveGame/LoadGame.
+- LoadSaveMenu drains Left/Right before waiting for slot click.
+
 ## Android overlay (2026-10-19)
 - Hit-test used window coords vs letterbox in renderer output → hard to press on hi-DPI.
   Fixed via `window_to_output`; `mouse_to_logical` shares the mapping.

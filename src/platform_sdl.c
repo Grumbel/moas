@@ -57,6 +57,7 @@ static int           running  = 1;
 static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
 static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
+static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
@@ -619,12 +620,15 @@ static void overlay_fire(int which)
 {
   switch (which) {
     case OV_SAVE:
-      KeyScanCode = 63; /* F5 */
-      MOAS_ALOG("overlay: SAVE");
-      break;
     case OV_LOAD:
-      KeyScanCode = 65; /* F7 */
-      MOAS_ALOG("overlay: LOAD");
+      /*
+       * Do not open the menu on press: the same touch would still be “down”
+       * (or its synthetic mouse release would satisfy LoadSaveMenu’s wait) and
+       * close the menu immediately / pick a bogus slot. Queue until release;
+       * LookKeys runs SaveGame/LoadGame with the usual control checks.
+       */
+      overlay_pending_cmd = which;
+      MOAS_ALOG("overlay: queued %s", which == OV_SAVE ? "SAVE" : "LOAD");
       break;
     case OV_ESC:
       if (KeyAbortState == 1)
@@ -640,6 +644,13 @@ static void overlay_fire(int which)
     default:
       break;
   }
+}
+
+int PlatformPollOverlayCmd(void)
+{
+  int c = overlay_pending_cmd;
+  overlay_pending_cmd = 0;
+  return c;
 }
 
 static void ov_fill_roundish(SDL_Rect *r, Uint8 R, Uint8 G, Uint8 B)
@@ -869,6 +880,7 @@ static void overlay_draw(void)
 static int overlay_hit(int wx, int wy) { (void)wx; (void)wy; return 0; }
 static void overlay_fire(int which) { (void)which; }
 static void overlay_draw(void) { }
+int PlatformPollOverlayCmd(void) { return 0; }
 #endif
 
 void PlatformPresent(void)
@@ -996,8 +1008,14 @@ void PlatformPumpEvents(void)
         if (ov && ev.button.button == SDL_BUTTON_LEFT) {
           if (down) {
             overlay_pressed = ov;
-            overlay_fire(ov);
+            /* ESC/SKIP act immediately; SAVE/LOAD wait for release. */
+            if (ov == OV_ESC || ov == OV_SKIP)
+              overlay_fire(ov);
           } else {
+            if (overlay_pressed == ov && (ov == OV_SAVE || ov == OV_LOAD))
+              overlay_fire(ov);
+            else if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
+              overlay_fire(overlay_pressed); /* release slightly off button still counts */
             overlay_pressed = 0;
           }
           break; /* do not inject a game click */
@@ -1007,8 +1025,11 @@ void PlatformPumpEvents(void)
             overlay_pressed = 0;
           break; /* ignore release over overlay */
         }
-        if (!down)
+        if (!down) {
+          if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
+            overlay_fire(overlay_pressed);
           overlay_pressed = 0;
+        }
         {
           short mx, my;
           mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
@@ -1040,7 +1061,8 @@ void PlatformPumpEvents(void)
         ov = overlay_hit(rx, ry);
         if (ov) {
           overlay_pressed = ov;
-          overlay_fire(ov);
+          if (ov == OV_ESC || ov == OV_SKIP)
+            overlay_fire(ov);
           break;
         }
         {
@@ -1061,6 +1083,8 @@ void PlatformPumpEvents(void)
         wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
         window_to_output(wx, wy, &rx, &ry);
         if (overlay_hit(rx, ry) || overlay_pressed) {
+          if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
+            overlay_fire(overlay_pressed);
           overlay_pressed = 0;
           break;
         }

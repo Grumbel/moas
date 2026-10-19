@@ -554,9 +554,19 @@ void LoadSaveMenu(char *Text)
       }
   PlayerHasControl=WalkingAllowed=0;
   VMouse(1);
-  while (Mouse.Left!=0 || Mouse.LastLeft!=1) MouseCheck();
+  /*
+   * Drain any button still held from the key/overlay that opened this menu.
+   * Without this, a touch release (or residual LastLeft edge) satisfies the
+   * wait immediately and SaveGame/LoadGame uses that coordinate as the slot
+   * — often outside the menu → “Kein Slot” / menu never seems to open.
+   */
+  while (Mouse.Left | Mouse.Right)
+    MouseCheck();
+  MouseCheck();
+  while (Mouse.Left != 0 || Mouse.LastLeft != 1)
+    MouseCheck();
   CloseWindow();
-  PlayerHasControl=WalkingAllowed=1;
+  PlayerHasControl = WalkingAllowed = 1;
 }
 /* Write full game state to path. quiet=1: no DisplayMessage (exit autosave).
  * Returns 0 on success, -1 on error. */

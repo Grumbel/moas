@@ -164,6 +164,18 @@ void LookKeys(void)
         case 65:LoadGame();           break;
       }
   }
+#ifndef DOS
+  /* Overlay SAVE/LOAD queued on button release (not KeyScanCode). */
+  {
+    int ocmd = PlatformPollOverlayCmd();
+    if (ocmd && Window.Status == None && PlayerHasControl == 1) {
+      if (ocmd == 1) /* OV_SAVE */
+        SaveGame(0);
+      else if (ocmd == 2) /* OV_LOAD */
+        LoadGame();
+    }
+  }
+#endif
   if (!Strg && Window.Status==None && PlayerHasControl==1 && Mouse.Right==0)
   {
     switch(CursorDir)
