@@ -497,11 +497,13 @@ static void window_to_output(int wx, int wy, int *ox, int *oy)
 }
 
 
+/* Overlay button ids — always defined so PlatformPumpEvents can reference them;
+ * on non-Android builds overlay_hit is a stub that always returns OV_NONE. */
+enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_ESC = 3, OV_SKIP = 4 };
+
 #if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
 /* Touch controls in letterbox margins (window pixels), not the 320x200 buffer.
  * Layout: left column Save / Load; right column Esc / Skip. */
-enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_ESC = 3, OV_SKIP = 4 };
-
 
 /* 5x7 glyphs, bit0 = leftmost pixel of each row. A–Z + space + digits unused. */
 static const unsigned char ov_font_5x7[][7] = {
