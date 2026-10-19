@@ -178,6 +178,15 @@ Static SDL2 for wasm32 and a self-contained site (`moas.html` / `.js` /
 TU under Emscripten; the blocking DOS-style game loop uses ASYNCIFY so
 `Wait` / `getch` can yield to the browser (`nix/wasm.nix`, `mk/wasm/`).
 
+The HTML shell (`mk/wasm/shell.html`) provides:
+
+- **Fullscreen**, **Pause/Resume**, **Download saves** / **Upload saves…**
+- Help text for mouse, touch, and keyboard
+- **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
+- On-canvas touch overlay (Save / Load / USE / LOOK / Esc / Skip), same as Android
+
+Save files are exported as `moas-saves.json` and can be imported on another browser.
+
 ### R36S and other PortMaster handhelds (ArkOS)
 
 ```sh

@@ -94,6 +94,7 @@ Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_are
 Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame only).
 
 ## Done this stack
+- WASM: link -lidbfs.js so FS.filesystems.IDBFS exists at preRun
 - WASM shell: fullscreen/pause/download-upload saves (IDBFS), better key help; touch overlay on web
 - Android swipe-away / background: autosave on SDL_APP_* lifecycle + RequestQuit; logcat for autosave path
 - Android assets: version stamp re-extract on APK upgrade; SDL_Log diagnostics; MOAS_VERSION in NDK flags
