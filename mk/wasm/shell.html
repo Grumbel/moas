@@ -114,6 +114,10 @@
 
     function mountState() {
       try { FS.mkdirTree(STATE_DIR); } catch (e) {}
+      if (!FS.filesystems || !FS.filesystems.IDBFS) {
+        console.warn('moas: IDBFS not linked; saves will not persist across reloads');
+        return;
+      }
       FS.mount(FS.filesystems.IDBFS, {}, STATE_DIR);
       Module.addRunDependency('moas-state');
       FS.syncfs(true, function(err) {
