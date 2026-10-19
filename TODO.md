@@ -77,6 +77,24 @@
 - Fix: MouseIntelligence forces VMouse(2) on BewegeMode change and VMouse(3)+VMouse(1) after inventar Phase[0] texel embed/clear.
 - Host Phase[0]/[1] size checks now log to stderr (DOS still InternalError).
 
+
+## Cold load / autosave (from script disasm)
+
+Prog **0** (`moas-util disasm 0`) is global init, not per-room:
+
+1. `add_description` ×81 + `add_power_parse` ×10 (interleaved with `set_object` inventory defaults)
+2. fresh-game `var_set` / `say_properties`
+3. `call_proc 4` → first story/room script
+
+`.SAV` has persons, markers, vars, inventar x/y, dialogs, CurrentProc, pictures — **not** Description[].
+Mid-session load keeps Description in RAM; cold load must replay prog0 name ops only
+(`MoasRegisterStaticNames`: apply 65/62, skip 38/40/85, stop at call_proc 17).
+
+Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_area` in any prog.
+`set_object` defaults must **not** run on load (inventar x already in save).
+
+Exit autosave = **GAME9.SAV** (original `SaveGame(1)` slot).
+
 ## Done this stack
 - Android quit: finishAndRemoveTask + InternalError(0)/Alt+Q → RequestQuit; MOAS_STATEDIR for autosave
 - LoadGameFromFile: re-init cursor/control so hover works after autosave/load
