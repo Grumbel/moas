@@ -178,6 +178,12 @@ MOAS_G struct FONT /*A..Zá- .!,:;'"0..9<>()[]a..z*/
   short *Begin,*Width;
 } Font[7];
 
+/* On DOS, pack(1) so sizeof(MAPFILE)==30 matches GAME.2 and the original
+ * ChkRead(sizeof) load path. Host builds keep natural alignment and use
+ * MapFileDisk (int32 fields) for the same on-disk layout. */
+#if defined(DOS) || defined(__WATCOMC__)
+#  pragma pack(1)
+#endif
 MOAS_G struct MAPFILE
 {
   char FileNum;
@@ -187,6 +193,10 @@ MOAS_G struct MAPFILE
   char InUse;      /* Only for Phase */
   CHKSUM Check;
 } *Programm,*Bilder,*Inventar,*Phase;
+#if defined(DOS) || defined(__WATCOMC__)
+#  pragma pack()
+#endif
+
 
 MOAS_G struct SAY_WINDOW
 {
@@ -214,7 +224,7 @@ MOAS_G struct MOUSE
   short ClickObject;                  /* Objekt beim letzten drcken          */
   short ReleaseX,ReleaseY;            /* Position beim letzten loslassen      */
   short CursorState;                  /* Cursor an, aus oder virtuell  (012)  */
-  char BewegeMode;                    /* -1 = Nein, sonst CursorPhase         */
+  signed char BewegeMode;             /* -1 = Nein, sonst CursorPhase         */
 } Mouse;
 
 MOAS_G short AnzProgramme,AnzBilder,AnzInventar,AnzPhasen;
@@ -258,7 +268,8 @@ MOAS_G struct
 
 MOAS_G short AnzDescription,TimeCounter;
 MOAS_G short *Var;
-MOAS_G char GhostMode,ThingAtCursor;
+MOAS_G char GhostMode;
+MOAS_G signed char ThingAtCursor;
 MOAS_G short CurrentProc,TotalSpeed,SpeechSpeed;
 MOAS_G unsigned short Tab320[200];
 MOAS_G char PlayerHasControl,WalkingAllowed,Eingeblendet;

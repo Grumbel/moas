@@ -228,10 +228,33 @@ void InitMapData(void)
   ChkRead(ifil,(char *)&AnzInventar,2);
   ChkRead(ifil,(char *)&AnzPhasen,2);
 
+#if defined(DOS) || defined(__WATCOMC__)
+  /* Original path: GAME.2 records are native packed MAPFILE (30 bytes). */
+  Programm=(struct MAPFILE *)MALLOC(AnzProgramme * (long)sizeof(struct MAPFILE));
+  Bilder  =(struct MAPFILE *)MALLOC(AnzBilder    * (long)sizeof(struct MAPFILE));
+  Inventar=(struct MAPFILE *)MALLOC(AnzInventar  * (long)sizeof(struct MAPFILE));
+  Phase   =(struct MAPFILE *)MALLOC(AnzPhasen    * (long)sizeof(struct MAPFILE));
+  ChkRead(ifil,(char *)Programm,AnzProgramme * (long)sizeof(struct MAPFILE));
+  ChkRead(ifil,(char *)Bilder  ,AnzBilder    * (long)sizeof(struct MAPFILE));
+  ChkRead(ifil,(char *)Inventar,AnzInventar  * (long)sizeof(struct MAPFILE));
+  ChkRead(ifil,(char *)Phase   ,AnzPhasen    * (long)sizeof(struct MAPFILE));
+  {
+    short i;
+    for (i=0;i<AnzProgramme;i++) Programm[i].Data=NULL;
+    for (i=0;i<AnzBilder;i++)    Bilder[i].Data=NULL;
+    for (i=0;i<AnzInventar;i++)  Inventar[i].Data=NULL;
+    for (i=0;i<AnzPhasen;i++)    Phase[i].Data=NULL;
+  }
+  /* Compile-time guard: packed MAPFILE must match GAME.2 record size. */
+  {
+    typedef char moas_mapfile_native_size_ok[(sizeof(struct MAPFILE)==30)?1:-1];
+  }
+#else
   LoadMapFileTable(ifil, &Programm, AnzProgramme);
   LoadMapFileTable(ifil, &Bilder,   AnzBilder);
   LoadMapFileTable(ifil, &Inventar, AnzInventar);
   LoadMapFileTable(ifil, &Phase,    AnzPhasen);
+#endif
 
 //printf("Bilder[0].x=%3li  Bilder[0].y=%3li  Bilder[0].Anz=%3li\n",Bilder[0].x,Bilder[0].y,Bilder[0].Anz);
 //printf("Bilder[1].x=%3li  Bilder[1].y=%3li  Bilder[1].Anz=%3li\n",Bilder[1].x,Bilder[1].y,Bilder[1].Anz);
@@ -250,6 +273,15 @@ void InitMapData(void)
     InternalError(1022);
   if (Phase[1].x != 30 || Phase[1].y != 30 || Phase[1].Anz != 16)
     InternalError(1022);
+  /* Host unpack of Phase[0] frame 0 has ~148 non-zero texels. Far outside
+   * that range means UniversalUnpack/LadeBereich produced garbage. */
+  {
+    long i, nz = 0;
+    for (i = 0; i < 44L * 40L; i++)
+      if (Phase[0].Data[i]) nz++;
+    if (nz < 40 || nz > 500)
+      InternalError(1022);
+  }
 #endif
 }
 void InitScreenData(void)

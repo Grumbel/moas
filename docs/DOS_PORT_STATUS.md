@@ -276,3 +276,19 @@ DOS heap is not — Phase[0]/[1] kept random bytes, and `if (PrsData[x])` in
 
 Fix: `memset` the destination to 0 before Glass=254 unpack (phases, inventar,
 sprite Bilder).
+
+## DOS MAPFILE load (64-bit port divergence)
+
+Host builds cannot `ChkRead(sizeof(MAPFILE))` because `long` is 64-bit and
+`sizeof(MAPFILE) != 30`. They use `MapFileDisk` (fixed int32 fields).
+
+DOS/Watcom must keep **`#pragma pack(1)` on `struct MAPFILE`** so
+`sizeof(MAPFILE)==30` and use the **original** load:
+
+```c
+ChkRead(ifil, Phase, AnzPhasen * sizeof(struct MAPFILE));
+```
+
+Field-by-field MapFileDisk should be equivalent if packing is correct; the
+native path removes that variable. After `LadePhase(0)` we also check that
+frame 0 has a plausible non-zero texel count (~148 expected).
