@@ -123,25 +123,30 @@
 
 #include <ctype.h>
 
-/* Desktop: -fcommon merges these header definitions.
- * Emscripten: one TU defines (MOAS_DEFINE_GLOBALS), others see extern. */
-#if defined(__EMSCRIPTEN__)
+/*
+ * Globals live in the header as classic DOS "common" symbols.
+ * GCC defaults to -fcommon and merges them. Emscripten and Open Watcom
+ * do not: each TU would get its own Mouse/Phase/Screen → soft cursor
+ * drawn from an empty Phase while input uses another Mouse copy.
+ * One TU defines storage (MOAS_DEFINE_GLOBALS); all others see extern.
+ */
+#if defined(__EMSCRIPTEN__) || defined(__WATCOMC__) || defined(DOS)
 #  if defined(MOAS_DEFINE_GLOBALS)
 #    define MOAS_G /* define storage */
 #  else
 #    define MOAS_G extern
 #  endif
 #else
-#  define MOAS_G /* tentative common */
+#  define MOAS_G /* tentative common (GCC -fcommon) */
 #endif
 
 
-MOAS_G MOAS_G struct I_LINE
+MOAS_G struct I_LINE
 {
   short x1,y1,x2,y2,Dir,Side,Parent;
 } iLine[600];
 
-MOAS_G MOAS_G struct LAUFREIHE
+MOAS_G struct LAUFREIHE
 {
   short x,y;
 } LaufReihe[30];

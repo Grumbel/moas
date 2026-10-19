@@ -254,3 +254,14 @@ via DPMI `0x0100` and talks to the Sound Blaster. That can exhaust low memory
 or interfere with the VGA path under DOSBox and produce scrambled graphics.
 
 DOS builds again skip `InitDigi()` (SDL audio remains for non-DOS).
+
+## Watcom globals (cursor corruption)
+
+Open Watcom does not merge tentative common definitions the way GCC `-fcommon`
+does. The linker warned `redefinition of _Phase` / `_Mouse` ignored — each
+object file could keep a private BSS copy. `LadePhase` then filled one `Phase`
+table while `PowerRedrawArea` in grafix drew the cursor from another (empty)
+table → corrupted soft cursor; input still used mouse.c’s `Mouse` (coordinates OK).
+
+DOS builds now use the same pattern as Emscripten: `moas_globals.c` defines
+storage (`MOAS_DEFINE_GLOBALS`); every other TU sees `extern` via `MOAS_G`.
