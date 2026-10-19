@@ -716,7 +716,7 @@ void UpDateWalking(void) /*==>+<== vllig neuschreiben !!! Total Chaos !!! */
 
         if ((Person[c].Bits & 2)==2 && IsPersonPositionOk(c+1000) && (Person[c].x!=Person[c].TargetX || Person[c].y!=Person[c].TargetY)) continue; /* Hlt andere Prs sie auf ?*/
 
-        if ((Person[c].x==Person[c].TargetX && Person[c].y==Person[c].TargetY) || Person[c].StepSpeed>0 || Person[c].Bits&16384==0)
+        if ((Person[c].x==Person[c].TargetX && Person[c].y==Person[c].TargetY) || Person[c].StepSpeed>0 || (Person[c].Bits & 16384) == 0)
           StopPerson(c);
         if (Person[c].Bits & 8)
         {
@@ -817,7 +817,7 @@ short IsPositionOk(short PrsNum,short x,short y)
 
   for (c=0;c<MAX_PRS;c++)
     if (Person[c].Num!=-1 && c!=PrsNum && (Person[c].Bits & 16384)==0)
-      if (abs(yFoot+Person[PrsNum].z-Person[c].y-Person[c].z-Person[c].ys)<3)
+      if (labs((long)(yFoot+Person[PrsNum].z-Person[c].y-Person[c].z-Person[c].ys))<3)
       {
         if (x<Person[c].x)
         {

@@ -467,7 +467,7 @@ void Blend(char Step,char Dir)
     Back[c+2]=b*DayLightB/100;
   }
                             /* ==>+<== */
-  if (Eingeblendet=Dir)     /* Wird VgaPal noch sonst wo verwendet ? */
+  if ((Eingeblendet = Dir) != 0) /* Wird VgaPal noch sonst wo verwendet ? */
   {                         /* Kann man Sie nicht auch lokal managen ? */
     memset(VgaPal,0,768);
     for (c=Step;c<=64;c+=Step,kbhit())

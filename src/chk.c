@@ -77,7 +77,7 @@ void AreaChk(unsigned char *Array,long Length)
 }
 short ChkOpen(char *FileName,char Mode)
 {
-  short xfil;
+  short xfil = -1;
   static short LastMode=-1;
 
   if (Mode==MODE)

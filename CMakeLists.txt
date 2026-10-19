@@ -88,8 +88,18 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     -Wall -Wextra
     -Wno-unused-parameter
     -Wno-unused-variable
+    -Wno-unused-but-set-variable
     -Wno-sign-compare
+    -Wno-pointer-sign
+    -Wno-char-subscripts
     -Wno-missing-field-initializers
+    -Wno-missing-braces
+    -Wno-misleading-indentation
+    -Wno-implicit-fallthrough
+    -Wno-unused-result
+    -Wno-format-truncation
+    -Wno-format-overflow
+    -Wno-absolute-value
     -Wno-error=format-security
     # Tentative globals need -fcommon on desktop; wasm32's MCStreamer
     # crashes on common symbols (emitLocalCommonSymbol).

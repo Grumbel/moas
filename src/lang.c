@@ -499,55 +499,6 @@ static void trim_inplace(char *s)
     *--e = 0;
 }
 
-static void load_ui_file(const char *path)
-{
-  FILE *f = fopen(path, "rb");
-  char line[512];
-  if (!f)
-    return;
-  while (fgets(line, sizeof(line), f)) {
-    char *tab, *val;
-    int id;
-    if (line[0] == '#' || line[0] == '\n' || line[0] == '\r')
-      continue;
-    tab = strchr(line, '\t');
-    if (!tab)
-      continue;
-    *tab = 0;
-    val = tab + 1;
-    trim_inplace(line);
-    trim_inplace(val);
-    id = ui_id_from_name(line);
-    if (id >= 0)
-      ui_set(id, val);
-  }
-  fclose(f);
-}
-
-static void load_script_file(const char *path)
-{
-  FILE *f = fopen(path, "rb");
-  char line[800];
-  if (!f)
-    return;
-  while (fgets(line, sizeof(line), f)) {
-    char *tab, *val;
-    if (line[0] == '#' || line[0] == '\n' || line[0] == '\r')
-      continue;
-    tab = strchr(line, '\t');
-    if (!tab)
-      continue;
-    *tab = 0;
-    val = tab + 1;
-    trim_inplace(line);
-    trim_inplace(val);
-    if (line[0] && val[0])
-      script_add(line, val);
-  }
-  fclose(f);
-  script_sort();
-}
-
 static void apply_verb_globals(void)
 {
   __Benutze    = (char *)Ui(UI_VERB_USE);

@@ -756,7 +756,7 @@ int LoadGameFromFile(const char *path)
 {
   unsigned short c;
   short h, ifil;
-  enum MARKTYP Typ;
+  enum PICTYP Typ;
 
   if (!path || !path[0]) {
     fprintf(stderr, "moas: LoadGameFromFile: empty path\n");
@@ -1006,26 +1006,12 @@ void LoadGame(void)
 
 void CheckFile(unsigned char a,unsigned char b,unsigned char c,unsigned char d)
 {
-  short ifil,AnzRead;
-  CHKSUM NewCheck;
-  char *p;
-
-  p=MALLOC(4000);
-//ifil=open(_pgmptr,O_RDONLY|O_BINARY);          /* ==>+<== */
-  if (ifil<0) InternalError(1033);
-  ClrChk();
-
-  while (1)
-  {
-    AnzRead=read(ifil,p,4000);
-    if (AnzRead==0) break;
-    AreaChk(p,AnzRead);
-  }
-  close(ifil);
-  NewCheck=GetChk();
-  if (NewCheck!=(a+((CHKSUM)b*256)+((CHKSUM)c*65536)+((CHKSUM)d*256*65536)))
-    InternalError(1033);
-  FREE(p);
+  /*
+   * Original DOS anti-tamper: checksum of the running EXE via _pgmptr.
+   * That open was already commented out, so ifil was uninitialized (UB).
+   * Host builds have no EXE to verify; keep the opcode as a no-op.
+   */
+  (void)a; (void)b; (void)c; (void)d;
 }
 void FileMenu(void)
 {

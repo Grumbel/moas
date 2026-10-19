@@ -121,7 +121,7 @@ void ConditionalWalk(short PrsNum,char Mode,short x1,short y1,short x2,short y2,
 }
 void iWalk(short PrsNum,short tx,short ty)
 {
-  short b,c,d,AnzILines=0,x,y,Real;
+  short b,c,d,AnzILines=0,x=0,y=0,Real;
   short Pass=0,Start,End,LastAnz;
   short mtx,mty;                      /*Minor target - Zwischenziel */
 
@@ -368,16 +368,16 @@ void VereinfacheLaufReihe(short PrsNum)
       y=(LaufReihe[c].y+LaufReihe[c+2].y)/2;
       while  (LaufReihe[c+1].x-Step>=x && IsDirectWalkPossible(PrsNum,LaufReihe[c].x,LaufReihe[c].y,LaufReihe[c+1].x-Step,LaufReihe[c+1].y)==1
                                        && IsDirectWalkPossible(PrsNum,LaufReihe[c+1].x-Step,LaufReihe[c+1].y,LaufReihe[c+2].x,LaufReihe[c+2].y)==1)
-      { LaufReihe[c+1].x-=Step; DidSomething; }
+      { LaufReihe[c+1].x-=Step; DidSomething=1; }
       while  (LaufReihe[c+1].x+Step<=x && IsDirectWalkPossible(PrsNum,LaufReihe[c].x,LaufReihe[c].y,LaufReihe[c+1].x+Step,LaufReihe[c+1].y)==1
                                        && IsDirectWalkPossible(PrsNum,LaufReihe[c+1].x+Step,LaufReihe[c+1].y,LaufReihe[c+2].x,LaufReihe[c+2].y)==1)
-      { LaufReihe[c+1].x+=Step; DidSomething; }
+      { LaufReihe[c+1].x+=Step; DidSomething=1; }
       while  (LaufReihe[c+1].y-Step>=y && IsDirectWalkPossible(PrsNum,LaufReihe[c].x,LaufReihe[c].y,LaufReihe[c+1].x,LaufReihe[c+1].y-Step)==1
                                        && IsDirectWalkPossible(PrsNum,LaufReihe[c+1].x,LaufReihe[c+1].y-Step,LaufReihe[c+2].x,LaufReihe[c+2].y)==1)
-      { LaufReihe[c+1].y-=Step; DidSomething; }
+      { LaufReihe[c+1].y-=Step; DidSomething=1; }
       while  (LaufReihe[c+1].y+Step<=y && IsDirectWalkPossible(PrsNum,LaufReihe[c].x,LaufReihe[c].y,LaufReihe[c+1].x,LaufReihe[c+1].y+Step)==1
                                        && IsDirectWalkPossible(PrsNum,LaufReihe[c+1].x,LaufReihe[c+1].y+Step,LaufReihe[c+2].x,LaufReihe[c+2].y)==1)
-      { LaufReihe[c+1].y+=Step; DidSomething; }
+      { LaufReihe[c+1].y+=Step; DidSomething=1; }
     }
   }
 }
