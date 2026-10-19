@@ -588,6 +588,7 @@ static void overlay_rects(SDL_Rect out[6])
   int left_x, right_x, left_y0, right_y0;
   int side;
   int left_stack_h, right_stack_h;
+  int mode_sep;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   gap = 10;
@@ -607,7 +608,11 @@ static void overlay_rects(SDL_Rect out[6])
   if (btn_h > 88)
     btn_h = 88;
 
-  left_stack_h = btn_h * 4 + gap * 3;
+  /* Extra gap after Load so USE/LOOK sit lower as their own group. */
+  mode_sep = gap + btn_h / 2 + 12;
+  if (mode_sep < 28)
+    mode_sep = 28;
+  left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
   right_stack_h = btn_h * 2 + gap;
 
   if (dx >= btn_w + margin * 2) {
@@ -626,7 +631,10 @@ static void overlay_rects(SDL_Rect out[6])
   } else {
     btn_w = 72;
     btn_h = 56;
-    left_stack_h = btn_h * 4 + gap * 3;
+    mode_sep = gap + btn_h / 2 + 12;
+    if (mode_sep < 28)
+      mode_sep = 28;
+    left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
     right_stack_h = btn_h * 2 + gap;
     left_x = margin;
     right_x = ww - margin - btn_w;
@@ -640,21 +648,24 @@ static void overlay_rects(SDL_Rect out[6])
       left_y0 = dy + margin;
       right_y0 = dy + margin;
       if (left_y0 + left_stack_h > dy + dh) {
-        btn_h = (dh - gap * 3 - margin * 2) / 4;
+        btn_h = (dh - gap * 2 - mode_sep - margin * 2) / 4;
         if (btn_h < 44)
           btn_h = 44;
-        left_stack_h = btn_h * 4 + gap * 3;
+        mode_sep = gap + btn_h / 2 + 12;
+        if (mode_sep < 28)
+          mode_sep = 28;
+        left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
         right_stack_h = btn_h * 2 + gap;
       }
     }
   }
 
-  out[0].x = left_x;  out[0].y = left_y0;                     out[0].w = btn_w; out[0].h = btn_h; /* Save */
-  out[1].x = left_x;  out[1].y = left_y0 + (btn_h + gap);      out[1].w = btn_w; out[1].h = btn_h; /* Load */
-  out[4].x = left_x;  out[4].y = left_y0 + 2 * (btn_h + gap);  out[4].w = btn_w; out[4].h = btn_h; /* USE  */
-  out[5].x = left_x;  out[5].y = left_y0 + 3 * (btn_h + gap);  out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
-  out[2].x = right_x; out[2].y = right_y0;                     out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
-  out[3].x = right_x; out[3].y = right_y0 + (btn_h + gap);     out[3].w = btn_w; out[3].h = btn_h; /* Skip */
+  out[0].x = left_x;  out[0].y = left_y0;                                    out[0].w = btn_w; out[0].h = btn_h; /* Save */
+  out[1].x = left_x;  out[1].y = left_y0 + (btn_h + gap);                     out[1].w = btn_w; out[1].h = btn_h; /* Load */
+  out[4].x = left_x;  out[4].y = left_y0 + 2 * (btn_h + gap) + (mode_sep - gap); out[4].w = btn_w; out[4].h = btn_h; /* USE  */
+  out[5].x = left_x;  out[5].y = out[4].y + (btn_h + gap);                    out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
+  out[2].x = right_x; out[2].y = right_y0;                                    out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
+  out[3].x = right_x; out[3].y = right_y0 + (btn_h + gap);                    out[3].w = btn_w; out[3].h = btn_h; /* Skip */
 }
 
 /* ox/oy are renderer-output pixels (after window_to_output). */
