@@ -569,119 +569,6 @@ void LoadSaveMenu(char *Text)
   PlayerHasControl = WalkingAllowed = 1;
 }
 
-#ifndef DOS
-/* Object names (Description) and custom verb strings (PowerParse) are filled by
- * scripts at runtime and were never part of the original save blob — after a
- * cold autosave load every hotspot showed "???". Append them after the
- * classic checksum so DOS/old readers stay compatible. */
-#define MOAS_DESC_MAGIC "DESC"
-
-static void WriteDescExtension(int ofil)
-{
-  short n, i, len;
-  if (write(ofil, MOAS_DESC_MAGIC, 4) != 4)
-    return;
-  n = AnzDescription;
-  if (write(ofil, (char *)&n, 2) != 2)
-    return;
-  for (i = 0; i < n; i++) {
-    if (write(ofil, (char *)&Description[i].Number, 2) != 2)
-      return;
-    len = (short)(strlen(Description[i].Name) + 1);
-    if (write(ofil, (char *)&len, 2) != 2)
-      return;
-    if (write(ofil, Description[i].Name, len) != len)
-      return;
-  }
-  n = 0;
-  for (i = 0; i < MAX_PARSE; i++)
-    if (PowerParse[i].Nummer != -1)
-      n++;
-  if (write(ofil, (char *)&n, 2) != 2)
-    return;
-  for (i = 0; i < MAX_PARSE; i++) {
-    if (PowerParse[i].Nummer == -1)
-      continue;
-    if (write(ofil, (char *)&PowerParse[i].Nummer, 2) != 2)
-      return;
-    len = (short)(strlen((char *)PowerParse[i].String) + 1);
-    if (write(ofil, (char *)&len, 2) != 2)
-      return;
-    if (write(ofil, (char *)PowerParse[i].String, len) != len)
-      return;
-  }
-}
-
-static void ReadDescExtension(int ifil)
-{
-  char magic[4];
-  short n, i, len, num;
-  char *buf;
-
-  if (read(ifil, magic, 4) != 4)
-    return;
-  if (magic[0] != 'D' || magic[1] != 'E' || magic[2] != 'S' || magic[3] != 'C')
-    return;
-
-  RemoveDescriptions();
-  for (i = 0; i < MAX_PARSE; i++)
-    PowerParse[i].Nummer = -1;
-
-  if (read(ifil, (char *)&n, 2) != 2)
-    return;
-  if (n < 0 || n > 500)
-    return;
-  for (i = 0; i < n; i++) {
-    if (read(ifil, (char *)&num, 2) != 2)
-      return;
-    if (read(ifil, (char *)&len, 2) != 2)
-      return;
-    if (len < 1 || len > 512)
-      return;
-    buf = MALLOC(len);
-    if (read(ifil, buf, len) != len) {
-      FREE(buf);
-      return;
-    }
-    buf[len - 1] = 0;
-    Description[i].Number = num;
-    Description[i].Name = buf;
-  }
-  AnzDescription = n;
-
-  if (read(ifil, (char *)&n, 2) != 2)
-    return;
-  if (n < 0 || n > MAX_PARSE)
-    return;
-  for (i = 0; i < n; i++) {
-    short slot;
-    if (read(ifil, (char *)&num, 2) != 2)
-      return;
-    if (read(ifil, (char *)&len, 2) != 2)
-      return;
-    if (len < 1 || len > 1024)
-      return;
-    buf = MALLOC(len);
-    if (read(ifil, buf, len) != len) {
-      FREE(buf);
-      return;
-    }
-    buf[len - 1] = 0;
-    for (slot = 0; slot < MAX_PARSE; slot++)
-      if (PowerParse[slot].Nummer == -1)
-        break;
-    if (slot >= MAX_PARSE) {
-      FREE(buf);
-      break;
-    }
-    PowerParse[slot].Nummer = num;
-    PowerParse[slot].String = (uChar *)buf;
-  }
-  fprintf(stderr, "moas: restored %d descriptions + verb strings from save\n",
-          (int)AnzDescription);
-}
-#endif
-
 /* Write full game state to path. quiet=1: no DisplayMessage (exit autosave).
  * Returns 0 on success, -1 on error. */
 int SaveGameToFile(const char *path, int quiet)
@@ -785,9 +672,6 @@ int SaveGameToFile(const char *path, int quiet)
         DisplayMessage("Speichern fehlgeschlagen", 253);
       return -1;
     }
-#ifndef DOS
-    WriteDescExtension(ofil);
-#endif
     close(ofil);
   }
   FREE(MiniPic);
@@ -928,18 +812,7 @@ int LoadGameFromFile(const char *path)
     }
   }
 #endif
-  {
-    CHKSUM Check, filecheck;
-    Check = GetChk();
-    if (read(ifil, (char *)&filecheck, sizeof(CHKSUM)) != (int)sizeof(CHKSUM))
-      InternalError(1005);
-    if (Check != filecheck)
-      InternalError(1007);
-#ifndef DOS
-    ReadDescExtension(ifil);
-#endif
-    close(ifil);
-  }
+  ChkClose(ifil);
   if (GhostMode == 1) {
     MakeMegaTable(-1);
     MakeMegaTable(1);
@@ -1018,22 +891,26 @@ int LoadGameSlot(short slot)
   return LoadGameFromFile(path);
 }
 
-#define MOAS_AUTOSAVE_NAME "AUTOSAVE.SAV"
+/*
+ * Exit/resume autosave uses the original engine path: slot 9 (GAME9.SAV),
+ * same as AutoSaveGame → SaveGame(1). No separate file, no format change.
+ *
+ * Note: Description[] / WalkArea[] are script RAM, never in .SAV. Mid-session
+ * LoadGame keeps them in memory; a cold process restart does not. After a
+ * cold load we re-run the ambient script procs so AddDescription can fire
+ * again (AddDescription is idempotent on non-DOS).
+ */
+#define MOAS_AUTOSAVE_SLOT 9
 
 void MoasAutosaveOnExit(void)
 {
-  char savpath[512];
-
   if (moas_no_autosave)
     return;
-  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
-    fprintf(stderr, "moas: autosave: path too long\n");
-    return;
-  }
-  if (SaveGameToFile(savpath, 1) != 0)
-    fprintf(stderr, "moas: autosave on exit failed\n");
+  /* Same as in-game AutoSaveGame: SaveGame(1) → GAME9.SAV */
+  if (SaveGameSlot(MOAS_AUTOSAVE_SLOT) != 0)
+    fprintf(stderr, "moas: exit autosave (slot %d) failed\n", MOAS_AUTOSAVE_SLOT);
   else
-    fprintf(stderr, "moas: autosave on exit ok\n");
+    fprintf(stderr, "moas: exit autosave (slot %d) ok\n", MOAS_AUTOSAVE_SLOT);
 }
 
 /* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
@@ -1044,7 +921,7 @@ int MoasTryLoadAutosave(void)
 
   if (moas_no_autosave)
     return -1;
-  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
+  if (MoasStatePath(savpath, sizeof(savpath), "GAME9.SAV") != 0)
     return -1;
   fd = open(savpath, O_RDONLY
 #ifdef DOS
@@ -1054,11 +931,28 @@ int MoasTryLoadAutosave(void)
   if (fd < 0)
     return -1;
   close(fd);
-  fprintf(stderr, "moas: restoring autosave %s\n", savpath);
-  if (LoadGameFromFile(savpath) != 0) {
-    fprintf(stderr, "moas: autosave restore failed; starting fresh\n");
+  fprintf(stderr, "moas: restoring exit autosave %s\n", savpath);
+  if (LoadGameSlot(MOAS_AUTOSAVE_SLOT) != 0) {
+    fprintf(stderr, "moas: exit autosave restore failed; starting fresh\n");
     return -1;
   }
+#ifndef DOS
+  /*
+   * Cold start: InitAll left Description empty. Same .SAV as a mid-session
+   * load, but RAM never had AddDescription. Re-run proc 1 and CurrentProc
+   * from addr 0 (ExecuteTheProgram order) so room/global setup can register
+   * names again. AddDescription replaces on duplicate (non-DOS).
+   */
+  if (AnzDescription == 0) {
+    fprintf(stderr, "moas: cold resume — re-running scripts to register objects\n");
+    (void)Execute(1, 0);
+    if (AnzDescription == 0 && CurrentProc >= 0)
+      (void)Execute(CurrentProc, 0);
+    if (AnzDescription == 0)
+      (void)Execute(2, 0);
+    fprintf(stderr, "moas: after script re-run AnzDescription=%d\n", (int)AnzDescription);
+  }
+#endif
   return 0;
 }
 

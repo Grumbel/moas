@@ -96,10 +96,10 @@ int main(int argc, char **argv)
 #endif
       return 1;
     }
-    /* Save already contains script state; skip intro + cold Execute. */
+    /* World state restored; skip intro. Names need session RAM or script re-run. */
   } else if (MoasTryLoadAutosave() == 0) {
-    /* AUTOSAVE.SAV from previous exit; skip intro like --load. */
-    MoasDbg(MOAS_DBG_LOAD, "restored AUTOSAVE.SAV");
+    /* GAME9.SAV exit resume (same slot as AutoSaveGame). */
+    MoasDbg(MOAS_DBG_LOAD, "restored exit autosave (slot 9)");
   } else {
     if (!moas_skip_intro) {
       MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
@@ -631,7 +631,18 @@ void AddDescription(short Num,char *Text)
   short c;
 
   for (c=0;c<AnzDescription;c++)
-    if (Description[c].Number==Num) InternalError(1012);
+    if (Description[c].Number==Num)
+    {
+#ifndef DOS
+      /* Idempotent: cold resume re-runs room setup; DOS still errors. */
+      FREE(Description[c].Name);
+      Description[c].Name=MALLOC(strlen(Text)+1);
+      strcpy(Description[c].Name,Text);
+      return;
+#else
+      InternalError(1012);
+#endif
+    }
   Description[c].Name=MALLOC(strlen(Text)+1);
   strcpy(Description[c].Name,Text);
 

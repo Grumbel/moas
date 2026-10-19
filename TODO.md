@@ -80,7 +80,7 @@
 ## Done this stack
 - Android quit: finishAndRemoveTask + InternalError(0)/Alt+Q → RequestQuit; MOAS_STATEDIR for autosave
 - LoadGameFromFile: re-init cursor/control so hover works after autosave/load
-- Save DESC extension: Description + PowerParse (fixes ??? after cold load)
+- Exit autosave = GAME9.SAV; cold resume script re-run; no .SAV format change
 - Android quit: Activity.finish() + SDL_Quit; AC_BACK quits
 - Touch USE/LOOK modes; both walk on empty; LOOK object = SIEHE (no Benutze/Bewege)
 - Touch walk: non-DOS left-click on empty ground → WalkClick + idle C_WALK (no D-pad)
