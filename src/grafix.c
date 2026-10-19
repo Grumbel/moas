@@ -198,6 +198,7 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
   for (c=0;c<MAX_PRS;c++)
   {
     if (Person[c].Num==-1) break;
+    if (!Person[c].Phase) continue;
 
     xs=Person[c].xs;
     ys=Person[c].ys;
@@ -262,7 +263,7 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
   }
 
   for (c=0;c<AnzInventar;c++)
-    if (Inventar[c].x==-3 && V_InventarState)
+    if (Inventar[c].x==-3 && V_InventarState && Inventar[c].Data)
     {
       xs=(Inventar[c].y%10)*32;
       ys=(Inventar[c].y/10)*24;
@@ -290,7 +291,7 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
       }
     }
   for (c=0;c<5;c++)
-    if (SayWindow[c].RefPrs!=-1)
+    if (SayWindow[c].RefPrs!=-1 && SayWindow[c].Data)
     {
       Tmp=PRedrawTmpBak-1;
       xs=SayWindow[c].xs;

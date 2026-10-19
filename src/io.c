@@ -804,6 +804,10 @@ void LoadGame(void)
           }
 
         Clearscreen();     InitScreenData();
+        /* Inventory icons must be loaded before any PowerRedrawArea (x==-3). */
+        for (c=0;c<AnzInventar;c++)
+          if (Inventar[c].x==-3)
+            LadeInventar(c);
         for (c=0;c<10;c++)
           if (PicturesOnScreen[c].Typ!=-1)
           {
