@@ -67,9 +67,12 @@ int main(int argc, char **argv)
 #endif
   MOAS_ALOG("assets prepared");
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
+  MoasLogDirectories();
   MOAS_ALOG("data dir ready, calling InitAll");
 #else
   (void)argc; (void)argv;
+  /* DOS: CWD is the game dir; state/config are "." (DOSBox runner persists saves). */
+  MoasLogDirectories();
 #endif
 
   DontCyclePal=1;

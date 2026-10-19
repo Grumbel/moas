@@ -323,7 +323,6 @@ static void resolve_state_dir(void)
     data_log("moas: WARNING: could not create state dir '%s'", state_dir);
 #endif
   state_dir_ready = 1;
-  data_log("moas: state directory: %s", state_dir);
 }
 
 static void resolve_config_dir(void)
@@ -391,6 +390,19 @@ const char *MoasConfigDir(void)
   resolve_config_dir();
   return config_dir;
 }
+
+void MoasLogDirectories(void)
+{
+  const char *data = MoasDataDir();
+  const char *state = MoasStateDir();
+  const char *config = MoasConfigDir();
+
+  data_log("moas: directories:");
+  data_log("  data   (GAME.*):  %s", data ? data : "(null)");
+  data_log("  state  (saves):   %s", state ? state : "(null)");
+  data_log("  config (settings): %s", config ? config : "(null)");
+}
+
 
 int MoasStatePath(char *buf, size_t buflen, const char *name)
 {

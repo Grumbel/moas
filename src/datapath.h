@@ -39,6 +39,9 @@ int MoasOpenState(const char *name, int flags, int mode);
 int MoasOpenData(const char *name);
 void MoasReportMissingData(const char *name);
 
+/* Print data / state / config directories once at startup. */
+void MoasLogDirectories(void);
+
 #ifdef __cplusplus
 }
 #endif
