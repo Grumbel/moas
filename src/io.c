@@ -29,13 +29,11 @@
 #include "moas.h"
 #include "person_disk.h"
 #include "save_disk.h"
+#include "datapath.h"
+#include "debug.h"
+#include <errno.h>
 #ifndef DOS
 #include "platform.h"
-#endif
-
-#ifndef DOS
-#include "datapath.h"
-#include <errno.h>
 #endif
 
 #ifdef DOS
@@ -560,22 +558,146 @@ void LoadSaveMenu(char *Text)
   CloseWindow();
   PlayerHasControl=WalkingAllowed=1;
 }
+/* Write full game state to path. quiet=1: no DisplayMessage (exit autosave).
+ * Returns 0 on success, -1 on error. */
+int SaveGameToFile(const char *path, int quiet)
+{
+  short h, ofil;
+  unsigned short c;
+  char *MiniPic;
+  unsigned char *Vga = VGA_ADRESSE;
+  unsigned short px, py;
+
+  if (!path || !path[0]) {
+    fprintf(stderr, "moas: SaveGameToFile: empty path\n");
+    return -1;
+  }
+
+  MiniPic = MALLOC(1000);
+  ofil = open(path, O_TRUNC | O_CREAT | O_WRONLY
+#ifdef DOS
+              | O_BINARY
+#endif
+#ifdef DOS
+              , S_IWRITE
+#else
+              , 0666
+#endif
+    );
+  if (ofil < 0) {
+    fprintf(stderr, "moas: SaveGameToFile: cannot create '%s' (errno=%d)\n", path, errno);
+    if (!quiet)
+      DisplayMessage("Speichern fehlgeschlagen", 253);
+    FREE(MiniPic);
+    return -1;
+  }
+
+  for (py = 0; py < 200; py += 8)
+    for (px = 0; px < 320; px += 8)
+      MiniPic[py / 8 * 40 + px / 8] =
+        (Palette[Vga[px + py * 320] * 3] + Palette[Vga[px + py * 320] * 3 + 1] +
+         Palette[Vga[px + py * 320] * 3 + 2]) /
+        12;
+
+  (void)ChkOpen("?", WRITE);
+  ChkWrite(ofil, MiniPic, 1000);
+  ChkWrite(ofil, (char *)&V_Points, 2);
+  ChkWrite(ofil, (char *)&V_TotalPoints, 2);
+  ChkWrite(ofil, RoomName, 40);
+#ifndef DOS
+  WritePicsDisk(ofil);
+  WritePersonsDisk(ofil);
+  WriteMarkersDisk(ofil);
+#else
+  ChkWrite(ofil, (char *)PicturesOnScreen, sizeof(PicturesOnScreen));
+  ChkWrite(ofil, (char *)Person, sizeof(Person));
+  ChkWrite(ofil, (char *)Marker, sizeof(Marker));
+#endif
+  ChkWrite(ofil, (char *)Ontimes, sizeof(struct ONTIME) * 10);
+  ChkWrite(ofil, (char *)Var, AnzVars * 2);
+  ChkWrite(ofil, (char *)&CurrentProc, 2);
+  ChkWrite(ofil, (char *)&GhostMode, 1);
+  ChkWrite(ofil, (char *)&TotalSpeed, 2);
+  ChkWrite(ofil, (char *)&SpeechSpeed, 2);
+  ChkWrite(ofil, (char *)&DayLightR, 2);
+  ChkWrite(ofil, (char *)&DayLightG, 2);
+  ChkWrite(ofil, (char *)&DayLightB, 2);
+  ChkWrite(ofil, (char *)&PaletteCycleFirst, 2);
+  ChkWrite(ofil, (char *)&PaletteCycleLast, 2);
+#ifndef DOS
+  WriteDialogsDisk(ofil);
+  WriteSayPropsDisk(ofil);
+#else
+  ChkWrite(ofil, (char *)Dialog, sizeof(struct DIALOG) * 20);
+  ChkWrite(ofil, (char *)SayProperties, sizeof(struct SAY_PROPERTIES) * 10);
+#endif
+  for (c = 0; c < AnzInventar; c++) {
+    ChkWrite(ofil, (char *)&Inventar[c].x, sizeof(Inventar[c].x));
+    ChkWrite(ofil, (char *)&Inventar[c].y, sizeof(Inventar[c].y));
+  }
+#ifndef DOS
+  WriteSayWindowsDisk(ofil);
+#else
+  for (c = 0; c < 5; c++) {
+    ChkWrite(ofil, (char *)&SayWindow[c], sizeof(struct SAY_WINDOW));
+    if (SayWindow[c].RefPrs != -1) {
+      if (SayWindow[c].Data)
+        ChkWrite(ofil, SayWindow[c].Data, SayWindow[c].xs * SayWindow[c].ys);
+      if (SayWindow[c].Text) {
+        h = (short)(strlen(SayWindow[c].Text) + 1);
+        ChkWrite(ofil, (char *)&h, 2);
+        ChkWrite(ofil, SayWindow[c].Text, h);
+      }
+    }
+  }
+#endif
+  {
+    CHKSUM Check = GetChk();
+    if (write(ofil, (char *)&Check, sizeof(CHKSUM)) != (int)sizeof(CHKSUM)) {
+      fprintf(stderr, "moas: SaveGameToFile: checksum write failed for '%s'\n", path);
+      close(ofil);
+      FREE(MiniPic);
+      if (!quiet)
+        DisplayMessage("Speichern fehlgeschlagen", 253);
+      return -1;
+    }
+    close(ofil);
+  }
+  FREE(MiniPic);
+  fprintf(stderr, "moas: saved -> %s\n", path);
+  return 0;
+}
+
+int SaveGameSlot(short slot)
+{
+  char name[32];
+  char savpath[512];
+
+  if (slot < 0 || slot > 9) {
+    fprintf(stderr, "moas: SaveGameSlot: slot %d out of range 0..9\n", (int)slot);
+    return -1;
+  }
+  sprintf(name, "GAME%i.SAV", (int)slot);
+  if (MoasStatePath(savpath, sizeof(savpath), name) != 0) {
+    fprintf(stderr, "moas: SaveGameSlot: path too long for %s\n", name);
+    return -1;
+  }
+  return SaveGameToFile(savpath, 0);
+}
+
 void SaveGame(short CallerID)
 {
-  unsigned short c,d;
-  short h,ofil;
+  unsigned short c, d;
   short slot = -1;
-  char Name[20],*MiniPic;
-  char savpath[512];
-  unsigned char *Vga=VGA_ADRESSE;
-  unsigned short px,py;
 
-  if (CallerID==0) LoadSaveMenu("Speichern:");
-  for (d=0;d<143;d+=142)
-    for (c=0;c<5;c++)
-      if ((Mouse.x>=19+d && Mouse.y>=33+c*30 && Mouse.x<=60+d && Mouse.y<=60+c*30 && c+d/142*5!=9 && CallerID==0) || (CallerID==1 && c+d/142*5==9))
-      {
-        slot = (short)(c + d/142*5);
+  if (CallerID == 0)
+    LoadSaveMenu("Speichern:");
+  for (d = 0; d < 143; d += 142)
+    for (c = 0; c < 5; c++)
+      if ((Mouse.x >= 19 + d && Mouse.y >= 33 + c * 30 && Mouse.x <= 60 + d &&
+           Mouse.y <= 60 + c * 30 && c + d / 142 * 5 != 9 && CallerID == 0) ||
+          (CallerID == 1 && c + d / 142 * 5 == 9)) {
+        slot = (short)(c + d / 142 * 5);
         break;
       }
   if (slot < 0) {
@@ -586,106 +708,9 @@ void SaveGame(short CallerID)
     }
     return;
   }
-
-  {
-        sprintf(Name,"GAME%i.SAV",(int)slot);
-        if (MoasStatePath(savpath, sizeof(savpath), Name) != 0) {
-          fprintf(stderr, "moas: SaveGame: state path too long for %s\n", Name);
-          DisplayMessage("Save-Pfad Fehler", 253);
-          return;
-        }
-        MiniPic=MALLOC(1000);
-        ofil = open(savpath, O_TRUNC|O_CREAT|O_WRONLY
-#ifdef DOS
-                    |O_BINARY
-#endif
-#ifdef DOS
-                    , S_IWRITE
-#else
-                    , 0666
-#endif
-          );
-        if (ofil < 0) {
-          fprintf(stderr, "moas: SaveGame: cannot create '%s' (errno=%d)\n", savpath, errno);
-          DisplayMessage("Speichern fehlgeschlagen", 253);
-          FREE(MiniPic);
-          return;
-        }
-        /* Separate vars — original reused c,d and clobbered the slot loops */
-        for (py=0;py<200;py+=8)
-          for (px=0;px<320;px+=8)
-            MiniPic[py/8*40+px/8]=(Palette[Vga[px+py*320]*3]+Palette[Vga[px+py*320]*3+1]+Palette[Vga[px+py*320]*3+2])/12;
-        /* Drive ChkWrite checksum path: pretend WRITE mode without ChkOpen name */
-        (void)ChkOpen("?", WRITE); /* clears checksum; '?' is no-op open */
-        ChkWrite(ofil,MiniPic,1000);
-        ChkWrite(ofil,(char*)&V_Points,2);
-        ChkWrite(ofil,(char*)&V_TotalPoints,2);
-        ChkWrite(ofil,RoomName,40);
-#ifndef DOS
-        WritePicsDisk(ofil);
-        WritePersonsDisk(ofil);
-        WriteMarkersDisk(ofil);
-#else
-        ChkWrite(ofil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
-        ChkWrite(ofil,(char*)Person,sizeof(Person));
-        ChkWrite(ofil,(char*)Marker,sizeof(Marker));
-#endif
-        ChkWrite(ofil,(char*)Ontimes,sizeof(struct ONTIME)*10);
-        ChkWrite(ofil,(char *)Var,AnzVars*2);
-        ChkWrite(ofil,(char *)&CurrentProc,2);
-        ChkWrite(ofil,(char *)&GhostMode,1);
-        ChkWrite(ofil,(char *)&TotalSpeed,2); ChkWrite(ofil,(char *)&SpeechSpeed,2);
-        ChkWrite(ofil,(char *)&DayLightR,2);  ChkWrite(ofil,(char *)&DayLightG,2);
-        ChkWrite(ofil,(char *)&DayLightB,2);
-        ChkWrite(ofil,(char *)&PaletteCycleFirst,2);
-        ChkWrite(ofil,(char *)&PaletteCycleLast,2);
-#ifndef DOS
-        WriteDialogsDisk(ofil);
-        WriteSayPropsDisk(ofil);
-#else
-        ChkWrite(ofil,(char *)Dialog,sizeof(struct DIALOG)*20);
-        ChkWrite(ofil,(char*)SayProperties,sizeof(struct SAY_PROPERTIES)*10);
-#endif
-        for (c=0;c<AnzInventar;c++)
-        {
-          ChkWrite(ofil,(char*)&Inventar[c].x,sizeof (Inventar[c].x));
-          ChkWrite(ofil,(char*)&Inventar[c].y,sizeof (Inventar[c].y));
-        }
-#ifndef DOS
-        WriteSayWindowsDisk(ofil);
-#else
-        for (c=0;c<5;c++)
-        {
-          ChkWrite(ofil,(char*)&SayWindow[c],sizeof(struct SAY_WINDOW));
-          if (SayWindow[c].RefPrs!=-1)
-          {
-            if (SayWindow[c].Data) ChkWrite(ofil,SayWindow[c].Data,SayWindow[c].xs*SayWindow[c].ys);
-            if (SayWindow[c].Text)
-            {
-              h=strlen(SayWindow[c].Text)+1;
-              ChkWrite(ofil,(char*)&h,2);
-              ChkWrite(ofil,SayWindow[c].Text,h);
-            }
-          }
-        }
-#endif
-        /* ChkClose writes trailing checksum then close() */
-        {
-          CHKSUM Check = GetChk();
-          if (write(ofil, (char *)&Check, sizeof(CHKSUM)) != (int)sizeof(CHKSUM)) {
-            fprintf(stderr, "moas: SaveGame: checksum write failed for '%s'\n", savpath);
-            close(ofil);
-            FREE(MiniPic);
-            DisplayMessage("Speichern fehlgeschlagen", 253);
-            return;
-          }
-          close(ofil);
-        }
-        FREE(MiniPic);
-        fprintf(stderr, "moas: saved slot %d -> %s\n", (int)slot, savpath);
-        return;
-  }
+  (void)SaveGameSlot(slot);
 }
+
 /* Load a save from an absolute or relative path. Returns 0 on success, -1 on error. */
 int LoadGameFromFile(const char *path)
 {
@@ -833,6 +858,50 @@ int LoadGameSlot(short slot)
     return -1;
   }
   return LoadGameFromFile(path);
+}
+
+#define MOAS_AUTOSAVE_NAME "AUTOSAVE.SAV"
+
+void MoasAutosaveOnExit(void)
+{
+  char savpath[512];
+
+  if (moas_no_autosave)
+    return;
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
+    fprintf(stderr, "moas: autosave: path too long\n");
+    return;
+  }
+  if (SaveGameToFile(savpath, 1) != 0)
+    fprintf(stderr, "moas: autosave on exit failed\n");
+  else
+    fprintf(stderr, "moas: autosave on exit ok\n");
+}
+
+/* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
+int MoasTryLoadAutosave(void)
+{
+  char savpath[512];
+  int fd;
+
+  if (moas_no_autosave)
+    return -1;
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
+    return -1;
+  fd = open(savpath, O_RDONLY
+#ifdef DOS
+            | O_BINARY
+#endif
+    );
+  if (fd < 0)
+    return -1;
+  close(fd);
+  fprintf(stderr, "moas: restoring autosave %s\n", savpath);
+  if (LoadGameFromFile(savpath) != 0) {
+    fprintf(stderr, "moas: autosave restore failed; starting fresh\n");
+    return -1;
+  }
+  return 0;
 }
 
 void LoadGame(void)

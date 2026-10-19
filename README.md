@@ -243,13 +243,15 @@ cmake -S . -B build && cmake --build build --target moas-util
 | **F5** | Open the **save** menu (“Speichern”) |
 | **F7** | Open the **load** menu (“Laden”) |
 
-On the menu, **click a slot** (small framed boxes on the left/right). Slot **9** is reserved for **autosave** and cannot be chosen manually for save.
+On the menu, **click a slot** (small framed boxes on the left/right). Slot **9** is reserved for the **script checkpoint** autosave (`AutoSaveGame` / `GAME9.SAV`) and cannot be chosen manually for save.
 
 Save files are named `GAME0.SAV` … `GAME9.SAV` under the **state directory** (printed at startup), for example:
 
 ```text
 ~/.local/state/moas/GAME0.SAV
 ```
+
+**Exit resume file:** on a normal quit (window close / quit request) the engine writes `AUTOSAVE.SAV` in the same state directory and restores it on the next start (skips intro, like `--load`). Use `--no-autosave` to disable both write-on-exit and restore-on-start. Explicit `--load=…` still takes priority over `AUTOSAVE.SAV`.
 
 Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).  
 DOSBox runners persist to `~/.local/state/moas-dos` / `moas-dos-original`.
@@ -330,6 +332,7 @@ These are developer tools from the original engine, not needed for normal play.
 --statedir=PATH         Savegame directory (MOAS_STATEDIR)
 --load=SLOT|FILE        Load a save at startup (slot 0–9 or path to .SAV)
 --load SLOT|FILE        Same as --load=
+--no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit
 -f, --fullscreen        Desktop fullscreen
 ```
 
@@ -339,9 +342,11 @@ Load a save without the in-game menu:
 ./build/moas --load=0
 ./build/moas --load=3 --statedir=$HOME/.local/state/moas
 ./build/moas --load=$HOME/.local/state/moas/GAME2.SAV
+./build/moas --no-autosave   # fresh start; do not write AUTOSAVE.SAV on quit
 ```
 
-`--load` implies `--skip-intro` (the save already holds game state).
+`--load` implies `--skip-intro` (the save already holds game state).  
+If no `--load` is given and `AUTOSAVE.SAV` exists (and `--no-autosave` was not passed), that file is restored the same way.
 
 Debug categories are `script`, `input`, `wait`, `window`, `load`, and `all`.
 For example:

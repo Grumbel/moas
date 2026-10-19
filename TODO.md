@@ -49,6 +49,10 @@
   - Override: `MOAS_STATEDIR` / `MOAS_CONFIGDIR`
   - DOS: CWD; DOSBox runners persist to `~/.local/state/moas-dos` and `moas-dos-original`
 - Manual save: clearer errors if no slot clicked; thumbnail uses fixed loop vars
+- **Exit resume:** `AUTOSAVE.SAV` in state dir — write on clean quit (`MoasAutosaveOnExit`),
+  restore on next start (`MoasTryLoadAutosave`) unless `--no-autosave` or explicit `--load`.
+  Separate from script slot 9 (`GAME9.SAV` / `AutoSaveGame`). Refactored `SaveGameToFile` /
+  `SaveGameSlot` so path saves share one writer.
 
 ## Still open
 - Android asset data path
@@ -63,6 +67,7 @@
 - Host Phase[0]/[1] size checks now log to stderr (DOS still InternalError).
 
 ## Done this stack
+- Exit AUTOSAVE.SAV + `--no-autosave`; SaveGameToFile/SaveGameSlot refactor
 - Esc only sets KeyAbortState=2 when armed (KeyAbortState==1), matching DOS IRQ
 - Bewege arrow cursor (VMouse + Phase[1]) + same-frame refresh after mode/embed change
 - ToggleScreen → PlatformSetBlank (op 75)

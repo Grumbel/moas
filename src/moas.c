@@ -97,6 +97,9 @@ int main(int argc, char **argv)
       return 1;
     }
     /* Save already contains script state; skip intro + cold Execute. */
+  } else if (MoasTryLoadAutosave() == 0) {
+    /* AUTOSAVE.SAV from previous exit; skip intro like --load. */
+    MoasDbg(MOAS_DBG_LOAD, "restored AUTOSAVE.SAV");
   } else {
     if (!moas_skip_intro) {
       MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
@@ -117,6 +120,7 @@ int main(int argc, char **argv)
     /* MouseCheck pumps events, presents, and delays on Linux. */
     MouseCheck();
   }
+  MoasAutosaveOnExit();
   PlatformShutdown();
 #else
   while (1) {

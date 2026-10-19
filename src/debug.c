@@ -16,6 +16,7 @@ int moas_start_addr = 0;
 int moas_load_slot = -1;
 char moas_load_path[512];
 int moas_fullscreen = 0;
+int moas_no_autosave = 0;
 
 static void usage(const char *argv0)
 {
@@ -32,6 +33,7 @@ static void usage(const char *argv0)
     "  --statedir=PATH         Savegame directory (MOAS_STATEDIR)\n"
     "  --load=SLOT|FILE        Load save at startup (slot 0-9 or path to .SAV)\n"
     "  --load SLOT|FILE        Same as --load=\n"
+    "  --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit\n"
     "  -f, --fullscreen        Desktop fullscreen\n"
     "\n"
     "Examples:\n"
@@ -177,6 +179,10 @@ void MoasParseArgs(int argc, char **argv)
         }
       }
       moas_skip_intro = 1; /* save already has the game state */
+      continue;
+    }
+    if (!strcmp(a, "--no-autosave")) {
+      moas_no_autosave = 1;
       continue;
     }
     fprintf(stderr, "moas: unknown option '%s' (try --help)\n", a);

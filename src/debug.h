@@ -23,6 +23,7 @@ static int moas_start_addr = 0;
 static int moas_load_slot = -1;
 static char moas_load_path[512];
 static int moas_fullscreen = 0;
+static int moas_no_autosave = 0; /* DOS: no CLI; always allow AUTOSAVE.SAV */
 static void MoasParseArgs(int argc, char **argv) { (void)argc; (void)argv; }
 static void MoasDbg(unsigned flag, const char *fmt, ...) { (void)flag; (void)fmt; }
 #else
@@ -33,6 +34,7 @@ extern int moas_start_addr;
 extern int moas_load_slot;     /* -1 = none; 0..9 = GAME{n}.SAV */
 extern char moas_load_path[512]; /* explicit path; empty if unset */
 extern int moas_fullscreen;   /* request desktop-fullscreen window */
+extern int moas_no_autosave;  /* 1 = skip exit AUTOSAVE.SAV and startup restore */
 
 void MoasParseArgs(int argc, char **argv);
 void MoasDbg(unsigned flag, const char *fmt, ...);
