@@ -145,7 +145,11 @@ See `nix/windows.nix`.
 
 ### Android
 
-On Android, **Save**, **Load**, and **Skip** touch buttons are drawn in the letterbox margins (SDL overlay, not the 320×200 game buffer). Save/Load map to F5/F7; Skip arms dialog abort like Esc when the script allows it.
+On Android, letterbox **touch buttons** (SDL overlay, not the 320×200 buffer):
+
+- **Left:** Save (top), Load (bottom) — F5 / F7
+- **Right:** Esc (top), Skip (bottom) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech)
+
 
 
 ```sh

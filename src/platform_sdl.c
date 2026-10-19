@@ -55,12 +55,17 @@ static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
 static int           moas_shift_down = 0;
+static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
 
 int PlatformShiftDown(void)
 {
+#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+  if (overlay_shift_hold > 0)
+    return 1;
+#endif
   return moas_shift_down;
 }
 
@@ -441,61 +446,133 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
 
 
 #if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
-/* Touch controls drawn in letterbox (window pixels), not in the 320x200 buffer. */
-enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_SKIP = 3 };
+/* Touch controls in letterbox margins (window pixels), not the 320x200 buffer.
+ * Layout: left column Save / Load; right column Esc / Skip. */
+enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_ESC = 3, OV_SKIP = 4 };
 
-static void overlay_layout(int *bx, int *by, int *bw, int *bh, int *gap)
+
+/* 5x7 glyphs, bit0 = leftmost pixel of each row. A–Z + space + digits unused. */
+static const unsigned char ov_font_5x7[][7] = {
+  /* A */ {0x0e,0x11,0x11,0x1f,0x11,0x11,0x11},
+  /* B */ {0x1e,0x11,0x11,0x1e,0x11,0x11,0x1e},
+  /* C */ {0x0e,0x11,0x10,0x10,0x10,0x11,0x0e},
+  /* D */ {0x1e,0x11,0x11,0x11,0x11,0x11,0x1e},
+  /* E */ {0x1f,0x10,0x10,0x1e,0x10,0x10,0x1f},
+  /* F */ {0x1f,0x10,0x10,0x1e,0x10,0x10,0x10},
+  /* G */ {0x0e,0x11,0x10,0x17,0x11,0x11,0x0e},
+  /* H */ {0x11,0x11,0x11,0x1f,0x11,0x11,0x11},
+  /* I */ {0x0e,0x04,0x04,0x04,0x04,0x04,0x0e},
+  /* J */ {0x01,0x01,0x01,0x01,0x11,0x11,0x0e},
+  /* K */ {0x11,0x12,0x14,0x18,0x14,0x12,0x11},
+  /* L */ {0x10,0x10,0x10,0x10,0x10,0x10,0x1f},
+  /* M */ {0x11,0x1b,0x15,0x15,0x11,0x11,0x11},
+  /* N */ {0x11,0x19,0x15,0x13,0x11,0x11,0x11},
+  /* O */ {0x0e,0x11,0x11,0x11,0x11,0x11,0x0e},
+  /* P */ {0x1e,0x11,0x11,0x1e,0x10,0x10,0x10},
+  /* Q */ {0x0e,0x11,0x11,0x11,0x15,0x12,0x0d},
+  /* R */ {0x1e,0x11,0x11,0x1e,0x14,0x12,0x11},
+  /* S */ {0x0e,0x11,0x10,0x0e,0x01,0x11,0x0e},
+  /* T */ {0x1f,0x04,0x04,0x04,0x04,0x04,0x04},
+  /* U */ {0x11,0x11,0x11,0x11,0x11,0x11,0x0e},
+  /* V */ {0x11,0x11,0x11,0x11,0x11,0x0a,0x04},
+  /* W */ {0x11,0x11,0x11,0x15,0x15,0x1b,0x11},
+  /* X */ {0x11,0x11,0x0a,0x04,0x0a,0x11,0x11},
+  /* Y */ {0x11,0x11,0x0a,0x04,0x04,0x04,0x04},
+  /* Z */ {0x1f,0x01,0x02,0x04,0x08,0x10,0x1f},
+};
+
+static void ov_draw_char(int x, int y, char ch, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  int row, col, gi;
+  if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
+  if (ch < 'A' || ch > 'Z') return;
+  gi = ch - 'A';
+  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+  for (row = 0; row < 7; row++) {
+    unsigned char bits = ov_font_5x7[gi][row];
+    for (col = 0; col < 5; col++) {
+      if (bits & (1 << (4 - col))) {
+        SDL_Rect p;
+        p.x = x + col * scale;
+        p.y = y + row * scale;
+        p.w = scale;
+        p.h = scale;
+        SDL_RenderFillRect(renderer, &p);
+      }
+    }
+  }
+}
+
+static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  int cx = x;
+  for (; *s; s++) {
+    if (*s == ' ') {
+      cx += 4 * scale;
+      continue;
+    }
+    ov_draw_char(cx, y, *s, scale, r, g, b);
+    cx += 6 * scale;
+  }
+}
+
+/* Four button rects in window pixels: [0]=Save [1]=Load [2]=Esc [3]=Skip */
+static void overlay_rects(SDL_Rect out[4])
 {
   int dx, dy, dw, dh, ww, wh;
-  int bar_h, y0, x0, usable_w, btn_w;
+  int btn_w, btn_h, gap, margin;
+  int left_x, right_x, col_y0;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
-  *gap = 8;
-  bar_h = 56;
-  if (dy + dh < wh - 8) {
-    /* Bottom letterbox */
-    y0 = dy + dh + 8;
-    if (y0 + bar_h > wh)
-      bar_h = wh - y0;
-    x0 = 8;
-    usable_w = ww - 16;
-  } else if (dy > 8 + bar_h) {
-    /* Top letterbox */
-    y0 = 8;
-    x0 = 8;
-    usable_w = ww - 16;
-  } else if (dx > 80) {
-    /* Side letterbox (left strip) */
-    y0 = dy;
-    x0 = 8;
-    usable_w = dx - 16;
-    bar_h = dh / 3 - 8;
+  gap = 10;
+  margin = 10;
+  btn_w = 72;
+  btn_h = 64;
+
+  if (dx >= btn_w + margin * 2) {
+    /* Side letterbox: columns in left/right margins, vertically centered on game */
+    left_x = (dx - btn_w) / 2;
+    if (left_x < margin) left_x = margin;
+    right_x = dx + dw + (dx - btn_w) / 2;
+    if (right_x + btn_w > ww - margin)
+      right_x = ww - margin - btn_w;
+    col_y0 = dy + (dh - (btn_h * 2 + gap)) / 2;
+    if (col_y0 < margin) col_y0 = margin;
   } else {
-    /* No usable letterbox: thin strip along bottom edge of the window */
-    bar_h = 48;
-    y0 = wh - bar_h - 4;
-    x0 = 8;
-    usable_w = ww - 16;
+    /* Top/bottom letterbox or edge-to-edge: float over side edges of the game */
+    btn_w = 64;
+    btn_h = 56;
+    left_x = margin;
+    right_x = ww - margin - btn_w;
+    if (dy + dh < wh - (btn_h * 2 + gap + margin)) {
+      col_y0 = dy + dh + margin;
+    } else if (dy > btn_h * 2 + gap + margin) {
+      col_y0 = margin;
+    } else {
+      col_y0 = dy + margin;
+      /* shrink so both fit inside game height if needed */
+      if (col_y0 + btn_h * 2 + gap > dy + dh) {
+        btn_h = (dh - gap - margin * 2) / 2;
+        if (btn_h < 44) btn_h = 44;
+      }
+    }
   }
-  if (bar_h < 32)
-    bar_h = 32;
-  btn_w = (usable_w - 2 * (*gap)) / 3;
-  if (btn_w < 40)
-    btn_w = 40;
-  *bx = x0;
-  *by = y0;
-  *bw = btn_w;
-  *bh = bar_h;
+
+  out[0].x = left_x;  out[0].y = col_y0;              out[0].w = btn_w; out[0].h = btn_h; /* Save */
+  out[1].x = left_x;  out[1].y = col_y0 + btn_h + gap; out[1].w = btn_w; out[1].h = btn_h; /* Load */
+  out[2].x = right_x; out[2].y = col_y0;              out[2].w = btn_w; out[2].h = btn_h; /* Esc */
+  out[3].x = right_x; out[3].y = col_y0 + btn_h + gap; out[3].w = btn_w; out[3].h = btn_h; /* Skip */
 }
 
 static int overlay_hit(int wx, int wy)
 {
-  int bx, by, bw, bh, gap, i;
-  overlay_layout(&bx, &by, &bw, &bh, &gap);
-  for (i = 0; i < 3; i++) {
-    int x0 = bx + i * (bw + gap);
-    if (wx >= x0 && wx < x0 + bw && wy >= by && wy < by + bh)
-      return i + 1; /* OV_SAVE, OV_LOAD, OV_SKIP */
+  SDL_Rect r[4];
+  int i;
+  overlay_rects(r);
+  for (i = 0; i < 4; i++) {
+    if (wx >= r[i].x && wx < r[i].x + r[i].w &&
+        wy >= r[i].y && wy < r[i].y + r[i].h)
+      return i + 1;
   }
   return OV_NONE;
 }
@@ -505,62 +582,150 @@ static void overlay_fire(int which)
   switch (which) {
     case OV_SAVE:
       KeyScanCode = 63; /* F5 */
-      MOAS_ALOG("overlay: SAVE (F5)");
+      MOAS_ALOG("overlay: SAVE");
       break;
     case OV_LOAD:
       KeyScanCode = 65; /* F7 */
-      MOAS_ALOG("overlay: LOAD (F7)");
+      MOAS_ALOG("overlay: LOAD");
       break;
-    case OV_SKIP:
+    case OV_ESC:
       if (KeyAbortState == 1)
         KeyAbortState = 2;
-      KeyScanCode = 1; /* Esc make */
-      MOAS_ALOG("overlay: SKIP (abort=%d)", (int)KeyAbortState);
+      KeyScanCode = 1;
+      MOAS_ALOG("overlay: ESC abort=%d", (int)KeyAbortState);
+      break;
+    case OV_SKIP:
+      /* Synthetic Shift: speed up / dismiss speech bubbles (not full sequence abort). */
+      overlay_shift_hold = 20; /* ~frames while speech checks PlatformShiftDown */
+      MOAS_ALOG("overlay: SKIP (speech)");
       break;
     default:
       break;
   }
 }
 
+static void ov_icon_save(SDL_Rect *r)
+{
+  /* Floppy-like: body + label window + shutter */
+  SDL_Rect body, win, slot;
+  int m = r->w / 8;
+  body.x = r->x + m; body.y = r->y + m;
+  body.w = r->w - 2 * m; body.h = r->h / 2 - m;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderFillRect(renderer, &body);
+  SDL_SetRenderDrawColor(renderer, 40, 120, 50, 255);
+  win.x = body.x + body.w / 4; win.y = body.y + body.h / 4;
+  win.w = body.w / 2; win.h = body.h / 2;
+  SDL_RenderFillRect(renderer, &win);
+  slot.x = body.x + body.w / 3; slot.y = body.y;
+  slot.w = body.w / 3; slot.h = body.h / 5;
+  SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
+  SDL_RenderFillRect(renderer, &slot);
+}
+
+static void ov_icon_load(SDL_Rect *r)
+{
+  /* Folder + arrow down into it */
+  SDL_Rect tab, body;
+  int m = r->w / 8;
+  int mid = r->x + r->w / 2;
+  tab.x = r->x + m; tab.y = r->y + m;
+  tab.w = r->w / 3; tab.h = r->h / 10;
+  body.x = r->x + m; body.y = tab.y + tab.h;
+  body.w = r->w - 2 * m; body.h = r->h / 3;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderFillRect(renderer, &tab);
+  SDL_RenderFillRect(renderer, &body);
+  /* Arrow */
+  SDL_RenderDrawLine(renderer, mid, r->y + m, mid, body.y + body.h / 2);
+  SDL_RenderDrawLine(renderer, mid, body.y + body.h / 2, mid - m, body.y + body.h / 2 - m);
+  SDL_RenderDrawLine(renderer, mid, body.y + body.h / 2, mid + m, body.y + body.h / 2 - m);
+}
+
+static void ov_icon_esc(SDL_Rect *r)
+{
+  /* Octagon-ish stop: outer ring + X */
+  int m = r->w / 6;
+  int cx = r->x + r->w / 2, cy = r->y + r->h / 3;
+  int rad = r->w / 5;
+  SDL_Rect box;
+  box.x = cx - rad; box.y = cy - rad; box.w = rad * 2; box.h = rad * 2;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDrawRect(renderer, &box);
+  SDL_RenderDrawLine(renderer, box.x + m / 2, box.y + m / 2,
+                     box.x + box.w - m / 2, box.y + box.h - m / 2);
+  SDL_RenderDrawLine(renderer, box.x + box.w - m / 2, box.y + m / 2,
+                     box.x + m / 2, box.y + box.h - m / 2);
+}
+
+static void ov_icon_skip(SDL_Rect *r)
+{
+  /* Double chevron >> */
+  int m = r->w / 8;
+  int x0 = r->x + r->w / 4, y0 = r->y + m;
+  int x1 = r->x + r->w / 2, y1 = r->y + r->h / 3;
+  int x2 = r->x + r->w / 4, y2 = r->y + r->h / 2 - m;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDrawLine(renderer, x0, y0, x1, y1);
+  SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+  SDL_RenderDrawLine(renderer, x0 + m * 2, y0, x1 + m * 2, y1);
+  SDL_RenderDrawLine(renderer, x1 + m * 2, y1, x2 + m * 2, y2);
+  /* thicker */
+  SDL_RenderDrawLine(renderer, x0, y0 + 1, x1, y1 + 1);
+  SDL_RenderDrawLine(renderer, x1, y1 + 1, x2, y2 + 1);
+}
+
 static void overlay_draw(void)
 {
-  int bx, by, bw, bh, gap, i;
-  static const SDL_Color cols[3] = {
-    { 40, 140, 60, 255 },   /* Save */
-    { 40, 80, 180, 255 },   /* Load */
-    { 180, 100, 30, 255 },  /* Skip */
+  SDL_Rect r[4];
+  static const SDL_Color cols[4] = {
+    { 36, 130, 55, 255 },   /* Save */
+    { 40, 90, 170, 255 },   /* Load */
+    { 150, 45, 45, 255 },   /* Esc */
+    { 190, 110, 25, 255 },  /* Skip */
   };
+  static const char *labels[4] = { "SAVE", "LOAD", "ESC", "SKIP" };
+  int i, ts;
+
   if (!renderer)
     return;
-  overlay_layout(&bx, &by, &bw, &bh, &gap);
-  for (i = 0; i < 3; i++) {
-    SDL_Rect r;
-    r.x = bx + i * (bw + gap);
-    r.y = by;
-    r.w = bw;
-    r.h = bh;
-    SDL_SetRenderDrawColor(renderer, cols[i].r, cols[i].g, cols[i].b, 220);
-    SDL_RenderFillRect(renderer, &r);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRect(renderer, &r);
-    /* Simple inner mark: 1/3/2 pixel bars as crude icons */
+  if (overlay_shift_hold > 0)
+    overlay_shift_hold--;
+
+  overlay_rects(r);
+  for (i = 0; i < 4; i++) {
+    /* Soft shadow */
     {
-      SDL_Rect m;
-      m.x = r.x + r.w / 4;
-      m.y = r.y + r.h / 3;
-      m.w = r.w / 2;
-      m.h = r.h / 3;
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-      if (i == 0) { /* Save: filled square */
-        SDL_RenderFillRect(renderer, &m);
-      } else if (i == 1) { /* Load: outline */
-        SDL_RenderDrawRect(renderer, &m);
-      } else { /* Skip: two chevron lines */
-        SDL_RenderDrawLine(renderer, m.x, m.y, m.x + m.w, m.y + m.h / 2);
-        SDL_RenderDrawLine(renderer, m.x + m.w, m.y + m.h / 2, m.x, m.y + m.h);
-        SDL_RenderDrawLine(renderer, m.x + 8, m.y, m.x + m.w + 8, m.y + m.h / 2);
-        SDL_RenderDrawLine(renderer, m.x + m.w + 8, m.y + m.h / 2, m.x + 8, m.y + m.h);
-      }
+      SDL_Rect sh = r[i];
+      sh.x += 3; sh.y += 3;
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 120);
+      SDL_RenderFillRect(renderer, &sh);
+    }
+    SDL_SetRenderDrawColor(renderer, cols[i].r, cols[i].g, cols[i].b, 255);
+    SDL_RenderFillRect(renderer, &r[i]);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &r[i]);
+    /* inset highlight */
+    {
+      SDL_Rect in = r[i];
+      in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 60);
+      SDL_RenderDrawRect(renderer, &in);
+    }
+    if (i == 0) ov_icon_save(&r[i]);
+    else if (i == 1) ov_icon_load(&r[i]);
+    else if (i == 2) ov_icon_esc(&r[i]);
+    else ov_icon_skip(&r[i]);
+
+    /* Label under icon */
+    ts = (r[i].w >= 70) ? 2 : 1;
+    {
+      int text_w = (int)strlen(labels[i]) * 6 * ts;
+      int tx = r[i].x + (r[i].w - text_w) / 2;
+      int ty = r[i].y + r[i].h - 7 * ts - 6;
+      if (ty < r[i].y + r[i].h / 2)
+        ty = r[i].y + r[i].h - 7 * ts - 4;
+      ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }
   }
 }
