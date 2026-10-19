@@ -784,16 +784,16 @@ static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 
   }
 }
 
-/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE [5]=LOOK
- * Left column: Save, Load, USE, LOOK. Right column: Esc, Skip. */
+/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE/PULL [5]=LOOK
+ * Save/Load + Esc/Skip stick to the top; USE/LOOK sit low for thumbs. */
 static void overlay_rects(SDL_Rect out[6])
 {
   int dx, dy, dw, dh, ww, wh;
   int btn_w, btn_h, gap, margin;
-  int left_x, right_x, left_y0, right_y0;
+  int left_x, right_x;
+  int top_y, mode_y0;
   int side;
-  int left_stack_h, right_stack_h;
-  int mode_sep;
+  int top_stack_h, mode_stack_h;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   gap = 10;
@@ -806,19 +806,14 @@ static void overlay_rects(SDL_Rect out[6])
     btn_w = 120;
   if (btn_w < 64)
     btn_w = 64;
-  /* Four stacked left buttons — slightly shorter so they fit the game height. */
   btn_h = (btn_w * 5) / 7;
   if (btn_h < 52)
     btn_h = 52;
   if (btn_h > 88)
     btn_h = 88;
 
-  /* Extra gap after Load so USE/LOOK sit lower as their own group. */
-  mode_sep = gap + btn_h / 2 + 12;
-  if (mode_sep < 28)
-    mode_sep = 28;
-  left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
-  right_stack_h = btn_h * 2 + gap;
+  top_stack_h = btn_h * 2 + gap;
+  mode_stack_h = btn_h * 2 + gap;
 
   if (dx >= btn_w + margin * 2) {
     left_x = (dx - btn_w) / 2;
@@ -827,50 +822,31 @@ static void overlay_rects(SDL_Rect out[6])
     right_x = dx + dw + (ww - (dx + dw) - btn_w) / 2;
     if (right_x + btn_w > ww - margin)
       right_x = ww - margin - btn_w;
-    left_y0 = dy + (dh - left_stack_h) / 2;
-    if (left_y0 < margin)
-      left_y0 = margin;
-    right_y0 = dy + (dh - right_stack_h) / 2;
-    if (right_y0 < margin)
-      right_y0 = margin;
+    /* Menu/abort at top; Pull/Use + LOOK near bottom for thumbs. */
+    top_y = margin;
+    mode_y0 = wh - margin - mode_stack_h;
+    /* Keep modes from climbing into the top cluster. */
+    if (mode_y0 < top_y + top_stack_h + gap * 2)
+      mode_y0 = top_y + top_stack_h + gap * 2;
   } else {
     btn_w = 72;
     btn_h = 56;
-    mode_sep = gap + btn_h / 2 + 12;
-    if (mode_sep < 28)
-      mode_sep = 28;
-    left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
-    right_stack_h = btn_h * 2 + gap;
+    top_stack_h = btn_h * 2 + gap;
+    mode_stack_h = btn_h * 2 + gap;
     left_x = margin;
     right_x = ww - margin - btn_w;
-    if (dy + dh < wh - (left_stack_h + margin)) {
-      left_y0 = dy + dh + margin;
-      right_y0 = left_y0;
-    } else if (dy > left_stack_h + margin) {
-      left_y0 = margin;
-      right_y0 = margin;
-    } else {
-      left_y0 = dy + margin;
-      right_y0 = dy + margin;
-      if (left_y0 + left_stack_h > dy + dh) {
-        btn_h = (dh - gap * 2 - mode_sep - margin * 2) / 4;
-        if (btn_h < 44)
-          btn_h = 44;
-        mode_sep = gap + btn_h / 2 + 12;
-        if (mode_sep < 28)
-          mode_sep = 28;
-        left_stack_h = btn_h * 4 + gap * 2 + mode_sep;
-        right_stack_h = btn_h * 2 + gap;
-      }
-    }
+    top_y = margin;
+    mode_y0 = wh - margin - mode_stack_h;
+    if (mode_y0 < top_y + top_stack_h + gap * 2)
+      mode_y0 = top_y + top_stack_h + gap * 2;
   }
 
-  out[0].x = left_x;  out[0].y = left_y0;                                    out[0].w = btn_w; out[0].h = btn_h; /* Save */
-  out[1].x = left_x;  out[1].y = left_y0 + (btn_h + gap);                     out[1].w = btn_w; out[1].h = btn_h; /* Load */
-  out[4].x = left_x;  out[4].y = left_y0 + 2 * (btn_h + gap) + (mode_sep - gap); out[4].w = btn_w; out[4].h = btn_h; /* USE  */
-  out[5].x = left_x;  out[5].y = out[4].y + (btn_h + gap);                    out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
-  out[2].x = right_x; out[2].y = right_y0;                                    out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
-  out[3].x = right_x; out[3].y = right_y0 + (btn_h + gap);                    out[3].w = btn_w; out[3].h = btn_h; /* Skip */
+  out[0].x = left_x;  out[0].y = top_y;                    out[0].w = btn_w; out[0].h = btn_h; /* Save */
+  out[1].x = left_x;  out[1].y = top_y + btn_h + gap;       out[1].w = btn_w; out[1].h = btn_h; /* Load */
+  out[2].x = right_x; out[2].y = top_y;                    out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
+  out[3].x = right_x; out[3].y = top_y + btn_h + gap;       out[3].w = btn_w; out[3].h = btn_h; /* Skip */
+  out[4].x = left_x;  out[4].y = mode_y0;                  out[4].w = btn_w; out[4].h = btn_h; /* USE/PULL */
+  out[5].x = left_x;  out[5].y = mode_y0 + btn_h + gap;     out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
 }
 
 /* ox/oy are renderer-output pixels (after window_to_output). */
@@ -1091,7 +1067,7 @@ static void overlay_draw(void)
     { 36, 100, 190, 255 },  /* Load */
     { 170, 42, 42, 255 },   /* Esc  */
     { 200, 120, 28, 255 },  /* Skip */
-    { 70, 70, 90, 255 },    /* USE  */
+    { 70, 70, 90, 255 },    /* USE / Pull */
     { 70, 70, 90, 255 },    /* LOOK */
   };
   static const char *labels[6] = { "SAVE", "LOAD", "ESC", "SKIP", "USE", "LOOK" };
@@ -1147,7 +1123,7 @@ static void overlay_draw(void)
     else if (i == 1) ov_icon_load(&face, pressed);
     else if (i == 2) ov_icon_esc(&face, pressed);
     else if (i == 3) ov_icon_skip(&face, pressed);
-    /* USE/LOOK: text only */
+    /* USE (Pull/Use) / LOOK: text only */
 
     ts = (face.w >= 80) ? 2 : 1;
     {
