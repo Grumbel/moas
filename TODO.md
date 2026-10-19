@@ -40,14 +40,16 @@
 - Bewege arrow: ported in VMouse (Phase[1])
 
 ## Still open
-- PowerBlend / WalkNLayers
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
 - Confirm Bewege arrow frames (Phase[1], 16 directions) look correct in-game
+- PowerBlend/WalkNLayers: no data path and op 11 still commented (upstream); inert by design
 
 ## Done this stack
 - Bewege arrow cursor (VMouse + Phase[1])
 - ToggleScreen → PlatformSetBlank (op 75)
 - ShowMarker: draw Label/Jumper outlines on framebuffer (Master key `2`)
 - ShowHercBak: stderr dump instead of 0xB8000 (Master key `#`)
+- TeakEffekt (op 6): SDL palette + present; fixed Info1 index via pointer delta
+- PowerBlend: present each depth step; documented WalkNLayers never loaded
 - Speech/audio left alone (not used by this game data)

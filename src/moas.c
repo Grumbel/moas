@@ -686,6 +686,10 @@ void TeakEffekt(void)
     uChar SpeedDummy[15];   /* Summe ergibt 32 */
   } *Star;
 
+#ifndef DOS
+  unsigned char teakPal[768];
+#endif
+
   if (KeyAbortState==2) return;
   Star=(struct STAR*)MALLOC(sizeof(struct STAR)*2500); Tab320=(long*)MALLOC(4*200);
 
@@ -711,22 +715,50 @@ void TeakEffekt(void)
       }
   for (Time=0;Time<64000;Time++) Screen[Time]=Info1[Time]|(Screen[Time]-16);
 
+  /*
+   * Special Teak palette: every index shows RGB of (index&15)+16.
+   * DOS wrote the DAC ports; SDL uses a temporary palette.
+   */
   for (x=0;x<256;x++)
   {
+    short pr = Palette[3*((x&15)+16)];
+    short pg = Palette[3*((x&15)+16)+1];
+    short pb = Palette[3*((x&15)+16)+2];
+#ifdef DOS
     outp(0x3c8,x);
-    outp(0x3c9,Palette[3*((x&15)+16)]);
-    outp(0x3c9,Palette[3*((x&15)+16)+1]);
-    outp(0x3c9,Palette[3*((x&15)+16)+2]);
+    outp(0x3c9,pr);
+    outp(0x3c9,pg);
+    outp(0x3c9,pb);
+#else
+    teakPal[x*3+0]=(unsigned char)pr;
+    teakPal[x*3+1]=(unsigned char)pg;
+    teakPal[x*3+2]=(unsigned char)pb;
+#endif
   }
+#ifndef DOS
+  PlatformSetPalette(teakPal);
+#endif
   memcpy(VGA_ADRESSE,Info1,64000);
+#ifndef DOS
+  PlatformPresent();
+#endif
   w=0;
   Time=GetTicker();
-  while (!kbhit() && w<58)
+  while (!kbhit() && w<58
+#ifndef DOS
+         && !PlatformShouldQuit()
+#endif
+        )
   {
     w++;
     for (x=0;x<c;x++)
     {
-      Star[x].Vga[0]=Info1[((unsigned long)Star[x].Vga)&65535];
+      /* Restore underlay — do not use pointer&65535 (only valid for DOS A000). */
+      {
+        long off = (long)(Star[x].Vga - (char *)VGA_ADRESSE);
+        if (off >= 0 && off < 64000)
+          Star[x].Vga[0]=Info1[off];
+      }
       if (Star[x].x<Star[x].tx) Star[x].vx++;
       else if (Star[x].x>Star[x].tx) Star[x].vx--;
       if (Star[x].y<Star[x].ty) Star[x].vy++;
@@ -768,8 +800,17 @@ void TeakEffekt(void)
         else if (Star[x].y>Star[x].ty) { Star[x].y--; Star[x].Vga-=320; }
       }
       Star[x].Vga+=Star[x].vx+Tab320[Star[x].vy];
-      if (x<((w+2)<<6)) Star[x].Vga[0]=Star[x].Color;
+      if (x<((w+2)<<6))
+      {
+        long off = (long)(Star[x].Vga - (char *)VGA_ADRESSE);
+        if (off >= 0 && off < 64000)
+          Star[x].Vga[0]=Star[x].Color;
+      }
     }
+#ifndef DOS
+    PlatformPumpEvents();
+    PlatformPresent();
+#endif
     while (GetTicker()==Time); Time=GetTicker();
     while (GetTicker()==Time); Time=GetTicker();
     while (GetTicker()==Time); Time=GetTicker();
@@ -781,60 +822,104 @@ void TeakEffekt(void)
       if (c>y && c-y<=20)
         for (x=0;x<16;x++)
         {
+          short pr=((short)Palette[3*x+48]*(20-(c-y))+63*(c-y))/20;
+          short pg=((short)Palette[3*x+1+48]*(20-(c-y))+63*(c-y))/20;
+          short pb=((short)Palette[3*x+2+48]*(20-(c-y))+63*(c-y))/20;
+#ifdef DOS
           outp(0x3c8,x+((y+1)<<4));
-          outp(0x3c9,((short)Palette[3*x+48]*(20-(c-y))+63*(c-y))/20);
-          outp(0x3c9,((short)Palette[3*x+1+48]*(20-(c-y))+63*(c-y))/20);
-          outp(0x3c9,((short)Palette[3*x+2+48]*(20-(c-y))+63*(c-y))/20);
+          outp(0x3c9,pr);
+          outp(0x3c9,pg);
+          outp(0x3c9,pb);
+#else
+          {
+            short idx=x+((y+1)<<4);
+            teakPal[idx*3+0]=(unsigned char)(pr>63?63:pr);
+            teakPal[idx*3+1]=(unsigned char)(pg>63?63:pg);
+            teakPal[idx*3+2]=(unsigned char)(pb>63?63:pb);
+          }
+#endif
         }
- // if (c&3==0)
- // {
- //   while (inp(0x3da)&8); while ((inp(0x3da)&8)==0);
- // }
+//  while (inp(0x3da)&8);
+//  while (inp(0x3da)&8==0);
     Time=GetTicker(); while (Time==GetTicker()) x++;
     Time=GetTicker(); while (Time==GetTicker()) x++;
+#ifndef DOS
+    PlatformSetPalette(teakPal);
+    PlatformPumpEvents();
+    PlatformPresent();
+#endif
   }
-  memcpy(VGA_ADRESSE,Screen,64000);
-  for (c=29;c>=0;c--)
+  for (c=1;c<30;c++)
   {
     for (y=0;y<10;y++)
-      if (c>=y && c-y<=20)
+      if (c>y && c-y<=20)
         for (x=0;x<16;x++)
         {
+          short pr=((short)Palette[3*x+48]*(20-(c-y))+63*(c-y))/20;
+          short pg=((short)Palette[3*x+1+48]*(20-(c-y))+63*(c-y))/20;
+          short pb=((short)Palette[3*x+2+48]*(20-(c-y))+63*(c-y))/20;
+#ifdef DOS
           outp(0x3c8,x+(((9-y)+1)<<4));
-          outp(0x3c9,((short)Palette[3*x+48]*(20-(c-y))+63*(c-y))/20);
-          outp(0x3c9,((short)Palette[3*x+1+48]*(20-(c-y))+63*(c-y))/20);
-          outp(0x3c9,((short)Palette[3*x+2+48]*(20-(c-y))+63*(c-y))/20);
+          outp(0x3c9,pr);
+          outp(0x3c9,pg);
+          outp(0x3c9,pb);
+#else
+          {
+            short idx=x+(((9-y)+1)<<4);
+            teakPal[idx*3+0]=(unsigned char)(pr>63?63:pr);
+            teakPal[idx*3+1]=(unsigned char)(pg>63?63:pg);
+            teakPal[idx*3+2]=(unsigned char)(pb>63?63:pb);
+          }
+#endif
         }
-//  if (c&3==0)
-//  {
-//    while (inp(0x3da)&8); while ((inp(0x3da)&8)==0);
-//  }
+//  while (inp(0x3da)&8);
+//  while (inp(0x3da)&8==0);
     Time=GetTicker(); while (Time==GetTicker()) x++;
     Time=GetTicker(); while (Time==GetTicker()) x++;
-    Time=GetTicker(); while (Time==GetTicker()) x++;
+#ifndef DOS
+    PlatformSetPalette(teakPal);
+    PlatformPumpEvents();
+    PlatformPresent();
+#endif
   }
-  while (kbhit()) getch();
-  Time=GetTicker();
-  while (GetTicker()-Time<17*64 && !kbhit());
-  while (kbhit()) getch();
-  for (c=1;c<15;c++)
+  for (c=0;c<16;c++)
   {
     for (x=0;x<256;x++)
     {
+      short pr=((short)Palette[3*((x&15)+16)]*(15-c))/15;
+      short pg=((short)Palette[3*((x&15)+16)+1]*(15-c))/15;
+      short pb=((short)Palette[3*((x&15)+16)+2]*(15-c))/15;
+#ifdef DOS
       outp(0x3c8,x);
-      outp(0x3c9,((short)Palette[3*((x&15)+16)]*(15-c))/15);
-      outp(0x3c9,((short)Palette[3*((x&15)+16)+1]*(15-c))/15);
-      outp(0x3c9,((short)Palette[3*((x&15)+16)+2]*(15-c))/15);
+      outp(0x3c9,pr);
+      outp(0x3c9,pg);
+      outp(0x3c9,pb);
+#else
+      teakPal[x*3+0]=(unsigned char)(pr>63?63:pr);
+      teakPal[x*3+1]=(unsigned char)(pg>63?63:pg);
+      teakPal[x*3+2]=(unsigned char)(pb>63?63:pb);
+#endif
     }
 //  while (inp(0x3da)&8);
 //  while (inp(0x3da)&8==0);
     Time=GetTicker(); while (Time==GetTicker()) x++;
     Time=GetTicker(); while (Time==GetTicker()) x++;
+#ifndef DOS
+    PlatformSetPalette(teakPal);
+    PlatformPumpEvents();
+    PlatformPresent();
+#endif
   }
   Clearscreen();
+#ifndef DOS
+  /* Restore game palette after temporary Teak DAC values. */
+  QuickSetPalette((char *)Palette);
+  PlatformPresent();
+#endif
   FREE((char*)(Tab320-100));
   FREE((char*)Star);
 }
+
 
 void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty)
 {

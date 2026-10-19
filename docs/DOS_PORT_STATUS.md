@@ -189,7 +189,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 |------:|------|--------|-------|
 | 50–55 / 65–70 | Wait on BIOS timer tick vs PlatformDelay(16) | PORTED | Timing of blend steps approximate. |
 
-`PowerBlend` / `WalkNLayers` themselves: still incomplete (TODO) — data path / effect quality, not an `#ifdef DOS` omission.
+`PowerBlend` / `WalkNLayers`: WalkNLayers is never allocated/loaded and script op 11 is commented out in upstream `moas.c`. Effect is inert. Loop presents each step on SDL when data exists.
 
 ---
 
@@ -221,9 +221,9 @@ Not DOS ifdefs; the replacement layer. Notable ready hooks not yet wired from ga
 
 ## Summary: remaining real gaps
 
-1. **PowerBlend / WalkNLayers** — incomplete effect, not an ifdef miss.
-2. **Copy-protection / disk serial** — intentionally not ported.
-3. Speech/audio — not required for this game data (skipped).
+1. **Copy-protection / disk serial** — intentionally not ported.
+2. Speech/audio — not required for this game data (skipped).
+3. **PowerBlend** — upstream-disabled (op 11 commented, no WalkNLayers data).
 
-ToggleScreen, ShowMarker, ShowHercBak, and the Bewege cursor are ported.
+ToggleScreen, ShowMarker, ShowHercBak, Bewege cursor, and TeakEffekt are ported.
 Everything else under `#ifdef DOS` is either replaced by the platform layer, intentionally stubbed (SB/DMA/IRQ), or debug/error-path only.

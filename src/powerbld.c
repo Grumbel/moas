@@ -27,7 +27,17 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#ifndef DOS
+#include "platform.h"
+#endif
 #define MOUSE_DEL    1
+/*
+ * WalkNLayers: 64000-byte depth map (one byte per pixel). PowerBlend reveals
+ * or clears Screen by depth order. Nothing in this tree ever allocates or
+ * loads WalkNLayers, and script op 11 remains commented out in moas.c — same
+ * as the upstream sources we received. The effect is therefore inert until
+ * a data path is restored; the loop body is kept for that future wiring.
+ */
 static unsigned char *WalkNLayers = NULL;
 static void ShowMouse(short Flag) { (void)Flag; }
 
@@ -56,6 +66,11 @@ void PowerBlend(short Mode)
       for (c=0;c<64000;c++)
         if (WalkNLayers[c]==d)
           ((unsigned char *)(VGA_ADRESSE))[c]=Screen[c];
+#ifndef DOS
+      PlatformPumpEvents();
+      PlatformPresent();
+      if (PlatformShouldQuit()) break;
+#endif
     }
   }
   else
@@ -71,6 +86,11 @@ void PowerBlend(short Mode)
       for (c=0;c<64000;c++)
         if (WalkNLayers[c]==d)
           ((unsigned char *)(VGA_ADRESSE))[c]=0;
+#ifndef DOS
+      PlatformPumpEvents();
+      PlatformPresent();
+      if (PlatformShouldQuit()) break;
+#endif
     }
     if (KeyAbortState==2) memset(Screen,0,64000);
   }
