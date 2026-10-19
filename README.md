@@ -95,6 +95,8 @@ Cross-compiles the original `#ifdef DOS` code with Open Watcom from Nix:
 ```sh
 nix build .#moas-dos          # $result/dos/moas.exe + GAME.* + DOS4GW.EXE
 nix build .#moas-dos-zip      # zip of the same folder
+nix run .#moas-dos            # Watcom rebuild under DOSBox-X
+nix run .#moas-dos-original   # historical manick/GAME.EXE under DOSBox-X
 ```
 
 Open Watcom is licensed under Watcom-1.0 (redistributable; nixpkgs marks it

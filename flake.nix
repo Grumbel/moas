@@ -126,6 +126,8 @@
           moas-dos = dos.moas-dos;
           moas-dos-zip = dos.moas-dos-zip;
           moas-dos-run = dos.moas-dos-run;
+          moas-dos-original = dos.moas-dos-original;
+          moas-dos-original-run = dos.moas-dos-original-run;
         };
 
         apps = {
@@ -141,6 +143,11 @@
           moas-dos = {
             type = "app";
             program = "${dos.moas-dos-run}/bin/moas-dos";
+          };
+          # Historical manick/GAME.EXE under DOSBox-X
+          moas-dos-original = {
+            type = "app";
+            program = "${dos.moas-dos-original-run}/bin/moas-dos-original";
           };
           install-android-moas = android.installApp;
           moas-wasm = wasm.serveApp;

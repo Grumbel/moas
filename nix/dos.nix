@@ -5,7 +5,8 @@
 #
 #   nix build .#moas-dos
 #   nix build .#moas-dos-zip
-#   nix run .#moas-dos          # DOSBox-X
+#   nix run .#moas-dos            # Watcom rebuild under DOSBox-X
+#   nix run .#moas-dos-original   # historical manick/GAME.EXE under DOSBox-X
 #
 # Open Watcom is Watcom-1.0 (redistributable; marked unfree in nixpkgs).
 # The flake allows that package only via allowUnfreePredicate in flake.nix.
@@ -68,9 +69,8 @@ let
       cat > $out/dos/README.txt <<'EOR'
 MOAS — MS-DOS build (Open Watcom, DOS/4GW)
 
-  nix run .#moas-dos
-
-Uses the original #ifdef DOS hardware paths, not the SDL2 port.
+  nix run .#moas-dos              # this rebuild
+  nix run .#moas-dos-original     # historical manick/GAME.EXE
 EOR
       runHook postInstall
     '';
@@ -93,24 +93,36 @@ EOR
     zip -r -9 $out/moas-${version}-dos.zip moas-${version}-dos
   '';
 
-  moasDosRun = pkgs.writeShellApplication {
-    name = "moas-dos";
-    runtimeInputs = [ pkgs.dosbox-x ];
-    text = ''
-      set -euo pipefail
-      DOSDIR="${moasDos}/dos"
-      BASE="''${XDG_RUNTIME_DIR:-/tmp}"
-      WORK="$BASE/moas-dos-$$"
-      rm -rf "$WORK"
-      mkdir -p "$WORK"
-      CONF="$WORK/dosbox-moas.conf"
-      cleanup() { rm -rf "$WORK"; }
-      trap cleanup EXIT
+  /*
+   * Shared DOSBox-X launcher.
+   * dosDir: store path containing EXE + GAME.* + DOS4GW.EXE
+   * exeName: MOAS.EXE or GAME.EXE
+   * title / workTag: window title and temp dir name
+   */
+  mkDosboxRun = {
+    name,
+    dosDir,
+    exeName,
+    title,
+    workTag,
+  }:
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [ pkgs.dosbox-x ];
+      text = ''
+        set -euo pipefail
+        DOSDIR="${dosDir}"
+        BASE="''${XDG_RUNTIME_DIR:-/tmp}"
+        WORK="$BASE/${workTag}-$$"
+        rm -rf "$WORK"
+        mkdir -p "$WORK"
+        CONF="$WORK/dosbox-moas.conf"
+        cleanup() { rm -rf "$WORK"; }
+        trap cleanup EXIT
 
-      cp -a --no-preserve=mode "$DOSDIR"/. "$WORK"/
+        cp -a --no-preserve=mode "$DOSDIR"/. "$WORK"/
 
-      # Generate conf with absolute paths (DOSBox-X primary folder = WORK)
-      cat > "$CONF" <<EOF
+        cat > "$CONF" <<EOF
 [sdl]
 fullscreen=false
 output=texture
@@ -119,7 +131,7 @@ autolock=true
 [dosbox]
 machine=svga_s3
 memsize=16
-title=MOAS (DOS/4GW)
+title=${title}
 working directory=$WORK
 
 [cpu]
@@ -134,7 +146,6 @@ rate=44100
 # Original MOAS pins INT33 at (100,100) and scales deltas — high host
 # sensitivity collapses that to 1:1 and feels unusable under DOSBox.
 sensitivity=55
-# Keep host pointer captured so INT 33 gets relative motion
 mouse_emulation=locked
 
 [sblaster]
@@ -149,22 +160,57 @@ oplmode=auto
 @echo off
 mount C "$WORK"
 C:
-echo Starting MOAS (Open Watcom DOS/4GW rebuild)...
-MOAS.EXE
+echo Starting ${exeName}...
+${exeName}
 exit
 EOF
 
-      echo "moas-dos: game directory $WORK"
-      echo "moas-dos: launching DOSBox-X (close the window or exit the game to quit)"
-      cd "$WORK"
-      # -defaultdir avoids the "You have not selected a valid path" dialog
-      dosbox-x -defaultdir "$WORK" -conf "$CONF" -exit "$@"
-    '';
+        echo "${name}: game directory $WORK"
+        echo "${name}: launching DOSBox-X (close the window or exit the game to quit)"
+        cd "$WORK"
+        dosbox-x -defaultdir "$WORK" -conf "$CONF" -exit "$@"
+      '';
+    };
+
+  moasDosRun = mkDosboxRun {
+    name = "moas-dos";
+    dosDir = "${moasDos}/dos";
+    exeName = "MOAS.EXE";
+    title = "MOAS (Open Watcom rebuild)";
+    workTag = "moas-dos";
   };
 
+  # Historical binary from manick/ — no rebuild, just stage data + GAME.EXE
+  moasOriginalDos = pkgs.runCommand "moas-dos-original-${version}" { } ''
+    mkdir -p $out/dos
+    for f in ${../manick}/GAME.* ${../manick}/DOS4GW.EXE ${../manick}/LICENCE.DAT; do
+      [ -f "$f" ] || continue
+      cp "$f" $out/dos/
+    done
+    # Normalise licence name if only mixed-case exists
+    for f in ${../manick}/Licence.Dat ${../manick}/licence.dat; do
+      [ -f "$f" ] || continue
+      cp "$f" $out/dos/
+    done
+    cat > $out/dos/README.txt <<'EOR'
+MOAS — original DOS binary (manick/GAME.EXE + DOS4GW.EXE)
+
+  nix run .#moas-dos-original
+EOR
+  '';
+
+  moasDosOriginalRun = mkDosboxRun {
+    name = "moas-dos-original";
+    dosDir = "${moasOriginalDos}/dos";
+    exeName = "GAME.EXE";
+    title = "MOAS (original GAME.EXE)";
+    workTag = "moas-dos-original";
+  };
 
 in {
   moas-dos = moasDos;
   moas-dos-zip = moasDosZip;
   moas-dos-run = moasDosRun;
+  moas-dos-original = moasOriginalDos;
+  moas-dos-original-run = moasDosOriginalRun;
 }
