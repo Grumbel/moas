@@ -46,6 +46,7 @@ set(MOAS_SOURCES
   src/hercbak.c
   src/if.c
   src/init.c
+  src/lang.c
   src/io.c
   src/misc.c
   src/moas.c
@@ -158,6 +159,9 @@ else()
   install(TARGETS moas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # Ship game data (exclude the original DOS binaries)
+  install(DIRECTORY lang/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/moas/lang
+    OPTIONAL)
   install(DIRECTORY manick/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/moas
     FILES_MATCHING

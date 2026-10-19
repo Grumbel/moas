@@ -94,6 +94,7 @@ Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_are
 Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame only).
 
 ## Done this stack
+- Runtime language packs: Ui(id) + UnPack LangLookup, --lang / MOAS_LANG
 - moas-util strings: export script/PCK/UI text as json|pot|tsv for translation
 - Android/overlay: letterbox_geom reserves side columns so buttons never cover the game
 - Gamepad: left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc

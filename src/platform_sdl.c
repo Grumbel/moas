@@ -6,6 +6,7 @@
  */
 
 #include "platform.h"
+#include "lang.h"
 #include "debug.h"
 
 #include <SDL.h>
@@ -254,6 +255,8 @@ static const char *const android_data_files[] = {
   "GAME.1", "GAME.2", "GAME.3", "GAME.4",
   "GAME.PCK", "GAME.XXX",
   "LICENCE.DAT", "Licence.Dat", "licence.dat",
+  /* optional language packs (assets/lang/…) */
+  "lang/en.ui", "lang/en.script",
   NULL
 };
 
@@ -366,6 +369,16 @@ void PlatformAndroidPrepareData(void)
 
   for (i = 0; android_data_files[i]; i++) {
     snprintf(dest_file, sizeof(dest_file), "%s/%s", dest_dir, android_data_files[i]);
+    {
+      /* Ensure subdirs (e.g. lang/) exist. */
+      char *slash = strrchr(dest_file, '/');
+      if (slash) {
+        *slash = 0;
+        if (stat(dest_file, &st) != 0)
+          mkdir(dest_file, 0755);
+        *slash = '/';
+      }
+    }
     if (!force && stat(dest_file, &st) == 0 && st.st_size > 0) {
       SDL_Log("already present: %s (%ld bytes)", dest_file, (long)st.st_size);
       ok++;
@@ -1070,7 +1083,10 @@ static void overlay_draw(void)
     { 70, 70, 90, 255 },    /* USE / Pull */
     { 70, 70, 90, 255 },    /* LOOK */
   };
-  static const char *labels[6] = { "SAVE", "LOAD", "ESC", "SKIP", "USE", "LOOK" };
+  const char *labels[6] = {
+    Ui(UI_OV_SAVE), Ui(UI_OV_LOAD), Ui(UI_OV_ESC), Ui(UI_OV_SKIP),
+    Ui(UI_OV_USE), Ui(UI_OV_LOOK)
+  };
   int i, ts;
 
   if (!renderer)

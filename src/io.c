@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "lang.h"
 #include "person_disk.h"
 #include "save_disk.h"
 #include "datapath.h"
@@ -564,7 +565,7 @@ void LoadSaveMenu(char *Text)
             read(ifil,Vga+20+d+(34+h+c*30)*320,40);
           read(ifil,(char*)&h,2);
           read(ifil,(char*)&hh,2);
-          sprintf(String,"%i von %i",h,hh);
+          sprintf(String, Ui(UI_SLOT_OF), h, hh);
           SmallPrint(String,((char*)VGA_ADRESSE)+60+d+(48+c*30)*320,253,320);
           read(ifil,String,40);
           p=strtok(String," "); x=y=0;
@@ -625,7 +626,7 @@ int SaveGameToFile(const char *path, int quiet)
   if (ofil < 0) {
     fprintf(stderr, "moas: SaveGameToFile: cannot create '%s' (errno=%d)\n", path, errno);
     if (!quiet)
-      DisplayMessage("Speichern fehlgeschlagen", 253);
+      DisplayMessage((char *)Ui(UI_SAVE_FAIL), 253);
     FREE(MiniPic);
     return -1;
   }
@@ -696,7 +697,7 @@ int SaveGameToFile(const char *path, int quiet)
       close(ofil);
       FREE(MiniPic);
       if (!quiet)
-        DisplayMessage("Speichern fehlgeschlagen", 253);
+        DisplayMessage((char *)Ui(UI_SAVE_FAIL), 253);
       return -1;
     }
     close(ofil);
@@ -730,7 +731,7 @@ void SaveGame(short CallerID)
   short slot = -1;
 
   if (CallerID == 0)
-    LoadSaveMenu("Speichern:");
+    LoadSaveMenu((char *)Ui(UI_SAVE_TITLE));
   for (d = 0; d < 143; d += 142)
     for (c = 0; c < 5; c++)
       if ((Mouse.x >= 19 + d && Mouse.y >= 33 + c * 30 && Mouse.x <= 60 + d &&
@@ -743,7 +744,7 @@ void SaveGame(short CallerID)
     if (CallerID == 0) {
       fprintf(stderr, "moas: SaveGame: no slot selected (mouse %d,%d) — click a free slot\n",
               (int)Mouse.x, (int)Mouse.y);
-      DisplayMessage("Kein Slot gewaehlt", 253);
+      DisplayMessage((char *)Ui(UI_SLOT_NONE), 253);
     }
     return;
   }
@@ -982,7 +983,7 @@ void LoadGame(void)
   char Name[20];
   char savpath[512];
 
-  LoadSaveMenu("Laden:");
+  LoadSaveMenu((char *)Ui(UI_LOAD_TITLE));
   for (d = 0; d < 143; d += 142)
     for (c = 0; c < 5; c++)
       if (Mouse.x >= 19 + d && Mouse.y >= 33 + c * 30 && Mouse.x <= 60 + d &&
@@ -994,12 +995,12 @@ void LoadGame(void)
           return;
         }
         if (LoadGameFromFile(savpath) != 0)
-          DisplayMessage("Laden fehlgeschlagen", 253);
+          DisplayMessage((char *)Ui(UI_LOAD_FAIL), 253);
         return;
       }
   fprintf(stderr, "moas: LoadGame: no slot selected (mouse %d,%d)\n",
           (int)Mouse.x, (int)Mouse.y);
-  DisplayMessage("Kein Slot gewaehlt", 253);
+  DisplayMessage((char *)Ui(UI_SLOT_NONE), 253);
 }
 
 

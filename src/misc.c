@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "lang.h"
 #include "platform.h"
 #include "debug.h"
 #ifdef __ANDROID__
@@ -591,6 +592,13 @@ char *UnPack(unsigned char *String)
       memcpy(Buffer + used, piece, plen);
       used += plen;
       Buffer[used] = 0;
+    }
+  }
+  {
+    const char *tr = LangLookup((const char *)Buffer);
+    if (tr) {
+      strncpy((char *)Buffer, tr, sizeof(Buffer) - 1);
+      Buffer[sizeof(Buffer) - 1] = 0;
     }
   }
   return (char *)Buffer;

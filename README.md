@@ -215,6 +215,19 @@ Each row has a stable `id` (`script.pN.0xADDR`, `pck.K`, or `ui.*`), the
 source text, and a short reference. UI verb templates and save/load prompts
 from the SDL port are included under `ui.*`.
 
+### Runtime language packs (no gettext)
+
+```sh
+moas --lang=en
+# or: MOAS_LANG=en moas
+```
+
+Loads `lang/<code>.ui` (index-based UI strings) and `lang/<code>.script`
+(German line → translation, applied inside `UnPack`). Search path:
+`$MOAS_LANGDIR`, `$MOAS_DATADIR/lang`, `$MOAS_DATADIR/../lang`, `./lang`.
+Default `de` keeps built-in German UI and original script text. Sample
+English UI: `lang/en.ui`. Build a full `en.script` from the TSV extract.
+
 ## Game data (`manick/`)
 
 | File | Role |

@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "lang.h"
 #include "debug.h"
 #include "person_disk.h"
 #ifndef DOS
@@ -68,11 +69,13 @@ int main(int argc, char **argv)
   MOAS_ALOG("assets prepared");
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
   MoasLogDirectories();
+  LangInit();
   MOAS_ALOG("data dir ready, calling InitAll");
 #else
   (void)argc; (void)argv;
   /* DOS: CWD is the game dir; state/config are "." (DOSBox runner persists saves). */
   MoasLogDirectories();
+  LangInit();
 #endif
 
   DontCyclePal=1;

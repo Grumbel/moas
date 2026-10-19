@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #include "debug.h"
+#include "lang.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@ static void usage(const char *argv0)
     "  --datadir=PATH          Game data directory (MOAS_DATADIR)\n"
     "  --statedir=PATH         Savegame directory (MOAS_STATEDIR)\n"
     "  --load=SLOT|FILE        Load save at startup (slot 0-9 or path to .SAV)\n"
+    "  --lang=CODE             UI/script language (default de; loads lang/CODE.*)\n"
     "  --load SLOT|FILE        Same as --load=\n"
     "  --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit\n"
     "  -f, --fullscreen        Desktop fullscreen\n"
@@ -80,6 +82,9 @@ void MoasParseArgs(int argc, char **argv)
   env = getenv("MOAS_DEBUG");
   if (env && *env)
     moas_debug |= parse_debug_list(env);
+  env = getenv("MOAS_LANG");
+  if (env && *env)
+    LangSetCode(env);
 #ifdef __ANDROID__
   /* Always surface load diagnostics on logcat until the port is solid. */
   if (!env || !*env)
@@ -94,6 +99,14 @@ void MoasParseArgs(int argc, char **argv)
     }
     if (!strcmp(a, "--skip-intro")) {
       moas_skip_intro = 1;
+      continue;
+    }
+    if (!strncmp(a, "--lang=", 7)) {
+      LangSetCode(a + 7);
+      continue;
+    }
+    if (!strcmp(a, "--lang") && i + 1 < argc) {
+      LangSetCode(argv[++i]);
       continue;
     }
     if (!strncmp(a, "--debug=", 8)) {

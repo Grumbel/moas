@@ -50,6 +50,11 @@ for f in "$GAME_SRC_DIR"/manick/GAME.*; do
   esac
   cp -n "$f" "src/assets/$base" 2>/dev/null || cp "$f" "src/assets/$base"
 done
+# Optional language packs
+if [ -d "$GAME_SRC_DIR/lang" ]; then
+  mkdir -p src/assets/lang
+  cp "$GAME_SRC_DIR"/lang/*.ui "$GAME_SRC_DIR"/lang/*.script src/assets/lang/ 2>/dev/null || true
+fi
 echo "==> assets:"; ls -la src/assets
 
 # SDL2, prebuilt; sources use #include <SDL.h> (headers at SDL/include/).

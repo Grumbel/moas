@@ -1,0 +1,20 @@
+# MOAS English UI (tab-separated: id<TAB>text)
+# UTF-8; ASCII is enough for the bitmap font.
+verb.use	USE %s
+verb.use_with	USE %s WITH %s
+verb.look	LOOK AT %s
+verb.talk	TALK TO %s
+verb.move	MOVE %s
+verb.move_dir	MOVE %s TOWARD %s
+save.title	Save:
+load.title	Load:
+save.fail	Save failed
+load.fail	Load failed
+slot.none	No slot selected
+slot.of	%i of %i
+ov.save	SAVE
+ov.load	LOAD
+ov.esc	ESC
+ov.skip	SKIP
+ov.use	USE
+ov.look	LOOK
