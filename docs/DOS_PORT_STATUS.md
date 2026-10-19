@@ -245,3 +245,12 @@ Soft cursor is still drawn by **PowerRedrawArea** (baked into the blit) when
 `Window.Status==None`, not by a hardware sprite. Capture the mouse in the
 emulator (click the window / Ctrl-F10 depending on build) so INT 33 receives
 motion.
+
+## Graphics corruption under DOS rebuild
+
+Original `InitAll` had `//InitDigi()` commented out. The port called `InitDigi()`
+unconditionally, which under DOS allocates large **DOS conventional** buffers
+via DPMI `0x0100` and talks to the Sound Blaster. That can exhaust low memory
+or interfere with the VGA path under DOSBox and produce scrambled graphics.
+
+DOS builds again skip `InitDigi()` (SDL audio remains for non-DOS).

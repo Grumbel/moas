@@ -69,8 +69,17 @@ void InitAll(void)
   PRedrawTmpBak=MALLOC(6000);
   SmallTextLine=MALLOC(340*(5+2+2));  memset(SmallTextLine,0,340*(5+2+2));
   VMouseBuf=MALLOC(40*44);
-  InitDialogs();             InitDigi();
-#ifndef DOS
+  InitDialogs();
+  /*
+   * Original source had InitDigi() commented out. Enabling it under DOS
+   * allocates large DOS-conventional buffers via DPMI and pokes the SB
+   * ports/IRQs — easy to exhaust low memory or disturb VGA under DOSBox.
+   * SDL audio path is separate (non-DOS only).
+   */
+#ifdef DOS
+  /* InitDigi(); — disabled; matches original GAME.EXE behaviour */
+#else
+  InitDigi();
   DigiStartSdlAudio();
 #endif
   Init320Tab();              InitScreenData();

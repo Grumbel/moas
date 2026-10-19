@@ -162,8 +162,18 @@ void MouseRead(void)
 
   ox=Mouse.x-15;
   oy=Mouse.y-15;
-  if (MouseDivX > 0) Mouse.x+=(short)(x/MouseDivX);
-  if (MouseDivY > 0) Mouse.y+=(short)(y/MouseDivY);
+  {
+    short dx = 0, dy = 0;
+    if (MouseDivX > 0) dx = (short)(x / MouseDivX);
+    if (MouseDivY > 0) dy = (short)(y / MouseDivY);
+    /* Cap step so one huge emulator poll cannot jump across the screen */
+    if (dx > 12) dx = 12;
+    if (dx < -12) dx = -12;
+    if (dy > 12) dy = 12;
+    if (dy < -12) dy = -12;
+    Mouse.x += dx;
+    Mouse.y += dy;
+  }
   if (Mouse.x<0) Mouse.x=0;    if (Mouse.x>319) Mouse.x=319;
   if (Mouse.y<0) Mouse.y=0;    if (Mouse.y>199) Mouse.y=199;
   if (Window.Status==None) PowerRedrawArea(min(Mouse.x-15,ox),min(Mouse.y-15,oy),max(Mouse.x-15,ox)+59,max(Mouse.y-15,oy)+55);
@@ -171,9 +181,9 @@ void MouseRead(void)
 
   if (LastX!=x && abs(LastX-x)<MouseDivX && abs(LastX-x)>0) MouseDivX=abs(LastX-x);
   if (LastY!=y && abs(LastY-y)<MouseDivY && abs(LastY-y)>0) MouseDivY=abs(LastY-y);
-  /* Emulator floor: real HW rarely settles below ~3–5 mickeys per poll. */
-  if (MouseDivX < 4) MouseDivX = 4;
-  if (MouseDivY < 4) MouseDivY = 4;
+  /* Tiny floor only — main speed control is the per-frame cap above */
+  if (MouseDivX < 2) MouseDivX = 2;
+  if (MouseDivY < 2) MouseDivY = 2;
 
   LastX=x;  Mouse.LastLeft=Mouse.Left;
   LastY=y;  Mouse.LastRight=Mouse.Right;
