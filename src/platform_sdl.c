@@ -56,6 +56,7 @@ static Uint32        start_ticks = 0;
 static int           running  = 1;
 static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
+static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
@@ -444,6 +445,25 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (out_wh) *out_wh = wh;
 }
 
+/* SDL mouse/touch events use window coordinates; present/hit-test use
+ * renderer output pixels. On Android high-DPI these often differ (2x). */
+static void window_to_output(int wx, int wy, int *ox, int *oy)
+{
+  int ww = 1, wh = 1, ow = 1, oh = 1;
+  if (window)
+    SDL_GetWindowSize(window, &ww, &wh);
+  if (renderer)
+    SDL_GetRendererOutputSize(renderer, &ow, &oh);
+  else {
+    ow = ww;
+    oh = wh;
+  }
+  if (ww < 1) ww = 1;
+  if (wh < 1) wh = 1;
+  if (ox) *ox = (int)((long)wx * (long)ow / (long)ww);
+  if (oy) *oy = (int)((long)wy * (long)oh / (long)wh);
+}
+
 
 #if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
 /* Touch controls in letterbox margins (window pixels), not the 320x200 buffer.
@@ -516,32 +536,47 @@ static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 
   }
 }
 
-/* Four button rects in window pixels: [0]=Save [1]=Load [2]=Esc [3]=Skip */
+/* Four button rects in renderer-output pixels: [0]=Save [1]=Load [2]=Esc [3]=Skip */
 static void overlay_rects(SDL_Rect out[4])
 {
   int dx, dy, dw, dh, ww, wh;
   int btn_w, btn_h, gap, margin;
   int left_x, right_x, col_y0;
+  int side;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
-  gap = 10;
-  margin = 10;
-  btn_w = 72;
-  btn_h = 64;
+  gap = 12;
+  margin = 8;
+  /* Prefer filling the side letterbox so targets are large enough for thumbs. */
+  side = dx;
+  if (side < ww - (dx + dw))
+    side = ww - (dx + dw);
+  btn_w = side - margin * 2;
+  if (btn_w > 132)
+    btn_w = 132;
+  if (btn_w < 72)
+    btn_w = 72;
+  btn_h = (btn_w * 6) / 7;
+  if (btn_h < 64)
+    btn_h = 64;
+  if (btn_h > 112)
+    btn_h = 112;
 
   if (dx >= btn_w + margin * 2) {
     /* Side letterbox: columns in left/right margins, vertically centered on game */
     left_x = (dx - btn_w) / 2;
-    if (left_x < margin) left_x = margin;
-    right_x = dx + dw + (dx - btn_w) / 2;
+    if (left_x < margin)
+      left_x = margin;
+    right_x = dx + dw + (ww - (dx + dw) - btn_w) / 2;
     if (right_x + btn_w > ww - margin)
       right_x = ww - margin - btn_w;
     col_y0 = dy + (dh - (btn_h * 2 + gap)) / 2;
-    if (col_y0 < margin) col_y0 = margin;
+    if (col_y0 < margin)
+      col_y0 = margin;
   } else {
     /* Top/bottom letterbox or edge-to-edge: float over side edges of the game */
-    btn_w = 64;
-    btn_h = 56;
+    btn_w = 80;
+    btn_h = 72;
     left_x = margin;
     right_x = ww - margin - btn_w;
     if (dy + dh < wh - (btn_h * 2 + gap + margin)) {
@@ -550,28 +585,31 @@ static void overlay_rects(SDL_Rect out[4])
       col_y0 = margin;
     } else {
       col_y0 = dy + margin;
-      /* shrink so both fit inside game height if needed */
       if (col_y0 + btn_h * 2 + gap > dy + dh) {
         btn_h = (dh - gap - margin * 2) / 2;
-        if (btn_h < 44) btn_h = 44;
+        if (btn_h < 56)
+          btn_h = 56;
       }
     }
   }
 
-  out[0].x = left_x;  out[0].y = col_y0;              out[0].w = btn_w; out[0].h = btn_h; /* Save */
-  out[1].x = left_x;  out[1].y = col_y0 + btn_h + gap; out[1].w = btn_w; out[1].h = btn_h; /* Load */
-  out[2].x = right_x; out[2].y = col_y0;              out[2].w = btn_w; out[2].h = btn_h; /* Esc */
-  out[3].x = right_x; out[3].y = col_y0 + btn_h + gap; out[3].w = btn_w; out[3].h = btn_h; /* Skip */
+  out[0].x = left_x;  out[0].y = col_y0;                out[0].w = btn_w; out[0].h = btn_h;
+  out[1].x = left_x;  out[1].y = col_y0 + btn_h + gap;  out[1].w = btn_w; out[1].h = btn_h;
+  out[2].x = right_x; out[2].y = col_y0;                out[2].w = btn_w; out[2].h = btn_h;
+  out[3].x = right_x; out[3].y = col_y0 + btn_h + gap; out[3].w = btn_w; out[3].h = btn_h;
 }
 
-static int overlay_hit(int wx, int wy)
+/* ox/oy are renderer-output pixels (after window_to_output). */
+static int overlay_hit(int ox, int oy)
 {
   SDL_Rect r[4];
   int i;
+  int pad = 14; /* touch slop beyond the drawn rect */
+
   overlay_rects(r);
   for (i = 0; i < 4; i++) {
-    if (wx >= r[i].x && wx < r[i].x + r[i].w &&
-        wy >= r[i].y && wy < r[i].y + r[i].h)
+    if (ox >= r[i].x - pad && ox < r[i].x + r[i].w + pad &&
+        oy >= r[i].y - pad && oy < r[i].y + r[i].h + pad)
       return i + 1;
   }
   return OV_NONE;
@@ -604,85 +642,164 @@ static void overlay_fire(int which)
   }
 }
 
-static void ov_icon_save(SDL_Rect *r)
+static void ov_fill_roundish(SDL_Rect *r, Uint8 R, Uint8 G, Uint8 B)
 {
-  /* Floppy-like: body + label window + shutter */
-  SDL_Rect body, win, slot;
-  int m = r->w / 8;
-  body.x = r->x + m; body.y = r->y + m;
-  body.w = r->w - 2 * m; body.h = r->h / 2 - m;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderFillRect(renderer, &body);
-  SDL_SetRenderDrawColor(renderer, 40, 120, 50, 255);
-  win.x = body.x + body.w / 4; win.y = body.y + body.h / 4;
-  win.w = body.w / 2; win.h = body.h / 2;
-  SDL_RenderFillRect(renderer, &win);
-  slot.x = body.x + body.w / 3; slot.y = body.y;
-  slot.w = body.w / 3; slot.h = body.h / 5;
-  SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-  SDL_RenderFillRect(renderer, &slot);
+  /* Fake rounded corners by stepping the fill edges in a few pixels. */
+  SDL_Rect mid = *r;
+  int c = r->w / 12;
+  if (c < 3) c = 3;
+  if (c > 10) c = 10;
+  mid.x += c; mid.w -= 2 * c;
+  SDL_SetRenderDrawColor(renderer, R, G, B, 255);
+  SDL_RenderFillRect(renderer, &mid);
+  mid = *r;
+  mid.y += c; mid.h -= 2 * c;
+  SDL_RenderFillRect(renderer, &mid);
+  /* corner nubs */
+  {
+    SDL_Rect q;
+    q.x = r->x + c / 2; q.y = r->y + c / 2; q.w = c; q.h = c;
+    SDL_RenderFillRect(renderer, &q);
+    q.x = r->x + r->w - c - c / 2;
+    SDL_RenderFillRect(renderer, &q);
+    q.y = r->y + r->h - c - c / 2;
+    SDL_RenderFillRect(renderer, &q);
+    q.x = r->x + c / 2;
+    SDL_RenderFillRect(renderer, &q);
+  }
 }
 
-static void ov_icon_load(SDL_Rect *r)
+static void ov_icon_save(SDL_Rect *r, int pressed)
 {
-  /* Folder + arrow down into it */
+  /* 3.5" floppy: body, metal shutter, label window, write-protect notch */
+  SDL_Rect body, shutter, label, hub, notch;
+  int m = r->w / 10;
+  int oy = pressed ? 2 : 0;
+  body.x = r->x + m; body.y = r->y + m + oy;
+  body.w = r->w - 2 * m; body.h = r->h / 2 - m;
+  SDL_SetRenderDrawColor(renderer, 245, 245, 245, 255);
+  SDL_RenderFillRect(renderer, &body);
+  SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
+  SDL_RenderDrawRect(renderer, &body);
+  /* metal shutter top */
+  shutter.x = body.x + body.w / 5; shutter.y = body.y;
+  shutter.w = body.w * 3 / 5; shutter.h = body.h / 4;
+  SDL_SetRenderDrawColor(renderer, 90, 95, 100, 255);
+  SDL_RenderFillRect(renderer, &shutter);
+  /* label area */
+  label.x = body.x + body.w / 6; label.y = body.y + body.h * 2 / 5;
+  label.w = body.w * 2 / 3; label.h = body.h * 2 / 5;
+  SDL_SetRenderDrawColor(renderer, 230, 235, 240, 255);
+  SDL_RenderFillRect(renderer, &label);
+  SDL_SetRenderDrawColor(renderer, 50, 100, 60, 255);
+  SDL_RenderDrawRect(renderer, &label);
+  /* hub circle (square approx) */
+  hub.w = body.w / 5; hub.h = hub.w;
+  hub.x = body.x + (body.w - hub.w) / 2;
+  hub.y = body.y + body.h - hub.h - 2;
+  SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+  SDL_RenderFillRect(renderer, &hub);
+  /* write-protect notch */
+  notch.x = body.x + body.w - m / 2; notch.y = body.y + body.h / 3;
+  notch.w = m / 2 + 1; notch.h = body.h / 5;
+  SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
+  SDL_RenderFillRect(renderer, &notch);
+}
+
+static void ov_icon_load(SDL_Rect *r, int pressed)
+{
+  /* Folder with tab + downward arrow into it */
   SDL_Rect tab, body;
-  int m = r->w / 8;
+  int m = r->w / 10;
   int mid = r->x + r->w / 2;
-  tab.x = r->x + m; tab.y = r->y + m;
-  tab.w = r->w / 3; tab.h = r->h / 10;
+  int oy = pressed ? 2 : 0;
+  int y0 = r->y + m + oy;
+  tab.x = r->x + m; tab.y = y0;
+  tab.w = r->w / 3; tab.h = r->h / 12;
   body.x = r->x + m; body.y = tab.y + tab.h;
   body.w = r->w - 2 * m; body.h = r->h / 3;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_SetRenderDrawColor(renderer, 255, 220, 120, 255);
   SDL_RenderFillRect(renderer, &tab);
+  SDL_SetRenderDrawColor(renderer, 255, 200, 70, 255);
   SDL_RenderFillRect(renderer, &body);
-  /* Arrow */
-  SDL_RenderDrawLine(renderer, mid, r->y + m, mid, body.y + body.h / 2);
-  SDL_RenderDrawLine(renderer, mid, body.y + body.h / 2, mid - m, body.y + body.h / 2 - m);
-  SDL_RenderDrawLine(renderer, mid, body.y + body.h / 2, mid + m, body.y + body.h / 2 - m);
+  SDL_SetRenderDrawColor(renderer, 120, 80, 20, 255);
+  SDL_RenderDrawRect(renderer, &body);
+  SDL_RenderDrawRect(renderer, &tab);
+  /* thick arrow into folder */
+  {
+    int tip = body.y + body.h * 2 / 3;
+    int i;
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    for (i = 0; i < 3; i++) {
+      SDL_RenderDrawLine(renderer, mid + i - 1, y0 - 2, mid + i - 1, tip);
+      SDL_RenderDrawLine(renderer, mid - m, tip - m + i, mid, tip + i);
+      SDL_RenderDrawLine(renderer, mid + m, tip - m + i, mid, tip + i);
+    }
+  }
 }
 
-static void ov_icon_esc(SDL_Rect *r)
+static void ov_icon_esc(SDL_Rect *r, int pressed)
 {
-  /* Octagon-ish stop: outer ring + X */
-  int m = r->w / 6;
-  int cx = r->x + r->w / 2, cy = r->y + r->h / 3;
-  int rad = r->w / 5;
-  SDL_Rect box;
-  box.x = cx - rad; box.y = cy - rad; box.w = rad * 2; box.h = rad * 2;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderDrawRect(renderer, &box);
-  SDL_RenderDrawLine(renderer, box.x + m / 2, box.y + m / 2,
-                     box.x + box.w - m / 2, box.y + box.h - m / 2);
-  SDL_RenderDrawLine(renderer, box.x + box.w - m / 2, box.y + m / 2,
-                     box.x + m / 2, box.y + box.h - m / 2);
-}
-
-static void ov_icon_skip(SDL_Rect *r)
-{
-  /* Double chevron >> */
+  /* Red stop plate with bold X */
+  SDL_Rect plate;
   int m = r->w / 8;
-  int x0 = r->x + r->w / 4, y0 = r->y + m;
-  int x1 = r->x + r->w / 2, y1 = r->y + r->h / 3;
-  int x2 = r->x + r->w / 4, y2 = r->y + r->h / 2 - m;
+  int oy = pressed ? 2 : 0;
+  int cx = r->x + r->w / 2, cy = r->y + r->h / 3 + oy;
+  int rad = r->w / 5;
+  int i;
+  plate.x = cx - rad; plate.y = cy - rad; plate.w = rad * 2; plate.h = rad * 2;
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderDrawLine(renderer, x0, y0, x1, y1);
-  SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
-  SDL_RenderDrawLine(renderer, x0 + m * 2, y0, x1 + m * 2, y1);
-  SDL_RenderDrawLine(renderer, x1 + m * 2, y1, x2 + m * 2, y2);
-  /* thicker */
-  SDL_RenderDrawLine(renderer, x0, y0 + 1, x1, y1 + 1);
-  SDL_RenderDrawLine(renderer, x1, y1 + 1, x2, y2 + 1);
+  SDL_RenderFillRect(renderer, &plate);
+  SDL_SetRenderDrawColor(renderer, 180, 30, 30, 255);
+  {
+    SDL_Rect in = plate;
+    in.x += 3; in.y += 3; in.w -= 6; in.h -= 6;
+    SDL_RenderFillRect(renderer, &in);
+  }
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  for (i = 0; i < 3; i++) {
+    SDL_RenderDrawLine(renderer, plate.x + m + i, plate.y + m,
+                       plate.x + plate.w - m + i, plate.y + plate.h - m);
+    SDL_RenderDrawLine(renderer, plate.x + plate.w - m - i, plate.y + m,
+                       plate.x + m - i, plate.y + plate.h - m);
+  }
+}
+
+static void ov_icon_skip(SDL_Rect *r, int pressed)
+{
+  /* Fast-forward: two filled chevrons */
+  int m = r->w / 8;
+  int oy = pressed ? 2 : 0;
+  int x0 = r->x + r->w / 5;
+  int y0 = r->y + m + oy;
+  int y1 = r->y + r->h / 3 + oy;
+  int y2 = r->y + r->h / 2 - m + oy;
+  int x1 = r->x + r->w * 2 / 5;
+  int x2 = r->x + r->w / 2;
+  int i;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  for (i = 0; i < 4; i++) {
+    SDL_RenderDrawLine(renderer, x0 + i, y0, x1 + i, y1);
+    SDL_RenderDrawLine(renderer, x1 + i, y1, x0 + i, y2);
+    SDL_RenderDrawLine(renderer, x2 + i, y0, x2 + (x1 - x0) + i, y1);
+    SDL_RenderDrawLine(renderer, x2 + (x1 - x0) + i, y1, x2 + i, y2);
+  }
 }
 
 static void overlay_draw(void)
 {
   SDL_Rect r[4];
   static const SDL_Color cols[4] = {
-    { 36, 130, 55, 255 },   /* Save */
-    { 40, 90, 170, 255 },   /* Load */
-    { 150, 45, 45, 255 },   /* Esc */
-    { 190, 110, 25, 255 },  /* Skip */
+    { 32, 140, 58, 255 },   /* Save  green */
+    { 36, 100, 190, 255 },  /* Load  blue  */
+    { 170, 42, 42, 255 },   /* Esc   red   */
+    { 200, 120, 28, 255 },  /* Skip  amber */
+  };
+  static const SDL_Color cols_press[4] = {
+    { 18, 90, 36, 255 },
+    { 20, 60, 130, 255 },
+    { 110, 25, 25, 255 },
+    { 140, 80, 15, 255 },
   };
   static const char *labels[4] = { "SAVE", "LOAD", "ESC", "SKIP" };
   int i, ts;
@@ -694,37 +811,56 @@ static void overlay_draw(void)
 
   overlay_rects(r);
   for (i = 0; i < 4; i++) {
-    /* Soft shadow */
-    {
-      SDL_Rect sh = r[i];
-      sh.x += 3; sh.y += 3;
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 120);
-      SDL_RenderFillRect(renderer, &sh);
-    }
-    SDL_SetRenderDrawColor(renderer, cols[i].r, cols[i].g, cols[i].b, 255);
-    SDL_RenderFillRect(renderer, &r[i]);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRect(renderer, &r[i]);
-    /* inset highlight */
-    {
-      SDL_Rect in = r[i];
-      in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 60);
-      SDL_RenderDrawRect(renderer, &in);
-    }
-    if (i == 0) ov_icon_save(&r[i]);
-    else if (i == 1) ov_icon_load(&r[i]);
-    else if (i == 2) ov_icon_esc(&r[i]);
-    else ov_icon_skip(&r[i]);
+    int pressed = (overlay_pressed == i + 1);
+    SDL_Color c = pressed ? cols_press[i] : cols[i];
+    SDL_Rect face = r[i];
 
-    /* Label under icon */
-    ts = (r[i].w >= 70) ? 2 : 1;
+    /* Soft shadow (skip when pressed so it looks inset) */
+    if (!pressed) {
+      SDL_Rect sh = r[i];
+      sh.x += 4; sh.y += 4;
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 140);
+      SDL_RenderFillRect(renderer, &sh);
+    } else {
+      face.x += 2; face.y += 2;
+    }
+
+    ov_fill_roundish(&face, c.r, c.g, c.b);
+
+    /* Bevel: light top-left, dark bottom-right */
+    if (!pressed) {
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + face.w - 3, face.y + 2);
+      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + 2, face.y + face.h - 3);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 180);
+      SDL_RenderDrawLine(renderer, face.x + 2, face.y + face.h - 3, face.x + face.w - 3, face.y + face.h - 3);
+      SDL_RenderDrawLine(renderer, face.x + face.w - 3, face.y + 2, face.x + face.w - 3, face.y + face.h - 3);
+    } else {
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + face.w - 3, face.y + 2);
+      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + 2, face.y + face.h - 3);
+      SDL_SetRenderDrawColor(renderer, 255, 220, 80, 255);
+      SDL_RenderDrawRect(renderer, &face);
+    }
+
+    /* Outer border */
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, pressed ? 255 : 200);
+    SDL_RenderDrawRect(renderer, &face);
+
+    if (i == 0) ov_icon_save(&face, pressed);
+    else if (i == 1) ov_icon_load(&face, pressed);
+    else if (i == 2) ov_icon_esc(&face, pressed);
+    else ov_icon_skip(&face, pressed);
+
+    ts = (face.w >= 80) ? 2 : 1;
     {
       int text_w = (int)strlen(labels[i]) * 6 * ts;
-      int tx = r[i].x + (r[i].w - text_w) / 2;
-      int ty = r[i].y + r[i].h - 7 * ts - 6;
-      if (ty < r[i].y + r[i].h / 2)
-        ty = r[i].y + r[i].h - 7 * ts - 4;
+      int tx = face.x + (face.w - text_w) / 2;
+      int ty = face.y + face.h - 7 * ts - 8;
+      if (ty < face.y + face.h / 2)
+        ty = face.y + face.h - 7 * ts - 4;
+      /* text shadow */
+      ov_draw_text(tx + 1, ty + 1, labels[i], ts, 0, 0, 0);
       ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }
   }
@@ -788,23 +924,33 @@ void PlatformSetMousePos(short x, short y)
   Mouse.y = y;
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   {
-    int wx = dx + (int)((float)x * (float)dw / (float)LOGICAL_W);
-    int wy = dy + (int)((float)y * (float)dh / (float)LOGICAL_H);
-    SDL_WarpMouseInWindow(window, wx, wy);
+    int rx = dx + (int)((float)x * (float)dw / (float)LOGICAL_W);
+    int ry = dy + (int)((float)y * (float)dh / (float)LOGICAL_H);
+    int wwin = 1, whin = 1;
+    SDL_GetWindowSize(window, &wwin, &whin);
+    if (ww < 1) ww = 1;
+    if (wh < 1) wh = 1;
+    /* Warp expects window coords; letterbox uses output pixels. */
+    SDL_WarpMouseInWindow(window,
+                          (int)((long)rx * (long)wwin / (long)ww),
+                          (int)((long)ry * (long)whin / (long)wh));
   }
 }
 
 static void mouse_to_logical(int wx, int wy, short *ox, short *oy)
 {
   int dx, dy, dw, dh;
+  int rx, ry;
   float lx, ly;
 
+  /* Events are window-space; letterbox geometry is renderer-output space. */
+  window_to_output(wx, wy, &rx, &ry);
   letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
   if (dw < 1) dw = 1;
   if (dh < 1) dh = 1;
 
-  lx = ((float)wx - (float)dx) * (float)LOGICAL_W / (float)dw;
-  ly = ((float)wy - (float)dy) * (float)LOGICAL_H / (float)dh;
+  lx = ((float)rx - (float)dx) * (float)LOGICAL_W / (float)dw;
+  ly = ((float)ry - (float)dy) * (float)LOGICAL_H / (float)dh;
 
   if (lx < 0) lx = 0;
   if (ly < 0) ly = 0;
@@ -844,14 +990,25 @@ void PlatformPumpEvents(void)
       case SDL_MOUSEBUTTONUP: {
         /* Only update current button state. MouseCheck latches Last* each frame. */
         int down = (ev.type == SDL_MOUSEBUTTONDOWN);
-        int ov = overlay_hit(ev.button.x, ev.button.y);
-        if (ov && down && ev.button.button == SDL_BUTTON_LEFT) {
-          overlay_fire(ov);
+        int rx, ry, ov;
+        window_to_output(ev.button.x, ev.button.y, &rx, &ry);
+        ov = overlay_hit(rx, ry);
+        if (ov && ev.button.button == SDL_BUTTON_LEFT) {
+          if (down) {
+            overlay_pressed = ov;
+            overlay_fire(ov);
+          } else {
+            overlay_pressed = 0;
+          }
           break; /* do not inject a game click */
         }
         if (ov) {
+          if (!down)
+            overlay_pressed = 0;
           break; /* ignore release over overlay */
         }
+        if (!down)
+          overlay_pressed = 0;
         {
           short mx, my;
           mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
@@ -875,14 +1032,14 @@ void PlatformPumpEvents(void)
         break;
       }
       case SDL_FINGERDOWN: {
-        int ww, wh;
-        int wx, wy;
-        int ov;
+        int ww, wh, wx, wy, rx, ry, ov;
         SDL_GetWindowSize(window, &ww, &wh);
-        wx = (int)(ev.tfinger.x * (float)ww);
-        wy = (int)(ev.tfinger.y * (float)wh);
-        ov = overlay_hit(wx, wy);
+        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
+        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
+        window_to_output(wx, wy, &rx, &ry);
+        ov = overlay_hit(rx, ry);
         if (ov) {
+          overlay_pressed = ov;
           overlay_fire(ov);
           break;
         }
@@ -898,12 +1055,15 @@ void PlatformPumpEvents(void)
         break;
       }
       case SDL_FINGERUP: {
-        int ww, wh, wx, wy;
+        int ww, wh, wx, wy, rx, ry;
         SDL_GetWindowSize(window, &ww, &wh);
-        wx = (int)(ev.tfinger.x * (float)ww);
-        wy = (int)(ev.tfinger.y * (float)wh);
-        if (overlay_hit(wx, wy))
+        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
+        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
+        window_to_output(wx, wy, &rx, &ry);
+        if (overlay_hit(rx, ry) || overlay_pressed) {
+          overlay_pressed = 0;
           break;
+        }
         {
           short mx, my;
           mouse_to_logical(wx, wy, &mx, &my);
@@ -913,6 +1073,20 @@ void PlatformPumpEvents(void)
           Mouse.ReleaseX = Mouse.x;
           Mouse.ReleaseY = Mouse.y;
         }
+        break;
+      }
+      case SDL_FINGERMOTION: {
+        /* Keep pressed highlight only while finger stays on a button. */
+        int ww, wh, wx, wy, rx, ry, ov;
+        if (!overlay_pressed)
+          break;
+        SDL_GetWindowSize(window, &ww, &wh);
+        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
+        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
+        window_to_output(wx, wy, &rx, &ry);
+        ov = overlay_hit(rx, ry);
+        if (ov != overlay_pressed)
+          overlay_pressed = ov; /* may become 0 when leaving */
         break;
       }
       case SDL_KEYDOWN:

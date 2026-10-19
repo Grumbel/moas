@@ -54,6 +54,12 @@
   Separate from script slot 9 (`GAME9.SAV` / `AutoSaveGame`). Refactored `SaveGameToFile` /
   `SaveGameSlot` so path saves share one writer.
 
+## Android overlay (2026-10-19)
+- Hit-test used window coords vs letterbox in renderer output → hard to press on hi-DPI.
+  Fixed via `window_to_output`; `mouse_to_logical` shares the mapping.
+- Larger buttons (fill side letterbox), 14px touch pad, pressed state (inset + gold border + darker face).
+- Icons: floppy / folder+arrow / stop+X / double-chevron with more detail.
+
 ## Still open
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
@@ -67,6 +73,7 @@
 - Host Phase[0]/[1] size checks now log to stderr (DOS still InternalError).
 
 ## Done this stack
+- Android overlay: DPI hit-test fix, pressed feedback, richer icons
 - Exit AUTOSAVE.SAV + `--no-autosave`; SaveGameToFile/SaveGameSlot refactor
 - Esc only sets KeyAbortState=2 when armed (KeyAbortState==1), matching DOS IRQ
 - Bewege arrow cursor (VMouse + Phase[1]) + same-frame refresh after mode/embed change
