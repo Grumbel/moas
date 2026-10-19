@@ -33,8 +33,9 @@ cp "$GAME_SRC_DIR"/src/*.c src/jni/src/
 cp "$GAME_SRC_DIR"/src/*.h src/jni/src/
 
 # Game data into APK assets/ (extracted at runtime to internal storage).
+# Keep in sync with android_data_files[] in platform_sdl.c.
 mkdir -p src/assets
-for f in GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX GAME.MAP \
+for f in GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX \
          LICENCE.DAT Licence.Dat licence.dat; do
   if [ -f "$GAME_SRC_DIR/manick/$f" ]; then
     cp "$GAME_SRC_DIR/manick/$f" "src/assets/$f"

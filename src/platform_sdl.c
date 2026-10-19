@@ -224,10 +224,15 @@ static void platform_log(const char *fmt, ...)
 }
 
 #ifdef __ANDROID__
-/* Known game data files shipped under APK assets/ (see build-apk.sh). */
+#ifndef MOAS_VERSION
+#define MOAS_VERSION "unknown"
+#endif
+
+/* Game data files staged under APK assets/ by mk/android/scripts/build-apk.sh.
+ * Optional licence name variants cover case differences on case-sensitive FS. */
 static const char *const android_data_files[] = {
   "GAME.1", "GAME.2", "GAME.3", "GAME.4",
-  "GAME.PCK", "GAME.XXX", "GAME.MAP",
+  "GAME.PCK", "GAME.XXX",
   "LICENCE.DAT", "Licence.Dat", "licence.dat",
   NULL
 };
@@ -266,17 +271,57 @@ static int copy_asset_to(const char *asset_name, const char *dest_path)
   return 0;
 }
 
+/* True if stamp matches this APK's MOAS_VERSION (re-extract after upgrade). */
+static int assets_version_current(const char *dest_dir)
+{
+  char path[640];
+  char line[128];
+  FILE *f;
+  size_t n;
+
+  snprintf(path, sizeof(path), "%s/.moas_assets_version", dest_dir);
+  f = fopen(path, "rb");
+  if (!f)
+    return 0;
+  if (!fgets(line, sizeof(line), f)) {
+    fclose(f);
+    return 0;
+  }
+  fclose(f);
+  n = strlen(line);
+  while (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+    line[--n] = 0;
+  return strcmp(line, MOAS_VERSION) == 0;
+}
+
+static void write_assets_version(const char *dest_dir)
+{
+  char path[640];
+  FILE *f;
+
+  snprintf(path, sizeof(path), "%s/.moas_assets_version", dest_dir);
+  f = fopen(path, "wb");
+  if (!f) {
+    SDL_Log("cannot write version stamp %s: %s", path, strerror(errno));
+    return;
+  }
+  fprintf(f, "%s\n", MOAS_VERSION);
+  fclose(f);
+  SDL_Log("wrote asset version stamp %s (%s)", path, MOAS_VERSION);
+}
+
 void PlatformAndroidPrepareData(void)
 {
   const char *base;
   char dest_dir[512];
   char dest_file[640];
-  int i, ok = 0, fail = 0;
+  int i, ok = 0, fail = 0, force = 0;
   struct stat st;
 
+  /* Verbose so logcat shows path resolution and extract progress. */
   SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
-  MOAS_ALOG("MOAS Android starting");
-  SDL_Log("MOAS Android starting");
+  MOAS_ALOG("MOAS Android starting (version %s)", MOAS_VERSION);
+  SDL_Log("MOAS Android starting (version %s)", MOAS_VERSION);
 
   base = SDL_AndroidGetInternalStoragePath();
   if (!base || !base[0]) {
@@ -294,9 +339,14 @@ void PlatformAndroidPrepareData(void)
   }
   SDL_Log("data directory: %s", dest_dir);
 
+  if (!assets_version_current(dest_dir)) {
+    force = 1;
+    SDL_Log("asset version mismatch or missing — will re-extract");
+  }
+
   for (i = 0; android_data_files[i]; i++) {
     snprintf(dest_file, sizeof(dest_file), "%s/%s", dest_dir, android_data_files[i]);
-    if (stat(dest_file, &st) == 0 && st.st_size > 0) {
+    if (!force && stat(dest_file, &st) == 0 && st.st_size > 0) {
       SDL_Log("already present: %s (%ld bytes)", dest_file, (long)st.st_size);
       ok++;
       continue;
@@ -306,7 +356,9 @@ void PlatformAndroidPrepareData(void)
     else
       fail++;
   }
-  SDL_Log("asset extract: %d ok, %d failed/missing", ok, fail);
+  SDL_Log("asset extract: %d ok, %d failed/missing (force=%d)", ok, fail, force);
+  if (ok > 0)
+    write_assets_version(dest_dir);
 
   if (setenv("MOAS_DATADIR", dest_dir, 1) != 0)
     SDL_Log("setenv MOAS_DATADIR failed");
@@ -318,9 +370,8 @@ void PlatformAndroidPrepareData(void)
   {
     char state_dir[512];
     snprintf(state_dir, sizeof(state_dir), "%s/moas-state", dest_dir);
-    if (mkdir(state_dir, 0755) != 0) {
-      /* EEXIST is fine */
-    }
+    if (mkdir(state_dir, 0755) != 0 && errno != EEXIST)
+      SDL_Log("mkdir state %s failed: %s", state_dir, strerror(errno));
     if (setenv("MOAS_STATEDIR", state_dir, 1) != 0)
       SDL_Log("setenv MOAS_STATEDIR failed");
     else {

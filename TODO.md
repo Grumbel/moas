@@ -1,6 +1,5 @@
 # TODO / Handoff
 
-- Android: APK assets + extract to internal storage; SDL_Log diagnostics
 
 ## Cross ports (this bundle)
 - MS-DOS: `nix/dos.nix`, `mk/dos/Makefile` — Open Watcom → DOS/4GW `moas.exe`
@@ -10,7 +9,7 @@
 - R36S / PortMaster: `nix/r36s.nix`, `mk/r36s/` — eoan arm64 sysroot, launcher
 - Android: `nix/android.nix`, `mk/android/` — NDK + SDL2 APK scaffold
 - `--fullscreen` / `-f` for handhelds and borderless desktop
-- Android: game data (manick/) not yet packed into APK assets / internal storage
+- Android: game data packed into APK assets/; extracted to internal storage on start
 - Windows: first MinGW build may need small POSIX path fixes — untested here
 
 ## Desktop integration
@@ -66,7 +65,6 @@
 - Icons: floppy / folder+arrow / stop+X / double-chevron with more detail.
 
 ## Still open
-- Android asset data path
 - Verify Windows MinGW and R36S device builds
 - PowerBlend/WalkNLayers: no data path and op 11 still commented (upstream); inert by design
 - In-game confirm: Bewege arrow (drag person/object 0–999 or ≥2000 away from click point; inventar 1000–1999 uses Phase[0] icon embed, not arrow)
@@ -96,6 +94,7 @@ Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_are
 Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame only).
 
 ## Done this stack
+- Android assets: version stamp re-extract on APK upgrade; SDL_Log diagnostics; MOAS_VERSION in NDK flags
 - Android quit: finishAndRemoveTask + InternalError(0)/Alt+Q → RequestQuit; MOAS_STATEDIR for autosave
 - LoadGameFromFile: re-init cursor/control so hover works after autosave/load
 - Exit autosave = AUTOSAVE.SAV; cold resume MoasRegisterStaticNames; no .SAV format change
