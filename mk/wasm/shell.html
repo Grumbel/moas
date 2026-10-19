@@ -17,64 +17,228 @@
     #wrap {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      min-height: 100%; box-sizing: border-box; padding: 12px;
+      height: 100%; gap: 0.55rem;
+      box-sizing: border-box; padding: 8px;
     }
-    #canvas {
-      display: block;
-      width: min(100vw - 24px, 960px);
-      height: auto;
-      aspect-ratio: 320 / 200;
-      background: #000;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      touch-action: none;
+    #slot {
+      width: min(96vw, calc(72vh * 16 / 10));
+      height: min(72vh, calc(96vw * 10 / 16));
+    }
+    #wrap:fullscreen #slot, #wrap:-webkit-full-screen #slot {
+      width: min(100vw, calc(100vh * 16 / 10));
+      height: min(100vh, calc(100vw * 10 / 16));
+    }
+    #wrap:fullscreen > :not(#slot), #wrap:-webkit-full-screen > :not(#slot) {
+      display: none;
+    }
+    canvas.emscripten {
+      display: block; background: #000;
+      width: 100% !important; height: 100% !important;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+      outline: none; touch-action: none;
       border: 1px solid #333;
     }
-    #status {
-      margin-top: 10px; font-size: 14px; color: #aaa; min-height: 1.2em;
-    }
+    #status { font-size: 0.9rem; opacity: 0.85; min-height: 1.2em; }
     #progress {
-      width: min(100vw - 24px, 320px); height: 6px;
-      background: #222; border-radius: 3px; margin-top: 6px; overflow: hidden;
+      width: min(320px, 80vw); height: 6px;
+      background: #1a1a28; border-radius: 3px; overflow: hidden;
     }
     #progress > div {
-      height: 100%; width: 0; background: #c44; transition: width 0.15s;
+      height: 100%; width: 0%; background: #c44; transition: width 0.15s ease-out;
     }
-    #meta {
-      margin-top: 14px; font-size: 12px; color: #666; text-align: center;
-      max-width: 40rem; line-height: 1.4;
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 0.45rem;
+      justify-content: center; max-width: 96vw;
     }
-    #meta a { color: #88a; }
+    .toolbar button {
+      background: #22223a; color: #e0e4f0;
+      border: 1px solid #44446a; border-radius: 4px;
+      padding: 0.35rem 0.75rem; cursor: pointer; font-size: 0.8rem;
+    }
+    .toolbar button:hover { background: #30304e; }
+    .toolbar button:disabled { opacity: 0.4; cursor: default; }
+    .toolbar input[type=file] { display: none; }
+    #help, #meta {
+      font-size: 0.75rem; opacity: 0.75; text-align: center;
+      line-height: 1.55; max-width: 42rem;
+    }
+    #meta a { color: #a8b8e0; }
     kbd {
-      background: #222; border: 1px solid #444; border-radius: 3px;
-      padding: 1px 5px; font-size: 11px;
+      font-family: inherit; font-size: 0.7rem;
+      background: #1c1c2c; border: 1px solid #44446a;
+      border-radius: 3px; padding: 0 0.28rem;
     }
   </style>
 </head>
 <body>
   <div id="wrap">
-    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div id="slot">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
     <div id="status">Downloading…</div>
     <div id="progress"><div id="progress-bar"></div></div>
+    <div class="toolbar">
+      <button type="button" id="btn-fullscreen">Fullscreen</button>
+      <button type="button" id="btn-pause" disabled>Pause</button>
+      <button type="button" id="btn-download" disabled
+        title="Export savegames from this browser (IndexedDB) to a JSON file">Download saves</button>
+      <button type="button" id="btn-upload" disabled
+        title="Import savegames previously downloaded from another browser">Upload saves…</button>
+      <input type="file" id="file-upload" accept=".json,application/json">
+    </div>
+    <div id="help">
+      <strong>Mouse / touch:</strong> click or tap to walk and use objects ·
+      on-screen <em>USE</em> / <em>LOOK</em> (left) · <em>Save</em> / <em>Load</em> ·
+      <em>Esc</em> aborts a scripted sequence · <em>Skip</em> speeds speech
+      <br>
+      <strong>Keyboard:</strong>
+      <kbd>Esc</kbd> cancel sequence ·
+      <kbd>Shift</kbd> skip speech ·
+      <kbd>Q</kbd> quit ·
+      left click interact · right click (desktop) alternate verb
+      <br>
+      Saves stay in this browser; use Download / Upload to move them between devices.
+    </div>
     <div id="meta">
       <strong>Mänick Mänschion</strong> @MOAS_VERSION@
       · MOAS engine
       · <a href="@MOAS_SOURCE_URL@" target="_blank" rel="noopener">source</a>
-      <br>
-      Point and click · <kbd>Space</kbd>/<kbd>Enter</kbd> click · <kbd>F10</kbd> menu · <kbd>Esc</kbd> cancel
     </div>
   </div>
-  <script>
+  <script type="text/javascript">
     var statusElement = document.getElementById('status');
     var progressBar = document.getElementById('progress-bar');
 
+    /* Game state dir is /moas-state (datapath.c __EMSCRIPTEN__). IndexedDB. */
+    var STATE_DIR = '/moas-state';
+
+    function mountState() {
+      try { FS.mkdirTree(STATE_DIR); } catch (e) {}
+      FS.mount(FS.filesystems.IDBFS, {}, STATE_DIR);
+      Module.addRunDependency('moas-state');
+      FS.syncfs(true, function(err) {
+        if (err) console.warn('moas: loading browser saves failed', err);
+        Module.removeRunDependency('moas-state');
+      });
+    }
+
+    function bytesToBase64(u8) {
+      var s = '';
+      for (var i = 0; i < u8.length; i += 0x8000) {
+        s += String.fromCharCode.apply(null, u8.subarray(i, Math.min(i + 0x8000, u8.length)));
+      }
+      return btoa(s);
+    }
+
+    function base64ToBytes(b64) {
+      var s = atob(b64);
+      var u8 = new Uint8Array(s.length);
+      for (var i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
+      return u8;
+    }
+
+    function downloadSaves() {
+      var files = {};
+      var names = [];
+      try { names = FS.readdir(STATE_DIR); } catch (e) {}
+      names.forEach(function(name) {
+        if (name === '.' || name === '..') return;
+        var path = STATE_DIR + '/' + name;
+        try {
+          if (FS.isFile(FS.stat(path).mode))
+            files[name] = bytesToBase64(FS.readFile(path));
+        } catch (e) {}
+      });
+      var blob = new Blob(
+        [JSON.stringify({ format: 'moas-saves', version: 1, files: files }, null, 2)],
+        { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'moas-saves.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
+    }
+
+    function uploadSaves(file) {
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var obj = JSON.parse(reader.result);
+          if (!obj || obj.format !== 'moas-saves' || !obj.files) {
+            alert('This is not a MOAS saves file.');
+            return;
+          }
+          FS.mkdirTree(STATE_DIR);
+          Object.keys(obj.files).filter(function(n) {
+            return n.indexOf('/') < 0 && n.indexOf('..') < 0;
+          }).forEach(function(n) {
+            FS.writeFile(STATE_DIR + '/' + n, base64ToBytes(obj.files[n]));
+          });
+          FS.syncfs(false, function(err) {
+            if (err) alert('Saving into the browser failed: ' + err);
+            else if (confirm('Saves loaded. Reload the page to use them?'))
+              location.reload();
+          });
+        } catch (e) {
+          alert('Loading saves failed: ' + e);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    var pagePaused = false;
+
+    function setPaused(on) {
+      pagePaused = !!on;
+      if (typeof Module._PlatformSetPaused === 'function')
+        Module._PlatformSetPaused(pagePaused ? 1 : 0);
+      var btn = document.getElementById('btn-pause');
+      if (btn) btn.textContent = pagePaused ? 'Resume' : 'Pause';
+    }
+
+    function togglePause() { setPaused(!pagePaused); }
+
+    function toggleFullscreen() {
+      var wrap = document.getElementById('wrap');
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        (wrap.requestFullscreen || wrap.webkitRequestFullscreen).call(wrap);
+      }
+    }
+
+    function enableControls() {
+      document.getElementById('btn-fullscreen').onclick = toggleFullscreen;
+      var pause = document.getElementById('btn-pause');
+      pause.disabled = false;
+      pause.onclick = togglePause;
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) setPaused(true);
+      });
+      var dl = document.getElementById('btn-download');
+      var ul = document.getElementById('btn-upload');
+      var input = document.getElementById('file-upload');
+      dl.disabled = ul.disabled = false;
+      dl.onclick = downloadSaves;
+      ul.onclick = function() { input.click(); };
+      input.onchange = function() {
+        if (input.files && input.files[0]) uploadSaves(input.files[0]);
+        input.value = '';
+      };
+      document.getElementById('canvas').focus();
+    }
+
     var Module = {
+      preRun: [mountState],
+      postRun: [enableControls],
       print: function(text) { console.log(text); },
       printErr: function(text) { console.error(text); },
       canvas: (function() {
         var canvas = document.getElementById('canvas');
         canvas.addEventListener('webglcontextlost', function(e) {
-          alert('WebGL context lost — reload the page.');
+          alert('The WebGL context was lost. Reload the page.');
           e.preventDefault();
         }, false);
         return canvas;
@@ -99,7 +263,7 @@
     };
     Module.setStatus('Downloading…');
     window.onerror = function() {
-      Module.setStatus('Something went wrong — see the JavaScript console');
+      Module.setStatus('Something went wrong, see the JavaScript console');
       Module.setStatus = function(text) { if (text) console.error('[status] ' + text); };
     };
   </script>

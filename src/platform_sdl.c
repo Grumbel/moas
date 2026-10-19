@@ -9,6 +9,9 @@
 #include "debug.h"
 
 #include <SDL.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #ifdef __ANDROID__
 #include <SDL_system.h>
 #include <jni.h>
@@ -63,6 +66,10 @@ static SDL_Texture  *texture  = NULL;
 static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
+#ifdef __EMSCRIPTEN__
+static volatile int  wasm_paused = 0;
+static void wasm_pause_spin(void);
+#endif
 static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
 static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
@@ -400,10 +407,18 @@ int PlatformInit(void)
     Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     if (moas_fullscreen)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    window = SDL_CreateWindow("Mänick Mänschion",
-                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              LOGICAL_W * SCALE, LOGICAL_H * SCALE,
-                              flags);
+    {
+      int win_w = LOGICAL_W * SCALE;
+      int win_h = LOGICAL_H * SCALE;
+#if defined(MOAS_OVERLAY_BUTTONS) && !defined(__ANDROID__)
+      /* Side letterbox for Save/Load/USE/LOOK columns (web / desktop overlay). */
+      win_w += 220;
+#endif
+      window = SDL_CreateWindow("Mänick Mänschion",
+                                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                win_w, win_h,
+                                flags);
+    }
   }
   if (!window) {
     platform_log("SDL_CreateWindow failed: %s", SDL_GetError());
@@ -515,6 +530,37 @@ void PlatformRequestQuit(void)
   }
 #endif
 }
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE void PlatformSetPaused(int paused)
+{
+  wasm_paused = paused ? 1 : 0;
+}
+
+EMSCRIPTEN_KEEPALIVE int PlatformIsPaused(void)
+{
+  return wasm_paused ? 1 : 0;
+}
+
+static void wasm_pause_spin(void)
+{
+  while (wasm_paused && running) {
+    SDL_Event ev;
+    while (SDL_PollEvent(&ev)) {
+      if (ev.type == SDL_QUIT) {
+        PlatformRequestQuit();
+        return;
+      }
+      if (ev.type == SDL_KEYDOWN) {
+        SDL_Keycode k = ev.key.keysym.sym;
+        if (k == SDLK_p || k == SDLK_ESCAPE || k == SDLK_SPACE)
+          wasm_paused = 0;
+      }
+    }
+    SDL_Delay(40);
+  }
+}
+#endif
 
 void PlatformShutdown(void)
 {
@@ -1372,6 +1418,9 @@ void PlatformPumpEvents(void)
   }
   /* Always re-sample mouse — event coords are unreliable with dpi/logical size. */
   sync_mouse_position();
+#ifdef __EMSCRIPTEN__
+  wasm_pause_spin();
+#endif
 }
 
 short PlatformGetTicker(void)
@@ -1394,5 +1443,8 @@ unsigned int PlatformGetMillis(void)
 
 void PlatformDelay(unsigned int ms)
 {
+#ifdef __EMSCRIPTEN__
+  wasm_pause_spin();
+#endif
   SDL_Delay(ms);
 }

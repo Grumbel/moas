@@ -42,6 +42,23 @@
 #else
 #define MOAS_IO_LOG(...) fprintf(stderr, __VA_ARGS__)
 #endif
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+static void moas_idbfs_sync(void)
+{
+  EM_ASM({
+    if (typeof FS !== 'undefined' && FS.syncfs) {
+      FS.syncfs(false, function(err) {
+        if (err) console.warn('moas: IDBFS sync failed', err);
+      });
+    }
+  });
+}
+#else
+static void moas_idbfs_sync(void) { }
+#endif
+
 #ifndef DOS
 #include "platform.h"
 #endif
@@ -686,6 +703,7 @@ int SaveGameToFile(const char *path, int quiet)
   }
   FREE(MiniPic);
   MOAS_IO_LOG("moas: saved -> %s\n", path);
+  moas_idbfs_sync();
   return 0;
 }
 

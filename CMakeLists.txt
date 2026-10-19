@@ -112,6 +112,8 @@ endif()
 if(EMSCRIPTEN)
   # Web page: moas.html + .js + .wasm (+ data pack). ASYNCIFY lets the
   # existing blocking Wait/getch loop yield to the browser.
+  # Touch overlay (Save/Load/USE/LOOK) same as Android handheld UI.
+  target_compile_definitions(moas PRIVATE MOAS_OVERLAY_BUTTONS)
   if(NOT DEFINED MOAS_VERSION)
     set(MOAS_VERSION "0.1.0-sdl")
   endif()
@@ -138,6 +140,7 @@ if(EMSCRIPTEN)
     -sASYNCIFY
     -sASYNCIFY_STACK_SIZE=65536
     -sENVIRONMENT=web
+    -sEXPORTED_RUNTIME_METHODS=FS,ccall,cwrap
     # Header-defined DOS globals: wasm-ld has no -fcommon merge; keep first def.
     -Wl,--allow-multiple-definition
     --preload-file ${_wasm_data}@/data
