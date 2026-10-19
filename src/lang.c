@@ -122,6 +122,8 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
     unsigned char c = in[i];
     const char *u = NULL;
     if (c >= 32 && c < 127) {
+      if (c == '`')
+        c = '\'';
       out[o++] = (char)c;
       continue;
     }
@@ -135,8 +137,7 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
       case 0xe1: u = "ß"; break;
       /* acute/grave often used as apostrophe-like in DOS text */
       case 0xb4: u = "'"; break; /* ´ */
-      case 0x60: u = "'"; break; /* ` as apostrophe */
-      case 0xa8: u = '"'; break; /* ¨ */
+      case 0xa8: u = "\""; break; /* ¨ */
       case '\n': u = "\n"; break;
       default:
         /* keep byte as-is if it is a single-byte that might match keys poorly —
@@ -165,7 +166,7 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
       /* glyphs not in CharAvail → nearest safe ASCII */
       if (c == '_' || c == '@')
         c = ' ';
-      else if (c == '`' || c == '\xb4')
+      else if (c == '`')
         c = '\'';
       else if (c == '#' || c == '$' || c == '%' || c == '&' || c == '*'
                || c == '+' || c == '/' || c == '=' || c == '\\' || c == '^'
