@@ -35,6 +35,7 @@
 
 #ifndef DOS
 #include "datapath.h"
+#include <errno.h>
 #endif
 
 #ifdef DOS
@@ -521,12 +522,18 @@ void LoadSaveMenu(char *Text)
         Line(250,60+d,36+c*30,60+d,59+c*30);
         Line(250,20+d,59+c*30,60+d,59+c*30);
         sprintf(String,"GAME%i.SAV",c+d/142*5);
-        ifil=open(String,O_RDONLY
+        {
+          char savpath[512];
+          if (MoasStatePath(savpath, sizeof(savpath), String) != 0)
+            ifil = -1;
+          else
+            ifil = open(savpath, O_RDONLY
 #ifdef DOS
-                  |O_BINARY
+                        |O_BINARY
 #endif
-          );
-        if (ifil>0)
+              );
+        }
+        if (ifil>=0)
         {
           for (h=0;h<25;h++)
             read(ifil,Vga+20+d+(34+h+c*30)*320,40);
@@ -557,20 +564,59 @@ void SaveGame(short CallerID)
 {
   unsigned short c,d;
   short h,ofil;
+  short slot = -1;
   char Name[20],*MiniPic;
+  char savpath[512];
   unsigned char *Vga=VGA_ADRESSE;
+  unsigned short px,py;
 
   if (CallerID==0) LoadSaveMenu("Speichern:");
   for (d=0;d<143;d+=142)
     for (c=0;c<5;c++)
       if ((Mouse.x>=19+d && Mouse.y>=33+c*30 && Mouse.x<=60+d && Mouse.y<=60+c*30 && c+d/142*5!=9 && CallerID==0) || (CallerID==1 && c+d/142*5==9))
       {
+        slot = (short)(c + d/142*5);
+        break;
+      }
+  if (slot < 0) {
+    if (CallerID == 0) {
+      fprintf(stderr, "moas: SaveGame: no slot selected (mouse %d,%d) — click a free slot\n",
+              (int)Mouse.x, (int)Mouse.y);
+      DisplayMessage("Kein Slot gewaehlt", 253);
+    }
+    return;
+  }
+
+  {
+        sprintf(Name,"GAME%i.SAV",(int)slot);
+        if (MoasStatePath(savpath, sizeof(savpath), Name) != 0) {
+          fprintf(stderr, "moas: SaveGame: state path too long for %s\n", Name);
+          DisplayMessage("Save-Pfad Fehler", 253);
+          return;
+        }
         MiniPic=MALLOC(1000);
-        sprintf(Name,"GAME%i.SAV",c+d/142*5);
-        ofil=ChkOpen(Name,WRITE);
-        for (d=0;d<200;d+=8)
-          for (c=0;c<320;c+=8)
-            MiniPic[d/8*40+c/8]=(Palette[Vga[c+d*320]*3]+Palette[Vga[c+d*320]*3+1]+Palette[Vga[c+d*320]*3+2])/12;
+        ofil = open(savpath, O_TRUNC|O_CREAT|O_WRONLY
+#ifdef DOS
+                    |O_BINARY
+#endif
+#ifdef DOS
+                    , S_IWRITE
+#else
+                    , 0666
+#endif
+          );
+        if (ofil < 0) {
+          fprintf(stderr, "moas: SaveGame: cannot create '%s' (errno=%d)\n", savpath, errno);
+          DisplayMessage("Speichern fehlgeschlagen", 253);
+          FREE(MiniPic);
+          return;
+        }
+        /* Separate vars — original reused c,d and clobbered the slot loops */
+        for (py=0;py<200;py+=8)
+          for (px=0;px<320;px+=8)
+            MiniPic[py/8*40+px/8]=(Palette[Vga[px+py*320]*3]+Palette[Vga[px+py*320]*3+1]+Palette[Vga[px+py*320]*3+2])/12;
+        /* Drive ChkWrite checksum path: pretend WRITE mode without ChkOpen name */
+        (void)ChkOpen("?", WRITE); /* clears checksum; '?' is no-op open */
         ChkWrite(ofil,MiniPic,1000);
         ChkWrite(ofil,(char*)&V_Points,2);
         ChkWrite(ofil,(char*)&V_TotalPoints,2);
@@ -623,10 +669,22 @@ void SaveGame(short CallerID)
           }
         }
 #endif
-        ChkClose(ofil);
+        /* ChkClose writes trailing checksum then close() */
+        {
+          CHKSUM Check = GetChk();
+          if (write(ofil, (char *)&Check, sizeof(CHKSUM)) != (int)sizeof(CHKSUM)) {
+            fprintf(stderr, "moas: SaveGame: checksum write failed for '%s'\n", savpath);
+            close(ofil);
+            FREE(MiniPic);
+            DisplayMessage("Speichern fehlgeschlagen", 253);
+            return;
+          }
+          close(ofil);
+        }
         FREE(MiniPic);
+        fprintf(stderr, "moas: saved slot %d -> %s\n", (int)slot, savpath);
         return;
-      }
+  }
 }
 void LoadGame(void)
 {
@@ -640,14 +698,35 @@ void LoadGame(void)
     for (c=0;c<5;c++)
       if (Mouse.x>=19+d && Mouse.y>=33+c*30 && Mouse.x<=60+d && Mouse.y<=60+c*30)
       {
-        sprintf(Name,"GAME%i.SAV",c+d/142*5);
-        ifil=open(Name,O_RDONLY
+        char savpath[512];
+        short slot = (short)(c + d/142*5);
+        sprintf(Name,"GAME%i.SAV",(int)slot);
+        if (MoasStatePath(savpath, sizeof(savpath), Name) != 0) {
+          fprintf(stderr, "moas: LoadGame: state path error\n");
+          return;
+        }
+        ifil=open(savpath,O_RDONLY
 #ifdef DOS
                   |O_BINARY
 #endif
           );
-        if (ifil<0) return; else close(ifil);
-        ifil=ChkOpen(Name,READ);
+        if (ifil<0) {
+          fprintf(stderr, "moas: LoadGame: no save in slot %d (%s)\n", (int)slot, savpath);
+          DisplayMessage("Kein Spielstand", 253);
+          return;
+        }
+        /* Use open handle with ChkRead path: set READ mode checksum */
+        close(ifil);
+        (void)ChkOpen("?", READ);
+        ifil=open(savpath,O_RDONLY
+#ifdef DOS
+                  |O_BINARY
+#endif
+          );
+        if (ifil<0) {
+          fprintf(stderr, "moas: LoadGame: reopen failed '%s'\n", savpath);
+          return;
+        }
         V_LockVga=1;
         RemoveAllPersons();
         CloseSay(255);

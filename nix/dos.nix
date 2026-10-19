@@ -105,6 +105,7 @@ EOR
     exeName,
     title,
     workTag,
+    stateSubdir,
   }:
     pkgs.writeShellApplication {
       inherit name;
@@ -112,15 +113,40 @@ EOR
       text = ''
         set -euo pipefail
         DOSDIR="${dosDir}"
+        # Persist GAME*.SAV on the host (nix store is read-only; WORK is tmp).
+        # XDG state: $XDG_STATE_HOME/${stateSubdir} or ~/.local/state/${stateSubdir}
+        if [ -n "''${XDG_STATE_HOME:-}" ]; then
+          STATEDIR="$XDG_STATE_HOME/${stateSubdir}"
+        else
+          STATEDIR="''${HOME:-/tmp}/.local/state/${stateSubdir}"
+        fi
+        mkdir -p "$STATEDIR"
         BASE="''${XDG_RUNTIME_DIR:-/tmp}"
         WORK="$BASE/${workTag}-$$"
         rm -rf "$WORK"
         mkdir -p "$WORK"
         CONF="$WORK/dosbox-moas.conf"
-        cleanup() { rm -rf "$WORK"; }
+        cleanup() {
+          # Copy saves back before deleting WORK
+          shopt -s nullglob
+          for f in "$WORK"/GAME*.SAV "$WORK"/game*.sav; do
+            [ -f "$f" ] || continue
+            cp -f "$f" "$STATEDIR"/
+          done
+          shopt -u nullglob
+          rm -rf "$WORK"
+        }
         trap cleanup EXIT
 
         cp -a --no-preserve=mode "$DOSDIR"/. "$WORK"/
+        # Seed prior saves into the DOS C: drive
+        shopt -s nullglob
+        for f in "$STATEDIR"/GAME*.SAV "$STATEDIR"/game*.sav; do
+          [ -f "$f" ] || continue
+          cp -f "$f" "$WORK"/
+        done
+        shopt -u nullglob
+        echo "${name}: state directory $STATEDIR (GAME*.SAV persisted here)"
 
         cat > "$CONF" <<EOF
 [sdl]
@@ -178,6 +204,7 @@ EOF
     exeName = "MOAS.EXE";
     title = "MOAS (Open Watcom rebuild)";
     workTag = "moas-dos";
+    stateSubdir = "moas-dos";
   };
 
   # Historical binary from manick/ — no rebuild, just stage data + GAME.EXE
@@ -205,6 +232,7 @@ EOR
     exeName = "GAME.EXE";
     title = "MOAS (original GAME.EXE)";
     workTag = "moas-dos-original";
+    stateSubdir = "moas-dos-original";
   };
 
 in {

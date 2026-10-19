@@ -10,6 +10,13 @@
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <errno.h>
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+#if defined(_WIN32) || defined(__WATCOMC__)
+#include <direct.h>
+#endif
 #ifdef __ANDROID__
 #include <SDL.h>
 #endif
@@ -214,6 +221,216 @@ const char *MoasDataDir(void)
 {
   return data_dir;
 }
+
+static char state_dir[PATH_MAX];
+static char config_dir[PATH_MAX];
+static int state_dir_ready;
+static int config_dir_ready;
+
+static int moas_mkdir_p(const char *path)
+{
+  char tmp[PATH_MAX];
+  size_t len;
+  size_t i;
+
+  if (!path || !path[0])
+    return -1;
+  len = strlen(path);
+  if (len >= sizeof(tmp))
+    return -1;
+  memcpy(tmp, path, len + 1);
+
+  for (i = 1; i < len; i++) {
+#ifdef _WIN32
+    if (tmp[i] == '\\' || tmp[i] == '/') {
+#else
+    if (tmp[i] == '/') {
+#endif
+      char save = tmp[i];
+      tmp[i] = 0;
+      if (tmp[0] && tmp[strlen(tmp)-1] != ':') {
+#ifdef _WIN32
+        _mkdir(tmp);
+#else
+        mkdir(tmp, 0755);
+#endif
+      }
+      tmp[i] = save;
+    }
+  }
+#ifdef _WIN32
+  if (_mkdir(tmp) != 0) {
+#else
+  if (mkdir(tmp, 0755) != 0) {
+#endif
+    struct stat st;
+    if (stat(tmp, &st) != 0 || (st.st_mode & S_IFDIR) == 0)
+      return -1;
+  }
+  return 0;
+}
+
+static void resolve_state_dir(void)
+{
+  const char *env;
+
+  if (state_dir_ready)
+    return;
+
+#if defined(DOS)
+  strncpy(state_dir, ".", sizeof(state_dir) - 1);
+  state_dir[sizeof(state_dir) - 1] = 0;
+#elif defined(__EMSCRIPTEN__)
+  strncpy(state_dir, "/moas-state", sizeof(state_dir) - 1);
+  state_dir[sizeof(state_dir) - 1] = 0;
+  moas_mkdir_p(state_dir);
+#elif defined(__ANDROID__)
+  {
+    const char *base = getenv("MOAS_STATEDIR");
+    if (!base || !base[0])
+      base = data_dir[0] ? data_dir : ".";
+    snprintf(state_dir, sizeof(state_dir), "%s/moas-state", base);
+    moas_mkdir_p(state_dir);
+  }
+#elif defined(_WIN32)
+  {
+    const char *la = getenv("LOCALAPPDATA");
+    if (la && la[0])
+      snprintf(state_dir, sizeof(state_dir), "%s\\moas\\state", la);
+    else
+      snprintf(state_dir, sizeof(state_dir), "moas-state");
+    moas_mkdir_p(state_dir);
+  }
+#else
+  /* XDG Base Directory: state home for savegames */
+  env = getenv("MOAS_STATEDIR");
+  if (env && env[0]) {
+    strncpy(state_dir, env, sizeof(state_dir) - 1);
+    state_dir[sizeof(state_dir) - 1] = 0;
+  } else {
+    env = getenv("XDG_STATE_HOME");
+    if (env && env[0])
+      snprintf(state_dir, sizeof(state_dir), "%s/moas", env);
+    else {
+      const char *home = getenv("HOME");
+      if (home && home[0])
+        snprintf(state_dir, sizeof(state_dir), "%s/.local/state/moas", home);
+      else
+        snprintf(state_dir, sizeof(state_dir), "moas-state");
+    }
+  }
+  if (moas_mkdir_p(state_dir) != 0)
+    data_log("moas: WARNING: could not create state dir '%s'", state_dir);
+#endif
+  state_dir_ready = 1;
+  data_log("moas: state directory: %s", state_dir);
+}
+
+static void resolve_config_dir(void)
+{
+  const char *env;
+
+  if (config_dir_ready)
+    return;
+
+#if defined(DOS)
+  strncpy(config_dir, ".", sizeof(config_dir) - 1);
+  config_dir[sizeof(config_dir) - 1] = 0;
+#elif defined(__EMSCRIPTEN__)
+  strncpy(config_dir, "/moas-config", sizeof(config_dir) - 1);
+  config_dir[sizeof(config_dir) - 1] = 0;
+  moas_mkdir_p(config_dir);
+#elif defined(__ANDROID__)
+  {
+    const char *base = getenv("MOAS_CONFIGDIR");
+    if (!base || !base[0])
+      base = data_dir[0] ? data_dir : ".";
+    snprintf(config_dir, sizeof(config_dir), "%s/moas-config", base);
+    moas_mkdir_p(config_dir);
+  }
+#elif defined(_WIN32)
+  {
+    const char *ad = getenv("APPDATA");
+    if (ad && ad[0])
+      snprintf(config_dir, sizeof(config_dir), "%s\\moas", ad);
+    else
+      snprintf(config_dir, sizeof(config_dir), "moas-config");
+    moas_mkdir_p(config_dir);
+  }
+#else
+  env = getenv("MOAS_CONFIGDIR");
+  if (env && env[0]) {
+    strncpy(config_dir, env, sizeof(config_dir) - 1);
+    config_dir[sizeof(config_dir) - 1] = 0;
+  } else {
+    env = getenv("XDG_CONFIG_HOME");
+    if (env && env[0])
+      snprintf(config_dir, sizeof(config_dir), "%s/moas", env);
+    else {
+      const char *home = getenv("HOME");
+      if (home && home[0])
+        snprintf(config_dir, sizeof(config_dir), "%s/.config/moas", home);
+      else
+        snprintf(config_dir, sizeof(config_dir), "moas-config");
+    }
+  }
+  if (moas_mkdir_p(config_dir) != 0)
+    data_log("moas: WARNING: could not create config dir '%s'", config_dir);
+#endif
+  config_dir_ready = 1;
+}
+
+const char *MoasStateDir(void)
+{
+  resolve_state_dir();
+  return state_dir;
+}
+
+const char *MoasConfigDir(void)
+{
+  resolve_config_dir();
+  return config_dir;
+}
+
+int MoasStatePath(char *buf, size_t buflen, const char *name)
+{
+  const char *dir;
+  int n;
+
+  if (!buf || buflen < 2 || !name || !name[0])
+    return -1;
+  dir = MoasStateDir();
+#if defined(_WIN32)
+  n = snprintf(buf, buflen, "%s\\%s", dir, name);
+#else
+  n = snprintf(buf, buflen, "%s/%s", dir, name);
+#endif
+  if (n < 0 || (size_t)n >= buflen)
+    return -1;
+  return 0;
+}
+
+int MoasOpenState(const char *name, int flags, int mode)
+{
+  char path[PATH_MAX];
+  int fd;
+
+  if (MoasStatePath(path, sizeof(path), name) != 0)
+    return -1;
+#if defined(DOS) || defined(_WIN32)
+  fd = open(path, flags | O_BINARY, mode);
+#else
+  (void)mode;
+  if (flags & O_CREAT)
+    fd = open(path, flags, mode ? mode : 0666);
+  else
+    fd = open(path, flags);
+#endif
+  if (fd < 0)
+    data_log("moas: MoasOpenState('%s') failed path=%s", name, path);
+  return fd;
+}
+
 
 static int try_open(const char *path)
 {

@@ -23,7 +23,7 @@ export INCLUDE := $(WATCOM)/h
 
 SRCDIR := src
 OBJDIR := build-dos
-SRCS := chk digicore digi_io grafix hercbak if init io misc moas moas_globals mouse powerbld print
+SRCS := chk datapath digicore digi_io grafix hercbak if init io misc moas moas_globals mouse powerbld print
 OBJS := $(addprefix $(OBJDIR)/,$(addsuffix .obj,$(SRCS)))
 
 # -bt=dos   target DOS

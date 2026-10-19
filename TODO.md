@@ -40,6 +40,16 @@
 - Full inventory: `docs/DOS_PORT_STATUS.md` (every `#ifdef DOS` / `#ifndef DOS`)
 - Bewege arrow: ported in VMouse (Phase[1])
 
+
+## Savegames (2026-10)
+- Broken: wrote GAME*.SAV to process CWD; ChkOpen(READ) looked in data dir
+- Fixed: MoasStateDir / MoasConfigDir / MoasStatePath
+  - Linux: `$XDG_STATE_HOME/moas` (fallback `~/.local/state/moas`)
+  - Config: `$XDG_CONFIG_HOME/moas` (reserved)
+  - Override: `MOAS_STATEDIR` / `MOAS_CONFIGDIR`
+  - DOS: CWD; DOSBox runners persist to `~/.local/state/moas-dos` and `moas-dos-original`
+- Manual save: clearer errors if no slot clicked; thumbnail uses fixed loop vars
+
 ## Still open
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
