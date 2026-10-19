@@ -275,8 +275,24 @@ You need **player control** and no dialogue window open (`Window.Status == None`
 | **S** | Same as right mouse button (when you have control) |
 | **;** (semicolon) | “Use” verb shortcut (`BENUTZE`) when you have control |
 | **F10** | File menu (when the window layout allows it) |
-| **Esc** | Abort only when the game has armed abort (`KeyAbortState`); does not quit the app by itself |
+| **Shift** | Speed up / dismiss **speech bubbles** only (see below) |
+| **Esc** | Abort a **scripted sequence** when the script has armed skip (see below) |
 | **Q** / **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
+
+### Esc vs Shift (skipping)
+
+These are **not** the same:
+
+| | **Esc** | **Shift** |
+|---|---------|-----------|
+| **What it skips** | Whole scripted beats (waits, blends, forced walks, multi-step cutscenes) | Speech bubble text timing only |
+| **When it works** | Only after a script opcode arms skip (`KeyAbortState = 1`) | Whenever a say-window is on screen |
+| **Effect** | Sets `KeyAbortState = 2` — remaining ops in that sequence jump/abort | Holds: text timer runs faster; edge/Middle mouse: timer → done (`Time = -1`) |
+| **Free play** | Ignored (does **not** freeze or quit) | No effect if nobody is talking |
+
+**Shift** matches original DOS keyboard flag `0x417` (either Shift key). **Middle mouse** does the same as a Shift edge for speech.
+
+Android **Skip** is wired like **Esc** (sequence abort), not Shift.
 
 ### Master / debug keys
 
