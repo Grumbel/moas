@@ -620,7 +620,10 @@ void RemoveDescriptions(void)
 
   for (c=0;c<AnzDescription;c++) FREE(Description[c].Name);
   for (c=0;c<MAX_PARSE;c++)
-    if (PowerParse[c].Nummer!=-1) FREE(PowerParse[c].String);
+    if (PowerParse[c].Nummer!=-1) {
+      FREE(PowerParse[c].String);
+      PowerParse[c].Nummer=-1;
+    }
   AnzDescription=0;
 }
 void AddDescription(short Num,char *Text)

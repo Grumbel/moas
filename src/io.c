@@ -568,6 +568,120 @@ void LoadSaveMenu(char *Text)
   CloseWindow();
   PlayerHasControl = WalkingAllowed = 1;
 }
+
+#ifndef DOS
+/* Object names (Description) and custom verb strings (PowerParse) are filled by
+ * scripts at runtime and were never part of the original save blob — after a
+ * cold autosave load every hotspot showed "???". Append them after the
+ * classic checksum so DOS/old readers stay compatible. */
+#define MOAS_DESC_MAGIC "DESC"
+
+static void WriteDescExtension(int ofil)
+{
+  short n, i, len;
+  if (write(ofil, MOAS_DESC_MAGIC, 4) != 4)
+    return;
+  n = AnzDescription;
+  if (write(ofil, (char *)&n, 2) != 2)
+    return;
+  for (i = 0; i < n; i++) {
+    if (write(ofil, (char *)&Description[i].Number, 2) != 2)
+      return;
+    len = (short)(strlen(Description[i].Name) + 1);
+    if (write(ofil, (char *)&len, 2) != 2)
+      return;
+    if (write(ofil, Description[i].Name, len) != len)
+      return;
+  }
+  n = 0;
+  for (i = 0; i < MAX_PARSE; i++)
+    if (PowerParse[i].Nummer != -1)
+      n++;
+  if (write(ofil, (char *)&n, 2) != 2)
+    return;
+  for (i = 0; i < MAX_PARSE; i++) {
+    if (PowerParse[i].Nummer == -1)
+      continue;
+    if (write(ofil, (char *)&PowerParse[i].Nummer, 2) != 2)
+      return;
+    len = (short)(strlen((char *)PowerParse[i].String) + 1);
+    if (write(ofil, (char *)&len, 2) != 2)
+      return;
+    if (write(ofil, (char *)PowerParse[i].String, len) != len)
+      return;
+  }
+}
+
+static void ReadDescExtension(int ifil)
+{
+  char magic[4];
+  short n, i, len, num;
+  char *buf;
+
+  if (read(ifil, magic, 4) != 4)
+    return;
+  if (magic[0] != 'D' || magic[1] != 'E' || magic[2] != 'S' || magic[3] != 'C')
+    return;
+
+  RemoveDescriptions();
+  for (i = 0; i < MAX_PARSE; i++)
+    PowerParse[i].Nummer = -1;
+
+  if (read(ifil, (char *)&n, 2) != 2)
+    return;
+  if (n < 0 || n > 500)
+    return;
+  for (i = 0; i < n; i++) {
+    if (read(ifil, (char *)&num, 2) != 2)
+      return;
+    if (read(ifil, (char *)&len, 2) != 2)
+      return;
+    if (len < 1 || len > 512)
+      return;
+    buf = MALLOC(len);
+    if (read(ifil, buf, len) != len) {
+      FREE(buf);
+      return;
+    }
+    buf[len - 1] = 0;
+    Description[i].Number = num;
+    Description[i].Name = buf;
+  }
+  AnzDescription = n;
+
+  if (read(ifil, (char *)&n, 2) != 2)
+    return;
+  if (n < 0 || n > MAX_PARSE)
+    return;
+  for (i = 0; i < n; i++) {
+    short slot;
+    if (read(ifil, (char *)&num, 2) != 2)
+      return;
+    if (read(ifil, (char *)&len, 2) != 2)
+      return;
+    if (len < 1 || len > 1024)
+      return;
+    buf = MALLOC(len);
+    if (read(ifil, buf, len) != len) {
+      FREE(buf);
+      return;
+    }
+    buf[len - 1] = 0;
+    for (slot = 0; slot < MAX_PARSE; slot++)
+      if (PowerParse[slot].Nummer == -1)
+        break;
+    if (slot >= MAX_PARSE) {
+      FREE(buf);
+      break;
+    }
+    PowerParse[slot].Nummer = num;
+    PowerParse[slot].String = (uChar *)buf;
+  }
+  fprintf(stderr, "moas: restored %d descriptions + verb strings from save\n",
+          (int)AnzDescription);
+}
+#endif
+
 /* Write full game state to path. quiet=1: no DisplayMessage (exit autosave).
  * Returns 0 on success, -1 on error. */
 int SaveGameToFile(const char *path, int quiet)
@@ -671,6 +785,9 @@ int SaveGameToFile(const char *path, int quiet)
         DisplayMessage("Speichern fehlgeschlagen", 253);
       return -1;
     }
+#ifndef DOS
+    WriteDescExtension(ofil);
+#endif
     close(ofil);
   }
   FREE(MiniPic);
@@ -811,7 +928,18 @@ int LoadGameFromFile(const char *path)
     }
   }
 #endif
-  ChkClose(ifil);
+  {
+    CHKSUM Check, filecheck;
+    Check = GetChk();
+    if (read(ifil, (char *)&filecheck, sizeof(CHKSUM)) != (int)sizeof(CHKSUM))
+      InternalError(1005);
+    if (Check != filecheck)
+      InternalError(1007);
+#ifndef DOS
+    ReadDescExtension(ifil);
+#endif
+    close(ifil);
+  }
   if (GhostMode == 1) {
     MakeMegaTable(-1);
     MakeMegaTable(1);
