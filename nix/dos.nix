@@ -93,60 +93,68 @@ EOR
     zip -r -9 $out/moas-${version}-dos.zip moas-${version}-dos
   '';
 
-  # Conf template; WORK_DIR is substituted at runtime
-  dosboxConf = pkgs.writeText "moas-dosbox.conf" ''
-    [sdl]
-    fullscreen=false
-    output=texture
-
-    [dosbox]
-    machine=svga_s3
-    memsize=16
-
-    [cpu]
-    core=auto
-    cycles=max
-
-    [mixer]
-    nosound=false
-    rate=44100
-
-    [sblaster]
-    sbtype=sb16
-    sbbase=220
-    irq=7
-    dma=1
-    hdma=5
-    oplmode=auto
-
-    [autoexec]
-    @echo off
-    mount C WORK_DIR
-    C:
-    echo Starting MOAS (Open Watcom DOS/4GW rebuild)...
-    MOAS.EXE
-  '';
-
   moasDosRun = pkgs.writeShellApplication {
     name = "moas-dos";
-    runtimeInputs = [ pkgs.dosbox-x pkgs.gnused ];
+    runtimeInputs = [ pkgs.dosbox-x ];
     text = ''
       set -euo pipefail
       DOSDIR="${moasDos}/dos"
-      WORK=$(mktemp -d -t moas-dos-work-XXXXXX)
-      CONF=$(mktemp -t moas-dosbox-XXXXXX.conf)
-      cleanup() { rm -rf "$WORK"; rm -f "$CONF"; }
+      BASE="''${XDG_RUNTIME_DIR:-/tmp}"
+      WORK="$BASE/moas-dos-$$"
+      rm -rf "$WORK"
+      mkdir -p "$WORK"
+      CONF="$WORK/dosbox-moas.conf"
+      cleanup() { rm -rf "$WORK"; }
       trap cleanup EXIT
 
       cp -a --no-preserve=mode "$DOSDIR"/. "$WORK"/
-      # DOSBox-X conf: inject writable work dir into mount path
-      sed "s|WORK_DIR|$WORK|g" ${dosboxConf} > "$CONF"
 
-      echo "moas-dos: data+exe in $WORK"
+      # Generate conf with absolute paths (DOSBox-X primary folder = WORK)
+      cat > "$CONF" <<EOF
+[sdl]
+fullscreen=false
+output=texture
+autolock=false
+
+[dosbox]
+machine=svga_s3
+memsize=16
+title=MOAS (DOS/4GW)
+working directory=$WORK
+
+[cpu]
+core=auto
+cycles=max
+
+[mixer]
+nosound=false
+rate=44100
+
+[sblaster]
+sbtype=sb16
+sbbase=220
+irq=7
+dma=1
+hdma=5
+oplmode=auto
+
+[autoexec]
+@echo off
+mount C "$WORK"
+C:
+echo Starting MOAS (Open Watcom DOS/4GW rebuild)...
+MOAS.EXE
+exit
+EOF
+
+      echo "moas-dos: game directory $WORK"
       echo "moas-dos: launching DOSBox-X (close the window or exit the game to quit)"
-      exec dosbox-x -conf "$CONF" -noconsole
+      cd "$WORK"
+      # -defaultdir avoids the "You have not selected a valid path" dialog
+      dosbox-x -defaultdir "$WORK" -conf "$CONF" -exit "$@"
     '';
   };
+
 
 in {
   moas-dos = moasDos;
