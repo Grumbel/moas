@@ -243,9 +243,10 @@ and `\n`). UI entries use `msgctxt` matching `verb.use`, `save.title`, … or
 match `msgid` to the built-in German string. All non-empty `msgstr` values
 also feed the script `UnPack` map keyed by `msgid`.
 
-Legacy `lang/<code>.ui` and `.script` (TSV) still load and merge. Search path:
+Search path:
 `$MOAS_LANGDIR`, `$MOAS_DATADIR/lang`, `$MOAS_DATADIR/../lang`, `./lang`.
-Default `de` keeps built-in German. Sample: `lang/en.po`.
+Default `de` keeps built-in German. The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
+Template with all strings: `lang/manick.pot` (from `moas-util strings pot`).
 
 ## Game data (`manick/`)
 

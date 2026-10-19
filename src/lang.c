@@ -582,27 +582,15 @@ void LangInit(void)
     return;
   }
 
-  /* Prefer a single gettext .po (readable msgid/msgstr). Optional legacy
-   * .ui / .script still work and merge on top. */
+  /* Runtime language pack: only lang/<code>.po */
   if (open_lang_file(path, sizeof(path), "po") == 0) {
     load_po_file(path);
-    fprintf(stderr, "moas: lang po %s (%d script entries)\n", path, script_n);
-  } else if (open_lang_file(path, sizeof(path), "ui") == 0
-             || open_lang_file(path, sizeof(path), "script") == 0) {
-    /* fall through to TSV loaders below */
+    fprintf(stderr, "moas: lang %s (%d translated script lines)
+", path, script_n);
   } else {
-    fprintf(stderr, "moas: lang: no %s.po (or .ui/.script); UI stays German\n",
+    fprintf(stderr, "moas: lang: missing lang/%s.po — UI/scripts stay German
+",
             lang_code);
-  }
-
-  if (open_lang_file(path, sizeof(path), "ui") == 0) {
-    load_ui_file(path);
-    fprintf(stderr, "moas: lang UI %s\n", path);
-  }
-
-  if (open_lang_file(path, sizeof(path), "script") == 0) {
-    load_script_file(path);
-    fprintf(stderr, "moas: lang script %s (%d entries)\n", path, script_n);
   }
 
   apply_verb_globals();

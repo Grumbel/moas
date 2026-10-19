@@ -1,4 +1,0 @@
-# MOAS English script map (German source UTF-8 <TAB> English)
-# Build a full file from: moas-util strings tsv | translate column 2
-# Keys must match UnPack output (German with äöüß).
-Schlüssel	key

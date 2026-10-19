@@ -6,7 +6,7 @@
 /*
  * Index-based UI strings + UnPack script translation (no gettext).
  *
- * UI:   Ui(UI_…) → table from lang/<code>.po (msgctxt) or .ui
+ * UI:   Ui(UI_…) → table from lang/<code>.po (msgctxt) or .po
  * Script: LangLookup(UnPack) via same .po (msgid→msgstr) or .script
  *
  * Select with --lang=CODE or MOAS_LANG. Default "de" uses built-in German UI
@@ -41,7 +41,7 @@ const char *Ui(int id);
 /* Parse --lang / MOAS_LANG (call from MoasParseArgs). */
 void LangSetCode(const char *code);
 
-/* Load lang/<code>.ui and .script after datadir is known. Re-points verb globals. */
+/* Load lang/<code>.po
 void LangInit(void);
 
 /* After UnPack: if a translation exists, return CP850 bytes for the font. */
