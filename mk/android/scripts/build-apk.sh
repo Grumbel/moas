@@ -53,7 +53,7 @@ done
 # Optional language packs
 if [ -d "$GAME_SRC_DIR/lang" ]; then
   mkdir -p src/assets/lang
-  cp "$GAME_SRC_DIR"/lang/*.ui "$GAME_SRC_DIR"/lang/*.script src/assets/lang/ 2>/dev/null || true
+  cp "$GAME_SRC_DIR"/lang/*.po "$GAME_SRC_DIR"/lang/*.ui "$GAME_SRC_DIR"/lang/*.script src/assets/lang/ 2>/dev/null || true
 fi
 echo "==> assets:"; ls -la src/assets
 

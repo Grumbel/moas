@@ -1,0 +1,85 @@
+# English UI + sample script strings for MOAS
+# Generate a full template with:
+#   moas-util --datadir manick strings pot > manick.pot
+# Then translate (Poedit etc.) and save as lang/en.po
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgctxt "verb.use"
+msgid "BENUTZE %s"
+msgstr "USE %s"
+
+msgctxt "verb.use_with"
+msgid "BENUTZE %s MIT %s"
+msgstr "USE %s WITH %s"
+
+msgctxt "verb.look"
+msgid "SCHAU %s AN"
+msgstr "LOOK AT %s"
+
+msgctxt "verb.talk"
+msgid "REDE MIT %s"
+msgstr "TALK TO %s"
+
+msgctxt "verb.move"
+msgid "BEWEGE %s"
+msgstr "MOVE %s"
+
+msgctxt "verb.move_dir"
+msgid "BEWEGE %s IN RICHTUNG %s"
+msgstr "MOVE %s TOWARD %s"
+
+msgctxt "save.title"
+msgid "Speichern:"
+msgstr "Save:"
+
+msgctxt "load.title"
+msgid "Laden:"
+msgstr "Load:"
+
+msgctxt "save.fail"
+msgid "Speichern fehlgeschlagen"
+msgstr "Save failed"
+
+msgctxt "load.fail"
+msgid "Laden fehlgeschlagen"
+msgstr "Load failed"
+
+msgctxt "slot.none"
+msgid "Kein Slot gewaehlt"
+msgstr "No slot selected"
+
+msgctxt "slot.of"
+msgid "%i von %i"
+msgstr "%i of %i"
+
+msgctxt "ov.save"
+msgid "SAVE"
+msgstr "SAVE"
+
+msgctxt "ov.load"
+msgid "LOAD"
+msgstr "LOAD"
+
+msgctxt "ov.esc"
+msgid "ESC"
+msgstr "ESC"
+
+msgctxt "ov.skip"
+msgid "SKIP"
+msgstr "SKIP"
+
+msgctxt "ov.use"
+msgid "USE"
+msgstr "USE"
+
+msgctxt "ov.look"
+msgid "LOOK"
+msgstr "LOOK"
+
+# Script example (msgid = German UnPack text, msgstr = English)
+msgid "Schlüssel"
+msgstr "key"

@@ -953,6 +953,11 @@ static void emit_pot(void)
     json_escape(g_rows[i].text, esc, sizeof(esc)); /* close enough for pot */
     printf("#. %s\n", g_rows[i].ref);
     printf("#: %s\n", g_rows[i].id);
+    {
+      char idesc[256];
+      json_escape(g_rows[i].id, idesc, sizeof(idesc));
+      printf("msgctxt \"%s\"\n", idesc);
+    }
     printf("msgid \"%s\"\n", esc);
     printf("msgstr \"\"\n\n");
   }

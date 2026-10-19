@@ -222,11 +222,30 @@ moas --lang=en
 # or: MOAS_LANG=en moas
 ```
 
-Loads `lang/<code>.ui` (index-based UI strings) and `lang/<code>.script`
-(German line → translation, applied inside `UnPack`). Search path:
+Primary format is a **gettext `.po` file** (`lang/<code>.po`):
+
+```po
+msgctxt "verb.use"          # optional; UI id without ui. prefix
+msgid "BENUTZE %s"          # German source (UnPack / UI)
+msgstr "USE %s"             # translation
+```
+
+Generate a template, translate it, install as `lang/en.po`:
+
+```sh
+moas-util --datadir manick strings pot > manick.pot
+# translate → lang/en.po
+moas --lang=en
+```
+
+A minimal PO parser loads `msgctxt` / `msgid` / `msgstr` (including multiline
+and `\n`). UI entries use `msgctxt` matching `verb.use`, `save.title`, … or
+match `msgid` to the built-in German string. All non-empty `msgstr` values
+also feed the script `UnPack` map keyed by `msgid`.
+
+Legacy `lang/<code>.ui` and `.script` (TSV) still load and merge. Search path:
 `$MOAS_LANGDIR`, `$MOAS_DATADIR/lang`, `$MOAS_DATADIR/../lang`, `./lang`.
-Default `de` keeps built-in German UI and original script text. Sample
-English UI: `lang/en.ui`. Build a full `en.script` from the TSV extract.
+Default `de` keeps built-in German. Sample: `lang/en.po`.
 
 ## Game data (`manick/`)
 

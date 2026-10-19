@@ -261,6 +261,190 @@ const char *LangLookup(const char *cp850_source)
   return NULL;
 }
 
+
+/* ---- minimal gettext .po reader (msgid / msgstr / msgctxt) ------------ */
+
+static void str_append(char *out, size_t outsz, size_t *used, const char *piece)
+{
+  size_t n = strlen(piece);
+  if (*used + n >= outsz)
+    n = outsz - *used - 1;
+  if (n > 0) {
+    memcpy(out + *used, piece, n);
+    *used += n;
+    out[*used] = 0;
+  }
+}
+
+/* Decode one "..." PO string segment into out (appended). Advances *pp past it. */
+static int po_take_quoted(const char **pp, char *out, size_t outsz, size_t *used)
+{
+  const char *p = *pp;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  if (*p != '"')
+    return -1;
+  p++;
+  while (*p && *p != '"') {
+    if (*p == '\\' && p[1]) {
+      p++;
+      if (*p == 'n')
+        str_append(out, outsz, used, "\n");
+      else if (*p == 't')
+        str_append(out, outsz, used, "\t");
+      else if (*p == 'r')
+        str_append(out, outsz, used, "\r");
+      else if (*p == '"' || *p == '\\') {
+        char b[2] = { *p, 0 };
+        str_append(out, outsz, used, b);
+      } else {
+        char b[2] = { *p, 0 };
+        str_append(out, outsz, used, b);
+      }
+      p++;
+    } else {
+      char b[2] = { *p++, 0 };
+      str_append(out, outsz, used, b);
+    }
+  }
+  if (*p == '"')
+    p++;
+  *pp = p;
+  return 0;
+}
+
+/* Read msgid/msgstr body: optional text on same line + continuation lines of only "..." */
+static int po_read_string_body(FILE *f, char *first_rest, char *out, size_t outsz)
+{
+  size_t used = 0;
+  char line[1024];
+  const char *p;
+  out[0] = 0;
+  p = first_rest;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  if (*p == '"') {
+    if (po_take_quoted(&p, out, outsz, &used) != 0)
+      return -1;
+  }
+  /* continuation lines */
+  for (;;) {
+    long pos = ftell(f);
+    if (!fgets(line, sizeof(line), f))
+      break;
+    p = line;
+    while (*p == ' ' || *p == '\t')
+      p++;
+    if (*p == '"') {
+      if (po_take_quoted(&p, out, outsz, &used) != 0)
+        return -1;
+      continue;
+    }
+    /* not a continuation — push back by seeking (works for real files) */
+    fseek(f, pos, SEEK_SET);
+    break;
+  }
+  return 0;
+}
+
+static void po_commit(const char *ctxt, const char *msgid, const char *msgstr)
+{
+  int id;
+  if (!msgid || !msgid[0])
+    return; /* header or empty */
+  if (!msgstr)
+    msgstr = "";
+  /* UI by msgctxt (ui.verb.use or verb.use) */
+  if (ctxt && ctxt[0]) {
+    const char *name = ctxt;
+    if (!strncmp(name, "ui.", 3))
+      name += 3;
+    id = ui_id_from_name(name);
+    if (id >= 0)
+      ui_set(id, msgstr);
+  } else {
+    /* UI by matching German fallback as msgid */
+    for (id = 0; id < UI_COUNT; id++) {
+      if (ui_fallback[id] && !strcmp(ui_fallback[id], msgid)) {
+        ui_set(id, msgstr);
+        break;
+      }
+    }
+  }
+  /* Script map: full German line → translation */
+  if (msgstr[0])
+    script_add(msgid, msgstr);
+}
+
+static void load_po_file(const char *path)
+{
+  FILE *f = fopen(path, "rb");
+  char line[1024];
+  char ctxt[256], msgid[400], msgstr[400];
+  int have_id = 0, have_str = 0, have_ctx = 0;
+
+  if (!f)
+    return;
+  ctxt[0] = msgid[0] = msgstr[0] = 0;
+
+  while (fgets(line, sizeof(line), f)) {
+    char *p = line;
+    while (*p == ' ' || *p == '\t')
+      p++;
+    if (*p == '#' || *p == '\n' || *p == '\r' || *p == 0)
+      continue;
+
+    if (!strncmp(p, "msgctxt", 7) && (p[7] == ' ' || p[7] == '\t' || p[7] == '"')) {
+      if (have_id && have_str)
+        po_commit(have_ctx ? ctxt : NULL, msgid, msgstr);
+      have_id = have_str = 0;
+      have_ctx = 1;
+      ctxt[0] = 0;
+      po_read_string_body(f, p + 7, ctxt, sizeof(ctxt));
+      continue;
+    }
+    if (!strncmp(p, "msgid_plural", 12)) {
+      /* skip plural forms for now */
+      char skip[400];
+      po_read_string_body(f, p + 12, skip, sizeof(skip));
+      continue;
+    }
+    if (!strncmp(p, "msgid", 5) && (p[5] == ' ' || p[5] == '\t' || p[5] == '"')) {
+      if (have_id && have_str)
+        po_commit(have_ctx ? ctxt : NULL, msgid, msgstr);
+      have_id = 1;
+      have_str = 0;
+      msgid[0] = 0;
+      msgstr[0] = 0;
+      po_read_string_body(f, p + 5, msgid, sizeof(msgid));
+      continue;
+    }
+    if (!strncmp(p, "msgstr", 6) && (p[6] == ' ' || p[6] == '\t' || p[6] == '"' || p[6] == '[')) {
+      /* msgstr or msgstr[N] — only use msgstr / msgstr[0] */
+      char *rest = p + 6;
+      if (*rest == '[') {
+        if (rest[1] != '0') {
+          char skip[400];
+          while (*rest && *rest != ' ' && *rest != '\t' && *rest != '"')
+            rest++;
+          po_read_string_body(f, rest, skip, sizeof(skip));
+          continue;
+        }
+        while (*rest && *rest != ' ' && *rest != '\t' && *rest != '"')
+          rest++;
+      }
+      have_str = 1;
+      msgstr[0] = 0;
+      po_read_string_body(f, rest, msgstr, sizeof(msgstr));
+      continue;
+    }
+  }
+  if (have_id && have_str)
+    po_commit(have_ctx ? ctxt : NULL, msgid, msgstr);
+  fclose(f);
+  script_sort();
+}
+
 static int open_lang_file(char *path, size_t pathsz, const char *suffix)
 {
   const char *data;
@@ -398,18 +582,27 @@ void LangInit(void)
     return;
   }
 
+  /* Prefer a single gettext .po (readable msgid/msgstr). Optional legacy
+   * .ui / .script still work and merge on top. */
+  if (open_lang_file(path, sizeof(path), "po") == 0) {
+    load_po_file(path);
+    fprintf(stderr, "moas: lang po %s (%d script entries)\n", path, script_n);
+  } else if (open_lang_file(path, sizeof(path), "ui") == 0
+             || open_lang_file(path, sizeof(path), "script") == 0) {
+    /* fall through to TSV loaders below */
+  } else {
+    fprintf(stderr, "moas: lang: no %s.po (or .ui/.script); UI stays German\n",
+            lang_code);
+  }
+
   if (open_lang_file(path, sizeof(path), "ui") == 0) {
     load_ui_file(path);
     fprintf(stderr, "moas: lang UI %s\n", path);
-  } else {
-    fprintf(stderr, "moas: lang: no %s.ui (using built-in German UI)\n", lang_code);
   }
 
   if (open_lang_file(path, sizeof(path), "script") == 0) {
     load_script_file(path);
     fprintf(stderr, "moas: lang script %s (%d entries)\n", path, script_n);
-  } else {
-    fprintf(stderr, "moas: lang: no %s.script (scripts stay German)\n", lang_code);
   }
 
   apply_verb_globals();

@@ -6,8 +6,8 @@
 /*
  * Index-based UI strings + UnPack script translation (no gettext).
  *
- * UI:   Ui(UI_…) → table loaded from lang/<code>.ui
- * Script: LangLookup(UnPack result) via lang/<code>.script
+ * UI:   Ui(UI_…) → table from lang/<code>.po (msgctxt) or .ui
+ * Script: LangLookup(UnPack) via same .po (msgid→msgstr) or .script
  *
  * Select with --lang=CODE or MOAS_LANG. Default "de" uses built-in German UI
  * and leaves script text as in GAME.PCK.

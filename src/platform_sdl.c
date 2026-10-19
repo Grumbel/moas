@@ -256,7 +256,7 @@ static const char *const android_data_files[] = {
   "GAME.PCK", "GAME.XXX",
   "LICENCE.DAT", "Licence.Dat", "licence.dat",
   /* optional language packs (assets/lang/…) */
-  "lang/en.ui", "lang/en.script",
+  "lang/en.po", "lang/en.ui", "lang/en.script",
   NULL
 };
 
