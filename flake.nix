@@ -125,6 +125,7 @@
 
           moas-dos = dos.moas-dos;
           moas-dos-zip = dos.moas-dos-zip;
+          moas-dos-run = dos.moas-dos-run;
         };
 
         apps = {
@@ -135,6 +136,11 @@
           moas = {
             type = "app";
             program = "${moas}/bin/moas";
+          };
+          # Open Watcom DOS rebuild under DOSBox-X
+          moas-dos = {
+            type = "app";
+            program = "${dos.moas-dos-run}/bin/moas-dos";
           };
           install-android-moas = android.installApp;
           moas-wasm = wasm.serveApp;

@@ -5,10 +5,10 @@
 #
 #   nix build .#moas-dos
 #   nix build .#moas-dos-zip
+#   nix run .#moas-dos          # DOSBox-X
 #
-# Open Watcom uses the Sybase Open Watcom Public License (redistributable but
-# marked unfree in nixpkgs). The flake allows that package only via
-# allowUnfreePredicate in flake.nix.
+# Open Watcom is Watcom-1.0 (redistributable; marked unfree in nixpkgs).
+# The flake allows that package only via allowUnfreePredicate in flake.nix.
 
 { pkgs
 , version
@@ -17,7 +17,6 @@
 let
   lib = pkgs.lib;
 
-  # Binary package is much faster than building open-watcom-v2 from source.
   watcom = pkgs.open-watcom-bin;
 
   moasDos = pkgs.stdenvNoCC.mkDerivation {
@@ -27,14 +26,10 @@ let
 
     nativeBuildInputs = [ watcom pkgs.gnumake ];
 
-    # Wrapped wcc386 already sets WATCOM; export for the Makefile and INCLUDE.
     buildPhase = ''
       runHook preBuild
-      # Resolve the Open Watcom root (headers + wstub live here)
       if [ -z "''${WATCOM:-}" ] || [ ! -d "''${WATCOM}/h" ]; then
-        # Probe from a wrapped tool's store path
         WCC=$(command -v wcc386)
-        # wrapper → real binary under .../binl/wcc386 or similar
         REAL=$(readlink -f "$WCC")
         for d in "$(dirname "$REAL")/.." "$(dirname "$REAL")/../.." \
                  "${watcom}" "$(dirname $(dirname "$REAL"))"; do
@@ -73,12 +68,9 @@ let
       cat > $out/dos/README.txt <<'EOR'
 MOAS — MS-DOS build (Open Watcom, DOS/4GW)
 
-Run under DOSBox, FreeDOS, or real MS-DOS with the data files beside the EXE:
-  MOAS.EXE
-(DOS/4GW is invoked automatically via the EXE stub when DOS4GW.EXE is present.)
+  nix run .#moas-dos
 
-This binary uses the original #ifdef DOS hardware paths (VGA Mode 13h,
-INT 33h mouse, keyboard IRQ, SoundBlaster), not the SDL2 port.
+Uses the original #ifdef DOS hardware paths, not the SDL2 port.
 EOR
       runHook postInstall
     '';
@@ -87,7 +79,7 @@ EOR
       description = "MOAS MS-DOS executable (Open Watcom / DOS/4GW)";
       license = licenses.gpl2Plus;
       platforms = platforms.linux;
-      hydraPlatforms = [];
+      hydraPlatforms = [ ];
     };
   };
 
@@ -101,7 +93,63 @@ EOR
     zip -r -9 $out/moas-${version}-dos.zip moas-${version}-dos
   '';
 
+  # Conf template; WORK_DIR is substituted at runtime
+  dosboxConf = pkgs.writeText "moas-dosbox.conf" ''
+    [sdl]
+    fullscreen=false
+    output=texture
+
+    [dosbox]
+    machine=svga_s3
+    memsize=16
+
+    [cpu]
+    core=auto
+    cycles=max
+
+    [mixer]
+    nosound=false
+    rate=44100
+
+    [sblaster]
+    sbtype=sb16
+    sbbase=220
+    irq=7
+    dma=1
+    hdma=5
+    oplmode=auto
+
+    [autoexec]
+    @echo off
+    mount C WORK_DIR
+    C:
+    echo Starting MOAS (Open Watcom DOS/4GW rebuild)...
+    MOAS.EXE
+  '';
+
+  moasDosRun = pkgs.writeShellApplication {
+    name = "moas-dos";
+    runtimeInputs = [ pkgs.dosbox-x pkgs.gnused ];
+    text = ''
+      set -euo pipefail
+      DOSDIR="${moasDos}/dos"
+      WORK=$(mktemp -d -t moas-dos-work-XXXXXX)
+      CONF=$(mktemp -t moas-dosbox-XXXXXX.conf)
+      cleanup() { rm -rf "$WORK"; rm -f "$CONF"; }
+      trap cleanup EXIT
+
+      cp -a --no-preserve=mode "$DOSDIR"/. "$WORK"/
+      # DOSBox-X conf: inject writable work dir into mount path
+      sed "s|WORK_DIR|$WORK|g" ${dosboxConf} > "$CONF"
+
+      echo "moas-dos: data+exe in $WORK"
+      echo "moas-dos: launching DOSBox-X (close the window or exit the game to quit)"
+      exec dosbox-x -conf "$CONF" -noconsole
+    '';
+  };
+
 in {
   moas-dos = moasDos;
   moas-dos-zip = moasDosZip;
+  moas-dos-run = moasDosRun;
 }
