@@ -673,6 +673,15 @@ void MoasRegisterStaticNames(void)
   if (!Prg)
     return;
 
+  /*
+   * Prog0 layout (moas-util disasm 0):
+   *   var_set → descriptions → power_parse → descriptions → set_object* →
+   *   power_parse → descriptions → power_parse → var_set* → say_properties →
+   *   call_proc (story).
+   * Descriptions are interleaved with set_object; stopping at the first
+   * non-name opcode left half the table unloaded. Skip init ops; apply 65/62;
+   * stop at call_proc (17).
+   */
   while (Adresse < Programm[0].Length) {
     unsigned char op = Prg[Adresse];
     Parameter = (short *)(Prg + 1 + Adresse);
@@ -684,9 +693,18 @@ void MoasRegisterStaticNames(void)
       AddPowerParse(Parameter[0], UnPack((unsigned char *)&Parameter[1]));
       Adresse = (unsigned short)(Adresse + 4 + strlen((char *)&Parameter[1]));
       n_parse++;
-    } else if (op == 38) { /* SetVar const — skip, do not apply */
+    } else if (op == 38 || op == 40) {
+      /* var_set_const / set_object — fresh-game defaults; do not apply */
       Adresse = (unsigned short)(Adresse + 5);
+    } else if (op == 85) {
+      /* say_properties — restored from .SAV */
+      Adresse = (unsigned short)(Adresse + 9);
+    } else if (op == 17) {
+      /* call_proc — story begins */
+      break;
     } else {
+      fprintf(stderr, "moas: MoasRegisterStaticNames: stop at op=%u addr=%u\n",
+              (unsigned)op, (unsigned)Adresse);
       break;
     }
   }
