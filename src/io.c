@@ -892,23 +892,32 @@ int LoadGameSlot(short slot)
 }
 
 /*
- * Exit/resume autosave uses the original engine path: slot 9 (GAME9.SAV),
- * same as AutoSaveGame → SaveGame(1). No separate file, no format change.
+ * Exit/resume file: AUTOSAVE.SAV in the state directory (not GAME9.SAV).
+ * Slot 9 remains the in-game AutoSaveGame checkpoint only.
+ * Same .SAV format via SaveGameToFile / LoadGameFromFile.
  *
  * Description[] is script RAM (prog 0 static table), never in .SAV.
  * Cold load calls MoasRegisterStaticNames() to replay only those opcodes.
  */
-#define MOAS_AUTOSAVE_SLOT 9
+#define MOAS_AUTOSAVE_NAME "AUTOSAVE.SAV"
 
 void MoasAutosaveOnExit(void)
 {
+  char savpath[512];
+
   if (moas_no_autosave)
     return;
-  /* Same as in-game AutoSaveGame: SaveGame(1) → GAME9.SAV */
-  if (SaveGameSlot(MOAS_AUTOSAVE_SLOT) != 0)
-    fprintf(stderr, "moas: exit autosave (slot %d) failed\n", MOAS_AUTOSAVE_SLOT);
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
+    fprintf(stderr, "moas: autosave: path too long
+");
+    return;
+  }
+  if (SaveGameToFile(savpath, 1) != 0)
+    fprintf(stderr, "moas: exit autosave failed (%s)
+", savpath);
   else
-    fprintf(stderr, "moas: exit autosave (slot %d) ok\n", MOAS_AUTOSAVE_SLOT);
+    fprintf(stderr, "moas: exit autosave ok (%s)
+", savpath);
 }
 
 /* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
@@ -919,7 +928,7 @@ int MoasTryLoadAutosave(void)
 
   if (moas_no_autosave)
     return -1;
-  if (MoasStatePath(savpath, sizeof(savpath), "GAME9.SAV") != 0)
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
     return -1;
   fd = open(savpath, O_RDONLY
 #ifdef DOS
@@ -929,9 +938,11 @@ int MoasTryLoadAutosave(void)
   if (fd < 0)
     return -1;
   close(fd);
-  fprintf(stderr, "moas: restoring exit autosave %s\n", savpath);
-  if (LoadGameSlot(MOAS_AUTOSAVE_SLOT) != 0) {
-    fprintf(stderr, "moas: exit autosave restore failed; starting fresh\n");
+  fprintf(stderr, "moas: restoring exit autosave %s
+", savpath);
+  if (LoadGameFromFile(savpath) != 0) {
+    fprintf(stderr, "moas: exit autosave restore failed; starting fresh
+");
     return -1;
   }
 #ifndef DOS

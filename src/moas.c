@@ -101,8 +101,8 @@ int main(int argc, char **argv)
       MoasRegisterStaticNames();
 #endif
   } else if (MoasTryLoadAutosave() == 0) {
-    /* GAME9.SAV exit resume (same slot as AutoSaveGame). */
-    MoasDbg(MOAS_DBG_LOAD, "restored exit autosave (slot 9)");
+    /* AUTOSAVE.SAV from previous exit. */
+    MoasDbg(MOAS_DBG_LOAD, "restored AUTOSAVE.SAV");
   } else {
     if (!moas_skip_intro) {
       MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");

@@ -93,12 +93,12 @@ Mid-session load keeps Description in RAM; cold load must replay prog0 name ops 
 Room progs (5–24) use `add_area_*` (markers → **in save**). No `add_walk_area` in any prog.
 `set_object` defaults must **not** run on load (inventar x already in save).
 
-Exit autosave = **GAME9.SAV** (original `SaveGame(1)` slot).
+Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame only).
 
 ## Done this stack
 - Android quit: finishAndRemoveTask + InternalError(0)/Alt+Q → RequestQuit; MOAS_STATEDIR for autosave
 - LoadGameFromFile: re-init cursor/control so hover works after autosave/load
-- Exit autosave = GAME9.SAV; cold resume script re-run; no .SAV format change
+- Exit autosave = AUTOSAVE.SAV; cold resume MoasRegisterStaticNames; no .SAV format change
 - Android quit: Activity.finish() + SDL_Quit; AC_BACK quits
 - Touch USE/LOOK modes; both walk on empty; LOOK object = SIEHE (no Benutze/Bewege)
 - Touch walk: non-DOS left-click on empty ground → WalkClick + idle C_WALK (no D-pad)
