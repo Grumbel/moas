@@ -78,6 +78,7 @@
 - Host Phase[0]/[1] size checks now log to stderr (DOS still InternalError).
 
 ## Done this stack
+- Touch walk: non-DOS left-click on empty ground → WalkClick + idle C_WALK (no D-pad)
 - Android overlay: DPI hit-test fix, pressed feedback, richer icons
 - Exit AUTOSAVE.SAV + `--no-autosave`; SaveGameToFile/SaveGameSlot refactor
 - Esc only sets KeyAbortState=2 when armed (KeyAbortState==1), matching DOS IRQ

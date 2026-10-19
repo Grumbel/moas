@@ -101,12 +101,44 @@ void MouseCheck(void)
     Mouse.ClickObject=WhatsAt(Mouse.x,Mouse.y);
     MoasDbg(MOAS_DBG_INPUT, "L-down at %d,%d obj=%d CursorState=%d",
             (int)Mouse.x, (int)Mouse.y, (int)Mouse.ClickObject, (int)Mouse.CursorState);
+#ifndef DOS
+    /*
+     * No right button on touchscreens. Empty-ground left press mirrors the
+     * DOS right-press walk (WalkClick). Object hits stay left-only verbs.
+     * Gated like right-walk: control, no window, V_NoWalk clear.
+     */
+    if (PlayerHasControl && V_NoWalk == 0 && Window.Status == None
+        && Mouse.ClickObject == -1)
+      WalkClick(Mouse.x, Mouse.y);
+#endif
   }
   if (Mouse.Left==0 && Mouse.LastLeft==1)
   {
     Mouse.ReleaseX=Mouse.x;
     Mouse.ReleaseY=Mouse.y;
     MoasDbg(MOAS_DBG_INPUT, "L-up at %d,%d", (int)Mouse.x, (int)Mouse.y);
+#ifndef DOS
+    /*
+     * Mirror right-button release → C_WALK when idle and the click was on
+     * empty ground (ClickObject still -1 until MouseIntelligence clears it).
+     * Does not run for object use/talk/bewege (ClickObject != -1).
+     */
+    if (PlayerHasControl == 1 && Window.Status == None && Mouse.ClickObject == -1)
+    {
+      short PN = GetPlayerPersonNumber();
+      if ((PN == MAX_PRS) || (Person[PN].StepSpeed == 0))
+      {
+        short T0 = Var[0], T1 = Var[1], T2 = Var[2];
+        V_Verb = C_WALK;
+        V_Par1 = -1;
+        V_Par2 = -1;
+        ExecuteTheProgram();
+        Var[0] = T0;
+        Var[1] = T1;
+        Var[2] = T2;
+      }
+    }
+#endif
   }
   if (PlayerHasControl)
     MouseIntelligence();
