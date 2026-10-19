@@ -30,7 +30,7 @@ effects may not yet match the original DOS release.
   under the name **Mänick Mänschion**
 - Cross builds: Windows (MinGW), Android (APK with packed `manick/` assets),
   WebAssembly (Emscripten + ASYNCIFY), R36S/PortMaster
-- **`moas-util`**: list/extract data resources and disassemble scripts
+- **`moas-util`**: list/extract data resources, disassemble scripts, extract strings for translation
 
 Known limitations include unfinished speech-channel wiring and legacy effects
 such as `PowerBlend` and `WalkNLayers`. Optional music banks (`GAME*.TSS`) are
@@ -198,6 +198,22 @@ nix build .#moas-r36s-portmaster       # or copy contents to /roms/ports/
 Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
 binary runs on ArkOS’s glibc and SDL2. Controls and install notes:
 `mk/r36s/README.md`. Launch with `--fullscreen`.
+
+## Translation strings
+
+Script dialogue and object names live as packed tokens in `GAME.PCK` and as
+packed byte sequences inside program resources. Extract everything for
+translation (UTF-8):
+
+```sh
+moas-util --datadir manick strings json > strings.json
+moas-util --datadir manick strings pot  > manick.pot
+moas-util --datadir manick strings tsv  > strings.tsv
+```
+
+Each row has a stable `id` (`script.pN.0xADDR`, `pck.K`, or `ui.*`), the
+source text, and a short reference. UI verb templates and save/load prompts
+from the SDL port are included under `ui.*`.
 
 ## Game data (`manick/`)
 

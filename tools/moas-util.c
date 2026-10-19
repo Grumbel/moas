@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 /* SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com> */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
@@ -106,6 +107,14 @@ static void *xmalloc(size_t n)
 {
   void *p = malloc(n ? n : 1);
   if (!p) die("out of memory");
+  return p;
+}
+
+static char *xstrdup(const char *s)
+{
+  size_t n = strlen(s) + 1;
+  char *p = xmalloc(n);
+  memcpy(p, s, n);
   return p;
 }
 
@@ -722,6 +731,249 @@ static void cmd_disasm(const Catalog *cat, int prog_index)
 }
 
 
+
+/* ---- extract translatable strings ------------------------------------ */
+
+static void cp850_to_utf8(const uint8_t *s, char *out, size_t outsz)
+{
+  size_t o = 0;
+  int i;
+  for (i = 0; s[i] && o + 4 < outsz; i++) {
+    unsigned char c = s[i];
+    const char *u = NULL;
+    if (c >= 32 && c < 127) {
+      out[o++] = (char)c;
+      continue;
+    }
+    switch (c) {
+      case 0x81: u = "ü"; break;
+      case 0x84: u = "ä"; break;
+      case 0x8e: u = "Ä"; break;
+      case 0x94: u = "ö"; break;
+      case 0x99: u = "Ö"; break;
+      case 0x9a: u = "Ü"; break;
+      case 0xe1: u = "ß"; break;
+      case '\n': u = "\n"; break;
+      default:
+        if (o + 6 < outsz) {
+          int n = snprintf(out + o, outsz - o, "\\x%02x", c);
+          if (n > 0) o += (size_t)n;
+        }
+        continue;
+    }
+    while (*u && o + 1 < outsz) out[o++] = *u++;
+  }
+  out[o] = 0;
+}
+
+static void json_escape(const char *s, char *out, size_t outsz)
+{
+  size_t o = 0;
+  for (; *s && o + 7 < outsz; s++) {
+    unsigned char c = (unsigned char)*s;
+    if (c == '"' || c == '\\') {
+      out[o++] = '\\';
+      out[o++] = (char)c;
+    } else if (c == '\n') {
+      out[o++] = '\\';
+      out[o++] = 'n';
+    } else if (c == '\r') {
+      out[o++] = '\\';
+      out[o++] = 'r';
+    } else if (c == '\t') {
+      out[o++] = '\\';
+      out[o++] = 't';
+    } else if (c < 32) {
+      int n = snprintf(out + o, outsz - o, "\\u%04x", c);
+      if (n > 0) o += (size_t)n;
+    } else {
+      out[o++] = (char)c;
+    }
+  }
+  out[o] = 0;
+}
+
+/* Byte offset of packed C-string relative to opcode (op at pc). */
+static int string_param_off(uint8_t op)
+{
+  switch (op) {
+    case 44: case 64: case 84: case 90: case 91: return 1;
+    case 62: case 65: case 89: return 3;
+    case 60: return 5;
+    case 66: case 81: case 92: case 97: case 98: case 99: return 7;
+    case 67: return 9;
+    default: return -1;
+  }
+}
+
+typedef struct {
+  char *id;
+  char *text;   /* UTF-8 */
+  char *ref;    /* source location */
+} StrRow;
+
+static StrRow *g_rows;
+static int g_nrows, g_rows_cap;
+
+static void rows_add(const char *id, const char *text_utf8, const char *ref)
+{
+  StrRow *r;
+  if (g_nrows >= g_rows_cap) {
+    int nc = g_rows_cap ? g_rows_cap * 2 : 256;
+    g_rows = realloc(g_rows, (size_t)nc * sizeof(StrRow));
+    if (!g_rows) die("out of memory");
+    g_rows_cap = nc;
+  }
+  r = &g_rows[g_nrows++];
+  r->id = xstrdup(id);
+  r->text = xstrdup(text_utf8);
+  r->ref = xstrdup(ref);
+  if (!r->id || !r->text || !r->ref) die("out of memory");
+}
+
+static void extract_prog_strings(const Catalog *cat, int prog_index)
+{
+  uint8_t *buf = NULL;
+  int len = 0, pc = 0;
+  if (load_prog_blob(cat, prog_index, &buf, &len) != 0 || !buf)
+    return;
+  while (pc < len) {
+    uint8_t op = buf[pc];
+    int sz = insn_size(buf, len, pc);
+    int soff = string_param_off(op);
+    if (sz < 1) break;
+    if (soff >= 0 && pc + soff < len) {
+      const uint8_t *packed = buf + pc + soff;
+      char unpacked[512], utf8[1024], id[64], ref[96];
+      const OpInfo *info = (op < 128) ? &op_table[op] : NULL;
+      unpack_to(unpacked, sizeof(unpacked), packed);
+      if (unpacked[0]) {
+        cp850_to_utf8((const uint8_t *)unpacked, utf8, sizeof(utf8));
+        snprintf(id, sizeof(id), "script.p%d.0x%04x", prog_index, pc);
+        snprintf(ref, sizeof(ref), "prog %d @ %04x op %s",
+                 prog_index, pc, info && info->name ? info->name : "?");
+        rows_add(id, utf8, ref);
+      }
+    }
+    pc += sz;
+  }
+  free(buf);
+}
+
+static void extract_pck_strings(void)
+{
+  int i;
+  char utf8[512], id[32], ref[32];
+  load_pack_codes();
+  for (i = 0; i < g_anz_codes; i++) {
+    if (!g_codes[i] || !g_codes[i][0]) continue;
+    cp850_to_utf8((const uint8_t *)g_codes[i], utf8, sizeof(utf8));
+    snprintf(id, sizeof(id), "pck.%d", i);
+    snprintf(ref, sizeof(ref), "GAME.PCK token %d", i);
+    rows_add(id, utf8, ref);
+  }
+}
+
+/* Hardcoded UI from the SDL port (not in GAME.PCK). */
+static void extract_ui_strings(void)
+{
+  static const char *const ui[][2] = {
+    { "ui.verb.use", "BENUTZE %s" },
+    { "ui.verb.use_with", "BENUTZE %s MIT %s" },
+    { "ui.verb.look", "SCHAU %s AN" },
+    { "ui.verb.talk", "REDE MIT %s" },
+    { "ui.verb.move", "BEWEGE %s" },
+    { "ui.verb.move_dir", "BEWEGE %s IN RICHTUNG %s" },
+    { "ui.save.title", "Speichern:" },
+    { "ui.load.title", "Laden:" },
+    { "ui.save.fail", "Speichern fehlgeschlagen" },
+    { "ui.load.fail", "Laden fehlgeschlagen" },
+    { "ui.slot.none", "Kein Slot gewaehlt" },
+    { "ui.overlay.save", "SAVE" },
+    { "ui.overlay.load", "LOAD" },
+    { "ui.overlay.esc", "ESC" },
+    { "ui.overlay.skip", "SKIP" },
+    { "ui.overlay.use", "USE" },
+    { "ui.overlay.look", "LOOK" },
+    { NULL, NULL }
+  };
+  int i;
+  for (i = 0; ui[i][0]; i++)
+    rows_add(ui[i][0], ui[i][1], "source UI");
+}
+
+static void emit_json(void)
+{
+  int i;
+  char esc[2048];
+  printf("[\n");
+  for (i = 0; i < g_nrows; i++) {
+    json_escape(g_rows[i].text, esc, sizeof(esc));
+    printf("  {\"id\": \"%s\", \"text\": \"%s\", \"ref\": \"%s\"}%s\n",
+           g_rows[i].id, esc, g_rows[i].ref, i + 1 < g_nrows ? "," : "");
+  }
+  printf("]\n");
+}
+
+static void emit_pot(void)
+{
+  int i;
+  printf("# MOAS / Mänick Mänschion — extracted strings\n");
+  printf("# Charset: UTF-8\n");
+  printf("msgid \"\"\nmsgstr \"\"\n"
+         "\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+         "\"Language: de\\n\"\n\n");
+  for (i = 0; i < g_nrows; i++) {
+    char esc[2048];
+    json_escape(g_rows[i].text, esc, sizeof(esc)); /* close enough for pot */
+    printf("#. %s\n", g_rows[i].ref);
+    printf("#: %s\n", g_rows[i].id);
+    printf("msgid \"%s\"\n", esc);
+    printf("msgstr \"\"\n\n");
+  }
+}
+
+static void emit_tsv(void)
+{
+  int i;
+  printf("id\ttext\tref\n");
+  for (i = 0; i < g_nrows; i++) {
+    /* TSV: escape tabs/newlines in text */
+    char *t = g_rows[i].text;
+    printf("%s\t", g_rows[i].id);
+    for (; *t; t++) {
+      if (*t == '\t') fputs("\\t", stdout);
+      else if (*t == '\n') fputs("\\n", stdout);
+      else putchar(*t);
+    }
+    printf("\t%s\n", g_rows[i].ref);
+  }
+}
+
+static void cmd_strings(const Catalog *cat, const char *fmt)
+{
+  int i;
+  g_nrows = 0;
+  extract_ui_strings();
+  extract_pck_strings();
+  for (i = 0; i < cat->n_prog; i++)
+    extract_prog_strings(cat, i);
+
+  if (!fmt || !fmt[0] || !strcmp(fmt, "json"))
+    emit_json();
+  else if (!strcmp(fmt, "pot"))
+    emit_pot();
+  else if (!strcmp(fmt, "tsv"))
+    emit_tsv();
+  else {
+    fprintf(stderr, "moas-util: unknown strings format '%s' (json|pot|tsv)\n", fmt);
+    exit(1);
+  }
+
+  fprintf(stderr, "moas-util: extracted %d string occurrences\n", g_nrows);
+}
+
+
 static void usage(const char *argv0)
 {
   fprintf(stderr,
@@ -741,13 +993,15 @@ static void usage(const char *argv0)
     "  licence           Print LICENCE.DAT text\n"
     "  xxx               Summarise GAME.XXX font tables\n"
     "  disasm [N]        Disassemble script program N (default: all)\n"
+    "  strings [FMT]     Extract translatable text (FMT: json|pot|tsv, default json)\n"
     "\n"
     "Examples:\n"
     "  %s --datadir manick info\n"
     "  %s --datadir manick list | less\n"
     "  %s --datadir manick extract --outdir /tmp/moas-out bild\n"
-    "  %s --datadir manick disasm 0\n",
-    argv0, argv0, argv0, argv0, argv0);
+    "  %s --datadir manick disasm 0\n"
+    "  %s --datadir manick strings pot > manick.pot\n",
+    argv0, argv0, argv0, argv0, argv0, argv0);
 }
 
 int main(int argc, char **argv)
@@ -789,7 +1043,8 @@ int main(int argc, char **argv)
     }
     if (!cmd) {
       cmd = argv[i];
-    } else if ((!strcmp(cmd, "extract") || !strcmp(cmd, "disasm")) && !strcmp(extract_kind, "all")) {
+    } else if ((!strcmp(cmd, "extract") || !strcmp(cmd, "disasm") || !strcmp(cmd, "strings"))
+               && !strcmp(extract_kind, "all")) {
       extract_kind = argv[i];
     } else {
       fprintf(stderr, "moas-util: unexpected argument '%s'\n", argv[i]);
@@ -814,14 +1069,28 @@ int main(int argc, char **argv)
     cmd_xxx();
     return 0;
   }
-  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "disasm")) {
+  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "disasm")
+      || !strcmp(cmd, "strings")) {
     int prog_idx = -1;
     cat = load_catalog();
     if (!strcmp(cmd, "list"))
       cmd_list(&cat);
     else if (!strcmp(cmd, "extract"))
       cmd_extract(&cat, extract_kind);
-    else {
+    else if (!strcmp(cmd, "strings")) {
+      const char *fmt = "json";
+      if (strcmp(extract_kind, "all") != 0)
+        fmt = extract_kind;
+      else {
+        for (i = 1; i < argc; i++) {
+          if (!strcmp(argv[i], "strings") && i + 1 < argc && argv[i+1][0] != '-') {
+            fmt = argv[i+1];
+            break;
+          }
+        }
+      }
+      cmd_strings(&cat, fmt);
+    } else {
       /* disasm [N] — N already consumed as extract_kind if present */
       if (strcmp(extract_kind, "all") != 0) {
         prog_idx = atoi(extract_kind);
