@@ -908,16 +908,13 @@ void MoasAutosaveOnExit(void)
   if (moas_no_autosave)
     return;
   if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
-    fprintf(stderr, "moas: autosave: path too long
-");
+    fprintf(stderr, "moas: autosave: path too long\n");
     return;
   }
   if (SaveGameToFile(savpath, 1) != 0)
-    fprintf(stderr, "moas: exit autosave failed (%s)
-", savpath);
+    fprintf(stderr, "moas: exit autosave failed (%s)\n", savpath);
   else
-    fprintf(stderr, "moas: exit autosave ok (%s)
-", savpath);
+    fprintf(stderr, "moas: exit autosave ok (%s)\n", savpath);
 }
 
 /* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
@@ -938,11 +935,9 @@ int MoasTryLoadAutosave(void)
   if (fd < 0)
     return -1;
   close(fd);
-  fprintf(stderr, "moas: restoring exit autosave %s
-", savpath);
+  fprintf(stderr, "moas: restoring exit autosave %s\n", savpath);
   if (LoadGameFromFile(savpath) != 0) {
-    fprintf(stderr, "moas: exit autosave restore failed; starting fresh
-");
+    fprintf(stderr, "moas: exit autosave restore failed; starting fresh\n");
     return -1;
   }
 #ifndef DOS
