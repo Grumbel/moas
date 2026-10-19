@@ -499,6 +499,11 @@ void Blend(char Step,char Dir)
 }
 void ToggleScreen(short Mode)
 {
+  /*
+   * DOS: VGA sequencer index 1, bit 5 (0x20) blanks the display.
+   * Mode==1 → clear bit (screen on); otherwise set bit (screen off).
+   */
+#ifdef DOS
   USHORT Tmp;
 
   outp(0x3c4,0x01); Tmp=inp(0x3c5);
@@ -506,6 +511,10 @@ void ToggleScreen(short Mode)
   if (Mode==1) Tmp=Tmp & 223;
      else      Tmp=Tmp | 32;
   outp(0x3c4,0x01); outp(0x3c5,Tmp);
+#else
+  PlatformSetBlank(Mode != 1);
+  PlatformPresent();
+#endif
 }
 void LoescheKopie(short PrsNum)
 {

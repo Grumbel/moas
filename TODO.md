@@ -40,10 +40,14 @@
 - Bewege arrow: ported in VMouse (Phase[1])
 
 ## Still open
-- **ToggleScreen** (op 75): still uses stubbed `outp`/`inp`; should call `PlatformSetBlank`
-- **ShowHercBak**: writes VGA text memory `0xB8000` even on non-DOS (Master key `#`) — unsafe
-- Speech channel (SpeechData) wiring if used
 - PowerBlend / WalkNLayers
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
 - Confirm Bewege arrow frames (Phase[1], 16 directions) look correct in-game
+
+## Done this stack
+- Bewege arrow cursor (VMouse + Phase[1])
+- ToggleScreen → PlatformSetBlank (op 75)
+- ShowMarker: draw Label/Jumper outlines on framebuffer (Master key `2`)
+- ShowHercBak: stderr dump instead of 0xB8000 (Master key `#`)
+- Speech/audio left alone (not used by this game data)

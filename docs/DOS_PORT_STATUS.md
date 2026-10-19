@@ -96,7 +96,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 
 | Location | What | Status | Notes |
 |----------|------|--------|-------|
-| `ToggleScreen` (~500) | VGA sequencer blank bit via `outp(0x3c4/0x3c5)` | **GAP** | `inp`/`outp` are stubs → **no-op**. Opcode 75 calls it. `PlatformSetBlank()` already exists and is used by present path, but `ToggleScreen` never calls it. |
+| `ToggleScreen` (~500) | VGA sequencer blank bit via `outp(0x3c4/0x3c5)` | **PORTED** | Non-DOS: `PlatformSetBlank(Mode != 1)` + present. Mode==1 = screen on. |
 
 ---
 
@@ -133,7 +133,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 | 407–… | Wait(Milliseconds) | PORTED | 100 ms units. |
 | 441–… | GetClickOrEnter DOS clock vs platform | PORTED | |
 | 831–842 | GetRealPersonNum debug: text mode + getch | DEAD/DEBUG | Still prints; video mode toggles skipped. |
-| 873–875 | `ShowMarker` `_rectangle` borders | STUB/NO-OP | Debug overlay; never drawn on SDL. |
+| 873–… | `ShowMarker` outline Label/Jumper rects | PORTED | Master key `2`: draws into `VGA_ADRESSE` + present. |
 | 943–945 | Quit check in wait loops | PORTED | |
 
 ---
@@ -197,7 +197,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 
 | Lines | What | Status | Notes |
 |------:|------|--------|-------|
-| 36–… / 62–… / 72–… | Text-mode video for debug HUD | **GAP / unsafe** | Writes `0xB8000` **unconditionally** (not only under DOS). Master key `#` → `ShowHercBak()`. On Linux this is a wild write. Should be gated or reimplemented as an SDL overlay / stderr dump. |
+| 36–… | Text-mode video for debug HUD | PORTED | Master key `#`: DOS keeps 0xB8000 HUD; non-DOS dumps person/say-window table to stderr, then waits for a key. |
 
 ---
 
@@ -213,7 +213,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 
 Not DOS ifdefs; the replacement layer. Notable ready hooks not yet wired from game code:
 
-- `PlatformSetBlank` — intended for `ToggleScreen` (**GAP** above)
+- `PlatformSetBlank` — wired from `ToggleScreen`
 - `PlatformSetShake` — already used from `Shake`
 - `PlatformGetTicker` / `PlatformGetMillis` — used from timer/Wait paths
 
@@ -221,11 +221,9 @@ Not DOS ifdefs; the replacement layer. Notable ready hooks not yet wired from ga
 
 ## Summary: remaining real gaps
 
-1. **`ToggleScreen` (script op 75)** — still talks to VGA ports; should call `PlatformSetBlank(!Mode)` (or equivalent). **Functional gap.**
-2. **`ShowHercBak`** — text-mode debug HUD; **unsafe on non-DOS** if Master activates it.
-3. **`ShowMarker` rectangles** — debug only; cosmetic no-op.
-4. **Speech channel wiring** — may still be incomplete (separate from ifdefs).
-5. **PowerBlend / WalkNLayers** — incomplete effect, not an ifdef miss.
-6. **Copy-protection / disk serial** — intentionally not ported.
+1. **PowerBlend / WalkNLayers** — incomplete effect, not an ifdef miss.
+2. **Copy-protection / disk serial** — intentionally not ported.
+3. Speech/audio — not required for this game data (skipped).
 
+ToggleScreen, ShowMarker, ShowHercBak, and the Bewege cursor are ported.
 Everything else under `#ifdef DOS` is either replaced by the platform layer, intentionally stubbed (SB/DMA/IRQ), or debug/error-path only.

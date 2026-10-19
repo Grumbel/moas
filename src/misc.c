@@ -864,16 +864,36 @@ void UnMarkArea(enum MARKTYP MarkTyp,short Ref)
 }
 void ShowMarker(void)
 {
+  /* Master debug (key '2'): outline Label/Jumper areas on the framebuffer. */
   short c;
 
   for (c=0;c<50;c++)
     if (Marker[c].MarkTyp!=Unused)
     {
-      if (Marker[c].MarkTyp==Label) _setcolor(2); else _setcolor(0);
+      unsigned char color = (Marker[c].MarkTyp==Label) ? 2 : 0;
+      short x1=Marker[c].x1, y1=Marker[c].y1, x2=Marker[c].x2, y2=Marker[c].y2;
+      short x,y;
 #ifdef DOS
-      _rectangle(_GBORDER,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2);
+      _setcolor(color);
+      _rectangle(_GBORDER,x1,y1,x2,y2);
+#else
+      if (x1>x2) { short t=x1; x1=x2; x2=t; }
+      if (y1>y2) { short t=y1; y1=y2; y2=t; }
+      if (x1<0) x1=0; if (y1<0) y1=0;
+      if (x2>319) x2=319; if (y2>199) y2=199;
+      for (x=x1; x<=x2; x++) {
+        (VGA_ADRESSE)[x + y1*320] = color;
+        (VGA_ADRESSE)[x + y2*320] = color;
+      }
+      for (y=y1; y<=y2; y++) {
+        (VGA_ADRESSE)[x1 + y*320] = color;
+        (VGA_ADRESSE)[x2 + y*320] = color;
+      }
 #endif
     }
+#ifndef DOS
+  PlatformPresent();
+#endif
 }
 void TestIfPersonIsInTrap(void)
 {
