@@ -20,13 +20,24 @@
       height: 100%; gap: 0.55rem;
       box-sizing: border-box; padding: 8px;
     }
+    /*
+     * SDL window is (320*3+280)×(200*3) = 1240×600 so overlay buttons sit in
+     * the side letterbox. The slot must use that aspect — not 16:10 — or the
+     * canvas is squeezed and the buttons land on the game picture.
+     */
     #slot {
-      width: min(96vw, calc(72vh * 16 / 10));
-      height: min(72vh, calc(96vw * 10 / 16));
+      /* 1240 / 600 */
+      aspect-ratio: 31 / 15;
+      width: min(96vw, calc(72vh * 31 / 15));
+      height: auto;
+      max-height: 72vh;
+      background: #000;
     }
     #wrap:fullscreen #slot, #wrap:-webkit-full-screen #slot {
-      width: min(100vw, calc(100vh * 16 / 10));
-      height: min(100vh, calc(100vw * 10 / 16));
+      width: min(100vw, calc(100vh * 31 / 15));
+      max-height: 100vh;
+      height: auto;
+      border: none;
     }
     #wrap:fullscreen > :not(#slot), #wrap:-webkit-full-screen > :not(#slot) {
       display: none;
@@ -37,6 +48,10 @@
       image-rendering: pixelated; image-rendering: crisp-edges;
       outline: none; touch-action: none;
       border: 1px solid #333;
+    }
+    #wrap:fullscreen canvas.emscripten,
+    #wrap:-webkit-full-screen canvas.emscripten {
+      border: none;
     }
     #status { font-size: 0.9rem; opacity: 0.85; min-height: 1.2em; }
     #progress {

@@ -411,8 +411,12 @@ int PlatformInit(void)
       int win_w = LOGICAL_W * SCALE;
       int win_h = LOGICAL_H * SCALE;
 #if defined(MOAS_OVERLAY_BUTTONS) && !defined(__ANDROID__)
-      /* Side letterbox for Save/Load/USE/LOOK columns (web / desktop overlay). */
-      win_w += 220;
+      /*
+       * Side letterbox for Save/Load/USE/LOOK columns (web / desktop overlay).
+       * overlay_rects needs dx >= ~136 (btn up to 120 + margins); +280 → 140/side
+       * when the framebuffer is height-limited (SCALE 3 → 960×600 game area).
+       */
+      win_w += 280;
 #endif
       window = SDL_CreateWindow("Mänick Mänschion",
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
