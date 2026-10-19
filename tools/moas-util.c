@@ -904,15 +904,40 @@ static void extract_ui_strings(void)
 
 static void emit_json(void)
 {
+  /* Index-based catalog for translation tools:
+   *   { "source_language": "de",
+   *     "strings": [ { "id", "source", "target", "note" }, ... ] }
+   * Fill "target", then derive lang/<code>.ui / .script for the engine.
+   */
   int i;
-  char esc[2048];
-  printf("[\n");
+  char esc[2048], idesc[256], notee[512];
+  printf("{\n");
+  printf("  \"source_language\": \"de\",\n");
+  printf("  \"strings\": [\n");
   for (i = 0; i < g_nrows; i++) {
+    json_escape(g_rows[i].id, idesc, sizeof(idesc));
     json_escape(g_rows[i].text, esc, sizeof(esc));
-    printf("  {\"id\": \"%s\", \"text\": \"%s\", \"ref\": \"%s\"}%s\n",
-           g_rows[i].id, esc, g_rows[i].ref, i + 1 < g_nrows ? "," : "");
+    json_escape(g_rows[i].ref, notee, sizeof(notee));
+    printf("    {\"id\": \"%s\", \"source\": \"%s\", \"target\": \"\", \"note\": \"%s\"}%s\n",
+           idesc, esc, notee, i + 1 < g_nrows ? "," : "");
   }
-  printf("]\n");
+  printf("  ]\n");
+  printf("}\n");
+}
+
+/* Flat { "id": "source", ... } for pipelines that want a simple map. */
+static void emit_json_map(void)
+{
+  int i;
+  char esc[2048], idesc[256];
+  printf("{\n");
+  for (i = 0; i < g_nrows; i++) {
+    json_escape(g_rows[i].id, idesc, sizeof(idesc));
+    json_escape(g_rows[i].text, esc, sizeof(esc));
+    printf("  \"%s\": \"%s\"%s\n",
+           idesc, esc, i + 1 < g_nrows ? "," : "");
+  }
+  printf("}\n");
 }
 
 static void emit_pot(void)
@@ -961,12 +986,14 @@ static void cmd_strings(const Catalog *cat, const char *fmt)
 
   if (!fmt || !fmt[0] || !strcmp(fmt, "json"))
     emit_json();
+  else if (!strcmp(fmt, "json-map"))
+    emit_json_map();
   else if (!strcmp(fmt, "pot"))
     emit_pot();
   else if (!strcmp(fmt, "tsv"))
     emit_tsv();
   else {
-    fprintf(stderr, "moas-util: unknown strings format '%s' (json|pot|tsv)\n", fmt);
+    fprintf(stderr, "moas-util: unknown strings format '%s' (json|json-map|pot|tsv)\n", fmt);
     exit(1);
   }
 
@@ -993,15 +1020,16 @@ static void usage(const char *argv0)
     "  licence           Print LICENCE.DAT text\n"
     "  xxx               Summarise GAME.XXX font tables\n"
     "  disasm [N]        Disassemble script program N (default: all)\n"
-    "  strings [FMT]     Extract translatable text (FMT: json|pot|tsv, default json)\n"
+    "  strings [FMT]     Extract translatable text (json|json-map|pot|tsv, default json)\n"
     "\n"
     "Examples:\n"
     "  %s --datadir manick info\n"
     "  %s --datadir manick list | less\n"
     "  %s --datadir manick extract --outdir /tmp/moas-out bild\n"
     "  %s --datadir manick disasm 0\n"
-    "  %s --datadir manick strings pot > manick.pot\n",
-    argv0, argv0, argv0, argv0, argv0, argv0);
+    "  %s --datadir manick strings pot > manick.pot\n"
+    "  %s --datadir manick strings json > manick.de.json\n",
+    argv0, argv0, argv0, argv0, argv0, argv0, argv0);
 }
 
 int main(int argc, char **argv)

@@ -206,9 +206,9 @@ packed byte sequences inside program resources. Extract everything for
 translation (UTF-8):
 
 ```sh
-moas-util --datadir manick strings json > strings.json
+moas-util --datadir manick strings json > manick.de.json   # id/source/target catalog
 moas-util --datadir manick strings pot  > manick.pot
-moas-util --datadir manick strings tsv  > strings.tsv
+moas-util --datadir manick strings tsv  > manick.tsv
 ```
 
 Each row has a stable `id` (`script.pN.0xADDR`, `pck.K`, or `ui.*`), the
