@@ -37,6 +37,30 @@ such as `PowerBlend` and `WalkNLayers`. Optional music banks (`GAME*.TSS`) are
 not in the bundled data, so tracker music is silent unless those files are
 added separately. See [TODO.md](TODO.md) for current porting notes.
 
+
+## Development shell (`nix develop`)
+
+Out-of-tree **Debug** builds (package builds stay RelWithDebInfo):
+
+```sh
+nix develop
+moas-configure && moas-build
+moas-run
+moas-run --load=0
+moas-run-gdb --load=0          # gdb: auto-run; stays open on crash
+# or: nix develop -c moas-run-gdb
+```
+
+| Variable | Default |
+|----------|---------|
+| `MOAS_SOURCE` | `$PWD` (flake root) |
+| `MOAS_BUILD_DIR` | `/tmp/moas-build` |
+| `MOAS_DATADIR` | `$MOAS_SOURCE/manick` |
+| `CMAKE_BUILD_TYPE` | `Debug` |
+
+Scripts refuse to run unless `MOAS_SOURCE` is set (enter via `nix develop`).
+`moas-build` reconfigures if the CMake source path changed.
+
 ## Build and run
 
 ### Requirements

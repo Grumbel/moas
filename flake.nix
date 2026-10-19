@@ -153,16 +153,105 @@
           moas-wasm = wasm.serveApp;
         };
 
-        devShells.default = pkgs.mkShell {
+        # Out-of-tree Debug develop loop (biltoo/Pingus pattern).
+        # Package builds stay `nix build` (RelWithDebInfo); develop uses Debug.
+        moasPreamble = ''
+          set -euo pipefail
+          if [ -z "''${MOAS_SOURCE:-}" ]; then
+            echo "$0: MOAS_SOURCE is not set (enter the shell with: nix develop)" >&2
+            exit 1
+          fi
+          MOAS_BUILD_DIR="''${MOAS_BUILD_DIR:-/tmp/moas-build}"
+        '';
+
+        moasConfigure = pkgs.writeShellScriptBin "moas-configure" ''
+          ${moasPreamble}
+          mkdir -p "$MOAS_BUILD_DIR"
+          cmake -S "$MOAS_SOURCE" -B "$MOAS_BUILD_DIR" \
+            -DCMAKE_BUILD_TYPE="''${CMAKE_BUILD_TYPE:-Debug}" \
+            -DMOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
+          echo "moas-configure: $MOAS_BUILD_DIR (CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug})"
+        '';
+
+        moasBuild = pkgs.writeShellScriptBin "moas-build" ''
+          ${moasPreamble}
+          need_cfg=0
+          if [ ! -f "$MOAS_BUILD_DIR/CMakeCache.txt" ]; then
+            need_cfg=1
+          else
+            cached=$(grep -E '^CMAKE_HOME_DIRECTORY:' "$MOAS_BUILD_DIR/CMakeCache.txt" | head -1 | cut -d= -f2- || true)
+            if [ -z "$cached" ] || [ "$cached" != "$MOAS_SOURCE" ]; then
+              echo "moas-build: CMake source changed ($cached -> $MOAS_SOURCE); reconfiguring" >&2
+              need_cfg=1
+            elif [ ! -d "$cached" ]; then
+              echo "moas-build: cached source missing; reconfiguring" >&2
+              need_cfg=1
+            fi
+          fi
+          if [ "$need_cfg" -eq 1 ]; then
+            moas-configure
+          fi
+          cmake --build "$MOAS_BUILD_DIR" -j"''${NIX_BUILD_CORES:-$(nproc)}"
+        '';
+
+        moasRun = pkgs.writeShellScriptBin "moas-run" ''
+          ${moasPreamble}
+          moas-build
+          exec "$MOAS_BUILD_DIR/moas" \
+            --datadir "''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            "$@"
+        '';
+
+        moasRunGdb = pkgs.writeShellScriptBin "moas-run-gdb" ''
+          ${moasPreamble}
+          moas-build
+          exec gdb -q \
+            -ex "set pagination off" \
+            -ex "set confirm off" \
+            -ex "set debuginfod enabled off" \
+            -ex run \
+            -ex 'python
+try:
+  ec = gdb.parse_and_eval("$_exitcode")
+  if int(ec) == 0:
+    gdb.execute("quit")
+except Exception:
+  pass
+' \
+            --args "$MOAS_BUILD_DIR/moas" \
+            --datadir "''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            "$@"
+        '';
+
+        devShells.default = pkgs.mkShell.override { stdenv = pkgs.ccacheStdenv; } {
+          inputsFrom = [ moas ];
           packages = with pkgs; [
             cmake
+            ninja
             pkg-config
             SDL2
             gdb
+            ccache
             clang-tools
+            moasConfigure
+            moasBuild
+            moasRun
+            moasRunGdb
           ];
+          CMAKE_BUILD_TYPE = "Debug";
           shellHook = ''
-            export MOAS_DATADIR="''${MOAS_DATADIR:-$PWD/manick}"
+            export MOAS_SOURCE="$PWD"
+            export MOAS_BUILD_DIR="''${MOAS_BUILD_DIR:-/tmp/moas-build}"
+            export MOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
+            # Avoid a hostile system LD_LIBRARY_PATH shadowing Nix SDL2
+            export LD_LIBRARY_PATH="''${LD_LIBRARY_PATH:-}"
+            echo "MOAS develop shell"
+            echo "  MOAS_SOURCE=$MOAS_SOURCE"
+            echo "  MOAS_BUILD_DIR=$MOAS_BUILD_DIR"
+            echo "  MOAS_DATADIR=$MOAS_DATADIR"
+            echo "  CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug}"
+            echo "Commands: moas-configure | moas-build | moas-run | moas-run-gdb"
+            echo "  moas-run --load=0   # example CLI after a save exists"
           '';
         };
       });
