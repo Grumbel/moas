@@ -46,6 +46,7 @@
 - PowerBlend/WalkNLayers: no data path and op 11 still commented (upstream); inert by design
 
 ## Done this stack
+- Esc only sets KeyAbortState=2 when armed (KeyAbortState==1), matching DOS IRQ
 - Bewege arrow cursor (VMouse + Phase[1])
 - ToggleScreen → PlatformSetBlank (op 75)
 - ShowMarker: draw Label/Jumper outlines on framebuffer (Master key `2`)

@@ -581,7 +581,12 @@ void PlatformPumpEvents(void)
         }
 
         if (down) {
-          if (k == SDLK_ESCAPE)
+          /*
+           * Match DOS KeyboardIrq: ESC only aborts when a script has armed
+           * skippable mode (KeyAbortState==1). Setting state 2 unconditionally
+           * left PowerRedrawArea / waits dead after Esc during free walk.
+           */
+          if (k == SDLK_ESCAPE && KeyAbortState == 1)
             KeyAbortState = 2;
           if (k == SDLK_q ||
               (k == SDLK_c && (mod & KMOD_CTRL)) ||
