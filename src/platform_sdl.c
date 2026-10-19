@@ -63,8 +63,6 @@ static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKI
 static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
 static int           touch_mode = 0;          /* 0=USE 1=LOOK */
-static char          siehe_banner[48];
-static Uint32        siehe_banner_until = 0;
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
@@ -734,32 +732,6 @@ int PlatformGetTouchMode(void)
   return touch_mode;
 }
 
-void PlatformShowSieheHint(const char *object_name)
-{
-  /* Bitmap HUD font is A–Z + space only — fold name to that alphabet. */
-  int j = 0;
-  const char *prefix = "SIEHE ";
-  while (*prefix && j < (int)sizeof(siehe_banner) - 1)
-    siehe_banner[j++] = *prefix++;
-  if (object_name) {
-    const char *p;
-    for (p = object_name; *p && j < (int)sizeof(siehe_banner) - 1; p++) {
-      char c = *p;
-      if (c >= 'a' && c <= 'z')
-        c = (char)(c - 'a' + 'A');
-      if ((c >= 'A' && c <= 'Z') || c == ' ')
-        siehe_banner[j++] = c;
-    }
-  }
-  if (j == 6) { /* only "SIEHE " */
-    siehe_banner[5] = 0;
-    j = 5;
-  }
-  siehe_banner[j] = 0;
-  siehe_banner_until = SDL_GetTicks() + 1600u;
-  MOAS_ALOG("siehe hint: %s", siehe_banner);
-}
-
 static void ov_fill_roundish(SDL_Rect *r, Uint8 R, Uint8 G, Uint8 B)
 {
   /* Fake rounded corners by stepping the fill edges in a few pixels. */
@@ -982,42 +954,12 @@ static void overlay_draw(void)
       ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }
   }
-  /* SIEHE feedback banner */
-  if (siehe_banner_until && SDL_GetTicks() < siehe_banner_until) {
-    int dx, dy, dw, dh;
-    SDL_Rect bar;
-    int ts = 2;
-    int text_w = (int)strlen(siehe_banner) * 6 * ts;
-    letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
-    bar.x = dx + 10;
-    bar.y = dy + 10;
-    bar.w = text_w + 28;
-    if (bar.w > dw - 20)
-      bar.w = dw - 20;
-    if (bar.w < 80)
-      bar.w = 80;
-    bar.h = 7 * ts + 18;
-    SDL_SetRenderDrawColor(renderer, 20, 20, 20, 220);
-    SDL_RenderFillRect(renderer, &bar);
-    SDL_SetRenderDrawColor(renderer, 255, 210, 60, 255);
-    SDL_RenderDrawRect(renderer, &bar);
-    {
-      SDL_Rect in = bar;
-      in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
-      SDL_SetRenderDrawColor(renderer, 80, 60, 20, 255);
-      SDL_RenderDrawRect(renderer, &in);
-    }
-    ov_draw_text(bar.x + 14, bar.y + 9, siehe_banner, ts, 255, 255, 220);
-  } else {
-    siehe_banner_until = 0;
-  }
 }
 #else
 static int overlay_hit(int wx, int wy) { (void)wx; (void)wy; return 0; }
 static void overlay_fire(int which) { (void)which; }
 static void overlay_draw(void) { }
 int PlatformPollOverlayCmd(void) { return 0; }
-void PlatformShowSieheHint(const char *object_name) { (void)object_name; }
 int PlatformGetTouchMode(void) { return 0; }
 #endif
 

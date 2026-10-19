@@ -110,10 +110,10 @@ void MouseCheck(void)
 #ifndef DOS
     suppress_left_verb = 0;
     /*
-     * Empty ground → walk only in USE mode. LOOK mode is look-only (no walk).
+     * Empty ground → walk in USE and LOOK (no right button on touch).
+     * Object hits: USE → MouseIntelligence verbs; LOOK → SIEHE on release.
      */
-    if (PlatformGetTouchMode() == MOAS_TOUCH_USE
-        && PlayerHasControl && V_NoWalk == 0 && Window.Status == None
+    if (PlayerHasControl && V_NoWalk == 0 && Window.Status == None
         && Mouse.ClickObject == -1)
       WalkClick(Mouse.x, Mouse.y);
 #endif
@@ -132,25 +132,18 @@ void MouseCheck(void)
         && PlayerHasControl && Window.Status == None
         && Mouse.ClickObject != -1)
     {
-      const char *name = DescriptionText(Mouse.ClickObject);
-      char hint[80];
+      /* Object tap in LOOK = DOS right-click look. Suppress USE verbs on release. */
       V_Verb = SIEHE;
       V_Par1 = Mouse.ClickObject;
       V_Par2 = -1;
-      if (name && name[0] && name[0] != '?')
-        snprintf(hint, sizeof(hint), "%s", name);
-      else
-        snprintf(hint, sizeof(hint), "#%d", (int)Mouse.ClickObject);
-      PlatformShowSieheHint(hint);
       ExecuteTheProgram();
       suppress_left_verb = 1;
       Mouse.ClickObject = -1;
       Mouse.BewegeMode = -1;
-      MoasDbg(MOAS_DBG_INPUT, "LOOK-mode SIEHE");
+      MoasDbg(MOAS_DBG_INPUT, "LOOK-mode SIEHE obj=%d", (int)V_Par1);
     } else if (PlayerHasControl == 1 && Window.Status == None
-               && Mouse.ClickObject == -1
-               && PlatformGetTouchMode() == MOAS_TOUCH_USE) {
-      /* Idle C_WALK after empty-ground walk (USE mode only). */
+               && Mouse.ClickObject == -1) {
+      /* Idle C_WALK after empty-ground walk (both modes). */
       short PN = GetPlayerPersonNumber();
       if ((PN == MAX_PRS) || (Person[PN].StepSpeed == 0))
       {

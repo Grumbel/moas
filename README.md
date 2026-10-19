@@ -270,15 +270,14 @@ You need **player control** and no dialogue window open (`Window.Status == None`
 | **Right click** | Empty ground: walk (original DOS). On object: look (`SIEHE`). Also **S** key. |
 | **Drag (grab+pull)** | Bewege mode — cursor becomes a **directional arrow** |
 
-On Android there is no right button. The HUD adds **USE** / **LOOK** mode toggles (left column under Save/Load):
+On Android there is no right button. Left-column HUD toggles (**USE** / **LOOK**, under Save/Load):
 
 | Mode | Empty ground | Object |
 |------|----------------|--------|
-| **USE** (default) | Walk | Use / talk / grab+pull (same as desktop left-click) |
-| **LOOK** | (no walk) | **Siehe** (look) — same as desktop right-click on object |
+| **USE** (default) | Walk | Use / talk / grab+pull (desktop left-click) |
+| **LOOK** | Walk | **Siehe** (look) — desktop right-click on object |
 
-A short **SIEHE …** banner confirms look. Pull (`Bewege`) only runs in **USE** mode.  
-Arrow keys still work with a keyboard. **Back** exits the activity fully.
+Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Back** exits the activity fully.
 
 ### Movement and inventory
 

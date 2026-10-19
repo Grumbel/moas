@@ -79,7 +79,7 @@
 
 ## Done this stack
 - Android quit: Activity.finish() + SDL_Quit; AC_BACK quits
-- Touch USE/LOOK mode buttons; LOOK = SIEHE only (no Benutze/Bewege race)
+- Touch USE/LOOK modes; both walk on empty; LOOK object = SIEHE (no Benutze/Bewege)
 - Touch walk: non-DOS left-click on empty ground → WalkClick + idle C_WALK (no D-pad)
 - Android overlay: DPI hit-test fix, pressed feedback, richer icons
 - Exit AUTOSAVE.SAV + `--no-autosave`; SaveGameToFile/SaveGameSlot refactor
