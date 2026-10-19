@@ -35,7 +35,13 @@
 - Bewege (grab+pull) directional arrow cursor: VMouse now draws Phase[1]
   when Mouse.BewegeMode != -1 (was DOS-only in PowerRedrawArea)
 
+## DOS port audit
+- Full inventory: `docs/DOS_PORT_STATUS.md` (every `#ifdef DOS` / `#ifndef DOS`)
+- Bewege arrow: ported in VMouse (Phase[1])
+
 ## Still open
+- **ToggleScreen** (op 75): still uses stubbed `outp`/`inp`; should call `PlatformSetBlank`
+- **ShowHercBak**: writes VGA text memory `0xB8000` even on non-DOS (Master key `#`) — unsafe
 - Speech channel (SpeechData) wiring if used
 - PowerBlend / WalkNLayers
 - Android asset data path
