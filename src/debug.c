@@ -13,6 +13,8 @@ unsigned moas_debug = 0;
 int moas_skip_intro = 0;
 int moas_start_proc = -1;
 int moas_start_addr = 0;
+int moas_load_slot = -1;
+char moas_load_path[512];
 int moas_fullscreen = 0;
 
 static void usage(const char *argv0)
@@ -21,26 +23,23 @@ static void usage(const char *argv0)
     "Usage: %s [options]\n"
     "\n"
     "Options:\n"
-    "  -h, --help           Show this help\n"
-    "  -d, --debug=LIST     Debug flags (comma-separated):\n"
-    "                         script  – Execute() opcodes\n"
-    "                         input   – mouse/key edges\n"
-    "                         wait    – GetClickOrEnter / Wait / menus\n"
-    "                         window  – Open/CloseWindow, cursor\n"
-    "                         load    – data file loads\n"
-    "                         all     – everything\n"
-    "                       Also: MOAS_DEBUG=script,wait\n"
-    "  --skip-intro         Skip Execute(3,0) intro/title script\n"
-    "  --proc=N             Start at program N (default 0 after intro)\n"
-    "  --addr=N             Start address in that program (default 0)\n"
-    "  --datadir=PATH       Same as MOAS_DATADIR\n"
-    "  --fullscreen         Start in desktop-fullscreen mode\n"
+    "  -h, --help              Show this help\n"
+    "  -d, --debug=LIST        Debug flags (script,input,wait,window,load,all)\n"
+    "  --skip-intro            Skip intro/title script\n"
+    "  --proc=N                Start program N after intro\n"
+    "  --addr=N                Start address in that program\n"
+    "  --datadir=PATH          Game data directory (MOAS_DATADIR)\n"
+    "  --statedir=PATH         Savegame directory (MOAS_STATEDIR)\n"
+    "  --load=SLOT|FILE        Load save at startup (slot 0-9 or path to .SAV)\n"
+    "  --load SLOT|FILE        Same as --load=\n"
+    "  -f, --fullscreen        Desktop fullscreen\n"
     "\n"
     "Examples:\n"
-    "  %s --debug=wait,input,window\n"
+    "  %s --load=0\n"
+    "  %s --load=~/.local/state/moas/GAME3.SAV\n"
     "  %s --skip-intro --debug=script\n"
     "  MOAS_DEBUG=all %s\n",
-    argv0, argv0, argv0, argv0);
+    argv0, argv0, argv0, argv0, argv0);
 }
 
 static unsigned parse_debug_list(const char *list)
@@ -122,6 +121,62 @@ void MoasParseArgs(int argc, char **argv)
     }
     if (!strcmp(a, "--fullscreen") || !strcmp(a, "-f")) {
       moas_fullscreen = 1;
+      continue;
+    }
+    if (!strncmp(a, "--statedir=", 11)) {
+#ifndef DOS
+      setenv("MOAS_STATEDIR", a + 11, 1);
+#endif
+      continue;
+    }
+    if (!strcmp(a, "--statedir")) {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "moas: --statedir needs a path\n");
+        exit(1);
+      }
+#ifndef DOS
+      setenv("MOAS_STATEDIR", argv[++i], 1);
+#endif
+      continue;
+    }
+    if (!strncmp(a, "--load=", 7) || !strcmp(a, "--load")) {
+      const char *arg;
+      if (!strncmp(a, "--load=", 7))
+        arg = a + 7;
+      else {
+        if (i + 1 >= argc) {
+          fprintf(stderr, "moas: --load needs a slot (0-9) or file path\n");
+          exit(1);
+        }
+        arg = argv[++i];
+      }
+      {
+        /* Pure digits 0-9 → slot; otherwise path (or GAME n relative to state). */
+        const char *p = arg;
+        int digits = 1;
+        if (!*p) digits = 0;
+        while (*p) {
+          if (*p < '0' || *p > '9') { digits = 0; break; }
+          p++;
+        }
+        if (digits && arg[0] && !arg[1] && arg[0] >= '0' && arg[0] <= '9') {
+          moas_load_slot = arg[0] - '0';
+          moas_load_path[0] = 0;
+        } else if (digits && strlen(arg) <= 2) {
+          int slot = atoi(arg);
+          if (slot < 0 || slot > 9) {
+            fprintf(stderr, "moas: --load slot must be 0..9 (got %s)\n", arg);
+            exit(1);
+          }
+          moas_load_slot = slot;
+          moas_load_path[0] = 0;
+        } else {
+          moas_load_slot = -1;
+          strncpy(moas_load_path, arg, sizeof(moas_load_path) - 1);
+          moas_load_path[sizeof(moas_load_path) - 1] = 0;
+        }
+      }
+      moas_skip_intro = 1; /* save already has the game state */
       continue;
     }
     fprintf(stderr, "moas: unknown option '%s' (try --help)\n", a);

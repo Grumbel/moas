@@ -224,6 +224,7 @@ Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).
 DOSBox runners persist to `~/.local/state/moas-dos` / `moas-dos-original`.
 
 **Load:** press **F7**, then click a slot that shows a thumbnail (empty slots do nothing useful).  
+Or from the shell: `moas --load=0` (see command-line options).  
 **Save:** press **F5**, then click an empty or occupied slot (0–8).
 
 You need **player control** and no dialogue window open (`Window.Status == None`); during cutscenes or forced walks these keys are ignored.
@@ -273,14 +274,27 @@ These are developer tools from the original engine, not needed for normal play.
 ## Command-line options (game)
 
 ```text
--h, --help           Show help
--d, --debug=LIST     Enable comma-separated debug categories
---skip-intro         Skip the intro/title script
---proc=N             Start at program N
---addr=N             Start at an address in that program
---datadir=PATH       Set the game-data directory (same as MOAS_DATADIR)
---fullscreen         Start in desktop-fullscreen mode
+-h, --help              Show help
+-d, --debug=LIST        Enable comma-separated debug categories
+--skip-intro            Skip the intro/title script
+--proc=N                Start at program N
+--addr=N                Start at an address in that program
+--datadir=PATH          Game data directory (MOAS_DATADIR)
+--statedir=PATH         Savegame directory (MOAS_STATEDIR)
+--load=SLOT|FILE        Load a save at startup (slot 0–9 or path to .SAV)
+--load SLOT|FILE        Same as --load=
+-f, --fullscreen        Desktop fullscreen
 ```
+
+Load a save without the in-game menu:
+
+```sh
+./build/moas --load=0
+./build/moas --load=3 --statedir=$HOME/.local/state/moas
+./build/moas --load=$HOME/.local/state/moas/GAME2.SAV
+```
+
+`--load` implies `--skip-intro` (the save already holds game state).
 
 Debug categories are `script`, `input`, `wait`, `window`, `load`, and `all`.
 For example:

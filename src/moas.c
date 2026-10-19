@@ -81,18 +81,36 @@ int main(int argc, char **argv)
 #ifndef DOS
   PlatformPresent();
 #endif
-  if (!moas_skip_intro) {
-    MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
-    Execute(3, 0);
+  if (moas_load_path[0] || moas_load_slot >= 0) {
+    int rc;
+    MoasDbg(MOAS_DBG_LOAD, "CLI load slot=%d path='%s'",
+            moas_load_slot, moas_load_path);
+    if (moas_load_path[0])
+      rc = LoadGameFromFile(moas_load_path);
+    else
+      rc = LoadGameSlot((short)moas_load_slot);
+    if (rc != 0) {
+      fprintf(stderr, "moas: failed to load save from CLI\n");
+#ifndef DOS
+      PlatformShutdown();
+#endif
+      return 1;
+    }
+    /* Save already contains script state; skip intro + cold Execute. */
   } else {
-    MoasDbg(MOAS_DBG_SCRIPT, "skipping intro (--skip-intro)");
-  }
+    if (!moas_skip_intro) {
+      MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
+      Execute(3, 0);
+    } else {
+      MoasDbg(MOAS_DBG_SCRIPT, "skipping intro (--skip-intro)");
+    }
 //ChkAuthorisation();
-  {
-    short proc = (moas_start_proc >= 0) ? (short)moas_start_proc : 0;
-    unsigned short addr = (unsigned short)moas_start_addr;
-    MoasDbg(MOAS_DBG_SCRIPT, "Execute main proc=%d addr=%u", (int)proc, (unsigned)addr);
-    Execute(proc, addr);
+    {
+      short proc = (moas_start_proc >= 0) ? (short)moas_start_proc : 0;
+      unsigned short addr = (unsigned short)moas_start_addr;
+      MoasDbg(MOAS_DBG_SCRIPT, "Execute main proc=%d addr=%u", (int)proc, (unsigned)addr);
+      Execute(proc, addr);
+    }
   }
 #ifndef DOS
   while (!PlatformShouldQuit()) {

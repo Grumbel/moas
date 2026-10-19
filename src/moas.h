@@ -482,6 +482,8 @@ void LargePrint(char *Message,char *Text,short TxtColor,short VgaXs);
 void LetUserUseIcons(void);
 void Line(short Col,short x1,short y1,short x2,short y2);
 void LoadGame(void);
+int LoadGameFromFile(const char *path);
+int LoadGameSlot(short slot);
 void LoadMusic(short Num);
 void LoadPack(void);
 void LoescheKopie(short PrsNum);

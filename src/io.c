@@ -686,143 +686,182 @@ void SaveGame(short CallerID)
         return;
   }
 }
+/* Load a save from an absolute or relative path. Returns 0 on success, -1 on error. */
+int LoadGameFromFile(const char *path)
+{
+  unsigned short c;
+  short h, ifil;
+  enum MARKTYP Typ;
+
+  if (!path || !path[0]) {
+    fprintf(stderr, "moas: LoadGameFromFile: empty path\n");
+    return -1;
+  }
+
+  ifil = open(path, O_RDONLY
+#ifdef DOS
+              | O_BINARY
+#endif
+    );
+  if (ifil < 0) {
+    fprintf(stderr, "moas: LoadGameFromFile: cannot open '%s'\n", path);
+    return -1;
+  }
+  close(ifil);
+  (void)ChkOpen("?", READ);
+  ifil = open(path, O_RDONLY
+#ifdef DOS
+              | O_BINARY
+#endif
+    );
+  if (ifil < 0) {
+    fprintf(stderr, "moas: LoadGameFromFile: reopen failed '%s'\n", path);
+    return -1;
+  }
+
+  V_LockVga = 1;
+  RemoveAllPersons();
+  CloseSay(255);
+  Blend(4, 0);
+  for (c = 0; c < 251; c++)
+    ChkRead(ifil, RoomName, 4); /* Dummies */
+  ChkRead(ifil, RoomName, 40);
+#ifndef DOS
+  ReadPicsDisk(ifil);
+  ReadPersonsDisk(ifil);
+  ReadMarkersDisk(ifil);
+#else
+  ChkRead(ifil, (char *)PicturesOnScreen, sizeof(PicturesOnScreen));
+  ChkRead(ifil, (char *)Person, sizeof(Person));
+  ChkRead(ifil, (char *)Marker, sizeof(Marker));
+#endif
+  ChkRead(ifil, (char *)Ontimes, sizeof(struct ONTIME) * 10);
+  ChkRead(ifil, (char *)Var, AnzVars * 2);
+  ChkRead(ifil, (char *)&CurrentProc, 2);
+  ChkRead(ifil, (char *)&GhostMode, 1);
+  ChkRead(ifil, (char *)&TotalSpeed, 2);
+  ChkRead(ifil, (char *)&SpeechSpeed, 2);
+  ChkRead(ifil, (char *)&DayLightR, 2);
+  ChkRead(ifil, (char *)&DayLightG, 2);
+  ChkRead(ifil, (char *)&DayLightB, 2);
+  ChkRead(ifil, (char *)&PaletteCycleFirst, 2);
+  ChkRead(ifil, (char *)&PaletteCycleLast, 2);
+#ifndef DOS
+  ReadDialogsDisk(ifil);
+  ReadSayPropsDisk(ifil);
+#else
+  ChkRead(ifil, (char *)Dialog, sizeof(struct DIALOG) * 20);
+  ChkRead(ifil, (char *)SayProperties, sizeof(struct SAY_PROPERTIES) * 10);
+#endif
+  for (c = 0; c < AnzInventar; c++) {
+    ChkRead(ifil, (char *)&Inventar[c].x, sizeof(Inventar[c].x));
+    ChkRead(ifil, (char *)&Inventar[c].y, sizeof(Inventar[c].y));
+  }
+#ifndef DOS
+  ReadSayWindowsDisk(ifil);
+#else
+  for (c = 0; c < 5; c++) {
+    ChkRead(ifil, (char *)&SayWindow[c], sizeof(struct SAY_WINDOW));
+    if (SayWindow[c].RefPrs != -1) {
+      h = 0;
+      if (SayWindow[c].Data) {
+        SayWindow[c].Data = MALLOC(SayWindow[c].xs * SayWindow[c].ys);
+        ChkRead(ifil, SayWindow[c].Data, SayWindow[c].xs * SayWindow[c].ys);
+      }
+      if (SayWindow[c].Text) {
+        ChkRead(ifil, (char *)&h, 2);
+        SayWindow[c].Text = MALLOC(h);
+        ChkRead(ifil, SayWindow[c].Text, h);
+      }
+    }
+  }
+#endif
+  ChkClose(ifil);
+  if (GhostMode == 1) {
+    MakeMegaTable(-1);
+    MakeMegaTable(1);
+  }
+  for (c = 0; c < MAX_PRS; c++)
+    if (Person[c].Num != -1) {
+      LadePhase(Person[c].PhaseNum);
+      if (Person[c].Bits & (1024 + 768))
+        Person[c].Phase = MALLOC(Person[c].xs * Person[c].ys * Person[c].Anz);
+      else
+        Person[c].Phase = Phase[Person[c].PhaseNum].Data;
+      LoescheKopie(c);
+      CheckKopie(c);
+    }
+
+  Clearscreen();
+  InitScreenData();
+  for (c = 0; c < AnzInventar; c++)
+    if (Inventar[c].x == -3)
+      LadeInventar(c);
+  for (c = 0; c < 10; c++)
+    if (PicturesOnScreen[c].Typ != -1) {
+      Typ = PicturesOnScreen[c].Typ;
+      PicturesOnScreen[c].Typ = -1;
+      if (Typ == Normal)
+        LadeBild(PicturesOnScreen[c].Num);
+      else if (Typ == InfoTyp1)
+        LadeInfoBild(PicturesOnScreen[c].Num, InfoTyp1);
+      else if (Typ == InfoTyp2)
+        LadeInfoBild(PicturesOnScreen[c].Num, InfoTyp2);
+    }
+
+  PowerRedrawArea(0, 0, 319, 199);
+  if (V_InventarState)
+    TurnInventar(1);
+  Blend(4, 1);
+  fprintf(stderr, "moas: loaded save '%s'\n", path);
+  return 0;
+}
+
+/* Load GAME{slot}.SAV from the state directory. */
+int LoadGameSlot(short slot)
+{
+  char name[32];
+  char path[512];
+
+  if (slot < 0 || slot > 9) {
+    fprintf(stderr, "moas: LoadGameSlot: slot %d out of range 0..9\n", (int)slot);
+    return -1;
+  }
+  sprintf(name, "GAME%i.SAV", (int)slot);
+  if (MoasStatePath(path, sizeof(path), name) != 0) {
+    fprintf(stderr, "moas: LoadGameSlot: path error\n");
+    return -1;
+  }
+  return LoadGameFromFile(path);
+}
+
 void LoadGame(void)
 {
-  unsigned short c,d;
-  short h,ifil;
-  enum MARKTYP Typ;
+  unsigned short c, d;
   char Name[20];
+  char savpath[512];
 
   LoadSaveMenu("Laden:");
-  for (d=0;d<143;d+=142)
-    for (c=0;c<5;c++)
-      if (Mouse.x>=19+d && Mouse.y>=33+c*30 && Mouse.x<=60+d && Mouse.y<=60+c*30)
-      {
-        char savpath[512];
-        short slot = (short)(c + d/142*5);
-        sprintf(Name,"GAME%i.SAV",(int)slot);
+  for (d = 0; d < 143; d += 142)
+    for (c = 0; c < 5; c++)
+      if (Mouse.x >= 19 + d && Mouse.y >= 33 + c * 30 && Mouse.x <= 60 + d &&
+          Mouse.y <= 60 + c * 30) {
+        short slot = (short)(c + d / 142 * 5);
+        sprintf(Name, "GAME%i.SAV", (int)slot);
         if (MoasStatePath(savpath, sizeof(savpath), Name) != 0) {
           fprintf(stderr, "moas: LoadGame: state path error\n");
           return;
         }
-        ifil=open(savpath,O_RDONLY
-#ifdef DOS
-                  |O_BINARY
-#endif
-          );
-        if (ifil<0) {
-          fprintf(stderr, "moas: LoadGame: no save in slot %d (%s)\n", (int)slot, savpath);
-          DisplayMessage("Kein Spielstand", 253);
-          return;
-        }
-        /* Use open handle with ChkRead path: set READ mode checksum */
-        close(ifil);
-        (void)ChkOpen("?", READ);
-        ifil=open(savpath,O_RDONLY
-#ifdef DOS
-                  |O_BINARY
-#endif
-          );
-        if (ifil<0) {
-          fprintf(stderr, "moas: LoadGame: reopen failed '%s'\n", savpath);
-          return;
-        }
-        V_LockVga=1;
-        RemoveAllPersons();
-        CloseSay(255);
-        Blend(4,0);
-        for (c=0;c<251;c++) ChkRead(ifil,RoomName,4); /*Dummies*/
-        ChkRead(ifil,RoomName,40);
-#ifndef DOS
-        ReadPicsDisk(ifil);
-        ReadPersonsDisk(ifil);
-        ReadMarkersDisk(ifil);
-#else
-        ChkRead(ifil,(char*)PicturesOnScreen,sizeof(PicturesOnScreen));
-        ChkRead(ifil,(char*)Person,sizeof(Person));
-        ChkRead(ifil,(char*)Marker,sizeof(Marker));
-#endif
-        ChkRead(ifil,(char*)Ontimes,sizeof(struct ONTIME)*10);
-        ChkRead(ifil,(char *)Var,AnzVars*2);
-        ChkRead(ifil,(char *)&CurrentProc,2);
-        ChkRead(ifil,(char *)&GhostMode,1);
-        ChkRead(ifil,(char *)&TotalSpeed,2); ChkRead(ifil,(char *)&SpeechSpeed,2);
-        ChkRead(ifil,(char *)&DayLightR,2);  ChkRead(ifil,(char *)&DayLightG,2);
-        ChkRead(ifil,(char *)&DayLightB,2);
-        ChkRead(ifil,(char *)&PaletteCycleFirst,2);
-        ChkRead(ifil,(char *)&PaletteCycleLast,2);
-#ifndef DOS
-        ReadDialogsDisk(ifil);
-        ReadSayPropsDisk(ifil);
-#else
-        ChkRead(ifil,(char *)Dialog,sizeof(struct DIALOG)*20);
-        ChkRead(ifil,(char*)SayProperties,sizeof(struct SAY_PROPERTIES)*10);
-#endif
-        for (c=0;c<AnzInventar;c++)
-        {
-          ChkRead(ifil,(char*)&Inventar[c].x,sizeof (Inventar[c].x));
-          ChkRead(ifil,(char*)&Inventar[c].y,sizeof (Inventar[c].y));
-        }
-#ifndef DOS
-        ReadSayWindowsDisk(ifil);
-#else
-        for (c=0;c<5;c++)
-        {
-          ChkRead(ifil,(char*)&SayWindow[c],sizeof(struct SAY_WINDOW));
-          if (SayWindow[c].RefPrs!=-1)
-          {
-            h=strlen(SayWindow[c].Text);
-            if (SayWindow[c].Data)
-            {
-              SayWindow[c].Data=MALLOC(SayWindow[c].xs*SayWindow[c].ys);
-              ChkRead(ifil,SayWindow[c].Data,SayWindow[c].xs*SayWindow[c].ys);
-            }
-            if (SayWindow[c].Text)
-            {
-              ChkRead(ifil,(char*)&h,2);
-              SayWindow[c].Text=MALLOC(h);
-              ChkRead(ifil,SayWindow[c].Text,h);
-            }
-          }
-        }
-#endif
-        ChkClose(ifil);
-        if (GhostMode==1)
-        {
-          MakeMegaTable(-1);
-          MakeMegaTable(1);
-        }
-        for (c=0;c<MAX_PRS;c++)
-          if (Person[c].Num!=-1)
-          {
-            LadePhase(Person[c].PhaseNum);
-            if (Person[c].Bits & (1024+768))
-              Person[c].Phase=MALLOC(Person[c].xs*Person[c].ys*Person[c].Anz);
-            else Person[c].Phase=Phase[Person[c].PhaseNum].Data;
-            LoescheKopie(c);
-            CheckKopie(c);
-          }
-
-        Clearscreen();     InitScreenData();
-        /* Inventory icons must be loaded before any PowerRedrawArea (x==-3). */
-        for (c=0;c<AnzInventar;c++)
-          if (Inventar[c].x==-3)
-            LadeInventar(c);
-        for (c=0;c<10;c++)
-          if (PicturesOnScreen[c].Typ!=-1)
-          {
-            Typ=PicturesOnScreen[c].Typ; PicturesOnScreen[c].Typ=-1;
-            if (Typ==Normal) LadeBild(PicturesOnScreen[c].Num);
-            else if (Typ==InfoTyp1) LadeInfoBild(PicturesOnScreen[c].Num,InfoTyp1);
-            else if (Typ==InfoTyp2) LadeInfoBild(PicturesOnScreen[c].Num,InfoTyp2);
-          }
-
-        PowerRedrawArea(0,0,319,199);
-        if (V_InventarState) TurnInventar(1);
-        Blend(4,1);
+        if (LoadGameFromFile(savpath) != 0)
+          DisplayMessage("Laden fehlgeschlagen", 253);
         return;
       }
+  fprintf(stderr, "moas: LoadGame: no slot selected (mouse %d,%d)\n",
+          (int)Mouse.x, (int)Mouse.y);
+  DisplayMessage("Kein Slot gewaehlt", 253);
 }
+
+
 void CheckFile(unsigned char a,unsigned char b,unsigned char c,unsigned char d)
 {
   short ifil,AnzRead;
