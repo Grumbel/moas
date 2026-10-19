@@ -145,6 +145,9 @@ See `nix/windows.nix`.
 
 ### Android
 
+On Android, **Save**, **Load**, and **Skip** touch buttons are drawn in the letterbox margins (SDL overlay, not the 320×200 game buffer). Save/Load map to F5/F7; Skip arms dialog abort like Esc when the script allows it.
+
+
 ```sh
 nix build .#moas-android         # moas-<version>.apk
 nix run .#install-android-moas   # install on a device with adb

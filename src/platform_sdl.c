@@ -439,6 +439,137 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (out_wh) *out_wh = wh;
 }
 
+
+#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+/* Touch controls drawn in letterbox (window pixels), not in the 320x200 buffer. */
+enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_SKIP = 3 };
+
+static void overlay_layout(int *bx, int *by, int *bw, int *bh, int *gap)
+{
+  int dx, dy, dw, dh, ww, wh;
+  int bar_h, y0, x0, usable_w, btn_w;
+
+  letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
+  *gap = 8;
+  bar_h = 56;
+  if (dy + dh < wh - 8) {
+    /* Bottom letterbox */
+    y0 = dy + dh + 8;
+    if (y0 + bar_h > wh)
+      bar_h = wh - y0;
+    x0 = 8;
+    usable_w = ww - 16;
+  } else if (dy > 8 + bar_h) {
+    /* Top letterbox */
+    y0 = 8;
+    x0 = 8;
+    usable_w = ww - 16;
+  } else if (dx > 80) {
+    /* Side letterbox (left strip) */
+    y0 = dy;
+    x0 = 8;
+    usable_w = dx - 16;
+    bar_h = dh / 3 - 8;
+  } else {
+    /* No usable letterbox: thin strip along bottom edge of the window */
+    bar_h = 48;
+    y0 = wh - bar_h - 4;
+    x0 = 8;
+    usable_w = ww - 16;
+  }
+  if (bar_h < 32)
+    bar_h = 32;
+  btn_w = (usable_w - 2 * (*gap)) / 3;
+  if (btn_w < 40)
+    btn_w = 40;
+  *bx = x0;
+  *by = y0;
+  *bw = btn_w;
+  *bh = bar_h;
+}
+
+static int overlay_hit(int wx, int wy)
+{
+  int bx, by, bw, bh, gap, i;
+  overlay_layout(&bx, &by, &bw, &bh, &gap);
+  for (i = 0; i < 3; i++) {
+    int x0 = bx + i * (bw + gap);
+    if (wx >= x0 && wx < x0 + bw && wy >= by && wy < by + bh)
+      return i + 1; /* OV_SAVE, OV_LOAD, OV_SKIP */
+  }
+  return OV_NONE;
+}
+
+static void overlay_fire(int which)
+{
+  switch (which) {
+    case OV_SAVE:
+      KeyScanCode = 63; /* F5 */
+      MOAS_ALOG("overlay: SAVE (F5)");
+      break;
+    case OV_LOAD:
+      KeyScanCode = 65; /* F7 */
+      MOAS_ALOG("overlay: LOAD (F7)");
+      break;
+    case OV_SKIP:
+      if (KeyAbortState == 1)
+        KeyAbortState = 2;
+      KeyScanCode = 1; /* Esc make */
+      MOAS_ALOG("overlay: SKIP (abort=%d)", (int)KeyAbortState);
+      break;
+    default:
+      break;
+  }
+}
+
+static void overlay_draw(void)
+{
+  int bx, by, bw, bh, gap, i;
+  static const SDL_Color cols[3] = {
+    { 40, 140, 60, 255 },   /* Save */
+    { 40, 80, 180, 255 },   /* Load */
+    { 180, 100, 30, 255 },  /* Skip */
+  };
+  if (!renderer)
+    return;
+  overlay_layout(&bx, &by, &bw, &bh, &gap);
+  for (i = 0; i < 3; i++) {
+    SDL_Rect r;
+    r.x = bx + i * (bw + gap);
+    r.y = by;
+    r.w = bw;
+    r.h = bh;
+    SDL_SetRenderDrawColor(renderer, cols[i].r, cols[i].g, cols[i].b, 220);
+    SDL_RenderFillRect(renderer, &r);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &r);
+    /* Simple inner mark: 1/3/2 pixel bars as crude icons */
+    {
+      SDL_Rect m;
+      m.x = r.x + r.w / 4;
+      m.y = r.y + r.h / 3;
+      m.w = r.w / 2;
+      m.h = r.h / 3;
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      if (i == 0) { /* Save: filled square */
+        SDL_RenderFillRect(renderer, &m);
+      } else if (i == 1) { /* Load: outline */
+        SDL_RenderDrawRect(renderer, &m);
+      } else { /* Skip: two chevron lines */
+        SDL_RenderDrawLine(renderer, m.x, m.y, m.x + m.w, m.y + m.h / 2);
+        SDL_RenderDrawLine(renderer, m.x + m.w, m.y + m.h / 2, m.x, m.y + m.h);
+        SDL_RenderDrawLine(renderer, m.x + 8, m.y, m.x + m.w + 8, m.y + m.h / 2);
+        SDL_RenderDrawLine(renderer, m.x + m.w + 8, m.y + m.h / 2, m.x + 8, m.y + m.h);
+      }
+    }
+  }
+}
+#else
+static int overlay_hit(int wx, int wy) { (void)wx; (void)wy; return 0; }
+static void overlay_fire(int which) { (void)which; }
+static void overlay_draw(void) { }
+#endif
+
 void PlatformPresent(void)
 {
   SDL_Rect dst;
@@ -464,6 +595,8 @@ void PlatformPresent(void)
     dst.y += shake_oy;
     SDL_RenderCopy(renderer, texture, NULL, &dst);
   }
+  /* Android (and optional desktop) touch buttons sit in letterbox, above the game. */
+  overlay_draw();
   SDL_RenderPresent(renderer);
 }
 
@@ -546,10 +679,20 @@ void PlatformPumpEvents(void)
       case SDL_MOUSEBUTTONUP: {
         /* Only update current button state. MouseCheck latches Last* each frame. */
         int down = (ev.type == SDL_MOUSEBUTTONDOWN);
-        short mx, my;
-        mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
-        Mouse.x = mx;
-        Mouse.y = my;
+        int ov = overlay_hit(ev.button.x, ev.button.y);
+        if (ov && down && ev.button.button == SDL_BUTTON_LEFT) {
+          overlay_fire(ov);
+          break; /* do not inject a game click */
+        }
+        if (ov) {
+          break; /* ignore release over overlay */
+        }
+        {
+          short mx, my;
+          mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
+          Mouse.x = mx;
+          Mouse.y = my;
+        }
         if (ev.button.button == SDL_BUTTON_LEFT) {
           Mouse.Left = down ? 1 : 0;
           if (down) {
@@ -563,6 +706,47 @@ void PlatformPumpEvents(void)
           Mouse.Right = down ? 1 : 0;
         } else if (ev.button.button == SDL_BUTTON_MIDDLE) {
           Mouse.Middle = down ? 1 : 0;
+        }
+        break;
+      }
+      case SDL_FINGERDOWN: {
+        int ww, wh;
+        int wx, wy;
+        int ov;
+        SDL_GetWindowSize(window, &ww, &wh);
+        wx = (int)(ev.tfinger.x * (float)ww);
+        wy = (int)(ev.tfinger.y * (float)wh);
+        ov = overlay_hit(wx, wy);
+        if (ov) {
+          overlay_fire(ov);
+          break;
+        }
+        {
+          short mx, my;
+          mouse_to_logical(wx, wy, &mx, &my);
+          Mouse.x = mx;
+          Mouse.y = my;
+          Mouse.Left = 1;
+          Mouse.ClickX = Mouse.x;
+          Mouse.ClickY = Mouse.y;
+        }
+        break;
+      }
+      case SDL_FINGERUP: {
+        int ww, wh, wx, wy;
+        SDL_GetWindowSize(window, &ww, &wh);
+        wx = (int)(ev.tfinger.x * (float)ww);
+        wy = (int)(ev.tfinger.y * (float)wh);
+        if (overlay_hit(wx, wy))
+          break;
+        {
+          short mx, my;
+          mouse_to_logical(wx, wy, &mx, &my);
+          Mouse.x = mx;
+          Mouse.y = my;
+          Mouse.Left = 0;
+          Mouse.ReleaseX = Mouse.x;
+          Mouse.ReleaseY = Mouse.y;
         }
         break;
       }

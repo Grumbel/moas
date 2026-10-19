@@ -102,57 +102,6 @@
           sdlSrc = sdl2-src;
           sdlVersion = "2.30.3";
         };
-      in {
-        packages = {
-          default = moas;
-          moas = moas;
-
-          moas-win64 = windows.win64;
-          moas-win64-zip = windows.win64Zip;
-          moas-win32 = windows.win32;
-          moas-win32-zip = windows.win32Zip;
-
-          moas-r36s = r36s.r36s;
-          moas-r36s-portmaster = r36s.portmaster;
-          moas-r36s-portmaster-zip = r36s.portmasterZip;
-          arkos-sysroot = r36s.sysroot;
-
-          moas-android = android.apk;
-          sdl2-android = android.sdlAndroidLibs;
-
-          moas-wasm = wasm.moasWasm;
-          sdl2-wasm = wasm.sdl2Wasm;
-
-          moas-dos = dos.moas-dos;
-          moas-dos-zip = dos.moas-dos-zip;
-          moas-dos-run = dos.moas-dos-run;
-          moas-dos-original = dos.moas-dos-original;
-          moas-dos-original-run = dos.moas-dos-original-run;
-        };
-
-        apps = {
-          default = {
-            type = "app";
-            program = "${moas}/bin/moas";
-          };
-          moas = {
-            type = "app";
-            program = "${moas}/bin/moas";
-          };
-          # Open Watcom DOS rebuild under DOSBox-X
-          moas-dos = {
-            type = "app";
-            program = "${dos.moas-dos-run}/bin/moas-dos";
-          };
-          # Historical manick/GAME.EXE under DOSBox-X
-          moas-dos-original = {
-            type = "app";
-            program = "${dos.moas-dos-original-run}/bin/moas-dos-original";
-          };
-          install-android-moas = android.installApp;
-          moas-wasm = wasm.serveApp;
-        };
-
         # Out-of-tree Debug develop loop (biltoo/Pingus pattern).
         # Package builds stay `nix build` (RelWithDebInfo); develop uses Debug.
         moasPreamble = ''
@@ -223,6 +172,57 @@ except Exception:
             "$@"
         '';
 
+      in {
+        packages = {
+          default = moas;
+          moas = moas;
+
+          moas-win64 = windows.win64;
+          moas-win64-zip = windows.win64Zip;
+          moas-win32 = windows.win32;
+          moas-win32-zip = windows.win32Zip;
+
+          moas-r36s = r36s.r36s;
+          moas-r36s-portmaster = r36s.portmaster;
+          moas-r36s-portmaster-zip = r36s.portmasterZip;
+          arkos-sysroot = r36s.sysroot;
+
+          moas-android = android.apk;
+          sdl2-android = android.sdlAndroidLibs;
+
+          moas-wasm = wasm.moasWasm;
+          sdl2-wasm = wasm.sdl2Wasm;
+
+          moas-dos = dos.moas-dos;
+          moas-dos-zip = dos.moas-dos-zip;
+          moas-dos-run = dos.moas-dos-run;
+          moas-dos-original = dos.moas-dos-original;
+          moas-dos-original-run = dos.moas-dos-original-run;
+        };
+
+        apps = {
+          default = {
+            type = "app";
+            program = "${moas}/bin/moas";
+          };
+          moas = {
+            type = "app";
+            program = "${moas}/bin/moas";
+          };
+          # Open Watcom DOS rebuild under DOSBox-X
+          moas-dos = {
+            type = "app";
+            program = "${dos.moas-dos-run}/bin/moas-dos";
+          };
+          # Historical manick/GAME.EXE under DOSBox-X
+          moas-dos-original = {
+            type = "app";
+            program = "${dos.moas-dos-original-run}/bin/moas-dos-original";
+          };
+          install-android-moas = android.installApp;
+          moas-wasm = wasm.serveApp;
+        };
+
         devShells.default = pkgs.mkShell.override { stdenv = pkgs.ccacheStdenv; } {
           inputsFrom = [ moas ];
           packages = with pkgs; [
@@ -254,5 +254,7 @@ except Exception:
             echo "  moas-run --load=0   # example CLI after a save exists"
           '';
         };
+
+
       });
 }
