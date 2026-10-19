@@ -29,8 +29,10 @@
 #include "moas.h"
 #include "debug.h"
 #include "person_disk.h"
+#ifndef DOS
 #include "datapath.h"
 #include "platform.h"
+#endif
 #ifdef __ANDROID__
 #include <SDL.h>
 #include <android/log.h>

@@ -3,6 +3,7 @@
 - Android: APK assets + extract to internal storage; SDL_Log diagnostics
 
 ## Cross ports (this bundle)
+- MS-DOS: `nix/dos.nix`, `mk/dos/Makefile` — Open Watcom → DOS/4GW `moas.exe`
 - WebAssembly: `nix/wasm.nix`, `mk/wasm/` — Emscripten + ASYNCIFY + preload data
 - Technique mirrored from Kurvenrausch (Nix flake packages + mk/ tree)
 - Windows: `nix/windows.nix` — MinGW + SDL2-win32 flake, win32/win64 zip

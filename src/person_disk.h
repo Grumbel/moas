@@ -25,8 +25,10 @@ typedef struct {
 } PersonDisk;
 #pragma pack(pop)
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 _Static_assert(sizeof(PersonDisk) == 236, "PersonDisk must be 236 bytes");
+#endif
 
 #define PERSON_DISK_STRIDE 240  /* 236 + 4-byte CHKSUM */
 
-#endif
+#endif /* MOAS_PERSON_DISK_H */

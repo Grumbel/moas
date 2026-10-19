@@ -4,10 +4,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <ctype.h>
 
 #ifndef DOS
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/stat.h>
 
 /* DOS I/O port stubs */
 static inline unsigned char inp(unsigned short port) { (void)port; return 0; }
@@ -31,14 +33,6 @@ static inline int getch(void) { return PlatformGetch(); }
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#endif /* !DOS */
-
-#endif /* MOAS_COMPAT_H */
-
-#ifndef DOS
-#include <stdio.h>
-#include <sys/stat.h>
-
 /* Borland / MSC helpers */
 static inline char *itoa(int value, char *str, int base) {
   if (base == 10) sprintf(str, "%d", value);
@@ -58,29 +52,45 @@ static inline long filelength(int fd) {
 }
 static inline void _setcolor(short c) { (void)c; }
 static inline unsigned long _memmax(void) { return 0; }
-#endif
 
-#ifndef S_IWRITE
-#define S_IWRITE 0200
-#endif
-
-/* Case-insensitive open for DOS-era filenames on case-sensitive filesystems.
- * Tries the given name first, then common case variants of the basename. */
+/* Case-insensitive open for DOS-era filenames on case-sensitive filesystems. */
 static inline int open_ci(const char *path, int flags, ...)
 {
   int fd = open(path, flags);
   if (fd >= 0) return fd;
 
-  /* Try uppercase and lowercase of the whole path (simple but enough for GAME.*/
   char buf[256];
   size_t n = strlen(path);
+  size_t i;
   if (n >= sizeof(buf)) return -1;
-  for (size_t i = 0; i < n; i++) buf[i] = (char)toupper((unsigned char)path[i]);
+  for (i = 0; i < n; i++) buf[i] = (char)toupper((unsigned char)path[i]);
   buf[n] = 0;
   fd = open(buf, flags);
   if (fd >= 0) return fd;
-  for (size_t i = 0; i < n; i++) buf[i] = (char)tolower((unsigned char)path[i]);
+  for (i = 0; i < n; i++) buf[i] = (char)tolower((unsigned char)path[i]);
   buf[n] = 0;
   fd = open(buf, flags);
   return fd;
 }
+#else
+/* DOS: Watcom provides inp/outp, kbhit, getch, itoa, filelength, etc. */
+#include <conio.h>
+#include <i86.h>
+#include <dos.h>
+#include <graph.h>
+#include <io.h>
+#include <fcntl.h>
+
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+#endif /* !DOS */
+
+#ifndef S_IWRITE
+#define S_IWRITE 0200
+#endif
+
+#endif /* MOAS_COMPAT_H */

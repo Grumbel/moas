@@ -20,6 +20,8 @@ typedef struct {
 } MapFileDisk;
 #pragma pack(pop)
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 _Static_assert(sizeof(MapFileDisk) == 30, "MapFileDisk must be 30 bytes");
-
 #endif
+
+#endif /* MOAS_MAPFILE_DISK_H */

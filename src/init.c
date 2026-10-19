@@ -27,7 +27,9 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#ifndef DOS
 #include "datapath.h"
+#endif
 #include "mapfile_disk.h"
 
 #define D32RealSeg(P)   ((((uLong) (P)) >> 4) & 0xFFFF)

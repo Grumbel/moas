@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com>
 # SPDX-License-Identifier: GPL-2.0-or-later
 {
-  description = "MOAS - Mouse Orientiertes Adventure System (SDL2 Linux port)";
+  description = "MOAS - Mouse Orientiertes Adventure System (SDL2 port + DOS Watcom target)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -23,6 +23,19 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        # Open Watcom is Watcom-1.0 (redistributable; marked unfree in nixpkgs)
+        dosPkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfreePredicate = pkg:
+            builtins.elem (pkgs.lib.getName pkg) [
+              "open-watcom-bin"
+              "open-watcom-bin-unwrapped"
+              "open-watcom-v2"
+              "open-watcom-v2-unwrapped"
+              "open-watcom-v2-full"
+              "open-watcom-v2-full-unwrapped"
+            ];
+        };
 
         version = "0.1.0-sdl";
 
@@ -50,6 +63,8 @@
         };
 
         r36s = import ./nix/r36s.nix { inherit pkgs version; };
+
+        dos = import ./nix/dos.nix { pkgs = dosPkgs; inherit version; };
 
         androidPkgs = import nixpkgs {
           inherit system;
@@ -107,6 +122,9 @@
 
           moas-wasm = wasm.moasWasm;
           sdl2-wasm = wasm.sdl2Wasm;
+
+          moas-dos = dos.moas-dos;
+          moas-dos-zip = dos.moas-dos-zip;
         };
 
         apps = {

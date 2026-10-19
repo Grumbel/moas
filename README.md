@@ -88,7 +88,25 @@ prefixes. After `cmake --install`, the game appears in application menus as
 All of the following require Linux host tools and the flake inputs (SDL2
 source, Android SDK where needed).
 
+### MS-DOS (Open Watcom / DOS/4GW)
+
+Cross-compiles the original `#ifdef DOS` code with Open Watcom from Nix:
+
+```sh
+nix build .#moas-dos          # $result/dos/moas.exe + GAME.* + DOS4GW.EXE
+nix build .#moas-dos-zip      # zip of the same folder
+```
+
+Open Watcom is licensed under Watcom-1.0 (redistributable; nixpkgs marks it
+unfree). The flake allows only the Open Watcom package names via
+`allowUnfreePredicate` — no global `allowUnfree`.
+
+Run the result under DOSBox or FreeDOS with the shipped data files next to
+`moas.exe`. The historical `manick/GAME.EXE` remains the reference original
+binary.
+
 ### Windows (MinGW)
+
 
 ```sh
 nix build .#moas-win64          # 64-bit

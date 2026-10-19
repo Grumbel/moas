@@ -33,7 +33,9 @@
 #include "platform.h"
 #endif
 
+#ifndef DOS
 #include "datapath.h"
+#endif
 
 #ifdef DOS
 void (interrupt far *RealIrq1c)();

@@ -103,25 +103,25 @@
 #define Real(PrsNum)            GetRealPersonNum(PrsNum)
 
 #include <signal.h>
-//#include <conio.h>
 #include <math.h>
 #include <fcntl.h>
-//#include <graph.h>
-//#include <io.h>
-//#include <i86.h>
-//#include <dos.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "compat.h"
+#ifndef DOS
 #include "platform.h"
 #include <unistd.h>
 #include <stdint.h>
-
-#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#else
+/* Watcom DOS headers (also pulled by compat.h) */
+#include <stdint.h> /* C99 types if available; else see below */
+#endif
+
+#include <ctype.h>
 
 /* Desktop: -fcommon merges these header definitions.
  * Emscripten: one TU defines (MOAS_DEFINE_GLOBALS), others see extern. */
