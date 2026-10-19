@@ -62,6 +62,7 @@ static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
 static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
+static int           touch_mode = 0;          /* 0=USE 1=LOOK */
 static char          siehe_banner[48];
 static Uint32        siehe_banner_until = 0;
 static int           shake_ox = 0, shake_oy = 0;
@@ -499,7 +500,15 @@ static void window_to_output(int wx, int wy, int *ox, int *oy)
 
 /* Overlay button ids — always defined so PlatformPumpEvents can reference them;
  * on non-Android builds overlay_hit is a stub that always returns OV_NONE. */
-enum { OV_NONE = 0, OV_SAVE = 1, OV_LOAD = 2, OV_ESC = 3, OV_SKIP = 4 };
+enum {
+  OV_NONE = 0,
+  OV_SAVE = 1,
+  OV_LOAD = 2,
+  OV_ESC = 3,
+  OV_SKIP = 4,
+  OV_MODE_USE = 5,
+  OV_MODE_LOOK = 6
+};
 
 #if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
 /* Touch controls in letterbox margins (window pixels), not the 320x200 buffer.
@@ -570,18 +579,18 @@ static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 
   }
 }
 
-/* Four button rects in renderer-output pixels: [0]=Save [1]=Load [2]=Esc [3]=Skip */
-static void overlay_rects(SDL_Rect out[4])
+/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE [5]=LOOK */
+static void overlay_rects(SDL_Rect out[6])
 {
   int dx, dy, dw, dh, ww, wh;
   int btn_w, btn_h, gap, margin;
   int left_x, right_x, col_y0;
   int side;
+  int mode_w, mode_h, mode_y, mode_gap;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   gap = 12;
   margin = 8;
-  /* Prefer filling the side letterbox so targets are large enough for thumbs. */
   side = dx;
   if (side < ww - (dx + dw))
     side = ww - (dx + dw);
@@ -597,7 +606,6 @@ static void overlay_rects(SDL_Rect out[4])
     btn_h = 112;
 
   if (dx >= btn_w + margin * 2) {
-    /* Side letterbox: columns in left/right margins, vertically centered on game */
     left_x = (dx - btn_w) / 2;
     if (left_x < margin)
       left_x = margin;
@@ -608,7 +616,6 @@ static void overlay_rects(SDL_Rect out[4])
     if (col_y0 < margin)
       col_y0 = margin;
   } else {
-    /* Top/bottom letterbox or edge-to-edge: float over side edges of the game */
     btn_w = 80;
     btn_h = 72;
     left_x = margin;
@@ -631,20 +638,41 @@ static void overlay_rects(SDL_Rect out[4])
   out[1].x = left_x;  out[1].y = col_y0 + btn_h + gap;  out[1].w = btn_w; out[1].h = btn_h;
   out[2].x = right_x; out[2].y = col_y0;                out[2].w = btn_w; out[2].h = btn_h;
   out[3].x = right_x; out[3].y = col_y0 + btn_h + gap; out[3].w = btn_w; out[3].h = btn_h;
+
+  /* USE / LOOK mode toggles: bottom of the game letterbox (or under it). */
+  mode_gap = 10;
+  mode_w = dw / 2 - mode_gap;
+  if (mode_w > 160)
+    mode_w = 160;
+  if (mode_w < 88)
+    mode_w = 88;
+  mode_h = 48;
+  if (dy + dh + mode_h + margin <= wh)
+    mode_y = dy + dh + 6;
+  else
+    mode_y = dy + dh - mode_h - 6;
+  out[4].x = dx + (dw - (mode_w * 2 + mode_gap)) / 2;
+  out[4].y = mode_y;
+  out[4].w = mode_w;
+  out[4].h = mode_h;
+  out[5].x = out[4].x + mode_w + mode_gap;
+  out[5].y = mode_y;
+  out[5].w = mode_w;
+  out[5].h = mode_h;
 }
 
 /* ox/oy are renderer-output pixels (after window_to_output). */
 static int overlay_hit(int ox, int oy)
 {
-  SDL_Rect r[4];
+  SDL_Rect r[6];
   int i;
-  int pad = 14; /* touch slop beyond the drawn rect */
+  int pad = 14;
 
   overlay_rects(r);
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 6; i++) {
     if (ox >= r[i].x - pad && ox < r[i].x + r[i].w + pad &&
         oy >= r[i].y - pad && oy < r[i].y + r[i].h + pad)
-      return i + 1;
+      return i + 1; /* OV_SAVE..OV_MODE_LOOK */
   }
   return OV_NONE;
 }
@@ -674,6 +702,14 @@ static void overlay_fire(int which)
       overlay_shift_hold = 20; /* ~frames while speech checks PlatformShiftDown */
       MOAS_ALOG("overlay: SKIP (speech)");
       break;
+    case OV_MODE_USE:
+      touch_mode = 0;
+      MOAS_ALOG("overlay: mode USE");
+      break;
+    case OV_MODE_LOOK:
+      touch_mode = 1;
+      MOAS_ALOG("overlay: mode LOOK");
+      break;
     default:
       break;
   }
@@ -684,6 +720,11 @@ int PlatformPollOverlayCmd(void)
   int c = overlay_pending_cmd;
   overlay_pending_cmd = 0;
   return c;
+}
+
+int PlatformGetTouchMode(void)
+{
+  return touch_mode;
 }
 
 void PlatformShowSieheHint(const char *object_name)
@@ -858,20 +899,16 @@ static void ov_icon_skip(SDL_Rect *r, int pressed)
 
 static void overlay_draw(void)
 {
-  SDL_Rect r[4];
-  static const SDL_Color cols[4] = {
-    { 32, 140, 58, 255 },   /* Save  green */
-    { 36, 100, 190, 255 },  /* Load  blue  */
-    { 170, 42, 42, 255 },   /* Esc   red   */
-    { 200, 120, 28, 255 },  /* Skip  amber */
+  SDL_Rect r[6];
+  static const SDL_Color cols[6] = {
+    { 32, 140, 58, 255 },   /* Save */
+    { 36, 100, 190, 255 },  /* Load */
+    { 170, 42, 42, 255 },   /* Esc  */
+    { 200, 120, 28, 255 },  /* Skip */
+    { 70, 70, 90, 255 },    /* USE  */
+    { 70, 70, 90, 255 },    /* LOOK */
   };
-  static const SDL_Color cols_press[4] = {
-    { 18, 90, 36, 255 },
-    { 20, 60, 130, 255 },
-    { 110, 25, 25, 255 },
-    { 140, 80, 15, 255 },
-  };
-  static const char *labels[4] = { "SAVE", "LOAD", "ESC", "SKIP" };
+  static const char *labels[6] = { "SAVE", "LOAD", "ESC", "SKIP", "USE", "LOOK" };
   int i, ts;
 
   if (!renderer)
@@ -880,15 +917,26 @@ static void overlay_draw(void)
     overlay_shift_hold--;
 
   overlay_rects(r);
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 6; i++) {
     int pressed = (overlay_pressed == i + 1);
-    SDL_Color c = pressed ? cols_press[i] : cols[i];
+    int selected = ((i == 4 && touch_mode == 0) || (i == 5 && touch_mode == 1));
+    SDL_Color c = cols[i];
     SDL_Rect face = r[i];
 
-    /* Soft shadow (skip when pressed so it looks inset) */
+    if (selected) {
+      c.r = (Uint8)(c.r + 40 > 255 ? 255 : c.r + 40);
+      c.g = (Uint8)(c.g + 50 > 255 ? 255 : c.g + 50);
+      c.b = (Uint8)(c.b + 80 > 255 ? 255 : c.b + 80);
+    }
+    if (pressed) {
+      c.r = (Uint8)(c.r * 2 / 3);
+      c.g = (Uint8)(c.g * 2 / 3);
+      c.b = (Uint8)(c.b * 2 / 3);
+    }
+
     if (!pressed) {
       SDL_Rect sh = r[i];
-      sh.x += 4; sh.y += 4;
+      sh.x += 3; sh.y += 3;
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 140);
       SDL_RenderFillRect(renderer, &sh);
     } else {
@@ -897,44 +945,42 @@ static void overlay_draw(void)
 
     ov_fill_roundish(&face, c.r, c.g, c.b);
 
-    /* Bevel: light top-left, dark bottom-right */
-    if (!pressed) {
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + face.w - 3, face.y + 2);
-      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + 2, face.y + face.h - 3);
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 180);
-      SDL_RenderDrawLine(renderer, face.x + 2, face.y + face.h - 3, face.x + face.w - 3, face.y + face.h - 3);
-      SDL_RenderDrawLine(renderer, face.x + face.w - 3, face.y + 2, face.x + face.w - 3, face.y + face.h - 3);
-    } else {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
-      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + face.w - 3, face.y + 2);
-      SDL_RenderDrawLine(renderer, face.x + 2, face.y + 2, face.x + 2, face.y + face.h - 3);
+    if (selected) {
       SDL_SetRenderDrawColor(renderer, 255, 220, 80, 255);
       SDL_RenderDrawRect(renderer, &face);
+      {
+        SDL_Rect in = face;
+        in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
+        SDL_RenderDrawRect(renderer, &in);
+      }
+    } else {
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, pressed ? 255 : 180);
+      SDL_RenderDrawRect(renderer, &face);
     }
-
-    /* Outer border */
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, pressed ? 255 : 200);
-    SDL_RenderDrawRect(renderer, &face);
 
     if (i == 0) ov_icon_save(&face, pressed);
     else if (i == 1) ov_icon_load(&face, pressed);
     else if (i == 2) ov_icon_esc(&face, pressed);
-    else ov_icon_skip(&face, pressed);
+    else if (i == 3) ov_icon_skip(&face, pressed);
+    /* USE/LOOK: text only */
 
-    ts = (face.w >= 80) ? 2 : 1;
+    ts = (face.w >= 100) ? 2 : 1;
     {
       int text_w = (int)strlen(labels[i]) * 6 * ts;
       int tx = face.x + (face.w - text_w) / 2;
-      int ty = face.y + face.h - 7 * ts - 8;
-      if (ty < face.y + face.h / 2)
-        ty = face.y + face.h - 7 * ts - 4;
-      /* text shadow */
+      int ty;
+      if (i >= 4)
+        ty = face.y + (face.h - 7 * ts) / 2;
+      else {
+        ty = face.y + face.h - 7 * ts - 8;
+        if (ty < face.y + face.h / 2)
+          ty = face.y + face.h - 7 * ts - 4;
+      }
       ov_draw_text(tx + 1, ty + 1, labels[i], ts, 0, 0, 0);
       ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }
   }
-  /* Long-press SIEHE feedback */
+  /* SIEHE feedback banner */
   if (siehe_banner_until && SDL_GetTicks() < siehe_banner_until) {
     int dx, dy, dw, dh;
     SDL_Rect bar;
@@ -970,6 +1016,7 @@ static void overlay_fire(int which) { (void)which; }
 static void overlay_draw(void) { }
 int PlatformPollOverlayCmd(void) { return 0; }
 void PlatformShowSieheHint(const char *object_name) { (void)object_name; }
+int PlatformGetTouchMode(void) { return 0; }
 #endif
 
 void PlatformPresent(void)
@@ -1098,7 +1145,7 @@ void PlatformPumpEvents(void)
           if (down) {
             overlay_pressed = ov;
             /* ESC/SKIP act immediately; SAVE/LOAD wait for release. */
-            if (ov == OV_ESC || ov == OV_SKIP)
+            if (ov == OV_ESC || ov == OV_SKIP || ov == OV_MODE_USE || ov == OV_MODE_LOOK)
               overlay_fire(ov);
           } else {
             if (overlay_pressed == ov && (ov == OV_SAVE || ov == OV_LOAD))
@@ -1150,7 +1197,7 @@ void PlatformPumpEvents(void)
         ov = overlay_hit(rx, ry);
         if (ov) {
           overlay_pressed = ov;
-          if (ov == OV_ESC || ov == OV_SKIP)
+          if (ov == OV_ESC || ov == OV_SKIP || ov == OV_MODE_USE || ov == OV_MODE_LOOK)
             overlay_fire(ov);
           break;
         }

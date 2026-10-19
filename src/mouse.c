@@ -32,11 +32,8 @@
 #define HIGHLIGHT 40
 
 #ifndef DOS
-/* Long-press look (SIEHE): ~500 ms hold on an object, touch-friendly. */
-#define LONGPRESS_SIEHE_MS 500u
-static unsigned int longpress_down_ms = 0;
-static short longpress_obj = -1;
-static int longpress_siehe_fired = 0;
+/* Suppress MouseIntelligence verb after LOOK-mode SIEHE on this press. */
+static int suppress_left_verb = 0;
 #endif
 
 char _sString[]=">%s<";
@@ -107,65 +104,53 @@ void MouseCheck(void)
     Mouse.ClickX=Mouse.x;
     Mouse.ClickY=Mouse.y;
     Mouse.ClickObject=WhatsAt(Mouse.x,Mouse.y);
-    MoasDbg(MOAS_DBG_INPUT, "L-down at %d,%d obj=%d CursorState=%d",
-            (int)Mouse.x, (int)Mouse.y, (int)Mouse.ClickObject, (int)Mouse.CursorState);
+    MoasDbg(MOAS_DBG_INPUT, "L-down at %d,%d obj=%d CursorState=%d mode=%d",
+            (int)Mouse.x, (int)Mouse.y, (int)Mouse.ClickObject, (int)Mouse.CursorState,
+            PlatformGetTouchMode());
 #ifndef DOS
-    longpress_down_ms = PlatformGetMillis();
-    longpress_obj = Mouse.ClickObject;
-    longpress_siehe_fired = 0;
+    suppress_left_verb = 0;
     /*
-     * No right button on touchscreens. Empty-ground left press mirrors the
-     * DOS right-press walk (WalkClick). Object hits stay left-only verbs.
-     * Gated like right-walk: control, no window, V_NoWalk clear.
+     * Empty ground → walk (no right button on touch). Skip in LOOK mode only
+     * when an object is under the finger — empty still walks.
      */
     if (PlayerHasControl && V_NoWalk == 0 && Window.Status == None
         && Mouse.ClickObject == -1)
       WalkClick(Mouse.x, Mouse.y);
 #endif
   }
-#ifndef DOS
-  /* Long-press on object → SIEHE (look), same as DOS right-click on object. */
-  if (Mouse.Left && !longpress_siehe_fired && longpress_obj != -1
-      && PlayerHasControl && Window.Status == None)
-  {
-    unsigned int held = PlatformGetMillis() - longpress_down_ms;
-    short now = WhatsAt(Mouse.x, Mouse.y);
-    if (held >= LONGPRESS_SIEHE_MS && now == longpress_obj
-        && abs(Mouse.x - Mouse.ClickX) < 12 && abs(Mouse.y - Mouse.ClickY) < 12)
-    {
-      char hint[80];
-      const char *name = DescriptionText(longpress_obj);
-      V_Verb = SIEHE;
-      DisplayMouseText(HIGHLIGHT);
-      V_Par1 = longpress_obj;
-      V_Par2 = -1;
-      if (name && name[0] && name[0] != '?')
-        snprintf(hint, sizeof(hint), "%s", name);
-      else
-        snprintf(hint, sizeof(hint), "#%d", (int)longpress_obj);
-      PlatformShowSieheHint(hint);
-      ExecuteTheProgram();
-      longpress_siehe_fired = 1;
-      MoasDbg(MOAS_DBG_INPUT, "long-press SIEHE obj=%d", (int)longpress_obj);
-    }
-  }
-#endif
   if (Mouse.Left==0 && Mouse.LastLeft==1)
   {
     Mouse.ReleaseX=Mouse.x;
     Mouse.ReleaseY=Mouse.y;
     MoasDbg(MOAS_DBG_INPUT, "L-up at %d,%d", (int)Mouse.x, (int)Mouse.y);
 #ifndef DOS
-    if (longpress_siehe_fired) {
-      /* Consume the release so MouseIntelligence does not also USE/TALK. */
+    /*
+     * LOOK mode: object tap → SIEHE only (DOS right-click look). Never run
+     * Benutze/Bewege on the same press. USE mode keeps MouseIntelligence.
+     */
+    if (PlatformGetTouchMode() == MOAS_TOUCH_LOOK
+        && PlayerHasControl && Window.Status == None
+        && Mouse.ClickObject != -1)
+    {
+      const char *name = DescriptionText(Mouse.ClickObject);
+      char hint[80];
+      V_Verb = SIEHE;
+      V_Par1 = Mouse.ClickObject;
+      V_Par2 = -1;
+      if (name && name[0] && name[0] != '?')
+        snprintf(hint, sizeof(hint), "%s", name);
+      else
+        snprintf(hint, sizeof(hint), "#%d", (int)Mouse.ClickObject);
+      PlatformShowSieheHint(hint);
+      ExecuteTheProgram();
+      suppress_left_verb = 1;
       Mouse.ClickObject = -1;
-      longpress_siehe_fired = 0;
-      longpress_obj = -1;
-    } else if (PlayerHasControl == 1 && Window.Status == None && Mouse.ClickObject == -1) {
-      /*
-       * Mirror right-button release → C_WALK when idle and the click was on
-       * empty ground (ClickObject still -1 until MouseIntelligence clears it).
-       */
+      Mouse.BewegeMode = -1;
+      MoasDbg(MOAS_DBG_INPUT, "LOOK-mode SIEHE");
+    } else if (PlayerHasControl == 1 && Window.Status == None
+               && Mouse.ClickObject == -1
+               && PlatformGetTouchMode() == MOAS_TOUCH_USE) {
+      /* Idle C_WALK after empty-ground walk (USE mode only). */
       short PN = GetPlayerPersonNumber();
       if ((PN == MAX_PRS) || (Person[PN].StepSpeed == 0))
       {
@@ -179,11 +164,14 @@ void MouseCheck(void)
         Var[2] = T2;
       }
     }
-    longpress_obj = -1;
 #endif
   }
   if (PlayerHasControl)
     MouseIntelligence();
+#ifndef DOS
+  if (suppress_left_verb && Mouse.Left == 0)
+    suppress_left_verb = 0;
+#endif
 
   IveGotTooMuchTime();
 #ifndef DOS
@@ -290,6 +278,11 @@ void MouseIntelligence(void)
   short inventar_embed = 0;
 
   DisplayMouseText(42);
+#ifndef DOS
+  /* LOOK mode: never enter Bewege (pull) while the mode is active. */
+  if (PlatformGetTouchMode() == MOAS_TOUCH_LOOK)
+    Mouse.BewegeMode = -1;
+#endif
   if (Mouse.Left && Mouse.LastLeft==0 && Mouse.ClickObject<2000 && Mouse.ClickObject>999)
   {
     inventar_embed = 1;
@@ -309,13 +302,21 @@ void MouseIntelligence(void)
   {
     if (Window.Status==None)
     {
-      DisplayMouseText(HIGHLIGHT);
-      if (Mouse.BewegeMode!=-1)
+#ifndef DOS
+      if (suppress_left_verb) {
+        /* LOOK-mode SIEHE already ran — do not Benutze/Bewege on release. */
+        Mouse.BewegeMode = -1;
+      } else
+#endif
       {
-        Mouse.BewegeMode=-1;
-        PowerRedrawArea(Mouse.x-15,Mouse.y-15,Mouse.x+44,Mouse.y+40);
+        DisplayMouseText(HIGHLIGHT);
+        if (Mouse.BewegeMode!=-1)
+        {
+          Mouse.BewegeMode=-1;
+          PowerRedrawArea(Mouse.x-15,Mouse.y-15,Mouse.x+44,Mouse.y+40);
+        }
+        if (V_Verb!=0 && (V_Verb!=BENUTZE || V_Par2!=-1)) ExecuteTheProgram();
       }
-      if (V_Verb!=0 && (V_Verb!=BENUTZE || V_Par2!=-1)) ExecuteTheProgram();
     }
     Mouse.ClickObject=-1;
   }

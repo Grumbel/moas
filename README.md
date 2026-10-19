@@ -270,14 +270,15 @@ You need **player control** and no dialogue window open (`Window.Status == None`
 | **Right click** | Empty ground: walk (original DOS). On object: look (`SIEHE`). Also **S** key. |
 | **Drag (grab+pull)** | Bewege mode — cursor becomes a **directional arrow** |
 
-On Android there is no right button:
+On Android there is no right button. The HUD adds **USE** / **LOOK** mode toggles (bottom of the game view):
 
-- **Tap empty ground** → walk  
-- **Tap object** → default action (use / talk / grab)  
-- **Long-press object (~0.5 s)** → look (`SIEHE`); a **SIEHE: …** banner appears at the top of the game view  
+| Mode | Empty ground | Object |
+|------|----------------|--------|
+| **USE** (default) | Walk | Use / talk / grab+pull (same as desktop left-click) |
+| **LOOK** | Walk | **Siehe** (look) — same as desktop right-click on object |
 
-Arrow keys still work with a keyboard. A virtual D-pad is not required for basic movement.  
-**Back** exits the activity (full quit).
+A short **SIEHE …** banner confirms look. Pull (`Bewege`) only runs in **USE** mode.  
+Arrow keys still work with a keyboard. **Back** exits the activity fully.
 
 ### Movement and inventory
 

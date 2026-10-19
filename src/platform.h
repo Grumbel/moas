@@ -38,8 +38,13 @@ int PlatformPollOverlayCmd(void);
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 
-/* Android HUD: brief “SIEHE …” banner after long-press look. */
+/* Android HUD: brief “SIEHE …” banner after look. */
 void PlatformShowSieheHint(const char *object_name);
+
+/* Touch interaction mode: 0=USE (default verbs), 1=LOOK (SIEHE on tap). */
+#define MOAS_TOUCH_USE  0
+#define MOAS_TOUCH_LOOK 1
+int PlatformGetTouchMode(void);
 
 /* Keyboard (DOS-style) */
 int PlatformKbhit(void);
