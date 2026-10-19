@@ -375,6 +375,47 @@ char *DescriptionText(short Num)
 }
 void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
 {
+#ifdef DOS
+  /* Exact original soft-cursor overlay (VGA Mode 13h). */
+  register unsigned short x,y;
+  unsigned static ox,oy,State=0;
+
+  if (Type==1 && State==0)
+  {
+    for (y=0;y<40 && y+Mouse.y<200;y++)
+      memcpy(VMouseBuf+y*44,(char *)0xA0000+Mouse.x+(Mouse.y+y)*320,44);
+    if (V_CursorState==1)
+      for (y=0;y<40 && y+Mouse.y<200;y++)
+        for (x=0;x<44 && x+Mouse.x<320;x++)
+          if (RefTable[0].Num==-1)
+          {
+            if (Phase[0].Data[x+y*44+3520])
+              ((unsigned char*)0xA0000)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+3520];
+          }
+          else
+          {
+            if (Phase[0].Data[x+y*44+1760])
+              ((unsigned char*)0xA0000)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+1760];
+          }
+    State=1;
+  }
+  if (Type==2)
+  {
+    if (Mouse.x!=ox || Mouse.y!=oy)
+    {
+      VMouse(3);
+      VMouse(1);
+    }
+  }
+  if (Type==3 && State==1)
+  {
+    for (y=0;y<40 && y+oy<200;y++)
+      memcpy((char *)0xA0000+ox+(oy+y)*320,VMouseBuf+y*44,44);
+    State=0;
+  }
+  ox=Mouse.x;
+  oy=Mouse.y;
+#else
   register short x,y;
   static short ox,oy,State=0;
   static short last_frame = -1;
@@ -388,13 +429,6 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
   if (!VMouseBuf || !Phase || !Phase[0].Data)
     return;
 
-  /*
-   * Match PowerRedrawArea cursor choice (DOS):
-   *   BewegeMode != -1 → Phase[1] directional pull/grab arrow (30x30,
-   *     hotspot at centre, frames @ 900 * BewegeMode, modes 0..15)
-   *   no control       → Phase[0] frame @ 3520 (wait / inactive)
-   *   control          → Phase[0] frame @ 1760 * ThingAtCursor
-   */
   use_bewege = (Mouse.BewegeMode != -1 && Phase[1].Data != NULL);
   if (use_bewege)
   {
@@ -488,6 +522,7 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
   }
   ox=Mouse.x;
   oy=Mouse.y;
+#endif
 }
 void AddPowerParse(short Nummer,char *String)
 {

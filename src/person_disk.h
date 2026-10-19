@@ -8,7 +8,11 @@
  * On-disk PERSON as written by the original 32-bit tools (GAME.1).
  * Record size 236 bytes; file stride is 240 (236 + 4-byte checksum).
  */
-#pragma pack(push, 1)
+#if defined(__WATCOMC__)
+#  pragma pack(1)
+#else
+#  pragma pack(push, 1)
+#endif
 typedef struct {
   int16_t  Num;
   int16_t  PhaseNum;
@@ -23,7 +27,13 @@ typedef struct {
   int8_t   BaseSpeed, StepSpeed, PhaseSpeed;
   uint16_t Bits;
 } PersonDisk;
-#pragma pack(pop)
+#if defined(__WATCOMC__)
+#  pragma pack()
+#else
+#  pragma pack(pop)
+#endif
+
+typedef char moas_person_disk_size_ok[(sizeof(PersonDisk) == 236) ? 1 : -1];
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 _Static_assert(sizeof(PersonDisk) == 236, "PersonDisk must be 236 bytes");

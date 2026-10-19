@@ -244,6 +244,13 @@ void InitMapData(void)
   ChkClose(ifil);
   LadePhase(0);
   LadePhase(1);
+#ifdef DOS
+  /* Cursor sprites must be 44x40x3 and 30x30x16 — catalog mis-read shows here. */
+  if (Phase[0].x != 44 || Phase[0].y != 40 || Phase[0].Anz != 3)
+    InternalError(1022);
+  if (Phase[1].x != 30 || Phase[1].y != 30 || Phase[1].Anz != 16)
+    InternalError(1022);
+#endif
 }
 void InitScreenData(void)
 {
