@@ -38,6 +38,9 @@ int PlatformPollOverlayCmd(void);
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 
+/* Android HUD: brief “SIEHE …” banner after long-press look. */
+void PlatformShowSieheHint(const char *object_name);
+
 /* Keyboard (DOS-style) */
 int PlatformKbhit(void);
 int PlatformShiftDown(void);

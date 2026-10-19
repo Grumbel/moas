@@ -31,6 +31,14 @@
 #include "debug.h"
 #define HIGHLIGHT 40
 
+#ifndef DOS
+/* Long-press look (SIEHE): ~500 ms hold on an object, touch-friendly. */
+#define LONGPRESS_SIEHE_MS 500u
+static unsigned int longpress_down_ms = 0;
+static short longpress_obj = -1;
+static int longpress_siehe_fired = 0;
+#endif
+
 char _sString[]=">%s<";
 char *__Benutze;
 char *__BenutzeMit;
@@ -102,6 +110,9 @@ void MouseCheck(void)
     MoasDbg(MOAS_DBG_INPUT, "L-down at %d,%d obj=%d CursorState=%d",
             (int)Mouse.x, (int)Mouse.y, (int)Mouse.ClickObject, (int)Mouse.CursorState);
 #ifndef DOS
+    longpress_down_ms = PlatformGetMillis();
+    longpress_obj = Mouse.ClickObject;
+    longpress_siehe_fired = 0;
     /*
      * No right button on touchscreens. Empty-ground left press mirrors the
      * DOS right-press walk (WalkClick). Object hits stay left-only verbs.
@@ -112,19 +123,49 @@ void MouseCheck(void)
       WalkClick(Mouse.x, Mouse.y);
 #endif
   }
+#ifndef DOS
+  /* Long-press on object → SIEHE (look), same as DOS right-click on object. */
+  if (Mouse.Left && !longpress_siehe_fired && longpress_obj != -1
+      && PlayerHasControl && Window.Status == None)
+  {
+    unsigned int held = PlatformGetMillis() - longpress_down_ms;
+    short now = WhatsAt(Mouse.x, Mouse.y);
+    if (held >= LONGPRESS_SIEHE_MS && now == longpress_obj
+        && abs(Mouse.x - Mouse.ClickX) < 12 && abs(Mouse.y - Mouse.ClickY) < 12)
+    {
+      char hint[80];
+      const char *name = DescriptionText(longpress_obj);
+      V_Verb = SIEHE;
+      DisplayMouseText(HIGHLIGHT);
+      V_Par1 = longpress_obj;
+      V_Par2 = -1;
+      if (name && name[0] && name[0] != '?')
+        snprintf(hint, sizeof(hint), "%s", name);
+      else
+        snprintf(hint, sizeof(hint), "#%d", (int)longpress_obj);
+      PlatformShowSieheHint(hint);
+      ExecuteTheProgram();
+      longpress_siehe_fired = 1;
+      MoasDbg(MOAS_DBG_INPUT, "long-press SIEHE obj=%d", (int)longpress_obj);
+    }
+  }
+#endif
   if (Mouse.Left==0 && Mouse.LastLeft==1)
   {
     Mouse.ReleaseX=Mouse.x;
     Mouse.ReleaseY=Mouse.y;
     MoasDbg(MOAS_DBG_INPUT, "L-up at %d,%d", (int)Mouse.x, (int)Mouse.y);
 #ifndef DOS
-    /*
-     * Mirror right-button release → C_WALK when idle and the click was on
-     * empty ground (ClickObject still -1 until MouseIntelligence clears it).
-     * Does not run for object use/talk/bewege (ClickObject != -1).
-     */
-    if (PlayerHasControl == 1 && Window.Status == None && Mouse.ClickObject == -1)
-    {
+    if (longpress_siehe_fired) {
+      /* Consume the release so MouseIntelligence does not also USE/TALK. */
+      Mouse.ClickObject = -1;
+      longpress_siehe_fired = 0;
+      longpress_obj = -1;
+    } else if (PlayerHasControl == 1 && Window.Status == None && Mouse.ClickObject == -1) {
+      /*
+       * Mirror right-button release → C_WALK when idle and the click was on
+       * empty ground (ClickObject still -1 until MouseIntelligence clears it).
+       */
       short PN = GetPlayerPersonNumber();
       if ((PN == MAX_PRS) || (Person[PN].StepSpeed == 0))
       {
@@ -138,6 +179,7 @@ void MouseCheck(void)
         Var[2] = T2;
       }
     }
+    longpress_obj = -1;
 #endif
   }
   if (PlayerHasControl)

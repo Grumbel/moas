@@ -9,6 +9,10 @@
 #include "debug.h"
 
 #include <SDL.h>
+#ifdef __ANDROID__
+#include <SDL_system.h>
+#include <jni.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +62,8 @@ static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
 static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
+static char          siehe_banner[48];
+static Uint32        siehe_banner_until = 0;
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
@@ -386,6 +392,26 @@ void PlatformRequestQuit(void)
 {
   running = 0;
   KeyAbortState = 2;
+#ifdef __ANDROID__
+  /*
+   * SDLActivity often keeps the window up after native main sets running=0
+   * unless the Activity is finished. Call finish() on the current Activity.
+   */
+  {
+    JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv();
+    jobject activity = (jobject)SDL_AndroidGetActivity();
+    if (env && activity) {
+      jclass cls = (*env)->GetObjectClass(env, activity);
+      if (cls) {
+        jmethodID mid = (*env)->GetMethodID(env, cls, "finish", "()V");
+        if (mid)
+          (*env)->CallVoidMethod(env, activity, mid);
+        (*env)->DeleteLocalRef(env, cls);
+      }
+      (*env)->DeleteLocalRef(env, activity);
+    }
+  }
+#endif
 }
 
 void PlatformShutdown(void)
@@ -400,11 +426,16 @@ void PlatformShutdown(void)
   if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
   if (window)   { SDL_DestroyWindow(window);     window   = NULL; }
   if (pixels)   { free(pixels);   pixels   = NULL; }
+#ifdef __ANDROID__
+  /* Full quit so SDLActivity tears down cleanly after main returns. */
+  SDL_Quit();
+#else
   /*
    * Full SDL_Quit() walks SDL's allocator and aborts if the game already
    * corrupted the heap. Tear down video only; process exit reclaims the rest.
    */
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+#endif
 }
 
 void PlatformSetPalette(const unsigned char *pal768)
@@ -653,6 +684,32 @@ int PlatformPollOverlayCmd(void)
   return c;
 }
 
+void PlatformShowSieheHint(const char *object_name)
+{
+  /* Bitmap HUD font is A–Z + space only — fold name to that alphabet. */
+  int j = 0;
+  const char *prefix = "SIEHE ";
+  while (*prefix && j < (int)sizeof(siehe_banner) - 1)
+    siehe_banner[j++] = *prefix++;
+  if (object_name) {
+    const char *p;
+    for (p = object_name; *p && j < (int)sizeof(siehe_banner) - 1; p++) {
+      char c = *p;
+      if (c >= 'a' && c <= 'z')
+        c = (char)(c - 'a' + 'A');
+      if ((c >= 'A' && c <= 'Z') || c == ' ')
+        siehe_banner[j++] = c;
+    }
+  }
+  if (j == 6) { /* only "SIEHE " */
+    siehe_banner[5] = 0;
+    j = 5;
+  }
+  siehe_banner[j] = 0;
+  siehe_banner_until = SDL_GetTicks() + 1600u;
+  MOAS_ALOG("siehe hint: %s", siehe_banner);
+}
+
 static void ov_fill_roundish(SDL_Rect *r, Uint8 R, Uint8 G, Uint8 B)
 {
   /* Fake rounded corners by stepping the fill edges in a few pixels. */
@@ -875,12 +932,42 @@ static void overlay_draw(void)
       ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
     }
   }
+  /* Long-press SIEHE feedback */
+  if (siehe_banner_until && SDL_GetTicks() < siehe_banner_until) {
+    int dx, dy, dw, dh;
+    SDL_Rect bar;
+    int ts = 2;
+    int text_w = (int)strlen(siehe_banner) * 6 * ts;
+    letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+    bar.x = dx + 10;
+    bar.y = dy + 10;
+    bar.w = text_w + 28;
+    if (bar.w > dw - 20)
+      bar.w = dw - 20;
+    if (bar.w < 80)
+      bar.w = 80;
+    bar.h = 7 * ts + 18;
+    SDL_SetRenderDrawColor(renderer, 20, 20, 20, 220);
+    SDL_RenderFillRect(renderer, &bar);
+    SDL_SetRenderDrawColor(renderer, 255, 210, 60, 255);
+    SDL_RenderDrawRect(renderer, &bar);
+    {
+      SDL_Rect in = bar;
+      in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
+      SDL_SetRenderDrawColor(renderer, 80, 60, 20, 255);
+      SDL_RenderDrawRect(renderer, &in);
+    }
+    ov_draw_text(bar.x + 14, bar.y + 9, siehe_banner, ts, 255, 255, 220);
+  } else {
+    siehe_banner_until = 0;
+  }
 }
 #else
 static int overlay_hit(int wx, int wy) { (void)wx; (void)wy; return 0; }
 static void overlay_fire(int which) { (void)which; }
 static void overlay_draw(void) { }
 int PlatformPollOverlayCmd(void) { return 0; }
+void PlatformShowSieheHint(const char *object_name) { (void)object_name; }
 #endif
 
 void PlatformPresent(void)
@@ -1137,7 +1224,8 @@ void PlatformPumpEvents(void)
             KeyAbortState = 2;
           if (k == SDLK_q ||
               (k == SDLK_c && (mod & KMOD_CTRL)) ||
-              (k == SDLK_F4 && (mod & KMOD_ALT)))
+              (k == SDLK_F4 && (mod & KMOD_ALT)) ||
+              k == SDLK_AC_BACK)
             PlatformRequestQuit();
 
           /* Feed DOS conio queue for LookKeys kbhit/getch path */
