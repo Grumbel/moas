@@ -110,10 +110,10 @@ void MouseCheck(void)
 #ifndef DOS
     suppress_left_verb = 0;
     /*
-     * Empty ground → walk (no right button on touch). Skip in LOOK mode only
-     * when an object is under the finger — empty still walks.
+     * Empty ground → walk only in USE mode. LOOK mode is look-only (no walk).
      */
-    if (PlayerHasControl && V_NoWalk == 0 && Window.Status == None
+    if (PlatformGetTouchMode() == MOAS_TOUCH_USE
+        && PlayerHasControl && V_NoWalk == 0 && Window.Status == None
         && Mouse.ClickObject == -1)
       WalkClick(Mouse.x, Mouse.y);
 #endif

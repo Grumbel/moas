@@ -275,7 +275,7 @@ On Android there is no right button. The HUD adds **USE** / **LOOK** mode toggle
 | Mode | Empty ground | Object |
 |------|----------------|--------|
 | **USE** (default) | Walk | Use / talk / grab+pull (same as desktop left-click) |
-| **LOOK** | Walk | **Siehe** (look) — same as desktop right-click on object |
+| **LOOK** | (no walk) | **Siehe** (look) — same as desktop right-click on object |
 
 A short **SIEHE …** banner confirms look. Pull (`Bewege`) only runs in **USE** mode.  
 Arrow keys still work with a keyboard. **Back** exits the activity fully.
