@@ -487,6 +487,9 @@ int LoadGameSlot(short slot);
 int SaveGameToFile(const char *path, int quiet);
 int SaveGameSlot(short slot);
 void MoasAutosaveOnExit(void);
+#ifndef DOS
+void MoasRegisterStaticNames(void);
+#endif
 int MoasTryLoadAutosave(void);
 void LoadMusic(short Num);
 void LoadPack(void);

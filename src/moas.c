@@ -96,7 +96,10 @@ int main(int argc, char **argv)
 #endif
       return 1;
     }
-    /* World state restored; skip intro. Names need session RAM or script re-run. */
+#ifndef DOS
+    if (AnzDescription == 0)
+      MoasRegisterStaticNames();
+#endif
   } else if (MoasTryLoadAutosave() == 0) {
     /* GAME9.SAV exit resume (same slot as AutoSaveGame). */
     MoasDbg(MOAS_DBG_LOAD, "restored exit autosave (slot 9)");
@@ -649,6 +652,48 @@ void AddDescription(short Num,char *Text)
   Description[c].Number=Num;
   if (++AnzDescription>=500) InternalError(1036);
 }
+
+#ifndef DOS
+/*
+ * Program 0 opens with the full static name table:
+ *   var_set (skip) → add_description* → add_power_parse* → more var_set (skip) → story…
+ * Disassembled with moas-util disasm 0. Cold load never runs that prefix, so
+ * Description[] stays empty and WhatsAt/DescriptionText break. Replay only
+ * opcodes 65/62; do not apply var_set (would overwrite the loaded save).
+ */
+void MoasRegisterStaticNames(void)
+{
+  unsigned char *Prg;
+  unsigned short Adresse = 0;
+  short *Parameter;
+  int n_desc = 0, n_parse = 0;
+
+  LadeProgramm(0);
+  Prg = Programm[0].Data;
+  if (!Prg)
+    return;
+
+  while (Adresse < Programm[0].Length) {
+    unsigned char op = Prg[Adresse];
+    Parameter = (short *)(Prg + 1 + Adresse);
+    if (op == 65) { /* AddDescription */
+      AddDescription(Parameter[0], UnPack((unsigned char *)&Parameter[1]));
+      Adresse = (unsigned short)(Adresse + 4 + strlen((char *)&Parameter[1]));
+      n_desc++;
+    } else if (op == 62) { /* AddPowerParse */
+      AddPowerParse(Parameter[0], UnPack((unsigned char *)&Parameter[1]));
+      Adresse = (unsigned short)(Adresse + 4 + strlen((char *)&Parameter[1]));
+      n_parse++;
+    } else if (op == 38) { /* SetVar const — skip, do not apply */
+      Adresse = (unsigned short)(Adresse + 5);
+    } else {
+      break;
+    }
+  }
+  fprintf(stderr, "moas: static names from prog0: %d descriptions, %d verb strings (AnzDescription=%d)\n",
+          n_desc, n_parse, (int)AnzDescription);
+}
+#endif
 void RemoveStatists(void)
 {
   register short c;

@@ -895,10 +895,8 @@ int LoadGameSlot(short slot)
  * Exit/resume autosave uses the original engine path: slot 9 (GAME9.SAV),
  * same as AutoSaveGame → SaveGame(1). No separate file, no format change.
  *
- * Note: Description[] / WalkArea[] are script RAM, never in .SAV. Mid-session
- * LoadGame keeps them in memory; a cold process restart does not. After a
- * cold load we re-run the ambient script procs so AddDescription can fire
- * again (AddDescription is idempotent on non-DOS).
+ * Description[] is script RAM (prog 0 static table), never in .SAV.
+ * Cold load calls MoasRegisterStaticNames() to replay only those opcodes.
  */
 #define MOAS_AUTOSAVE_SLOT 9
 
@@ -937,21 +935,9 @@ int MoasTryLoadAutosave(void)
     return -1;
   }
 #ifndef DOS
-  /*
-   * Cold start: InitAll left Description empty. Same .SAV as a mid-session
-   * load, but RAM never had AddDescription. Re-run proc 1 and CurrentProc
-   * from addr 0 (ExecuteTheProgram order) so room/global setup can register
-   * names again. AddDescription replaces on duplicate (non-DOS).
-   */
-  if (AnzDescription == 0) {
-    fprintf(stderr, "moas: cold resume — re-running scripts to register objects\n");
-    (void)Execute(1, 0);
-    if (AnzDescription == 0 && CurrentProc >= 0)
-      (void)Execute(CurrentProc, 0);
-    if (AnzDescription == 0)
-      (void)Execute(2, 0);
-    fprintf(stderr, "moas: after script re-run AnzDescription=%d\n", (int)AnzDescription);
-  }
+  /* Prog 0 global name table (moas-util disasm 0) — not stored in .SAV. */
+  if (AnzDescription == 0)
+    MoasRegisterStaticNames();
 #endif
   return 0;
 }
