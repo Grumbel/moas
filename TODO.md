@@ -32,9 +32,12 @@
 
 ## Input
 - Cursor tracks inside windows; blocking getch(); click timeout in seconds
+- Bewege (grab+pull) directional arrow cursor: VMouse now draws Phase[1]
+  when Mouse.BewegeMode != -1 (was DOS-only in PowerRedrawArea)
 
 ## Still open
 - Speech channel (SpeechData) wiring if used
 - PowerBlend / WalkNLayers
 - Android asset data path
 - Verify Windows MinGW and R36S device builds
+- Confirm Bewege arrow frames (Phase[1], 16 directions) look correct in-game

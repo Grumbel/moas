@@ -354,39 +354,95 @@ char *DescriptionText(short Num)
 }
 void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
 {
-  register unsigned short x,y;
-  unsigned static ox,oy,State=0;
+  register short x,y;
+  static short ox,oy,State=0;
   static short last_frame = -1;
+  static char last_bewege = -2;
+  static short save_x,save_y,saved_w,saved_h;
   short frame_off;
+  short cx,cy,cw,ch,stride;
+  unsigned char *src;
+  char use_bewege;
 
   if (!VMouseBuf || !Phase || !Phase[0].Data)
     return;
 
   /*
-   * Match PowerRedrawArea cursor choice:
-   *   no control → frame @ 3520 (wait / inactive)
-   *   control    → frame @ 1760 * ThingAtCursor (hotspot vs normal)
+   * Match PowerRedrawArea cursor choice (DOS):
+   *   BewegeMode != -1 → Phase[1] directional pull/grab arrow (30x30,
+   *     hotspot at centre, frames @ 900 * BewegeMode, modes 0..15)
+   *   no control       → Phase[0] frame @ 3520 (wait / inactive)
+   *   control          → Phase[0] frame @ 1760 * ThingAtCursor
    */
-  if (!PlayerHasControl)
-    frame_off = 3520;
+  use_bewege = (Mouse.BewegeMode != -1 && Phase[1].Data != NULL);
+  if (use_bewege)
+  {
+    cx = (short)(Mouse.x - 15);
+    cy = (short)(Mouse.y - 15);
+    cw = 30;
+    ch = 30;
+    frame_off = (short)(900 * (short)Mouse.BewegeMode);
+    src = Phase[1].Data;
+    stride = 30;
+  }
   else
-    frame_off = (short)(1760 * (ThingAtCursor ? 1 : 0));
+  {
+    cx = Mouse.x;
+    cy = Mouse.y;
+    cw = 44;
+    ch = 40;
+    if (!PlayerHasControl)
+      frame_off = 3520;
+    else
+      frame_off = (short)(1760 * (ThingAtCursor ? 1 : 0));
+    src = Phase[0].Data;
+    stride = 44;
+  }
 
   if (Type==1 && State==0)
   {
-    for (y=0;y<40 && y+Mouse.y<200;y++)
-      memcpy(VMouseBuf+y*44,VGA_ADRESSE+Mouse.x+(Mouse.y+y)*320,44);
+    save_x = cx;
+    save_y = cy;
+    saved_w = cw;
+    saved_h = ch;
+    for (y=0; y<ch; y++)
+    {
+      short sy = (short)(cy + y);
+      if (sy < 0 || sy >= 200)
+        continue;
+      for (x=0; x<cw; x++)
+      {
+        short sx = (short)(cx + x);
+        if (sx < 0 || sx >= 320)
+          continue;
+        VMouseBuf[y*44 + x] = (unsigned char)(VGA_ADRESSE)[sx + sy*320];
+      }
+    }
     if (V_CursorState==1)
-      for (y=0;y<40 && y+Mouse.y<200;y++)
-        for (x=0;x<44 && x+Mouse.x<320;x++)
-          if (Phase[0].Data[x+y*44+frame_off])
-            (VGA_ADRESSE)[x+Mouse.x+(y+Mouse.y)*320]=Phase[0].Data[x+y*44+frame_off];
+      for (y=0; y<ch; y++)
+      {
+        short sy = (short)(cy + y);
+        if (sy < 0 || sy >= 200)
+          continue;
+        for (x=0; x<cw; x++)
+        {
+          short sx = (short)(cx + x);
+          unsigned char pix;
+          if (sx < 0 || sx >= 320)
+            continue;
+          pix = src[x + y*stride + frame_off];
+          if (pix)
+            (VGA_ADRESSE)[sx + sy*320] = pix;
+        }
+      }
     last_frame = frame_off;
+    last_bewege = Mouse.BewegeMode;
     State=1;
   }
   if (Type==2)
   {
-    if (Mouse.x!=ox || Mouse.y!=oy || last_frame != frame_off)
+    if (Mouse.x!=ox || Mouse.y!=oy || last_frame != frame_off
+        || last_bewege != Mouse.BewegeMode)
     {
       VMouse(3);
       VMouse(1);
@@ -394,7 +450,19 @@ void VMouse(short Type) /* 1=Create, 2=Update, 3=Remove */
   }
   if (Type==3 && State==1)
   {
-    for (y=0;y<40 && y+oy<200;y++) memcpy(VGA_ADRESSE+ox+(oy+y)*320,VMouseBuf+y*44,44);
+    for (y=0; y<saved_h; y++)
+    {
+      short sy = (short)(save_y + y);
+      if (sy < 0 || sy >= 200)
+        continue;
+      for (x=0; x<saved_w; x++)
+      {
+        short sx = (short)(save_x + x);
+        if (sx < 0 || sx >= 320)
+          continue;
+        (VGA_ADRESSE)[sx + sy*320] = VMouseBuf[y*44 + x];
+      }
+    }
     State=0;
   }
   ox=Mouse.x;
