@@ -113,7 +113,7 @@ static char *xstrdup_local(const char *s)
   return p;
 }
 
-/* Minimal CP850 → UTF-8 for lookup keys. */
+/* CP850 → UTF-8 for lookup keys (German umlauts + common punct). */
 static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
 {
   size_t o = 0;
@@ -133,8 +133,14 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
       case 0x99: u = "Ö"; break;
       case 0x9a: u = "Ü"; break;
       case 0xe1: u = "ß"; break;
+      /* acute/grave often used as apostrophe-like in DOS text */
+      case 0xb4: u = "'"; break; /* ´ */
+      case 0x60: u = "'"; break; /* ` as apostrophe */
+      case 0xa8: u = '"'; break; /* ¨ */
       case '\n': u = "\n"; break;
       default:
+        /* keep byte as-is if it is a single-byte that might match keys poorly —
+         * prefer '?' only for truly unknown high bytes */
         out[o++] = '?';
         continue;
     }
@@ -144,20 +150,33 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
   out[o] = 0;
 }
 
-/* UTF-8 → CP850 for values shown with the game font (ASCII + German extras). */
+/*
+ * UTF-8 → bytes the bitmap font can show (CharAvail in print.c):
+ *   A-Z ÄÖÜß  - .!?,:;' " 0-9 <>()[]  a-z äöü
+ * Smart quotes/dashes/ellipsis collapse to ASCII so they are not drawn as '?'.
+ */
 static void utf8_to_cp850(const char *in, char *out, size_t outsz)
 {
   size_t o = 0;
   const unsigned char *p = (const unsigned char *)in;
   while (*p && o + 1 < outsz) {
     if (*p < 0x80) {
-      out[o++] = (char)*p++;
+      unsigned char c = *p++;
+      /* glyphs not in CharAvail → nearest safe ASCII */
+      if (c == '_' || c == '@')
+        c = ' ';
+      else if (c == '`' || c == '\xb4')
+        c = '\'';
+      else if (c == '#' || c == '$' || c == '%' || c == '&' || c == '*'
+               || c == '+' || c == '/' || c == '=' || c == '\\' || c == '^'
+               || c == '{' || c == '}' || c == '|' || c == '~')
+        c = ' ';
+      out[o++] = (char)c;
       continue;
     }
-    /* 2-byte UTF-8 */
     if ((p[0] & 0xe0) == 0xc0 && p[1]) {
       unsigned int cp = ((p[0] & 0x1f) << 6) | (p[1] & 0x3f);
-      unsigned char c = '?';
+      unsigned char c = 0;
       if (cp == 0xe4) c = 0x84;      /* ä */
       else if (cp == 0xf6) c = 0x94; /* ö */
       else if (cp == 0xfc) c = 0x81; /* ü */
@@ -165,18 +184,39 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
       else if (cp == 0xd6) c = 0x99; /* Ö */
       else if (cp == 0xdc) c = 0x9a; /* Ü */
       else if (cp == 0xdf) c = 0xe1; /* ß */
+      else if (cp == 0xa0) c = ' ';  /* nbsp */
+      else if (cp == 0xb4 || cp == 0x60) c = '\'';
+      else
+        c = ' '; /* unknown Latin-1-ish → space, not '?' */
       out[o++] = (char)c;
       p += 2;
       continue;
     }
-    /* skip other sequences */
-    if ((p[0] & 0xf0) == 0xe0 && p[1] && p[2])
+    if ((p[0] & 0xf0) == 0xe0 && p[1] && p[2]) {
+      unsigned int cp = ((p[0] & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
+      const char *rep = " ";
+      if (cp == 0x2018 || cp == 0x2019 || cp == 0x201a || cp == 0x2032)
+        rep = "'";
+      else if (cp == 0x201c || cp == 0x201d || cp == 0x201e || cp == 0x2033)
+        rep = "\"";
+      else if (cp == 0x2013 || cp == 0x2014 || cp == 0x2212)
+        rep = "-";
+      else if (cp == 0x2026)
+        rep = "...";
+      while (*rep && o + 1 < outsz)
+        out[o++] = *rep++;
       p += 3;
-    else if ((p[0] & 0xf8) == 0xf0 && p[1] && p[2] && p[3])
+      continue;
+    }
+    if ((p[0] & 0xf8) == 0xf0 && p[1] && p[2] && p[3]) {
       p += 4;
-    else
-      p++;
-    out[o++] = '?';
+      if (o + 1 < outsz)
+        out[o++] = ' ';
+      continue;
+    }
+    p++;
+    if (o + 1 < outsz)
+      out[o++] = ' ';
   }
   out[o] = 0;
 }
