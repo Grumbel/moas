@@ -203,6 +203,73 @@ cmake -S . -B build && cmake --build build --target moas-util
 - **disasm** — linear disassembly of **prog** scripts using the engine’s
   opcode map; packed strings decoded via `GAME.PCK`
 
+## Controls
+
+### Save and load
+
+| Key | Action |
+|-----|--------|
+| **F5** | Open the **save** menu (“Speichern”) |
+| **F7** | Open the **load** menu (“Laden”) |
+
+On the menu, **click a slot** (small framed boxes on the left/right). Slot **9** is reserved for **autosave** and cannot be chosen manually for save.
+
+Save files are named `GAME0.SAV` … `GAME9.SAV` under the **state directory** (printed at startup), for example:
+
+```text
+~/.local/state/moas/GAME0.SAV
+```
+
+Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).  
+DOSBox runners persist to `~/.local/state/moas-dos` / `moas-dos-original`.
+
+**Load:** press **F7**, then click a slot that shows a thumbnail (empty slots do nothing useful).  
+**Save:** press **F5**, then click an empty or occupied slot (0–8).
+
+You need **player control** and no dialogue window open (`Window.Status == None`); during cutscenes or forced walks these keys are ignored.
+
+### Mouse
+
+| Action | Effect |
+|--------|--------|
+| **Left click** | Walk / interact / choose UI |
+| **Right click** | Context / alternate action (also **S** key) |
+| **Drag (grab+pull)** | Bewege mode — cursor becomes a **directional arrow** |
+
+### Movement and inventory
+
+| Key | Action |
+|-----|--------|
+| **Arrow keys** / **Home/End/PgUp/PgDn** | Walk in that direction (when idle) |
+| **Keypad 5** | Stop directional cursor nudge |
+| **Tab** | Toggle inventory bar |
+| **Space** / **Enter** | Advance dialogue / confirm (also used with on-screen prompts) |
+| **S** | Same as right mouse button (when you have control) |
+| **;** (semicolon) | “Use” verb shortcut (`BENUTZE`) when you have control |
+| **F10** | File menu (when the window layout allows it) |
+| **Esc** | Abort only when the game has armed abort (`KeyAbortState`); does not quit the app by itself |
+| **Q** / **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
+
+### Master / debug keys
+
+Enable master mode only if the environment variable **`THPRIV`** is set, then press **T** (scancode path) to toggle `V_Master`.
+
+When master mode is on:
+
+| Key | Action |
+|-----|--------|
+| **P** | Show mouse coordinates |
+| **1** | Full screen redraw |
+| **2** | Outline walk/label markers (`ShowMarker`) |
+| **I** / **J** | Blit `Info1` / `Info2` overlays |
+| **P** (scancode 25) | Redraw all persons |
+| **B** | Free some memory (debug) |
+| **#** | Hercules debug dump (stderr on non-DOS) |
+| **-** | Export label rectangle tool (console prompt) |
+
+These are developer tools from the original engine, not needed for normal play.
+
+
 ## Command-line options (game)
 
 ```text
