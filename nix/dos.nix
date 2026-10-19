@@ -114,7 +114,7 @@ EOR
 [sdl]
 fullscreen=false
 output=texture
-autolock=false
+autolock=true
 
 [dosbox]
 machine=svga_s3
@@ -129,6 +129,13 @@ cycles=max
 [mixer]
 nosound=false
 rate=44100
+
+[mouse]
+# Original MOAS pins INT33 at (100,100) and scales deltas — high host
+# sensitivity collapses that to 1:1 and feels unusable under DOSBox.
+sensitivity=40
+# Keep host pointer captured so INT 33 gets relative motion
+mouse_emulation=locked
 
 [sblaster]
 sbtype=sb16

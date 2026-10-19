@@ -227,3 +227,21 @@ Not DOS ifdefs; the replacement layer. Notable ready hooks not yet wired from ga
 
 ToggleScreen, ShowMarker, ShowHercBak, Bewege cursor, and TeakEffekt are ported.
 Everything else under `#ifdef DOS` is either replaced by the platform layer, intentionally stubbed (SB/DMA/IRQ), or debug/error-path only.
+
+## Mouse under DOS / DOSBox (2026-10)
+
+Original `MouseRead` pins the INT 33 cursor at (100,100), reads the delta,
+and divides by adaptive `MouseDivX/Y` (starts 30000, shrinks to min nonzero
+delta). On real hardware that yields a usable scale. Under DOSBox/DOSBox-X the
+host reports large pixel-like deltas so Div collapses to **1** → hyperspeed
+(same behaviour with the historical `GAME.EXE`).
+
+Mitigations in this tree:
+- Floor `MouseDiv` at 4 so emulators stay playable
+- Init `x,y` to 0 when the driver is absent (was uninitialised)
+- DOSBox-X runner: `sensitivity=40`, `autolock=true`, `mouse_emulation=locked`
+
+Soft cursor is still drawn by **PowerRedrawArea** (baked into the blit) when
+`Window.Status==None`, not by a hardware sprite. Capture the mouse in the
+emulator (click the window / Ctrl-F10 depending on build) so INT 33 receives
+motion.

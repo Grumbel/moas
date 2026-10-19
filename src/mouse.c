@@ -139,10 +139,18 @@ short IsMousePresent(void)
 void MouseRead(void)
 {
 #ifdef DOS
+  /*
+   * Original relative-mouse trick: pin hardware cursor at (100,100), read
+   * delta, divide by adaptive MouseDiv.  On real mice MouseDiv settles to a
+   * few mickeys.  DOSBox reports large pixel-like deltas and collapses Div
+   * to 1 → hyperspeed.  Floor Div so emulators stay usable; still matches
+   * the original algorithm otherwise.
+   */
   static short MouseDivX=30000,MouseDivY=30000,LastX=-1000,LastY=-1000;
-  short x,y,ox,oy;
+  short x=0,y=0,ox,oy;
   union REGS Regs;
 
+  Regs.w.bx=0;
   if (IsMousePresent())
   {
     Regs.w.ax=3;
@@ -150,19 +158,22 @@ void MouseRead(void)
     x=((short)(Regs.w.cx))-100;
     y=((short)(Regs.w.dx))-100;
     SetMousePos(100,100);
-  } else Regs.w.bx=0;
+  }
 
   ox=Mouse.x-15;
   oy=Mouse.y-15;
-  Mouse.x+=x/MouseDivX;
-  Mouse.y+=y/MouseDivY;
+  if (MouseDivX > 0) Mouse.x+=(short)(x/MouseDivX);
+  if (MouseDivY > 0) Mouse.y+=(short)(y/MouseDivY);
   if (Mouse.x<0) Mouse.x=0;    if (Mouse.x>319) Mouse.x=319;
   if (Mouse.y<0) Mouse.y=0;    if (Mouse.y>199) Mouse.y=199;
   if (Window.Status==None) PowerRedrawArea(min(Mouse.x-15,ox),min(Mouse.y-15,oy),max(Mouse.x-15,ox)+59,max(Mouse.y-15,oy)+55);
                       else VMouse(2);
 
-  if (LastX!=x && abs(LastX-x)<MouseDivX) MouseDivX=abs(LastX-x);
-  if (LastY!=y && abs(LastY-y)<MouseDivY) MouseDivY=abs(LastY-y);
+  if (LastX!=x && abs(LastX-x)<MouseDivX && abs(LastX-x)>0) MouseDivX=abs(LastX-x);
+  if (LastY!=y && abs(LastY-y)<MouseDivY && abs(LastY-y)>0) MouseDivY=abs(LastY-y);
+  /* Emulator floor: real HW rarely settles below ~3–5 mickeys per poll. */
+  if (MouseDivX < 4) MouseDivX = 4;
+  if (MouseDivY < 4) MouseDivY = 4;
 
   LastX=x;  Mouse.LastLeft=Mouse.Left;
   LastY=y;  Mouse.LastRight=Mouse.Right;
