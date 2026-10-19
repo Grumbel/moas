@@ -27,6 +27,11 @@
 #define MOAS_ALOG(...) ((void)0)
 #endif
 
+#ifndef DOS
+/* io.c — write AUTOSAVE.SAV; safe once Screen is allocated. */
+extern void MoasAutosaveOnExit(void);
+#endif
+
 /* Minimal declarations of the globals we touch (defined elsewhere). */
 typedef unsigned char uChar;
 extern uChar *Screen;
@@ -453,8 +458,38 @@ int PlatformShouldQuit(void)
   return running ? 0 : 1;
 }
 
+/*
+ * Persist AUTOSAVE.SAV before the process may be killed.
+ * Swiping the task away often never returns to main()'s post-loop
+ * MoasAutosaveOnExit — background / terminating / RequestQuit must save here.
+ */
+static void platform_try_autosave(const char *reason)
+{
+#ifndef DOS
+  static int in_save;
+
+  if (in_save)
+    return;
+  if (!Screen) {
+    MOAS_ALOG("autosave skipped (%s): Screen not ready", reason ? reason : "?");
+    return;
+  }
+  in_save = 1;
+  MOAS_ALOG("autosave (%s)", reason ? reason : "exit");
+#ifdef __ANDROID__
+  SDL_Log("moas: autosave trigger: %s", reason ? reason : "exit");
+#endif
+  MoasAutosaveOnExit();
+  in_save = 0;
+#else
+  (void)reason;
+#endif
+}
+
 void PlatformRequestQuit(void)
 {
+  /* Save before finish() — Android may kill us before main() exits the loop. */
+  platform_try_autosave("request-quit");
   running = 0;
   KeyAbortState = 2;
 #ifdef __ANDROID__
@@ -1139,6 +1174,23 @@ void PlatformPumpEvents(void)
       case SDL_QUIT:
         PlatformRequestQuit();
         break;
+#ifdef __ANDROID__
+      /*
+       * Swipe-away / Home: process is often killed after onPause without
+       * returning to main()'s exit path. Save immediately on background
+       * and on terminating so AUTOSAVE.SAV exists for the next cold start.
+       */
+      case SDL_APP_WILLENTERBACKGROUND:
+        platform_try_autosave("will-enter-background");
+        break;
+      case SDL_APP_DIDENTERBACKGROUND:
+        platform_try_autosave("did-enter-background");
+        break;
+      case SDL_APP_TERMINATING:
+        platform_try_autosave("terminating");
+        PlatformRequestQuit();
+        break;
+#endif
       case SDL_MOUSEMOTION: {
         short mx, my;
         mouse_to_logical(ev.motion.x, ev.motion.y, &mx, &my);
