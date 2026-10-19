@@ -41,7 +41,7 @@ const char *Ui(int id);
 /* Parse --lang / MOAS_LANG (call from MoasParseArgs). */
 void LangSetCode(const char *code);
 
-/* Load lang/<code>.po
+/* Load lang/<code>.po after datadir is known. Re-points verb globals. */
 void LangInit(void);
 
 /* After UnPack: if a translation exists, return CP850 bytes for the font. */

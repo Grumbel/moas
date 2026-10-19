@@ -585,11 +585,9 @@ void LangInit(void)
   /* Runtime language pack: only lang/<code>.po */
   if (open_lang_file(path, sizeof(path), "po") == 0) {
     load_po_file(path);
-    fprintf(stderr, "moas: lang %s (%d translated script lines)
-", path, script_n);
+    fprintf(stderr, "moas: lang %s (%d translated script lines)\n", path, script_n);
   } else {
-    fprintf(stderr, "moas: lang: missing lang/%s.po — UI/scripts stay German
-",
+    fprintf(stderr, "moas: lang: missing lang/%s.po - UI/scripts stay German\n",
             lang_code);
   }
 
