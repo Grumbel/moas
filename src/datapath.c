@@ -287,10 +287,19 @@ static void resolve_state_dir(void)
 #elif defined(__ANDROID__)
   {
     const char *base = getenv("MOAS_STATEDIR");
-    if (!base || !base[0])
+    if (base && base[0]) {
+      /* Explicit state dir (set by PlatformAndroidPrepareData). */
+      strncpy(state_dir, base, sizeof(state_dir) - 1);
+      state_dir[sizeof(state_dir) - 1] = 0;
+    } else {
+      /* Ensure data_dir is resolved before using it as the parent. */
+      (void)MoasDataDir();
       base = data_dir[0] ? data_dir : ".";
-    snprintf(state_dir, sizeof(state_dir), "%s/moas-state", base);
-    moas_mkdir_p(state_dir);
+      snprintf(state_dir, sizeof(state_dir), "%s/moas-state", base);
+    }
+    if (moas_mkdir_p(state_dir) != 0)
+      data_log("moas: WARNING: could not create Android state dir '%s'", state_dir);
+    data_log("moas: Android state dir: %s", state_dir);
   }
 #elif defined(_WIN32)
   {

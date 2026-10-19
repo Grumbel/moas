@@ -848,6 +848,26 @@ int LoadGameFromFile(const char *path)
   if (V_InventarState)
     TurnInventar(1);
   Blend(4, 1);
+
+  /*
+   * Soft-cursor / control state is not fully part of the save blob. After a
+   * load the VMouse statics and ThingAtCursor often lag — hover highlight
+   * looks dead until the player clicks. Re-arm the same defaults as InitVars.
+   */
+  Window.Status = None;
+  PlayerHasControl = 1;
+  WalkingAllowed = 1;
+  V_CursorState = 1;
+  Mouse.CursorState = 1;
+  Mouse.BewegeMode = -1;
+  Mouse.Left = Mouse.Right = Mouse.Middle = 0;
+  Mouse.LastLeft = Mouse.LastRight = Mouse.LastMiddle = 0;
+  Mouse.ClickObject = -1;
+  ThingAtCursor = (WhatsAt(Mouse.x, Mouse.y) != -1);
+#ifndef DOS
+  VMouse(3);
+  VMouse(1);
+#endif
   fprintf(stderr, "moas: loaded save '%s'\n", path);
   return 0;
 }

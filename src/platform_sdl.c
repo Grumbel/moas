@@ -310,9 +310,24 @@ void PlatformAndroidPrepareData(void)
 
   if (setenv("MOAS_DATADIR", dest_dir, 1) != 0)
     SDL_Log("setenv MOAS_DATADIR failed");
-  else
+  else {
     MOAS_ALOG("MOAS_DATADIR=%s", dest_dir);
     SDL_Log("MOAS_DATADIR=%s", dest_dir);
+  }
+  /* Savegames / AUTOSAVE under internal storage (writable). */
+  {
+    char state_dir[512];
+    snprintf(state_dir, sizeof(state_dir), "%s/moas-state", dest_dir);
+    if (mkdir(state_dir, 0755) != 0) {
+      /* EEXIST is fine */
+    }
+    if (setenv("MOAS_STATEDIR", state_dir, 1) != 0)
+      SDL_Log("setenv MOAS_STATEDIR failed");
+    else {
+      MOAS_ALOG("MOAS_STATEDIR=%s", state_dir);
+      SDL_Log("MOAS_STATEDIR=%s", state_dir);
+    }
+  }
 }
 #else
 void PlatformAndroidPrepareData(void) { /* no-op on non-Android */ }
@@ -393,8 +408,8 @@ void PlatformRequestQuit(void)
   KeyAbortState = 2;
 #ifdef __ANDROID__
   /*
-   * SDLActivity often keeps the window up after native main sets running=0
-   * unless the Activity is finished. Call finish() on the current Activity.
+   * finish() alone can leave the task and relaunch SDLActivity. Prefer
+   * finishAndRemoveTask (API 21+) then finish(); native main still returns.
    */
   {
     JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv();
@@ -402,7 +417,9 @@ void PlatformRequestQuit(void)
     if (env && activity) {
       jclass cls = (*env)->GetObjectClass(env, activity);
       if (cls) {
-        jmethodID mid = (*env)->GetMethodID(env, cls, "finish", "()V");
+        jmethodID mid = (*env)->GetMethodID(env, cls, "finishAndRemoveTask", "()V");
+        if (!mid)
+          mid = (*env)->GetMethodID(env, cls, "finish", "()V");
         if (mid)
           (*env)->CallVoidMethod(env, activity, mid);
         (*env)->DeleteLocalRef(env, cls);

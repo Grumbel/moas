@@ -69,6 +69,18 @@ void InternalError(short num)
   _dos_setvect(0x9,RealIrq9);
   _dos_setvect(0x8,RealIrq1c);
 #endif
+  /*
+   * num==0 is the intentional “quit” path (Alt+Q / case 16). Must not skip
+   * Android Activity.finish() — bare exit() leaves a dead window that relaunches.
+   */
+  if (num == 0) {
+#ifndef DOS
+    MoasAutosaveOnExit();
+    PlatformRequestQuit();
+    PlatformShutdown();
+#endif
+    exit(0);
+  }
   exit(-1);
 }
 /*********
@@ -233,7 +245,11 @@ void LookKeys(void)
                  Mouse.Right=1;  break;
       case 0:switch((V_Keyboard=getch()+1000)-1000)
              {
+#ifndef DOS
+               case 16 : PlatformRequestQuit(); break;
+#else
                case 16 :InternalError(0);
+#endif
                //case '>':V_Play=1; StartSoundProcessing(); break;  /*F4*/
                case 'D':if (Window.Status==None || Window.x1>115 || Window.y2<142) FileMenu();
                         break;
