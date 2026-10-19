@@ -70,6 +70,7 @@ static SDL_GameController *pad = NULL;
 static int           pad_use = 0;   /* RT → left click */
 static int           pad_look = 0;  /* LT → right click */
 static int           pad_walk_cooldown = 0;
+static int           pad_aiming = 0; /* 1: soft cursor owned by right stick */
 static int           phys_left = 0, phys_right = 0, phys_middle = 0;
 #ifndef DOS
 extern void MoasPadWalk(int ax, int ay);
@@ -1291,18 +1292,30 @@ static void pad_apply(void)
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_DOWN))
     walk_y = 32767;
 
-  /* Right stick → soft cursor (pixels per frame at full deflection). */
+  /*
+   * Right stick → relative cursor. Warp the OS pointer so release does not
+   * snap back via sync_mouse_position() to the old physical position.
+   * Speed scales with deflection (gentle near centre, faster at the edge).
+   */
   dx = axis_dead(rx, stick_dead);
   dy = axis_dead(ry, stick_dead);
   if (dx || dy) {
-    int mx = (int)Mouse.x + (dx * 6) / 32767;
-    int my = (int)Mouse.y + (dy * 6) / 32767;
+    int mx, my;
+    /* |d|/32767 in 0..1; use squared response for finer aim near centre. */
+    float fx = (float)dx / 32767.0f;
+    float fy = (float)dy / 32767.0f;
+    float sx = fx * (0.35f + 0.65f * (fx < 0 ? -fx : fx));
+    float sy = fy * (0.35f + 0.65f * (fy < 0 ? -fy : fy));
+    mx = (int)Mouse.x + (int)(sx * 14.0f);
+    my = (int)Mouse.y + (int)(sy * 14.0f);
     if (mx < 0) mx = 0;
     if (my < 0) my = 0;
     if (mx > LOGICAL_W - 1) mx = LOGICAL_W - 1;
     if (my > LOGICAL_H - 1) my = LOGICAL_H - 1;
     Mouse.x = (short)mx;
     Mouse.y = (short)my;
+    pad_aiming = 1;
+    PlatformSetMousePos(Mouse.x, Mouse.y);
   }
 
   use = (rt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
@@ -1382,6 +1395,9 @@ void PlatformPumpEvents(void)
 #endif
       case SDL_MOUSEMOTION: {
         short mx, my;
+        /* Physical mouse motion takes ownership back from the stick. */
+        if (ev.motion.xrel != 0 || ev.motion.yrel != 0)
+          pad_aiming = 0;
         mouse_to_logical(ev.motion.x, ev.motion.y, &mx, &my);
         Mouse.x = mx;
         Mouse.y = my;
@@ -1565,18 +1581,12 @@ void PlatformPumpEvents(void)
     }
   }
   /*
-   * OS mouse sample when the right stick is idle so pad cursor aim is not
-   * overwritten every frame. Buttons are merged in pad_apply.
+   * Do not resync from the OS pointer while the right stick owns the cursor
+   * (including after release — otherwise the soft cursor snaps back). Physical
+   * mouse motion clears pad_aiming in SDL_MOUSEMOTION.
    */
-  {
-    int rs_x = 0, rs_y = 0;
-    if (pad) {
-      rs_x = axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTX), 8000);
-      rs_y = axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTY), 8000);
-    }
-    if (!rs_x && !rs_y)
-      sync_mouse_position();
-  }
+  if (!pad_aiming)
+    sync_mouse_position();
   pad_apply();
 #ifdef __EMSCRIPTEN__
   wasm_pause_spin();
