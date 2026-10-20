@@ -28,6 +28,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#if defined(_WIN32)
+#include <direct.h>
+#endif
 
 #pragma pack(push, 1)
 typedef struct {
@@ -283,7 +286,11 @@ static int mkdir_p(const char *path)
 {
   struct stat st;
   if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) return 0;
+#if defined(_WIN32)
+  if (_mkdir(path) == 0) return 0;
+#else
   if (mkdir(path, 0755) == 0) return 0;
+#endif
   return -1;
 }
 

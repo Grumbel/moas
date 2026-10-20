@@ -33,7 +33,8 @@ static inline int getch(void) { return PlatformGetch(); }
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
-/* Borland / MSC helpers */
+/* Borland / MSC helpers — MinGW already declares itoa/ltoa/filelength. */
+#if !defined(_WIN32)
 static inline char *itoa(int value, char *str, int base) {
   if (base == 10) sprintf(str, "%d", value);
   else if (base == 16) sprintf(str, "%x", value);
@@ -50,8 +51,26 @@ static inline long filelength(int fd) {
   if (fstat(fd, &st) == 0) return (long)st.st_size;
   return -1L;
 }
+#endif
 static inline void _setcolor(short c) { (void)c; }
 static inline unsigned long _memmax(void) { return 0; }
+
+/* POSIX setenv — not in MinGW CRT; used by CLI --datadir / --statedir.
+ * _putenv keeps the string; do not free the buffer. */
+#if defined(_WIN32)
+static inline int setenv(const char *name, const char *value, int overwrite)
+{
+  if (!name || !value) return -1;
+  if (!overwrite && getenv(name) != NULL) return 0;
+  size_t nlen = strlen(name), vlen = strlen(value);
+  char *buf = (char *)malloc(nlen + vlen + 2);
+  if (!buf) return -1;
+  memcpy(buf, name, nlen);
+  buf[nlen] = '=';
+  memcpy(buf + nlen + 1, value, vlen + 1);
+  return _putenv(buf);
+}
+#endif
 
 /* Case-insensitive open for DOS-era filenames on case-sensitive filesystems. */
 static inline int open_ci(const char *path, int flags, ...)

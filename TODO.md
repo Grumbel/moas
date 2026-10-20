@@ -2,6 +2,13 @@
 
 
 
+
+## Windows MinGW (2026-10-20)
+- Site build failed on win32: compat.h `itoa`/`ltoa`/`filelength` conflict with MinGW CRT;
+  `setenv` implicit decl; moas-util `mkdir` arity.
+- Fix: guard Borland helpers with `!_WIN32`; add `setenv` via `_putenv` (string retained);
+  moas-util uses `_mkdir` on Windows.
+
 ## R36S SDL include (2026-10-20)
 - Site build failed: `digi_io.c: fatal error: SDL.h: No such file or directory`
 - Cause: `nix/r36s.nix` passed `SDL2_INCLUDE_DIRS=\${sysroot}/usr/include` but
