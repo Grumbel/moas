@@ -336,15 +336,21 @@ static int po_take_quoted(const char **pp, char *out, size_t outsz, size_t *used
       else if (*p == 'r')
         str_append(out, outsz, used, "\r");
       else if (*p == '"' || *p == '\\') {
-        char b[2] = { *p, 0 };
+        char b[2];
+        b[0] = *p;
+        b[1] = 0;
         str_append(out, outsz, used, b);
       } else {
-        char b[2] = { *p, 0 };
+        char b[2];
+        b[0] = *p;
+        b[1] = 0;
         str_append(out, outsz, used, b);
       }
       p++;
     } else {
-      char b[2] = { *p++, 0 };
+      char b[2];
+      b[0] = *p++;
+      b[1] = 0;
       str_append(out, outsz, used, b);
     }
   }
