@@ -1,6 +1,16 @@
 # TODO / Handoff
 
 
+
+## R36S SDL include (2026-10-20)
+- Site build failed: `digi_io.c: fatal error: SDL.h: No such file or directory`
+- Cause: `nix/r36s.nix` passed `SDL2_INCLUDE_DIRS=\${sysroot}/usr/include` but
+  sources use `#include <SDL.h>` and eoan installs the header at `include/SDL2/SDL.h`.
+  Kurvenrausch uses `#include <SDL2/SDL.h>` so the same path works there.
+- Also `find_package(SDL2)` always ran and could overwrite pre-set paths.
+- Fix: r36s → `.../include/SDL2`; CMakeLists skips `find_package` when
+  `SDL2_INCLUDE_DIRS` and `SDL2_LIBRARIES` are already set via `-D`.
+
 ## Cross ports (this bundle)
 - MS-DOS: `nix/dos.nix`, `mk/dos/Makefile` — Open Watcom → DOS/4GW `moas.exe`
 - WebAssembly: `nix/wasm.nix`, `mk/wasm/` — Emscripten + ASYNCIFY + preload data

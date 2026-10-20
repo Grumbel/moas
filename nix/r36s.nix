@@ -151,8 +151,9 @@ let
       "-DCMAKE_BUILD_TYPE=Release"
       "-DCMAKE_SKIP_RPATH=ON"
       "-DMOAS_DATADIR=data"
-      # eoan's SDL2 CMake files name /usr: give the sysroot's directly.
-      "-DSDL2_INCLUDE_DIRS=${sysroot}/usr/include"
+      # Sources #include <SDL.h>; eoan places the header at include/SDL2/SDL.h.
+      # (Kurvenrausch uses <SDL2/SDL.h> and can pass include/ alone.)
+      "-DSDL2_INCLUDE_DIRS=${sysroot}/usr/include/SDL2"
       "-DSDL2_LIBRARIES=${sdlStub}/lib/libSDL2.so"
     ];
     # A device binary: no nix store RPATH, interpreter or shebangs.

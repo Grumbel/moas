@@ -11,6 +11,12 @@ endif()
 include(GNUInstallDirs)
 
 # --- SDL2 discovery ---
+# Sources use #include <SDL.h> (not <SDL2/SDL.h>), so INCLUDE_DIRS must point
+# at the directory that contains SDL.h (often .../include/SDL2).
+#
+# Callers may pre-set SDL2_INCLUDE_DIRS + SDL2_LIBRARIES via -D (r36s sysroot
+# cross-build). In that case skip find_package so host CMake configs cannot
+# overwrite the sysroot paths.
 if(EMSCRIPTEN)
   # Static SDL2 under SDL2_ROOT (nix/wasm.nix) or Emscripten's -sUSE_SDL=2 port.
   if(SDL2_ROOT)
@@ -32,6 +38,9 @@ if(EMSCRIPTEN)
     set(SDL2_INCLUDE_DIRS "")
     set(SDL2_LIBRARIES "")
   endif()
+elseif(SDL2_INCLUDE_DIRS AND SDL2_LIBRARIES)
+  # Pre-set by the caller (e.g. nix/r36s.nix against the ArkOS/eoan sysroot).
+  message(STATUS "SDL2 (pre-set): include=${SDL2_INCLUDE_DIRS} lib=${SDL2_LIBRARIES}")
 else()
   find_package(SDL2 REQUIRED)
 endif()
