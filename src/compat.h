@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <fcntl.h> /* open() for open_ci */
 
 /* DOS I/O port stubs — MinGW declares different inp/outp in intrin.h (via SDL). */
 #if !defined(_WIN32)
