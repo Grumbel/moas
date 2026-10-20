@@ -243,7 +243,7 @@ static int moas_mkdir_p(const char *path)
   memcpy(tmp, path, len + 1);
 
   for (i = 1; i < len; i++) {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(DOS)
     if (tmp[i] == '\\' || tmp[i] == '/') {
 #else
     if (tmp[i] == '/') {
@@ -251,8 +251,9 @@ static int moas_mkdir_p(const char *path)
       char save = tmp[i];
       tmp[i] = 0;
       if (tmp[0] && tmp[strlen(tmp)-1] != ':') {
-#ifdef _WIN32
-        _mkdir(tmp);
+#if defined(_WIN32) || defined(__WATCOMC__)
+        /* Win32 / Open Watcom: path only (no mode). */
+        (void)_mkdir(tmp);
 #else
         mkdir(tmp, 0755);
 #endif
@@ -260,7 +261,7 @@ static int moas_mkdir_p(const char *path)
       tmp[i] = save;
     }
   }
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__WATCOMC__)
   if (_mkdir(tmp) != 0) {
 #else
   if (mkdir(tmp, 0755) != 0) {
