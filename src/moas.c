@@ -30,8 +30,8 @@
 #include "lang.h"
 #include "debug.h"
 #include "person_disk.h"
-#ifndef DOS
 #include "datapath.h"
+#ifndef DOS
 #include "platform.h"
 /* Windows: SDL2main expects SDL_main; including SDL.h renames main via macro. */
 #include <SDL.h>

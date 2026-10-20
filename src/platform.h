@@ -44,7 +44,12 @@ void PlatformEngineMenu(void);
 /* Touch interaction mode: 0=USE (default verbs), 1=LOOK (SIEHE on object tap). */
 #define MOAS_TOUCH_USE  0
 #define MOAS_TOUCH_LOOK 1
+#ifdef DOS
+/* No touch overlay on real DOS; always classic mouse verbs. */
+#define PlatformGetTouchMode() MOAS_TOUCH_USE
+#else
 int PlatformGetTouchMode(void);
+#endif
 
 /* Keyboard (DOS-style) */
 int PlatformKbhit(void);
