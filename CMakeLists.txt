@@ -71,10 +71,19 @@ endif()
 add_executable(moas ${MOAS_SOURCES})
 
 target_include_directories(moas PRIVATE src ${SDL2_INCLUDE_DIRS})
-target_link_libraries(moas PRIVATE ${SDL2_LIBRARIES} m)
+if(WIN32)
+  # libm is not used on MinGW; SDL2main is pulled via find_package / SDL2_LIBRARIES.
+  target_link_libraries(moas PRIVATE ${SDL2_LIBRARIES})
+else()
+  target_link_libraries(moas PRIVATE ${SDL2_LIBRARIES} m)
+endif()
 
 if(TARGET SDL2::SDL2)
   target_link_libraries(moas PRIVATE SDL2::SDL2)
+endif()
+# Windows entry point: SDL2main calls SDL_main (main after #include <SDL.h>).
+if(WIN32 AND TARGET SDL2::SDL2main)
+  target_link_libraries(moas PRIVATE SDL2::SDL2main)
 endif()
 
 # Default install data dir; can be overridden (-DMOAS_DATADIR=...)

@@ -33,9 +33,10 @@
 #ifndef DOS
 #include "datapath.h"
 #include "platform.h"
+/* Windows: SDL2main expects SDL_main; including SDL.h renames main via macro. */
+#include <SDL.h>
 #endif
 #ifdef __ANDROID__
-#include <SDL.h>
 #include <android/log.h>
 #define MOAS_ALOG(...) __android_log_print(ANDROID_LOG_ERROR, "MOAS", __VA_ARGS__)
 __attribute__((constructor))
