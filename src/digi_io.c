@@ -35,7 +35,9 @@
 #include "platform.h"
 #endif
 
+#ifdef DOS
 void InitDSP(void);
+#endif
 void InitVolumeTab(void);
 void InitStepTable(void);
 void GetEnvirenment(void);
@@ -127,6 +129,7 @@ void InitDigi(void)
   /* SDL audio started later from InitAll after PlatformInit (Android). */
 }
 
+#ifdef DOS
 void InitDSP(void)
 {
   short c;
@@ -143,6 +146,7 @@ void InitDSP(void)
   OutpWait(Config.BaseNum+0xC,0x40);
   OutpWait(Config.BaseNum+0xC,184);   /*14000 Hz*/
 }
+#endif
 
 void InitVolumeTab(void)
 {

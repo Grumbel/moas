@@ -1,3 +1,9 @@
+
+## Windows MinGW follow-up (2026-10-20)
+- setenv was only in compat.h; debug.c did not include it → implicit decl.
+- inp/outp stubs conflicted with MinGW intrin.h (pulled via SDL).
+- Fix: include compat.h in debug.c; gate inp/outp on !_WIN32; InitDSP only under DOS.
+
 # TODO / Handoff
 
 

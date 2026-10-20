@@ -11,9 +11,11 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-/* DOS I/O port stubs */
+/* DOS I/O port stubs — MinGW declares different inp/outp in intrin.h (via SDL). */
+#if !defined(_WIN32)
 static inline unsigned char inp(unsigned short port) { (void)port; return 0; }
 static inline void outp(unsigned short port, unsigned char val) { (void)port; (void)val; }
+#endif
 
 /* Interrupt control stubs */
 static inline void _disable(void) {}
