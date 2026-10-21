@@ -152,6 +152,11 @@ default on Android and the web build; on desktop builds enable them with
 - **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
 - **Right:** Esc, Skip (top) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech); **Menu** (bottom) opens the options menu
 
+Save and Load are greyed out while they would be ignored (cutscene, dialogue,
+menu open); Load also when there is no savegame yet. In **portrait** the picture
+takes the full width and the buttons sit in two rows underneath (Save, Load,
+Esc, Skip / Use, Look, Menu) instead of in side columns.
+
 
 
 ```sh
@@ -221,13 +226,15 @@ from the SDL port are included under `ui.*`.
 
 ```sh
 moas --lang=en
+# or: MOAS_LANG=en moas
+```
 
 SDL host: press **F12** (or the touch **Menu** button, or gamepad **Back**) for the options menu
 (language, fullscreen, touch buttons, game/speech speed, quit). It works with keyboard,
 gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, tap the
-left half of a value to step back, tap outside to close).
-# or: MOAS_LANG=en moas
-```
+left half of a value to step back, tap outside to close). Switching the language there
+takes effect at once, including object names and verbs (prog0's name table is
+re-registered); speech already on screen stays in the old language.
 
 Primary format is a **gettext `.po` file** (`lang/<code>.po`):
 

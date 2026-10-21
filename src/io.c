@@ -949,6 +949,32 @@ int MoasCanSave(void)
       && KeyAbortState == 0;
 }
 
+/* Overlay SAVE/LOAD are honoured by LookKeys only under these conditions. */
+int MoasCanOpenSaveMenu(void)
+{
+  return Screen != NULL && Window.Status == None && PlayerHasControl == 1;
+}
+
+/* Any GAME0..9.SAV in the state dir (something for LOAD to offer). */
+int MoasAnySaveExists(void)
+{
+  char name[20], path[512];
+  FILE *f;
+  int slot;
+
+  for (slot = 0; slot < 10; slot++) {
+    sprintf(name, "GAME%i.SAV", slot);
+    if (MoasStatePath(path, sizeof(path), name) != 0)
+      continue;
+    f = fopen(path, "rb");
+    if (f) {
+      fclose(f);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static int MoasWriteAutosave(const char *why)
 {
   char savpath[512];

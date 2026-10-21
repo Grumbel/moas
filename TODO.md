@@ -6,6 +6,27 @@
 
 # TODO / Handoff
 
+## Portrait overlay, greyed Save/Load, runtime language switch (2026-10-21)
+- **Portrait:** `letterbox_geom` reserved side columns even when the window is
+  taller than wide, shrinking the picture and leaving the space above/below
+  empty. `ov_portrait()`: picture at full width, centred above two rows of four
+  buttons (Save Load Esc Skip / Use Look - Menu) at the bottom.
+- **Save/Load greyed out** when LookKeys would drop them (`MoasCanOpenSaveMenu`
+  = Window.Status==None && PlayerHasControl==1); Load also when no GAME?.SAV
+  exists (`MoasAnySaveExists`, checked at most once a second). Taps on a greyed
+  button are ignored.
+- **Language switch (F12) did not apply:** Description[] / PowerParse strings
+  are translated once when prog0 registers them, so `LangInit()` alone only
+  changed new dialogue lines. `MoasReloadLanguage()` = LangInit +
+  MoasRegisterStaticNames, preserving UnPack's static buffer (the menu can
+  open while a caller still holds it).
+- Game speed stays 1..8 (original F10 menu range; `Walker>=10-TotalSpeed`
+  makes 9 and 10 identical, and the original slider is drawn for 1..8).
+
+### Next
+- Persist language (and touch-buttons toggle) in the config dir; on Android
+  the language choice is lost on restart.
+
 ## Safe autosave, touch overlay everywhere, palette fix (2026-10-21)
 - **Autosave safety:** `.SAV` has no script PC / C stack, so saving mid-cutscene,
   dialog or Load/Save menu resumed into a broken room. `MoasCanSave()` (io.c) =

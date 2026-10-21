@@ -570,9 +570,11 @@ void LoadPack(void)
 
   if (check!=GetChk()) InternalError(2007);
 }
+static unsigned char UnPackBuffer[300];
+
 char *UnPack(unsigned char *String)
 {
-  static unsigned char Buffer[300];
+  unsigned char *Buffer = UnPackBuffer;
   short c,l;
 
   if (!String) {
@@ -580,8 +582,8 @@ char *UnPack(unsigned char *String)
     return (char *)Buffer;
   }
   if (Packing==0) {
-    strncpy((char *)Buffer, (const char *)String, sizeof(Buffer)-1);
-    Buffer[sizeof(Buffer)-1] = 0;
+    strncpy((char *)Buffer, (const char *)String, sizeof(UnPackBuffer)-1);
+    Buffer[sizeof(UnPackBuffer)-1] = 0;
   } else {
     size_t used = 0;
     Buffer[0] = 0;
@@ -591,7 +593,7 @@ char *UnPack(unsigned char *String)
       size_t plen;
       if (!piece) continue;
       plen = strlen(piece);
-      if (used + plen >= sizeof(Buffer) - 1)
+      if (used + plen >= sizeof(UnPackBuffer) - 1)
         break;
       memcpy(Buffer + used, piece, plen);
       used += plen;
@@ -601,12 +603,29 @@ char *UnPack(unsigned char *String)
   {
     const char *tr = LangLookup((const char *)Buffer);
     if (tr) {
-      strncpy((char *)Buffer, tr, sizeof(Buffer) - 1);
-      Buffer[sizeof(Buffer) - 1] = 0;
+      strncpy((char *)Buffer, tr, sizeof(UnPackBuffer) - 1);
+      Buffer[sizeof(UnPackBuffer) - 1] = 0;
     }
   }
   return (char *)Buffer;
 }
+#ifndef DOS
+/*
+ * Switch language at runtime (options menu). Object names and verb-parse
+ * strings are translated once when prog0 registers them, so reloading the
+ * .po alone only changed new dialogue lines. Re-register them too. The menu
+ * can open while a caller still holds UnPack's buffer, so keep it intact.
+ */
+void MoasReloadLanguage(void)
+{
+  unsigned char saved[sizeof(UnPackBuffer)];
+
+  memcpy(saved, UnPackBuffer, sizeof(saved));
+  LangInit();
+  MoasRegisterStaticNames();
+  memcpy(UnPackBuffer, saved, sizeof(saved));
+}
+#endif
 void RedrawCompleteScreen(void)
 {
   PowerRedrawArea(0,0,319,199);

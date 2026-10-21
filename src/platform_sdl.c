@@ -34,6 +34,9 @@
 #ifndef DOS
 /* io.c — write AUTOSAVE.SAV; safe once Screen is allocated. */
 extern void MoasAutosaveOnExit(void);
+extern void MoasReloadLanguage(void);
+extern int MoasCanOpenSaveMenu(void);
+extern int MoasAnySaveExists(void);
 #endif
 
 /* Minimal declarations of the globals we touch (defined elsewhere). */
@@ -91,6 +94,8 @@ static int           overlay_pressed = 0;    /* OV_* drawn pressed (pointer stil
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
 static int           touch_mode = 0;          /* 0=USE 1=LOOK */
 static int           overlay_on = 0;          /* on-screen buttons visible */
+static int           ov_save_ok = 1;          /* SAVE/LOAD usable right now */
+static int           ov_load_ok = 1;
 static int           pointer_is_touch = 0;    /* last pointer input was a finger */
 static SDL_FingerID  game_finger = 0;         /* finger acting as left button */
 static int           game_finger_down = 0;
@@ -673,12 +678,47 @@ void PlatformSetPalette(const unsigned char *pal768)
     PlatformSetPaletteEntry(i, pal768[i * 3 + 0], pal768[i * 3 + 1], pal768[i * 3 + 2]);
 }
 
+#define OV_GAP    10
+#define OV_MARGIN 8
+
+/*
+ * Portrait (taller than wide, e.g. a phone held upright): the picture uses
+ * the full width and the buttons go in two rows of four underneath, instead
+ * of squeezing the picture between side columns and leaving the space above
+ * and below empty. Returns 0 when there is no room for that.
+ */
+static int ov_portrait(int ww, int wh, int *bw, int *bh, int *block_h)
+{
+  int w, h, block, dh;
+
+  if (!overlay_on || wh <= ww)
+    return 0;
+  w = (ww - 2 * OV_MARGIN - 3 * OV_GAP) / 4;
+  if (w > 200)
+    w = 200;
+  if (w < 64)
+    return 0;
+  h = (w * 5) / 7;
+  if (h < 52)
+    h = 52;
+  if (h > 120)
+    h = 120;
+  block = 2 * h + OV_GAP + 2 * OV_MARGIN;
+  dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
+  if (wh - dh < block)
+    return 0;
+  if (bw) *bw = w;
+  if (bh) *bh = h;
+  if (block_h) *block_h = block;
+  return 1;
+}
+
 /* Shared letterbox geometry for present + mouse (output-pixel space). */
 static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
                            int *out_ww, int *out_wh)
 {
   int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
-  int dw, dh, dx, dy;
+  int dw, dh, dx, dy, block_h;
   float sx, sy, scale;
 
   if (renderer)
@@ -696,7 +736,13 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   dx = (ww - dw) / 2;
   dy = (wh - dh) / 2;
 
-  if (overlay_on)
+  if (ov_portrait(ww, wh, NULL, NULL, &block_h)) {
+    /* Full width, centred in the space above the button rows. */
+    dw = ww;
+    dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
+    dx = 0;
+    dy = (wh - block_h - dh) / 2;
+  } else if (overlay_on)
   /*
    * Keep side columns free for the touch overlay (Save/Load/USE/LOOK, Esc/Skip).
    * overlay_rects needs dx >= btn_w + margins (~80–136). If the natural
@@ -1088,8 +1134,27 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
   int side;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
-  gap = 10;
-  margin = 8;
+  gap = OV_GAP;
+  margin = OV_MARGIN;
+
+#define OV_SET(i, X, Y) (out[(i) - 1].x = (X), out[(i) - 1].y = (Y), \
+                         out[(i) - 1].w = btn_w, out[(i) - 1].h = btn_h)
+  if (ov_portrait(ww, wh, &btn_w, &btn_h, NULL)) {
+    /* Two rows of four under the picture; Use/Look/Menu on the lower,
+     * thumb-friendly row, like the low cluster in landscape. */
+    int x0 = (ww - (4 * btn_w + 3 * gap)) / 2, step = btn_w + gap;
+    low_y = wh - margin - btn_h;
+    top_y = low_y - gap - btn_h;
+    OV_SET(OV_SAVE,      x0,            top_y);
+    OV_SET(OV_LOAD,      x0 + step,     top_y);
+    OV_SET(OV_ESC,       x0 + 2 * step, top_y);
+    OV_SET(OV_SKIP,      x0 + 3 * step, top_y);
+    OV_SET(OV_MODE_USE,  x0,            low_y);
+    OV_SET(OV_MODE_LOOK, x0 + step,     low_y);
+    OV_SET(OV_MENU,      x0 + 3 * step, low_y);
+    return;
+  }
+
   side = dx;
   if (side < ww - (dx + dw))
     side = ww - (dx + dw);
@@ -1123,8 +1188,6 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
   if (low_y < top_y + btn_h * 2 + gap * 3)
     low_y = top_y + btn_h * 2 + gap * 3;
 
-#define OV_SET(i, X, Y) (out[(i) - 1].x = (X), out[(i) - 1].y = (Y), \
-                         out[(i) - 1].w = btn_w, out[(i) - 1].h = btn_h)
   OV_SET(OV_SAVE,      left_x,  top_y);
   OV_SET(OV_LOAD,      left_x,  top_y + btn_h + gap);
   OV_SET(OV_ESC,       right_x, top_y);
@@ -1177,6 +1240,8 @@ static void overlay_fire(int which)
   switch (which) {
     case OV_SAVE:
     case OV_LOAD:
+      if (!(which == OV_SAVE ? ov_save_ok : ov_load_ok))
+        break; /* greyed out */
       /*
        * Queued for LookKeys, which runs SaveGame/LoadGame with the usual
        * control checks (dropped during cutscenes/dialogs). Opening on
@@ -1276,7 +1341,9 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   static const int labels[OV_COUNT] = {
     UI_OV_SAVE, UI_OV_LOAD, UI_OV_ESC, UI_OV_SKIP, UI_OV_USE, UI_OV_LOOK, UI_OV_MENU
   };
-  int pressed = (overlay_pressed == which);
+  int disabled = (which == OV_SAVE && !ov_save_ok) ||
+                 (which == OV_LOAD && !ov_load_ok);
+  int pressed = (overlay_pressed == which) && !disabled;
   int selected = (which == OV_MODE_USE && touch_mode == MOAS_TOUCH_USE) ||
                  (which == OV_MODE_LOOK && touch_mode == MOAS_TOUCH_LOOK);
   SDL_Color c = face_cols[which - 1], top, bot;
@@ -1286,6 +1353,11 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   int ts, label_h, pad, icon, tw;
   SDL_Texture *tex;
 
+  if (disabled) {
+    /* Greyed out: flat grey, dimmed icon and label (below). */
+    int g = (c.r * 30 + c.g * 59 + c.b * 11) / 100;
+    c.r = c.g = c.b = (Uint8)(g * 3 / 4);
+  }
   if (selected) {
     c.r = ui_shade(c.r, 150);
     c.g = ui_shade(c.g, 150);
@@ -1339,12 +1411,40 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
     SDL_SetTextureAlphaMod(tex, 110);
     SDL_RenderCopy(renderer, tex, NULL, &dst);
     dst.x -= u; dst.y -= u;
+    if (disabled) {
+      SDL_SetTextureColorMod(tex, 150, 150, 150);
+      SDL_SetTextureAlphaMod(tex, 110);
+    } else {
+      SDL_SetTextureColorMod(tex, 255, 255, 255);
+      SDL_SetTextureAlphaMod(tex, 255);
+    }
+    SDL_RenderCopy(renderer, tex, NULL, &dst);
     SDL_SetTextureColorMod(tex, 255, 255, 255);
     SDL_SetTextureAlphaMod(tex, 255);
-    SDL_RenderCopy(renderer, tex, NULL, &dst);
   }
-  ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
-                label, ts, 255, 255, 255);
+  if (disabled)
+    ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
+                  label, ts, 140, 140, 140);
+  else
+    ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
+                  label, ts, 255, 255, 255);
+}
+
+/* SAVE/LOAD only do something when LookKeys would honour them; LOAD
+ * additionally needs a savegame. The file check is throttled. */
+static void overlay_update_availability(void)
+{
+  static Uint32 last_check;
+  static int any_save = -1;
+  Uint32 now = SDL_GetTicks();
+  int can = MoasCanOpenSaveMenu();
+
+  if (any_save < 0 || now - last_check >= 1000) {
+    any_save = MoasAnySaveExists();
+    last_check = now;
+  }
+  ov_save_ok = can;
+  ov_load_ok = can && any_save;
 }
 
 static void overlay_draw(void)
@@ -1354,6 +1454,7 @@ static void overlay_draw(void)
 
   if (!renderer || !overlay_on)
     return;
+  overlay_update_availability();
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   overlay_rects(r);
   for (i = 0; i < OV_COUNT; i++)
@@ -1550,7 +1651,7 @@ static void eng_menu_change(int sel, int dir)
     case ENG_LANG:
       code = LangGetCode();
       LangSetCode((code && strcmp(code, "en") == 0) ? "de" : "en");
-      LangInit();
+      MoasReloadLanguage();
       break;
     case ENG_FULLSCREEN:
       eng_toggle_fullscreen();
