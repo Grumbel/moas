@@ -428,26 +428,27 @@ void QuickSetSinglePal(short Color,short r,short g,short b)
    tmp=g*DayLightG/100;  if (tmp>63) tmp=63;  outp(0x3c9,tmp);
    tmp=b*DayLightB/100;  if (tmp>63) tmp=63;  outp(0x3c9,tmp);
 #else
-   if (Color < 0 || Color > 255 || !Palette) return;
-   tmp=r*DayLightR/100;  if (tmp>63) tmp=63;  Palette[Color*3+0]=(unsigned char)tmp;
-   tmp=g*DayLightG/100;  if (tmp>63) tmp=63;  Palette[Color*3+1]=(unsigned char)tmp;
-   tmp=b*DayLightB/100;  if (tmp>63) tmp=63;  Palette[Color*3+2]=(unsigned char)tmp;
-   PlatformSetPalette(Palette);
+   /*
+    * Like the DOS DAC write: only the displayed colour changes. Palette[]
+    * stays the unscaled master copy (Blend, cycling and the next
+    * QuickSetPalette read it again).
+    */
+   {
+     short rr,gg,bb;
+     tmp=r*DayLightR/100;  if (tmp>63) tmp=63;  rr=tmp;
+     tmp=g*DayLightG/100;  if (tmp>63) tmp=63;  gg=tmp;
+     tmp=b*DayLightB/100;  if (tmp>63) tmp=63;  bb=tmp;
+     PlatformSetPaletteEntry(Color,rr,gg,bb);
+   }
 #endif
 }
 void QuickSetPalette(char *Pal)
 {
   short c;
 
-#ifdef DOS
+  /* Same on all targets: greyscale + DayLight per entry (also AsmQPalSet). */
   for (c=0;c<256;c++,Pal+=3)
     QuickSetSinglePal(c,Pal[0],Pal[1],Pal[2]);
-#else
-  /* Keep the game palette in sync and push to SDL. */
-  if (Pal && Pal != (char*)Palette)
-    memcpy(Palette, Pal, 768);
-  PlatformSetPalette((const unsigned char *)Palette);
-#endif
 }
 void Blend(char Step,char Dir)
 {

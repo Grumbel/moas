@@ -145,10 +145,12 @@ See `nix/windows.nix`.
 
 ### Android
 
-On Android, letterbox **touch buttons** (SDL overlay, not the 320×200 buffer):
+Letterbox **touch buttons** (SDL overlay, not the 320×200 buffer). On by
+default on Android and the web build; on desktop builds enable them with
+`--touch-controls` or **F12 → Touch buttons** (the window grows to make room):
 
-- **Left:** Save (top), Load (bottom) — F5 / F7
-- **Right:** Esc (top), Skip (bottom) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech)
+- **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
+- **Right:** Esc, Skip (top) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech); **Menu** (bottom) opens the options menu
 
 
 
@@ -220,7 +222,10 @@ from the SDL port are included under `ui.*`.
 ```sh
 moas --lang=en
 
-SDL host: press **F12** for the engine menu (language, fullscreen, game/speech speed, quit).
+SDL host: press **F12** (or the touch **Menu** button, or gamepad **Back**) for the options menu
+(language, fullscreen, touch buttons, game/speech speed, quit). It works with keyboard,
+gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, tap the
+left half of a value to step back, tap outside to close).
 # or: MOAS_LANG=en moas
 ```
 
@@ -312,7 +317,12 @@ Save files are named `GAME0.SAV` … `GAME9.SAV` under the **state directory** (
 ~/.local/state/moas/GAME0.SAV
 ```
 
-**Exit resume file:** on a normal quit (window close / quit request) the engine writes `AUTOSAVE.SAV` in the same state directory and restores it on the next start (skips intro, like `--load`). Use `--no-autosave` to disable both write-on-exit and restore-on-start. Explicit `--load=…` still takes priority over `AUTOSAVE.SAV`.
+**Resume file:** the engine keeps `AUTOSAVE.SAV` in the same state directory and restores it on the next start (skips intro, like `--load`). It is only ever written at a point where the original game would allow F5 (player has control, no dialogue/menu, no script running), because the `.SAV` format has no script position:
+
+- on quit / app backgrounding, if the game is at such a point;
+- otherwise the last **checkpoint** is kept: written after every room change, after the game's own slot-9 autosave, and after any script action (at most every 5 s).
+
+So quitting in the middle of a cutscene or dialogue resumes just before it. Use `--no-autosave` to disable both writing and restoring. Explicit `--load=…` still takes priority over `AUTOSAVE.SAV`.
 
 Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).  
 DOSBox runners persist to `~/.local/state/moas-dos` / `moas-dos-original`.
@@ -338,7 +348,7 @@ On Android there is no right button. Left-column HUD toggles (**USE** / **LOOK**
 | **USE** (default) | Walk | Use / talk / grab+pull (desktop left-click) |
 | **LOOK** | Walk | **Siehe** (look) — desktop right-click on object |
 
-Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Back** exits the activity fully.
+Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Back** exits the activity fully. The same buttons are available on desktop with `--touch-controls`.
 
 ### Movement and inventory
 
@@ -353,7 +363,9 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **F10** | File menu (when the window layout allows it) |
 | **Shift** | Speed up / dismiss **speech bubbles** only (see below) |
 | **Esc** | Abort a **scripted sequence** when the script has armed skip (see below) |
-| **Q** / **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
+| **Alt+Q** | Quit (original DOS key) |
+| **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
+| **F12** | Options menu (SDL port) |
 
 ### Esc vs Shift (skipping)
 
@@ -368,7 +380,7 @@ These are **not** the same:
 
 **Shift** matches original DOS keyboard flag `0x417` (either Shift key). **Middle mouse** does the same as a Shift edge for speech.
 
-Android **Skip** is wired like **Esc** (sequence abort), not Shift.
+The touch **Skip** button acts like **Shift** (speech only); touch **Esc** is the sequence abort.
 
 ### Master / debug keys
 
@@ -404,6 +416,8 @@ These are developer tools from the original engine, not needed for normal play.
 --load SLOT|FILE        Same as --load=
 --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit
 -f, --fullscreen        Desktop fullscreen
+--touch-controls        Show the on-screen Save/Load/Esc/Skip/Use/Look/Menu buttons
+--no-touch-controls     Hide them (default except Android / web)
 ```
 
 Load a save without the in-game menu:

@@ -6,6 +6,42 @@
 
 # TODO / Handoff
 
+## Safe autosave, touch overlay everywhere, palette fix (2026-10-21)
+- **Autosave safety:** `.SAV` has no script PC / C stack, so saving mid-cutscene,
+  dialog or Load/Save menu resumed into a broken room. `MoasCanSave()` (io.c) =
+  main loop active + MouseCheck not nested + `Window.Status==None` +
+  `PlayerHasControl==1` + `KeyAbortState==0`.
+  - Quit/backgrounding saves only if safe; otherwise last checkpoint stays.
+  - `MoasAutosaveCheckpoint()` from LookKeys: room change (CurrentProc), game's
+    slot-9 AutoSaveGame, any Execute() since last save (≤ every 5 s).
+  - Written via `AUTOSAVE.SAV.tmp` + rename (kill-safe).
+  - Removed post-loop save in main() and InternalError(0): after a quit request
+    scripts unwind with waits cut short, that state is not faithful.
+- **Touch overlay on all SDL targets:** runtime `overlay_on`; default on for
+  Android/web, `--touch-controls` / `--no-touch-controls`, F12 "Touch buttons"
+  (desktop window grows/shrinks by 280 px). New **MENU** button (bottom right).
+- Overlay graphics: 16×16 pixel-art icons (floppy, folder+arrow, stop sign,
+  fast-forward, left/right mouse button for USE/LOOK, hamburger) rendered as
+  textures at whole multiples; rounded gradient buttons, gold rim for active mode.
+- Options menu (F12 / MENU / pad Back): mouse hover+click, wheel, right-click
+  closes; touch tap rows, left half of value = step back, tap outside closes.
+  Added Touch buttons row; Left arrow now decrements.
+- Input fixes: synthetic touch→mouse events ignored (taps were seen twice and
+  the cursor jumped into the letterbox); one finger drives the game; mouse
+  release over a button no longer leaves the game's left button stuck;
+  overlay/pad Esc sends a break code next frame; pad B/Start/Back edge-triggered.
+- Keys: Alt+letter now produces BIOS `0,scancode` (Alt+Q quits as on DOS,
+  master Alt+I/J/P work); plain **Q** no longer quits.
+- **Porting bug fixed:** non-DOS `QuickSetPalette` memcpy'd its argument into
+  `Palette` (Blend fade frames overwrote the master palette) and ignored
+  DayLight/greyscale; palette cycling did the same. Now mirrors the DOS DAC
+  path via `PlatformSetPaletteEntry` (6-bit masked like the VGA DAC).
+
+### Next
+- Verify touch on a real Android device / touchscreen laptop (only mouse and
+  keyboard were exercised under Xvfb).
+- Persist the touch-buttons toggle in the config dir.
+
 
 
 

@@ -58,12 +58,15 @@ void MouseCheck(void)
    * inspect the edge AFTER MouseCheck returns.
    */
   short prevL = Mouse.Left, prevR = Mouse.Right, prevM = Mouse.Middle;
+  MoasMouseCheckDepth++;
   PlatformPumpEvents();
   Mouse.LastLeft = prevL;
   Mouse.LastRight = prevR;
   Mouse.LastMiddle = prevM;
-  if (PlatformShouldQuit())
+  if (PlatformShouldQuit()) {
+    MoasMouseCheckDepth--;
     return;
+  }
   /* Dialogs turn CursorState off; restore when no window is open. */
   if (Window.Status == None && Mouse.CursorState == 0)
     Mouse.CursorState = 1;
@@ -170,6 +173,7 @@ void MouseCheck(void)
 #ifndef DOS
   PlatformPresent();
   PlatformDelay(16);
+  MoasMouseCheckDepth--;
 #endif
 }
 short IsMousePresent(void)

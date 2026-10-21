@@ -56,6 +56,12 @@ char *__BewegeMit ="BEWEGE %s IN RICHTUNG %s";
 
 void AddWalkArea(short x1,short y1,short x2,short y2,short tx,short ty);
 
+#ifndef DOS
+int MoasMainLoopActive = 0;
+int MoasMouseCheckDepth = 0;
+unsigned MoasScriptSerial = 0;
+#endif
+
 int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
@@ -123,11 +129,17 @@ int main(int argc, char **argv)
     }
   }
 #ifndef DOS
+  MoasMainLoopActive = 1;
   while (!PlatformShouldQuit()) {
     /* MouseCheck pumps events, presents, and delays on Linux. */
     MouseCheck();
   }
-  MoasAutosaveOnExit();
+  MoasMainLoopActive = 0;
+  /*
+   * No autosave here: PlatformRequestQuit already saved (if safe) when the
+   * quit was requested. Scripts unwind with all waits cut short after
+   * that, so the state at this point is not a faithful game state.
+   */
   PlatformShutdown();
 #else
   while (1) {
@@ -142,6 +154,9 @@ short Execute(short ProcNum,unsigned short Adresse)
   short *Parameter;
   char LastControl=PlayerHasControl;
 
+#ifndef DOS
+  MoasScriptSerial++; /* game state may change: autosave checkpoint due */
+#endif
   PlayerHasControl=0;
   LadeProgramm(ProcNum);       Prg=Programm[ProcNum].Data;
 

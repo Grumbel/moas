@@ -62,6 +62,8 @@ extern struct MOUSE Mouse;
 #define LOGICAL_W 320
 #define LOGICAL_H 200
 #define SCALE     3
+/* Extra window width (both side columns) for the touch overlay. */
+#define OVERLAY_EXTRA_W 280
 
 static SDL_Window   *window   = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -84,9 +86,16 @@ static void wasm_pause_spin(void);
 #endif
 static int           moas_shift_down = 0;
 static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
-static int           overlay_pressed = 0;    /* OV_* while finger/mouse held on button */
+static int           overlay_down = 0;       /* OV_* where the press started */
+static int           overlay_pressed = 0;    /* OV_* drawn pressed (pointer still on it) */
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
 static int           touch_mode = 0;          /* 0=USE 1=LOOK */
+static int           overlay_on = 0;          /* on-screen buttons visible */
+static int           pointer_is_touch = 0;    /* last pointer input was a finger */
+static SDL_FingerID  game_finger = 0;         /* finger acting as left button */
+static int           game_finger_down = 0;
+static SDL_FingerID  overlay_finger = 0;
+static int           esc_break_pending = 0;   /* synthetic Esc: send break next pump */
 static int           shake_ox = 0, shake_oy = 0;
 static int           screen_blank = 0;
 static Uint32        sdl_palette[256];
@@ -231,6 +240,8 @@ static int dos_ext_getch(SDL_Scancode sc)
   }
 }
 
+
+static void ov_free_icons(void);
 
 static void platform_log(const char *fmt, ...)
 {
@@ -433,13 +444,23 @@ int PlatformInit(void)
     {
       int win_w = LOGICAL_W * SCALE;
       int win_h = LOGICAL_H * SCALE;
-#if defined(MOAS_OVERLAY_BUTTONS) && !defined(__ANDROID__)
       /*
-       * Side letterbox for Save/Load/USE/LOOK columns (web / desktop overlay).
-       * overlay_rects needs dx >= ~136 (btn up to 120 + margins); +280 → 140/side
-       * when the framebuffer is height-limited (SCALE 3 → 960×600 game area).
+       * Touch overlay default: on for Android / web, off for desktop.
+       * --touch-controls / --no-touch-controls or the F12 menu override it.
        */
-      win_w += 280;
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(MOAS_OVERLAY_BUTTONS)
+      overlay_on = (moas_touch_controls != 0);
+#else
+      overlay_on = (moas_touch_controls == 1);
+#endif
+#ifndef __ANDROID__
+      /*
+       * Side letterbox for the button columns. overlay_rects needs
+       * dx >= ~136 (btn up to 120 + margins); +280 → 140/side when the
+       * framebuffer is height-limited (SCALE 3 → 960×600 game area).
+       */
+      if (overlay_on)
+        win_w += OVERLAY_EXTRA_W;
 #endif
       window = SDL_CreateWindow("Mänick Mänschion",
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -526,8 +547,8 @@ static void platform_try_autosave(const char *reason)
 #ifndef DOS
   static int in_save;
 
-  if (in_save)
-    return;
+  if (in_save || !running)
+    return; /* after a quit request scripts unwind: state is not faithful */
   if (!Screen) {
     MOAS_ALOG("autosave skipped (%s): Screen not ready", reason ? reason : "?");
     return;
@@ -546,6 +567,8 @@ static void platform_try_autosave(const char *reason)
 
 void PlatformRequestQuit(void)
 {
+  if (!running)
+    return;
   /* Save before finish() — Android may kill us before main() exits the loop. */
   platform_try_autosave("request-quit");
   running = 0;
@@ -615,6 +638,7 @@ void PlatformShutdown(void)
   running = 0;
 
   /* Destroy SDL objects before freeing our buffers. */
+  ov_free_icons();
   if (texture)  { SDL_DestroyTexture(texture);  texture  = NULL; }
   if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
   if (window)   { SDL_DestroyWindow(window);     window   = NULL; }
@@ -632,15 +656,21 @@ void PlatformShutdown(void)
 #endif
 }
 
+void PlatformSetPaletteEntry(int index, int r, int g, int b)
+{
+  if (index < 0 || index > 255) return;
+  /* VGA DAC registers are 6 bits wide; the upper bits are dropped. */
+  r = (r & 63) * 255 / 63;
+  g = (g & 63) * 255 / 63;
+  b = (b & 63) * 255 / 63;
+  sdl_palette[index] = 0xFF000000u | ((Uint32)r << 16) | ((Uint32)g << 8) | (Uint32)b;
+}
+
 void PlatformSetPalette(const unsigned char *pal768)
 {
   if (!pal768) return;
-  for (int i = 0; i < 256; i++) {
-    Uint8 r = (Uint8)(pal768[i * 3 + 0] * 255 / 63);
-    Uint8 g = (Uint8)(pal768[i * 3 + 1] * 255 / 63);
-    Uint8 b = (Uint8)(pal768[i * 3 + 2] * 255 / 63);
-    sdl_palette[i] = 0xFF000000u | (r << 16) | (g << 8) | b;
-  }
+  for (int i = 0; i < 256; i++)
+    PlatformSetPaletteEntry(i, pal768[i * 3 + 0], pal768[i * 3 + 1], pal768[i * 3 + 2]);
 }
 
 /* Shared letterbox geometry for present + mouse (output-pixel space). */
@@ -666,7 +696,7 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   dx = (ww - dw) / 2;
   dy = (wh - dh) / 2;
 
-#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
+  if (overlay_on)
   /*
    * Keep side columns free for the touch overlay (Save/Load/USE/LOOK, Esc/Skip).
    * overlay_rects needs dx >= btn_w + margins (~80–136). If the natural
@@ -690,7 +720,6 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
       dy = (wh - dh) / 2;
     }
   }
-#endif
 
   if (out_x) *out_x = dx;
   if (out_y) *out_y = dy;
@@ -720,97 +749,343 @@ static void window_to_output(int wx, int wy, int *ox, int *oy)
 }
 
 
-/* Overlay button ids — always defined so PlatformPumpEvents can reference them;
- * on non-Android builds overlay_hit is a stub that always returns OV_NONE. */
+/* Overlay button ids: index into overlay_rects() + 1. */
 enum {
   OV_NONE = 0,
-  OV_SAVE = 1,
-  OV_LOAD = 2,
-  OV_ESC = 3,
-  OV_SKIP = 4,
-  OV_MODE_USE = 5,
-  OV_MODE_LOOK = 6
+  OV_SAVE,
+  OV_LOAD,
+  OV_ESC,
+  OV_SKIP,
+  OV_MODE_USE,
+  OV_MODE_LOOK,
+  OV_MENU,
+  OV_COUNT = OV_MENU
 };
 
-#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
-/* Touch controls in letterbox margins (window pixels), not the 320x200 buffer.
- * Layout: left column Save / Load; right column Esc / Skip. */
-
-/* 5x7 glyphs, bit0 = leftmost pixel of each row. A–Z + space + digits unused. */
-static const unsigned char ov_font_5x7[][7] = {
-  /* A */ {0x0e,0x11,0x11,0x1f,0x11,0x11,0x11},
-  /* B */ {0x1e,0x11,0x11,0x1e,0x11,0x11,0x1e},
-  /* C */ {0x0e,0x11,0x10,0x10,0x10,0x11,0x0e},
-  /* D */ {0x1e,0x11,0x11,0x11,0x11,0x11,0x1e},
-  /* E */ {0x1f,0x10,0x10,0x1e,0x10,0x10,0x1f},
-  /* F */ {0x1f,0x10,0x10,0x1e,0x10,0x10,0x10},
-  /* G */ {0x0e,0x11,0x10,0x17,0x11,0x11,0x0e},
-  /* H */ {0x11,0x11,0x11,0x1f,0x11,0x11,0x11},
-  /* I */ {0x0e,0x04,0x04,0x04,0x04,0x04,0x0e},
-  /* J */ {0x01,0x01,0x01,0x01,0x11,0x11,0x0e},
-  /* K */ {0x11,0x12,0x14,0x18,0x14,0x12,0x11},
-  /* L */ {0x10,0x10,0x10,0x10,0x10,0x10,0x1f},
-  /* M */ {0x11,0x1b,0x15,0x15,0x11,0x11,0x11},
-  /* N */ {0x11,0x19,0x15,0x13,0x11,0x11,0x11},
-  /* O */ {0x0e,0x11,0x11,0x11,0x11,0x11,0x0e},
-  /* P */ {0x1e,0x11,0x11,0x1e,0x10,0x10,0x10},
-  /* Q */ {0x0e,0x11,0x11,0x11,0x15,0x12,0x0d},
-  /* R */ {0x1e,0x11,0x11,0x1e,0x14,0x12,0x11},
-  /* S */ {0x0e,0x11,0x10,0x0e,0x01,0x11,0x0e},
-  /* T */ {0x1f,0x04,0x04,0x04,0x04,0x04,0x04},
-  /* U */ {0x11,0x11,0x11,0x11,0x11,0x11,0x0e},
-  /* V */ {0x11,0x11,0x11,0x11,0x11,0x0a,0x04},
-  /* W */ {0x11,0x11,0x11,0x15,0x15,0x1b,0x11},
-  /* X */ {0x11,0x11,0x0a,0x04,0x0a,0x11,0x11},
-  /* Y */ {0x11,0x11,0x0a,0x04,0x04,0x04,0x04},
-  /* Z */ {0x1f,0x01,0x02,0x04,0x08,0x10,0x1f},
+/* ---- 5x7 bitmap font (overlay labels, options menu) -------------------- */
+/* bit4 = leftmost pixel of each row */
+static const unsigned char ui_font_alpha[26][7] = {
+  {0x0e,0x11,0x11,0x1f,0x11,0x11,0x11},{0x1e,0x11,0x11,0x1e,0x11,0x11,0x1e},
+  {0x0e,0x11,0x10,0x10,0x10,0x11,0x0e},{0x1e,0x11,0x11,0x11,0x11,0x11,0x1e},
+  {0x1f,0x10,0x10,0x1e,0x10,0x10,0x1f},{0x1f,0x10,0x10,0x1e,0x10,0x10,0x10},
+  {0x0e,0x11,0x10,0x17,0x11,0x11,0x0e},{0x11,0x11,0x11,0x1f,0x11,0x11,0x11},
+  {0x0e,0x04,0x04,0x04,0x04,0x04,0x0e},{0x01,0x01,0x01,0x01,0x11,0x11,0x0e},
+  {0x11,0x12,0x14,0x18,0x14,0x12,0x11},{0x10,0x10,0x10,0x10,0x10,0x10,0x1f},
+  {0x11,0x1b,0x15,0x15,0x11,0x11,0x11},{0x11,0x19,0x15,0x13,0x11,0x11,0x11},
+  {0x0e,0x11,0x11,0x11,0x11,0x11,0x0e},{0x1e,0x11,0x11,0x1e,0x10,0x10,0x10},
+  {0x0e,0x11,0x11,0x11,0x15,0x12,0x0d},{0x1e,0x11,0x11,0x1e,0x14,0x12,0x11},
+  {0x0e,0x11,0x10,0x0e,0x01,0x11,0x0e},{0x1f,0x04,0x04,0x04,0x04,0x04,0x04},
+  {0x11,0x11,0x11,0x11,0x11,0x11,0x0e},{0x11,0x11,0x11,0x11,0x11,0x0a,0x04},
+  {0x11,0x11,0x11,0x15,0x15,0x1b,0x11},{0x11,0x11,0x0a,0x04,0x0a,0x11,0x11},
+  {0x11,0x11,0x0a,0x04,0x04,0x04,0x04},{0x1f,0x01,0x02,0x04,0x08,0x10,0x1f},
+};
+static const unsigned char ui_font_digit[10][7] = {
+  {0x0e,0x11,0x13,0x15,0x19,0x11,0x0e},{0x04,0x0c,0x04,0x04,0x04,0x04,0x0e},
+  {0x0e,0x11,0x01,0x06,0x08,0x10,0x1f},{0x1f,0x01,0x02,0x06,0x01,0x11,0x0e},
+  {0x02,0x06,0x0a,0x12,0x1f,0x02,0x02},{0x1f,0x10,0x1e,0x01,0x01,0x11,0x0e},
+  {0x06,0x08,0x10,0x1e,0x11,0x11,0x0e},{0x1f,0x01,0x02,0x04,0x08,0x08,0x08},
+  {0x0e,0x11,0x11,0x0e,0x11,0x11,0x0e},{0x0e,0x11,0x11,0x0f,0x01,0x02,0x0c},
+};
+static const struct { char ch; unsigned char rows[7]; } ui_font_punct[] = {
+  { '<', {0x02,0x04,0x08,0x10,0x08,0x04,0x02} },
+  { '>', {0x08,0x04,0x02,0x01,0x02,0x04,0x08} },
+  { '+', {0x00,0x04,0x04,0x1f,0x04,0x04,0x00} },
+  { '-', {0x00,0x00,0x00,0x1f,0x00,0x00,0x00} },
+  { ':', {0x00,0x0c,0x0c,0x00,0x0c,0x0c,0x00} },
+  { '/', {0x01,0x01,0x02,0x04,0x08,0x10,0x10} },
+  { '.', {0x00,0x00,0x00,0x00,0x00,0x0c,0x0c} },
 };
 
-static void ov_draw_char(int x, int y, char ch, int scale, Uint8 r, Uint8 g, Uint8 b)
+static const unsigned char *ui_glyph(char ch)
 {
-  int row, col, gi;
+  size_t i;
   if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
-  if (ch < 'A' || ch > 'Z') return;
-  gi = ch - 'A';
-  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-  for (row = 0; row < 7; row++) {
-    unsigned char bits = ov_font_5x7[gi][row];
-    for (col = 0; col < 5; col++) {
-      if (bits & (1 << (4 - col))) {
-        SDL_Rect p;
-        p.x = x + col * scale;
-        p.y = y + row * scale;
-        p.w = scale;
-        p.h = scale;
-        SDL_RenderFillRect(renderer, &p);
-      }
-    }
-  }
+  if (ch >= 'A' && ch <= 'Z') return ui_font_alpha[ch - 'A'];
+  if (ch >= '0' && ch <= '9') return ui_font_digit[ch - '0'];
+  for (i = 0; i < sizeof(ui_font_punct) / sizeof(ui_font_punct[0]); i++)
+    if (ui_font_punct[i].ch == ch)
+      return ui_font_punct[i].rows;
+  return NULL;
 }
 
-static void ov_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
+static int ui_text_width(const char *s, int scale)
 {
-  int cx = x;
+  int w = 0;
+  for (; *s; s++)
+    w += (*s == ' ') ? 4 * scale : 6 * scale;
+  return w > 0 ? w - scale : 0;
+}
+
+static void ui_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
   for (; *s; s++) {
+    const unsigned char *glyph;
+    int row, col;
     if (*s == ' ') {
-      cx += 4 * scale;
+      x += 4 * scale;
       continue;
     }
-    ov_draw_char(cx, y, *s, scale, r, g, b);
-    cx += 6 * scale;
+    glyph = ui_glyph(*s);
+    for (row = 0; glyph && row < 7; row++)
+      for (col = 0; col < 5; col++)
+        if (glyph[row] & (1 << (4 - col))) {
+          SDL_Rect p;
+          p.x = x + col * scale;
+          p.y = y + row * scale;
+          p.w = scale;
+          p.h = scale;
+          SDL_RenderFillRect(renderer, &p);
+        }
+    x += 6 * scale;
   }
 }
 
-/* Button rects [0]=Save [1]=Load [2]=Esc [3]=Skip [4]=USE/PULL [5]=LOOK
- * Save/Load + Esc/Skip stick to the top; USE/LOOK sit low for thumbs. */
-static void overlay_rects(SDL_Rect out[6])
+/* Text with a 1-unit drop shadow so it reads on any face colour. */
+static void ui_draw_label(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
+{
+  ui_draw_text(x + scale, y + scale, s, scale, 0, 0, 0);
+  ui_draw_text(x, y, s, scale, r, g, b);
+}
+
+static Uint8 ui_shade(int v, int pct)
+{
+  v = v * pct / 100;
+  return (Uint8)(v < 0 ? 0 : (v > 255 ? 255 : v));
+}
+
+/* Rounded rectangle, vertical gradient top→bot. Needs BLEND for alpha. */
+static void ui_fill_rounded(const SDL_Rect *r, int rad, SDL_Color top, SDL_Color bot)
+{
+  int y;
+  if (r->w <= 0 || r->h <= 0) return;
+  if (rad * 2 > r->h) rad = r->h / 2;
+  if (rad * 2 > r->w) rad = r->w / 2;
+  for (y = 0; y < r->h; y++) {
+    int inset = 0, dy = -1;
+    int t = (r->h > 1) ? y * 256 / (r->h - 1) : 0;
+    if (y < rad)
+      dy = rad - y;
+    else if (y >= r->h - rad)
+      dy = y - (r->h - rad - 1);
+    if (dy > 0)
+      while (inset < rad && (rad - inset) * (rad - inset) + dy * dy > rad * rad)
+        inset++;
+    SDL_SetRenderDrawColor(renderer,
+                           (Uint8)(top.r + ((bot.r - top.r) * t >> 8)),
+                           (Uint8)(top.g + ((bot.g - top.g) * t >> 8)),
+                           (Uint8)(top.b + ((bot.b - top.b) * t >> 8)),
+                           (Uint8)(top.a + ((bot.a - top.a) * t >> 8)));
+    SDL_RenderDrawLine(renderer, r->x + inset, r->y + y,
+                       r->x + r->w - 1 - inset, r->y + y);
+  }
+}
+
+static void ui_fill_rounded_solid(const SDL_Rect *r, int rad, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
+{
+  SDL_Color c;
+  c.r = R; c.g = G; c.b = B; c.a = A;
+  ui_fill_rounded(r, rad, c, c);
+}
+
+/* ---- Touch overlay ------------------------------------------------------- */
+/*
+ * Buttons live in the side letterbox (renderer-output pixels), never on top
+ * of the 320x200 picture. Left column: Save / Load (top), Use / Look
+ * (bottom, thumb reach). Right column: Esc / Skip (top), Menu (bottom).
+ * Enabled by default on Android and the web build; elsewhere via
+ * --touch-controls or the options menu (F12).
+ */
+
+/* 16x16 pixel-art icons, scaled by whole multiples. '.' = transparent. */
+static const char *const ov_icon_art[OV_COUNT][16] = {
+  /* OV_SAVE */ {
+    "................",
+    ".kkkkkkkkkkkkk..",
+    ".kbbkllllldkbbk.",
+    ".kbbklldddlkbbk.",
+    ".kbbklldddlkbbk.",
+    ".kbbkllllllkbbk.",
+    ".kbbbkkkkkkbbbk.",
+    ".kbbbbbbbbbbbbk.",
+    ".kbwwwwwwwwwwbk.",
+    ".kbwddddddddwbk.",
+    ".kbwwwwwwwwwwbk.",
+    ".kbwddddddddwbk.",
+    ".kbwwwwwwwwwwbk.",
+    ".kbwwwwwwwwwwbk.",
+    ".kkkkkkkkkkkkkk.",
+    "................",
+  },
+  /* OV_LOAD */ {
+    "........kk......",
+    ".......kGGk.....",
+    "......kGGGGk....",
+    ".....kGGGGGGk...",
+    ".....kkkGGkkk...",
+    ".kkkk..kGGk.....",
+    ".kyyyk.kGGk.....",
+    ".kyyyykkGGkkkkk.",
+    ".kyyyyykGGkyyyk.",
+    ".kyyyyykkkkyyyk.",
+    ".kooooooooooook.",
+    ".koyyyyyyyyyyyk.",
+    ".koyyyyyyyyyyyk.",
+    ".koyyyyyyyyyyyk.",
+    ".kkkkkkkkkkkkkk.",
+    "................",
+  },
+  /* OV_ESC */ {
+    "................",
+    ".....kkkkkk.....",
+    "....krrrrrrk....",
+    "...krrrrrrrrk...",
+    "..krrwrrrrwrrk..",
+    "..krwwwrrwwwrk..",
+    "..krrwwwwwwrrk..",
+    "..krrrwwwwrrrk..",
+    "..krrrwwwwrrrk..",
+    "..krrwwwwwwrrk..",
+    "..krwwwrrwwwrk..",
+    "..krrwrrrrwrrk..",
+    "...krrrrrrrrk...",
+    "....krrrrrrk....",
+    ".....kkkkkk.....",
+    "................",
+  },
+  /* OV_SKIP */ {
+    "................",
+    "................",
+    ".kk.....kk......",
+    ".kwk....kwk.....",
+    ".kwwk...kwwk....",
+    ".kwwwk..kwwwk...",
+    ".kwwwwk.kwwwwk..",
+    ".kwwwwwkkwwwwwk.",
+    ".kwwwwwkkwwwwwk.",
+    ".kwwwwk.kwwwwk..",
+    ".kwwwk..kwwwk...",
+    ".kwwk...kwwk....",
+    ".kwk....kwk.....",
+    ".kk.....kk......",
+    "................",
+    "................",
+  },
+  /* OV_MODE_USE */ {
+    ".......kk.......",
+    "........k.......",
+    ".....kkkkkk.....",
+    "....khhkkwwk....",
+    "...khhhkkwwwk...",
+    "...khhhkkwwwk...",
+    "...khhhkkwwwk...",
+    "...kkkkkkkkkk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "....kwwwwwlk....",
+    ".....kkkkkk.....",
+    "................",
+    "................",
+  },
+  /* OV_MODE_LOOK */ {
+    ".......kk.......",
+    "........k.......",
+    ".....kkkkkk.....",
+    "....kwwkkhhk....",
+    "...kwwwkkhhhk...",
+    "...kwwwkkhhhk...",
+    "...kwwwkkhhhk...",
+    "...kkkkkkkkkk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "...kwwwwwwwlk...",
+    "....kwwwwwlk....",
+    ".....kkkkkk.....",
+    "................",
+    "................",
+  },
+  /* OV_MENU */ {
+    "................",
+    "................",
+    "................",
+    "..kkkkkkkkkkkk..",
+    "..kwwwwwwwwwwk..",
+    "..kkkkkkkkkkkk..",
+    "................",
+    "..kkkkkkkkkkkk..",
+    "..kwwwwwwwwwwk..",
+    "..kkkkkkkkkkkk..",
+    "................",
+    "..kkkkkkkkkkkk..",
+    "..kwwwwwwwwwwk..",
+    "..kkkkkkkkkkkk..",
+    "................",
+    "................",
+  },
+};
+static SDL_Texture *ov_icon_tex[OV_COUNT];
+
+static Uint32 ov_icon_rgba(char c)
+{
+  switch (c) {
+    case 'k': return 0xFF141418u; /* outline */
+    case 'w': return 0xFFF4F4F0u; /* white */
+    case 'l': return 0xFFB8BEC6u; /* light grey */
+    case 'd': return 0xFF5A6068u; /* dark grey */
+    case 'b': return 0xFF2E5FB8u; /* floppy blue */
+    case 'y': return 0xFFF6C850u; /* folder */
+    case 'o': return 0xFFC8902Cu; /* folder shade */
+    case 'r': return 0xFFD23C32u; /* stop red */
+    case 'G': return 0xFF52D06Au; /* arrow green */
+    case 'h': return 0xFFFFC832u; /* pressed mouse button */
+    default:  return 0x00000000u;
+  }
+}
+
+static SDL_Texture *ov_icon(int which)
+{
+  Uint32 px[16 * 16];
+  int x, y;
+  SDL_Texture *t;
+
+  if (which < 1 || which > OV_COUNT || !renderer)
+    return NULL;
+  if (ov_icon_tex[which - 1])
+    return ov_icon_tex[which - 1];
+  for (y = 0; y < 16; y++)
+    for (x = 0; x < 16; x++)
+      px[y * 16 + x] = ov_icon_rgba(ov_icon_art[which - 1][y][x]);
+  t = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                        SDL_TEXTUREACCESS_STATIC, 16, 16);
+  if (!t)
+    return NULL;
+  SDL_UpdateTexture(t, NULL, px, 16 * (int)sizeof(Uint32));
+  SDL_SetTextureBlendMode(t, SDL_BLENDMODE_BLEND);
+  ov_icon_tex[which - 1] = t;
+  return t;
+}
+
+static void ov_free_icons(void)
+{
+  int i;
+  for (i = 0; i < OV_COUNT; i++)
+    if (ov_icon_tex[i]) {
+      SDL_DestroyTexture(ov_icon_tex[i]);
+      ov_icon_tex[i] = NULL;
+    }
+}
+
+/* Rects for OV_SAVE..OV_MENU in out[0..OV_COUNT-1]. */
+static void overlay_rects(SDL_Rect out[OV_COUNT])
 {
   int dx, dy, dw, dh, ww, wh;
   int btn_w, btn_h, gap, margin;
   int left_x, right_x;
-  int top_y, mode_y0;
+  int top_y, low_y;
   int side;
-  int top_stack_h, mode_stack_h;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   gap = 10;
@@ -829,9 +1104,6 @@ static void overlay_rects(SDL_Rect out[6])
   if (btn_h > 88)
     btn_h = 88;
 
-  top_stack_h = btn_h * 2 + gap;
-  mode_stack_h = btn_h * 2 + gap;
-
   if (dx >= btn_w + margin * 2) {
     left_x = (dx - btn_w) / 2;
     if (left_x < margin)
@@ -839,47 +1111,65 @@ static void overlay_rects(SDL_Rect out[6])
     right_x = dx + dw + (ww - (dx + dw) - btn_w) / 2;
     if (right_x + btn_w > ww - margin)
       right_x = ww - margin - btn_w;
-    /* Menu/abort at top; Pull/Use + LOOK near bottom for thumbs. */
-    top_y = margin;
-    mode_y0 = wh - margin - mode_stack_h;
-    /* Keep modes from climbing into the top cluster. */
-    if (mode_y0 < top_y + top_stack_h + gap * 2)
-      mode_y0 = top_y + top_stack_h + gap * 2;
   } else {
     btn_w = 72;
     btn_h = 56;
-    top_stack_h = btn_h * 2 + gap;
-    mode_stack_h = btn_h * 2 + gap;
     left_x = margin;
     right_x = ww - margin - btn_w;
-    top_y = margin;
-    mode_y0 = wh - margin - mode_stack_h;
-    if (mode_y0 < top_y + top_stack_h + gap * 2)
-      mode_y0 = top_y + top_stack_h + gap * 2;
   }
+  /* Menu/abort cluster at the top; Use/Look + Menu low for thumbs. */
+  top_y = margin;
+  low_y = wh - margin - (btn_h * 2 + gap);
+  if (low_y < top_y + btn_h * 2 + gap * 3)
+    low_y = top_y + btn_h * 2 + gap * 3;
 
-  out[0].x = left_x;  out[0].y = top_y;                    out[0].w = btn_w; out[0].h = btn_h; /* Save */
-  out[1].x = left_x;  out[1].y = top_y + btn_h + gap;       out[1].w = btn_w; out[1].h = btn_h; /* Load */
-  out[2].x = right_x; out[2].y = top_y;                    out[2].w = btn_w; out[2].h = btn_h; /* Esc  */
-  out[3].x = right_x; out[3].y = top_y + btn_h + gap;       out[3].w = btn_w; out[3].h = btn_h; /* Skip */
-  out[4].x = left_x;  out[4].y = mode_y0;                  out[4].w = btn_w; out[4].h = btn_h; /* USE/PULL */
-  out[5].x = left_x;  out[5].y = mode_y0 + btn_h + gap;     out[5].w = btn_w; out[5].h = btn_h; /* LOOK */
+#define OV_SET(i, X, Y) (out[(i) - 1].x = (X), out[(i) - 1].y = (Y), \
+                         out[(i) - 1].w = btn_w, out[(i) - 1].h = btn_h)
+  OV_SET(OV_SAVE,      left_x,  top_y);
+  OV_SET(OV_LOAD,      left_x,  top_y + btn_h + gap);
+  OV_SET(OV_ESC,       right_x, top_y);
+  OV_SET(OV_SKIP,      right_x, top_y + btn_h + gap);
+  OV_SET(OV_MODE_USE,  left_x,  low_y);
+  OV_SET(OV_MODE_LOOK, left_x,  low_y + btn_h + gap);
+  OV_SET(OV_MENU,      right_x, low_y + btn_h + gap);
+#undef OV_SET
 }
 
 /* ox/oy are renderer-output pixels (after window_to_output). */
 static int overlay_hit(int ox, int oy)
 {
-  SDL_Rect r[6];
-  int i;
-  int pad = 14;
+  SDL_Rect r[OV_COUNT];
+  int i, dx, dy, dw, dh;
+  const int pad = 14; /* fingers are fat */
 
+  if (!overlay_on)
+    return OV_NONE;
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  /* The game picture always wins, even inside a button's touch padding. */
+  if (ox >= dx && ox < dx + dw && oy >= dy && oy < dy + dh)
+    return OV_NONE;
   overlay_rects(r);
-  for (i = 0; i < 6; i++) {
+  for (i = 0; i < OV_COUNT; i++) {
     if (ox >= r[i].x - pad && ox < r[i].x + r[i].w + pad &&
         oy >= r[i].y - pad && oy < r[i].y + r[i].h + pad)
-      return i + 1; /* OV_SAVE..OV_MODE_LOOK */
+      return i + 1;
   }
   return OV_NONE;
+}
+
+/* Esc make code now, break code on the next pump (like a key tap). */
+static void synth_esc(void)
+{
+  if (KeyAbortState == 1)
+    KeyAbortState = 2;
+  KeyScanCode = 1;
+  esc_break_pending = 1;
+}
+
+/* SAVE/LOAD/MENU act on release; the rest on press. */
+static int overlay_fires_on_release(int which)
+{
+  return which == OV_SAVE || which == OV_LOAD || which == OV_MENU;
 }
 
 static void overlay_fire(int which)
@@ -888,36 +1178,53 @@ static void overlay_fire(int which)
     case OV_SAVE:
     case OV_LOAD:
       /*
-       * Do not open the menu on press: the same touch would still be “down”
-       * (or its synthetic mouse release would satisfy LoadSaveMenu’s wait) and
-       * close the menu immediately / pick a bogus slot. Queue until release;
-       * LookKeys runs SaveGame/LoadGame with the usual control checks.
+       * Queued for LookKeys, which runs SaveGame/LoadGame with the usual
+       * control checks (dropped during cutscenes/dialogs). Opening on
+       * press would let the same touch close LoadSaveMenu at once.
        */
-      overlay_pending_cmd = which;
+      overlay_pending_cmd = (which == OV_SAVE) ? 1 : 2;
       MOAS_ALOG("overlay: queued %s", which == OV_SAVE ? "SAVE" : "LOAD");
       break;
     case OV_ESC:
-      if (KeyAbortState == 1)
-        KeyAbortState = 2;
-      KeyScanCode = 1;
+      synth_esc();
       MOAS_ALOG("overlay: ESC abort=%d", (int)KeyAbortState);
       break;
     case OV_SKIP:
       /* Synthetic Shift: speed up / dismiss speech bubbles (not full sequence abort). */
       overlay_shift_hold = 20; /* ~frames while speech checks PlatformShiftDown */
-      MOAS_ALOG("overlay: SKIP (speech)");
       break;
     case OV_MODE_USE:
-      touch_mode = 0;
-      MOAS_ALOG("overlay: mode USE");
+      touch_mode = MOAS_TOUCH_USE;
       break;
     case OV_MODE_LOOK:
-      touch_mode = 1;
-      MOAS_ALOG("overlay: mode LOOK");
+      touch_mode = MOAS_TOUCH_LOOK;
+      break;
+    case OV_MENU:
+      PlatformEngineMenu();
       break;
     default:
       break;
   }
+}
+
+/* Pointer went down on button `which` (finger or left mouse). */
+static void overlay_press(int which)
+{
+  overlay_down = which;
+  overlay_pressed = which;
+  if (!overlay_fires_on_release(which))
+    overlay_fire(which);
+}
+
+/* Pointer released; `which` is the button under it now (may be OV_NONE). */
+static void overlay_release(int which)
+{
+  int down = overlay_down;
+  overlay_down = 0;
+  overlay_pressed = 0;
+  /* Sliding off the button before lifting cancels, like a desktop button. */
+  if (down && which == down && overlay_fires_on_release(down))
+    overlay_fire(down);
 }
 
 int PlatformPollOverlayCmd(void)
@@ -929,313 +1236,150 @@ int PlatformPollOverlayCmd(void)
 
 int PlatformGetTouchMode(void)
 {
-  return touch_mode;
+  return overlay_on ? touch_mode : MOAS_TOUCH_USE;
 }
 
-static void ov_fill_roundish(SDL_Rect *r, Uint8 R, Uint8 G, Uint8 B)
+static void overlay_set_enabled(int on)
 {
-  /* Fake rounded corners by stepping the fill edges in a few pixels. */
-  SDL_Rect mid = *r;
-  int c = r->w / 12;
-  if (c < 3) c = 3;
-  if (c > 10) c = 10;
-  mid.x += c; mid.w -= 2 * c;
-  SDL_SetRenderDrawColor(renderer, R, G, B, 255);
-  SDL_RenderFillRect(renderer, &mid);
-  mid = *r;
-  mid.y += c; mid.h -= 2 * c;
-  SDL_RenderFillRect(renderer, &mid);
-  /* corner nubs */
-  {
-    SDL_Rect q;
-    q.x = r->x + c / 2; q.y = r->y + c / 2; q.w = c; q.h = c;
-    SDL_RenderFillRect(renderer, &q);
-    q.x = r->x + r->w - c - c / 2;
-    SDL_RenderFillRect(renderer, &q);
-    q.y = r->y + r->h - c - c / 2;
-    SDL_RenderFillRect(renderer, &q);
-    q.x = r->x + c / 2;
-    SDL_RenderFillRect(renderer, &q);
+  on = on ? 1 : 0;
+  if (on == overlay_on)
+    return;
+  overlay_on = on;
+  overlay_down = overlay_pressed = 0;
+  if (!on)
+    touch_mode = MOAS_TOUCH_USE;
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+  /* Grow/shrink a plain window so the picture keeps its size. */
+  if (window && !(SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN |
+                  SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_MAXIMIZED))) {
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    w += on ? OVERLAY_EXTRA_W : -OVERLAY_EXTRA_W;
+    if (w >= LOGICAL_W)
+      SDL_SetWindowSize(window, w, h);
   }
+#endif
+  platform_log("touch controls %s", on ? "on" : "off");
 }
 
-static void ov_icon_save(SDL_Rect *r, int pressed)
+static void overlay_draw_button(int which, const SDL_Rect *r)
 {
-  /* 3.5" floppy: body, metal shutter, label window, write-protect notch */
-  SDL_Rect body, shutter, label, hub, notch;
-  int m = r->w / 10;
-  int oy = pressed ? 2 : 0;
-  body.x = r->x + m; body.y = r->y + m + oy;
-  body.w = r->w - 2 * m; body.h = r->h / 2 - m;
-  SDL_SetRenderDrawColor(renderer, 245, 245, 245, 255);
-  SDL_RenderFillRect(renderer, &body);
-  SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
-  SDL_RenderDrawRect(renderer, &body);
-  /* metal shutter top */
-  shutter.x = body.x + body.w / 5; shutter.y = body.y;
-  shutter.w = body.w * 3 / 5; shutter.h = body.h / 4;
-  SDL_SetRenderDrawColor(renderer, 90, 95, 100, 255);
-  SDL_RenderFillRect(renderer, &shutter);
-  /* label area */
-  label.x = body.x + body.w / 6; label.y = body.y + body.h * 2 / 5;
-  label.w = body.w * 2 / 3; label.h = body.h * 2 / 5;
-  SDL_SetRenderDrawColor(renderer, 230, 235, 240, 255);
-  SDL_RenderFillRect(renderer, &label);
-  SDL_SetRenderDrawColor(renderer, 50, 100, 60, 255);
-  SDL_RenderDrawRect(renderer, &label);
-  /* hub circle (square approx) */
-  hub.w = body.w / 5; hub.h = hub.w;
-  hub.x = body.x + (body.w - hub.w) / 2;
-  hub.y = body.y + body.h - hub.h - 2;
-  SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
-  SDL_RenderFillRect(renderer, &hub);
-  /* write-protect notch */
-  notch.x = body.x + body.w - m / 2; notch.y = body.y + body.h / 3;
-  notch.w = m / 2 + 1; notch.h = body.h / 5;
-  SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-  SDL_RenderFillRect(renderer, &notch);
-}
+  static const SDL_Color face_cols[OV_COUNT] = {
+    {  40, 132,  70, 255 },  /* Save */
+    {  44,  98, 176, 255 },  /* Load */
+    { 156,  44,  44, 255 },  /* Esc  */
+    { 196, 120,  36, 255 },  /* Skip */
+    {  70,  74,  96, 255 },  /* Use  */
+    {  70,  74,  96, 255 },  /* Look */
+    {  70,  74,  96, 255 },  /* Menu */
+  };
+  static const int labels[OV_COUNT] = {
+    UI_OV_SAVE, UI_OV_LOAD, UI_OV_ESC, UI_OV_SKIP, UI_OV_USE, UI_OV_LOOK, UI_OV_MENU
+  };
+  int pressed = (overlay_pressed == which);
+  int selected = (which == OV_MODE_USE && touch_mode == MOAS_TOUCH_USE) ||
+                 (which == OV_MODE_LOOK && touch_mode == MOAS_TOUCH_LOOK);
+  SDL_Color c = face_cols[which - 1], top, bot;
+  SDL_Rect face = *r, inner, sh;
+  const char *label = Ui(labels[which - 1]);
+  int rad = r->w / 7;
+  int ts, label_h, pad, icon, tw;
+  SDL_Texture *tex;
 
-static void ov_icon_load(SDL_Rect *r, int pressed)
-{
-  /* Folder with tab + downward arrow into it */
-  SDL_Rect tab, body;
-  int m = r->w / 10;
-  int mid = r->x + r->w / 2;
-  int oy = pressed ? 2 : 0;
-  int y0 = r->y + m + oy;
-  tab.x = r->x + m; tab.y = y0;
-  tab.w = r->w / 3; tab.h = r->h / 12;
-  body.x = r->x + m; body.y = tab.y + tab.h;
-  body.w = r->w - 2 * m; body.h = r->h / 3;
-  SDL_SetRenderDrawColor(renderer, 255, 220, 120, 255);
-  SDL_RenderFillRect(renderer, &tab);
-  SDL_SetRenderDrawColor(renderer, 255, 200, 70, 255);
-  SDL_RenderFillRect(renderer, &body);
-  SDL_SetRenderDrawColor(renderer, 120, 80, 20, 255);
-  SDL_RenderDrawRect(renderer, &body);
-  SDL_RenderDrawRect(renderer, &tab);
-  /* thick arrow into folder */
-  {
-    int tip = body.y + body.h * 2 / 3;
-    int i;
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    for (i = 0; i < 3; i++) {
-      SDL_RenderDrawLine(renderer, mid + i - 1, y0 - 2, mid + i - 1, tip);
-      SDL_RenderDrawLine(renderer, mid - m, tip - m + i, mid, tip + i);
-      SDL_RenderDrawLine(renderer, mid + m, tip - m + i, mid, tip + i);
-    }
+  if (selected) {
+    c.r = ui_shade(c.r, 150);
+    c.g = ui_shade(c.g, 150);
+    c.b = ui_shade(c.b, 170);
   }
-}
+  if (pressed) {
+    c.r = ui_shade(c.r, 70);
+    c.g = ui_shade(c.g, 70);
+    c.b = ui_shade(c.b, 70);
+    face.y += 2;
+  } else {
+    sh = face;
+    sh.y += 4;
+    ui_fill_rounded_solid(&sh, rad, 0, 0, 0, 110);
+  }
 
-static void ov_icon_esc(SDL_Rect *r, int pressed)
-{
-  /* Red stop plate with bold X */
-  SDL_Rect plate;
-  int m = r->w / 8;
-  int oy = pressed ? 2 : 0;
-  int cx = r->x + r->w / 2, cy = r->y + r->h / 3 + oy;
-  int rad = r->w / 5;
-  int i;
-  plate.x = cx - rad; plate.y = cy - rad; plate.w = rad * 2; plate.h = rad * 2;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderFillRect(renderer, &plate);
-  SDL_SetRenderDrawColor(renderer, 180, 30, 30, 255);
-  {
-    SDL_Rect in = plate;
-    in.x += 3; in.y += 3; in.w -= 6; in.h -= 6;
-    SDL_RenderFillRect(renderer, &in);
-  }
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  for (i = 0; i < 3; i++) {
-    SDL_RenderDrawLine(renderer, plate.x + m + i, plate.y + m,
-                       plate.x + plate.w - m + i, plate.y + plate.h - m);
-    SDL_RenderDrawLine(renderer, plate.x + plate.w - m - i, plate.y + m,
-                       plate.x + m - i, plate.y + plate.h - m);
-  }
-}
+  /* Rim (gold when the mode is active), then the gradient face. */
+  if (selected)
+    ui_fill_rounded_solid(&face, rad, 255, 206, 72, 255);
+  else
+    ui_fill_rounded_solid(&face, rad, ui_shade(c.r, 45), ui_shade(c.g, 45), ui_shade(c.b, 45), 255);
+  inner = face;
+  inner.x += selected ? 3 : 2;
+  inner.y += selected ? 3 : 2;
+  inner.w -= selected ? 6 : 4;
+  inner.h -= selected ? 6 : 4;
+  top.r = ui_shade(c.r, 125); top.g = ui_shade(c.g, 125); top.b = ui_shade(c.b, 125); top.a = 255;
+  bot.r = ui_shade(c.r, 80);  bot.g = ui_shade(c.g, 80);  bot.b = ui_shade(c.b, 80);  bot.a = 255;
+  ui_fill_rounded(&inner, rad - 2, top, bot);
 
-static void ov_icon_skip(SDL_Rect *r, int pressed)
-{
-  /* Fast-forward: two filled chevrons */
-  int m = r->w / 8;
-  int oy = pressed ? 2 : 0;
-  int x0 = r->x + r->w / 5;
-  int y0 = r->y + m + oy;
-  int y1 = r->y + r->h / 3 + oy;
-  int y2 = r->y + r->h / 2 - m + oy;
-  int x1 = r->x + r->w * 2 / 5;
-  int x2 = r->x + r->w / 2;
-  int i;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  for (i = 0; i < 4; i++) {
-    SDL_RenderDrawLine(renderer, x0 + i, y0, x1 + i, y1);
-    SDL_RenderDrawLine(renderer, x1 + i, y1, x0 + i, y2);
-    SDL_RenderDrawLine(renderer, x2 + i, y0, x2 + (x1 - x0) + i, y1);
-    SDL_RenderDrawLine(renderer, x2 + (x1 - x0) + i, y1, x2 + i, y2);
+  /* Label along the bottom; 2x when it fits. */
+  ts = (face.h >= 70 && ui_text_width(label, 2) <= inner.w - 8) ? 2 : 1;
+  tw = ui_text_width(label, ts);
+  label_h = 7 * ts;
+  pad = face.h / 16 + 2;
+
+  /* Icon: largest whole multiple of 16 that fits above the label. */
+  icon = (face.h - label_h - 3 * pad) / 16 * 16;
+  if (icon > (inner.w - 2 * pad) / 16 * 16)
+    icon = (inner.w - 2 * pad) / 16 * 16;
+  tex = ov_icon(which);
+  if (tex && icon >= 16) {
+    SDL_Rect dst;
+    int u = icon / 16;
+    dst.w = dst.h = icon;
+    dst.x = face.x + (face.w - icon) / 2;
+    dst.y = face.y + pad;
+    /* soft drop shadow */
+    dst.x += u; dst.y += u;
+    SDL_SetTextureColorMod(tex, 0, 0, 0);
+    SDL_SetTextureAlphaMod(tex, 110);
+    SDL_RenderCopy(renderer, tex, NULL, &dst);
+    dst.x -= u; dst.y -= u;
+    SDL_SetTextureColorMod(tex, 255, 255, 255);
+    SDL_SetTextureAlphaMod(tex, 255);
+    SDL_RenderCopy(renderer, tex, NULL, &dst);
   }
+  ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
+                label, ts, 255, 255, 255);
 }
 
 static void overlay_draw(void)
 {
-  SDL_Rect r[6];
-  static const SDL_Color cols[6] = {
-    { 32, 140, 58, 255 },   /* Save */
-    { 36, 100, 190, 255 },  /* Load */
-    { 170, 42, 42, 255 },   /* Esc  */
-    { 200, 120, 28, 255 },  /* Skip */
-    { 70, 70, 90, 255 },    /* USE / Pull */
-    { 70, 70, 90, 255 },    /* LOOK */
-  };
-  const char *labels[6] = {
-    Ui(UI_OV_SAVE), Ui(UI_OV_LOAD), Ui(UI_OV_ESC), Ui(UI_OV_SKIP),
-    Ui(UI_OV_USE), Ui(UI_OV_LOOK)
-  };
-  int i, ts;
+  SDL_Rect r[OV_COUNT];
+  int i;
 
-  if (!renderer)
+  if (!renderer || !overlay_on)
     return;
-  /* overlay_shift_hold decays in pad_apply / end of pump */
-
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   overlay_rects(r);
-  for (i = 0; i < 6; i++) {
-    int pressed = (overlay_pressed == i + 1);
-    int selected = ((i == 4 && touch_mode == 0) || (i == 5 && touch_mode == 1));
-    SDL_Color c = cols[i];
-    SDL_Rect face = r[i];
-
-    if (selected) {
-      c.r = (Uint8)(c.r + 40 > 255 ? 255 : c.r + 40);
-      c.g = (Uint8)(c.g + 50 > 255 ? 255 : c.g + 50);
-      c.b = (Uint8)(c.b + 80 > 255 ? 255 : c.b + 80);
-    }
-    if (pressed) {
-      c.r = (Uint8)(c.r * 2 / 3);
-      c.g = (Uint8)(c.g * 2 / 3);
-      c.b = (Uint8)(c.b * 2 / 3);
-    }
-
-    if (!pressed) {
-      SDL_Rect sh = r[i];
-      sh.x += 3; sh.y += 3;
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 140);
-      SDL_RenderFillRect(renderer, &sh);
-    } else {
-      face.x += 2; face.y += 2;
-    }
-
-    ov_fill_roundish(&face, c.r, c.g, c.b);
-
-    if (selected) {
-      SDL_SetRenderDrawColor(renderer, 255, 220, 80, 255);
-      SDL_RenderDrawRect(renderer, &face);
-      {
-        SDL_Rect in = face;
-        in.x += 2; in.y += 2; in.w -= 4; in.h -= 4;
-        SDL_RenderDrawRect(renderer, &in);
-      }
-    } else {
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, pressed ? 255 : 180);
-      SDL_RenderDrawRect(renderer, &face);
-    }
-
-    if (i == 0) ov_icon_save(&face, pressed);
-    else if (i == 1) ov_icon_load(&face, pressed);
-    else if (i == 2) ov_icon_esc(&face, pressed);
-    else if (i == 3) ov_icon_skip(&face, pressed);
-    /* USE (Pull/Use) / LOOK: text only */
-
-    ts = (face.w >= 80) ? 2 : 1;
-    {
-      int text_w = (int)strlen(labels[i]) * 6 * ts;
-      int tx = face.x + (face.w - text_w) / 2;
-      int ty = face.y + face.h - 7 * ts - 6;
-      if (ty < face.y + face.h / 2)
-        ty = face.y + (face.h - 7 * ts) / 2;
-      ov_draw_text(tx + 1, ty + 1, labels[i], ts, 0, 0, 0);
-      ov_draw_text(tx, ty, labels[i], ts, 255, 255, 255);
-    }
-  }
+  for (i = 0; i < OV_COUNT; i++)
+    overlay_draw_button(i + 1, &r[i]);
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
-#else
-static int overlay_hit(int wx, int wy) { (void)wx; (void)wy; return 0; }
-static void overlay_fire(int which) { (void)which; }
-static void overlay_draw(void) { }
-int PlatformPollOverlayCmd(void) { return 0; }
-int PlatformGetTouchMode(void) { return 0; }
-#endif
 
 
-/* ---- Engine settings menu (SDL port; not the in-game script system menu) ---- */
+/* ---- Options menu (F12 / overlay MENU / gamepad Back) ------------------ */
+/*
+ * Port-side settings, not the game's own F10 FileMenu. Works with keyboard,
+ * gamepad, mouse (hover + click, wheel, right-click closes) and touch
+ * (tap a row; tap the left half of a value to step backwards; tap outside
+ * the panel to close).
+ */
 static int engine_menu_visible;
 
-static const unsigned char eng_font_digit[10][7] = {
-  {0x0e,0x11,0x13,0x15,0x19,0x11,0x0e},
-  {0x04,0x0c,0x04,0x04,0x04,0x04,0x0e},
-  {0x0e,0x11,0x01,0x06,0x08,0x10,0x1f},
-  {0x1f,0x01,0x02,0x06,0x01,0x11,0x0e},
-  {0x02,0x06,0x0a,0x12,0x1f,0x02,0x02},
-  {0x1f,0x10,0x1e,0x01,0x01,0x11,0x0e},
-  {0x06,0x08,0x10,0x1e,0x11,0x11,0x0e},
-  {0x1f,0x01,0x02,0x04,0x08,0x08,0x08},
-  {0x0e,0x11,0x11,0x0e,0x11,0x11,0x0e},
-  {0x0e,0x11,0x11,0x0f,0x01,0x02,0x0c},
-};
-static const unsigned char eng_font_A[26][7] = {
-  {0x0e,0x11,0x11,0x1f,0x11,0x11,0x11},{0x1e,0x11,0x11,0x1e,0x11,0x11,0x1e},
-  {0x0e,0x11,0x10,0x10,0x10,0x11,0x0e},{0x1e,0x11,0x11,0x11,0x11,0x11,0x1e},
-  {0x1f,0x10,0x10,0x1e,0x10,0x10,0x1f},{0x1f,0x10,0x10,0x1e,0x10,0x10,0x10},
-  {0x0e,0x11,0x10,0x17,0x11,0x11,0x0e},{0x11,0x11,0x11,0x1f,0x11,0x11,0x11},
-  {0x0e,0x04,0x04,0x04,0x04,0x04,0x0e},{0x01,0x01,0x01,0x01,0x11,0x11,0x0e},
-  {0x11,0x12,0x14,0x18,0x14,0x12,0x11},{0x10,0x10,0x10,0x10,0x10,0x10,0x1f},
-  {0x11,0x1b,0x15,0x15,0x11,0x11,0x11},{0x11,0x19,0x15,0x13,0x11,0x11,0x11},
-  {0x0e,0x11,0x11,0x11,0x11,0x11,0x0e},{0x1e,0x11,0x11,0x1e,0x10,0x10,0x10},
-  {0x0e,0x11,0x11,0x11,0x15,0x12,0x0d},{0x1e,0x11,0x11,0x1e,0x14,0x12,0x11},
-  {0x0e,0x11,0x10,0x0e,0x01,0x11,0x0e},{0x1f,0x04,0x04,0x04,0x04,0x04,0x04},
-  {0x11,0x11,0x11,0x11,0x11,0x11,0x0e},{0x11,0x11,0x11,0x11,0x11,0x0a,0x04},
-  {0x11,0x11,0x11,0x15,0x15,0x1b,0x11},{0x11,0x11,0x0a,0x04,0x0a,0x11,0x11},
-  {0x11,0x11,0x0a,0x04,0x04,0x04,0x04},{0x1f,0x01,0x02,0x04,0x08,0x10,0x1f},
-};
+enum { ENG_LANG = 0, ENG_FULLSCREEN, ENG_TOUCH, ENG_SPEED, ENG_SPEECH,
+       ENG_RESUME, ENG_QUIT, ENG_COUNT };
 
-static void eng_draw_char(int x, int y, char ch, int scale, Uint8 r, Uint8 g, Uint8 b)
-{
-  const unsigned char *glyph = NULL;
-  int row, col;
-  if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
-  if (ch >= 'A' && ch <= 'Z') glyph = eng_font_A[ch - 'A'];
-  else if (ch >= '0' && ch <= '9') glyph = eng_font_digit[ch - '0'];
-  else if (ch == ':') {
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    { SDL_Rect p; p.x = x+2*scale; p.y = y+2*scale; p.w = scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
-    { SDL_Rect p; p.x = x+2*scale; p.y = y+4*scale; p.w = scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
-    return;
-  } else if (ch == '-' || ch == '/') {
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    { SDL_Rect p; p.x = x; p.y = y+3*scale; p.w = 5*scale; p.h = scale; SDL_RenderFillRect(renderer, &p); }
-    return;
-  } else return;
-  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-  for (row = 0; row < 7; row++) {
-    unsigned char bits = glyph[row];
-    for (col = 0; col < 5; col++) {
-      if (bits & (1 << (4 - col))) {
-        SDL_Rect p;
-        p.x = x + col * scale; p.y = y + row * scale; p.w = scale; p.h = scale;
-        SDL_RenderFillRect(renderer, &p);
-      }
-    }
-  }
-}
-
-static void eng_draw_text(int x, int y, const char *s, int scale, Uint8 r, Uint8 g, Uint8 b)
-{
-  int cx = x;
-  for (; *s; s++) {
-    if (*s == ' ') { cx += 4 * scale; continue; }
-    eng_draw_char(cx, y, *s, scale, r, g, b);
-    cx += 6 * scale;
-  }
-}
+typedef struct {
+  SDL_Rect panel;
+  SDL_Rect item[ENG_COUNT];
+  SDL_Rect value[ENG_COUNT]; /* w == 0: no value column */
+  int u;                     /* pixel scale of the 5x7 font */
+} EngLayout;
 
 static int eng_is_fullscreen(void)
 {
@@ -1252,156 +1396,343 @@ static void eng_toggle_fullscreen(void)
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-enum { ENG_LANG=0, ENG_FULLSCREEN, ENG_SPEED, ENG_SPEECH, ENG_RESUME, ENG_QUIT, ENG_COUNT };
-
-static void eng_menu_draw(int sel)
+static void eng_layout(EngLayout *L)
 {
-  int dx, dy, dw, dh;
-  int out_w = 640, out_h = 400;
-  SDL_Rect panel, bar, dim;
-  static char L[ENG_COUNT][48];
-  int i, scale, ty, item_h;
-  const char *lang;
+  int out_w = 640, out_h = 400, u, i, y, row_h;
+  const int cols = 24; /* widest row: "SPEECH SPEED    < 24 >" */
 
-  if (!renderer) return;
-  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
   SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
+  u = out_h / 160;
+  if (u > 4) u = 4;
+  if (u < 1) u = 1;
+  /* panel: 6u margin, 7u title + 6u gap, rows of 13u, 6u hint gap + 7 + 6u */
+  while (u > 1 && ((cols * 6 + 12) * u > out_w - 16 ||
+                   (6 + 13 + ENG_COUNT * 13 + 6) * u + 7 + 6 * u > out_h - 16))
+    u--;
+  L->u = u;
+  L->panel.w = (cols * 6 + 12) * u;
+  L->panel.h = (6 + 13 + ENG_COUNT * 13 + 6) * u + 7 + 6 * u;
+  L->panel.x = (out_w - L->panel.w) / 2;
+  L->panel.y = (out_h - L->panel.h) / 2;
+  row_h = 13 * u;
+  y = L->panel.y + (6 + 13) * u;
+  for (i = 0; i < ENG_COUNT; i++, y += row_h) {
+    L->item[i].x = L->panel.x + 4 * u;
+    L->item[i].y = y;
+    L->item[i].w = L->panel.w - 8 * u;
+    L->item[i].h = row_h - u;
+    L->value[i] = L->item[i];
+    if (i <= ENG_SPEECH) {
+      L->value[i].w = 9 * 6 * u;
+      L->value[i].x = L->item[i].x + L->item[i].w - L->value[i].w - 2 * u;
+    } else
+      L->value[i].w = 0;
+  }
+}
 
+static int eng_hit(const EngLayout *L, int x, int y)
+{
+  int i;
+  for (i = 0; i < ENG_COUNT; i++)
+    if (x >= L->item[i].x && x < L->item[i].x + L->item[i].w &&
+        y >= L->item[i].y && y < L->item[i].y + L->item[i].h)
+      return i;
+  return -1;
+}
+
+static int eng_in_panel(const EngLayout *L, int x, int y)
+{
+  return x >= L->panel.x && x < L->panel.x + L->panel.w &&
+         y >= L->panel.y && y < L->panel.y + L->panel.h;
+}
+
+/* Tap/click on a row: left half of the value column steps back. */
+static int eng_dir_at(const EngLayout *L, int item, int x)
+{
+  if (L->value[item].w > 0 && x >= L->value[item].x &&
+      x < L->value[item].x + L->value[item].w / 2)
+    return -1;
+  return 1;
+}
+
+static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
+{
+  int out_w = 640, out_h = 400, i, u = L->u;
+  SDL_Rect dim, rim, bar;
+  char val[16];
+  const char *title = "OPTIONS";
+  const char *hint = overlay_on ? "TAP A ROW - TAP OUTSIDE TO CLOSE"
+                                : "CLICK OR ARROWS/ENTER - ESC/F12 CLOSES";
+
+  SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   dim.x = 0; dim.y = 0; dim.w = out_w; dim.h = out_h;
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 160);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 170);
   SDL_RenderFillRect(renderer, &dim);
 
-  panel.w = dw > 400 ? 360 : (dw * 9) / 10;
-  if (panel.w < 260) panel.w = 260;
-  panel.h = 230;
-  panel.x = dx + (dw - panel.w) / 2;
-  panel.y = dy + (dh - panel.h) / 2;
-  if (panel.y < 8) panel.y = 8;
-
-  SDL_SetRenderDrawColor(renderer, 24, 28, 40, 245);
-  SDL_RenderFillRect(renderer, &panel);
-  SDL_SetRenderDrawColor(renderer, 200, 200, 220, 255);
-  SDL_RenderDrawRect(renderer, &panel);
-
-  scale = panel.w >= 320 ? 2 : 1;
-  eng_draw_text(panel.x + 16, panel.y + 12, "ENGINE MENU", scale, 255, 220, 80);
-
-  lang = LangGetCode();
-  if (!lang || !lang[0]) lang = "de";
-  snprintf(L[ENG_LANG], sizeof(L[0]), "LANGUAGE  %s", lang);
-  snprintf(L[ENG_FULLSCREEN], sizeof(L[0]), "FULLSCREEN  %s", eng_is_fullscreen() ? "ON" : "OFF");
-  snprintf(L[ENG_SPEED], sizeof(L[0]), "GAME SPEED  %d", (int)TotalSpeed);
-  snprintf(L[ENG_SPEECH], sizeof(L[0]), "SPEECH SPEED  %d", (int)SpeechSpeed);
-  snprintf(L[ENG_RESUME], sizeof(L[0]), "RESUME");
-  snprintf(L[ENG_QUIT], sizeof(L[0]), "QUIT");
-
-  item_h = 7 * scale + 12;
-  for (i = 0; i < ENG_COUNT; i++) {
-    ty = panel.y + 44 + i * item_h;
-    if (i == sel) {
-      bar.x = panel.x + 8; bar.y = ty - 4; bar.w = panel.w - 16; bar.h = item_h;
-      SDL_SetRenderDrawColor(renderer, 60, 90, 160, 255);
-      SDL_RenderFillRect(renderer, &bar);
-    }
-    eng_draw_text(panel.x + 20, ty, L[i], scale, 255, 255, 255);
+  rim = L->panel;
+  ui_fill_rounded_solid(&rim, 4 * u, 200, 200, 220, 255);
+  rim.x += u; rim.y += u; rim.w -= 2 * u; rim.h -= 2 * u;
+  {
+    SDL_Color top = { 34, 40, 60, 250 }, bot = { 18, 20, 32, 250 };
+    ui_fill_rounded(&rim, 3 * u, top, bot);
   }
-  eng_draw_text(panel.x + 16, panel.y + panel.h - 20, "ARROWS ENTER ESC  F12", 1, 150, 150, 170);
+  ui_draw_label(L->panel.x + (L->panel.w - ui_text_width(title, u)) / 2,
+                L->panel.y + 6 * u, title, u, 255, 206, 72);
+
+  for (i = 0; i < ENG_COUNT; i++) {
+    const SDL_Rect *it = &L->item[i];
+    const char *label = "";
+    int ty = it->y + (it->h - 7 * u) / 2;
+
+    if (i == sel || i == pressed) {
+      bar = *it;
+      if (i == pressed)
+        ui_fill_rounded_solid(&bar, 2 * u, 40, 62, 120, 255);
+      else
+        ui_fill_rounded_solid(&bar, 2 * u, 62, 94, 168, 255);
+    }
+    val[0] = 0;
+    switch (i) {
+      case ENG_LANG:
+        label = "LANGUAGE";
+        snprintf(val, sizeof(val), "%s", (LangGetCode() && LangGetCode()[0]) ? LangGetCode() : "de");
+        break;
+      case ENG_FULLSCREEN:
+        label = "FULLSCREEN";
+        snprintf(val, sizeof(val), "%s", eng_is_fullscreen() ? "ON" : "OFF");
+        break;
+      case ENG_TOUCH:
+        label = "TOUCH BUTTONS";
+        snprintf(val, sizeof(val), "%s", overlay_on ? "ON" : "OFF");
+        break;
+      case ENG_SPEED:
+        label = "GAME SPEED";
+        snprintf(val, sizeof(val), "%d", (int)TotalSpeed);
+        break;
+      case ENG_SPEECH:
+        label = "SPEECH SPEED";
+        snprintf(val, sizeof(val), "%d", (int)SpeechSpeed);
+        break;
+      case ENG_RESUME:
+        label = "RESUME";
+        break;
+      case ENG_QUIT:
+        label = "QUIT";
+        break;
+    }
+    if (L->value[i].w > 0) {
+      const SDL_Rect *v = &L->value[i];
+      ui_draw_label(it->x + 3 * u, ty, label, u, 255, 255, 255);
+      ui_draw_label(v->x, ty, "<", u, 150, 170, 210);
+      ui_draw_label(v->x + v->w - 5 * u, ty, ">", u, 150, 170, 210);
+      ui_draw_label(v->x + (v->w - ui_text_width(val, u)) / 2, ty, val, u, 255, 230, 140);
+    } else {
+      ui_draw_label(it->x + (it->w - ui_text_width(label, u)) / 2, ty, label, u, 255, 255, 255);
+    }
+  }
+  {
+    int hs = u > 1 ? u - 1 : 1;
+    if (ui_text_width(hint, hs) > L->panel.w - 8)
+      hs = 1;
+    ui_draw_text(L->panel.x + (L->panel.w - ui_text_width(hint, hs)) / 2,
+                 L->panel.y + L->panel.h - 6 * u - 7 * hs / 2,
+                 hint, hs, 150, 150, 175);
+  }
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
-static void eng_menu_activate(int sel)
+/* dir: +1 next / activate, -1 previous. */
+static void eng_menu_change(int sel, int dir)
 {
   const char *code;
   switch (sel) {
     case ENG_LANG:
       code = LangGetCode();
-      if (code && strcmp(code, "en") == 0)
-        LangSetCode("de");
-      else
-        LangSetCode("en");
+      LangSetCode((code && strcmp(code, "en") == 0) ? "de" : "en");
       LangInit();
       break;
     case ENG_FULLSCREEN:
       eng_toggle_fullscreen();
       break;
+    case ENG_TOUCH:
+      overlay_set_enabled(!overlay_on);
+      break;
     case ENG_SPEED:
-      TotalSpeed++;
-      if (TotalSpeed < 1) TotalSpeed = 1;
+      /* Same 1..8 range as the game's own F10 menu. */
+      TotalSpeed = (short)(TotalSpeed + dir);
+      if (TotalSpeed < 1) TotalSpeed = 8;
       if (TotalSpeed > 8) TotalSpeed = 1;
       break;
     case ENG_SPEECH:
-      SpeechSpeed++;
-      if (SpeechSpeed < 1) SpeechSpeed = 1;
+      SpeechSpeed = (short)(SpeechSpeed + dir);
+      if (SpeechSpeed < 1) SpeechSpeed = 24;
       if (SpeechSpeed > 24) SpeechSpeed = 1;
       break;
     case ENG_RESUME:
-      engine_menu_visible = 0;
+      if (dir > 0)
+        engine_menu_visible = 0;
       break;
     case ENG_QUIT:
-      engine_menu_visible = 0;
-      PlatformRequestQuit();
+      if (dir > 0) {
+        engine_menu_visible = 0;
+        PlatformRequestQuit();
+      }
       break;
   }
 }
 
-/* Forward: PlatformPresent draws the menu when visible. */
+/* Forward: PlatformPresent draws the game + overlay under the menu. */
 static void platform_present_frame(void);
+static void pad_device_event(const SDL_Event *ev);
+static void platform_try_autosave(const char *reason);
 
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_KEEPALIVE
 #endif
 void PlatformEngineMenu(void)
 {
-  int sel = 0;
+  static int in_menu = 0;
+  int sel = 0, pressed = -1, outside = 0;
   SDL_Event ev;
+  EngLayout L;
 
-  if (!renderer || !window)
+  if (!renderer || !window || in_menu)
     return;
+  in_menu = 1;
   engine_menu_visible = 1;
   while (engine_menu_visible && running) {
+    eng_layout(&L);
     platform_present_frame();
-    eng_menu_draw(sel);
+    eng_menu_draw(&L, sel, pressed);
     SDL_RenderPresent(renderer);
 
-    while (SDL_PollEvent(&ev)) {
-      if (ev.type == SDL_QUIT) {
-        PlatformRequestQuit();
-        engine_menu_visible = 0;
-        break;
-      }
-      if (ev.type == SDL_KEYDOWN) {
-        SDL_Keycode k = ev.key.keysym.sym;
-        if (k == SDLK_ESCAPE || k == SDLK_F12) {
+    while (engine_menu_visible && SDL_PollEvent(&ev)) {
+      int px = 0, py = 0, down = 0, up = 0;
+
+      switch (ev.type) {
+        case SDL_QUIT:
+          PlatformRequestQuit();
           engine_menu_visible = 0;
           break;
+#ifdef __ANDROID__
+        case SDL_APP_WILLENTERBACKGROUND:
+        case SDL_APP_DIDENTERBACKGROUND:
+          platform_try_autosave("background (menu)");
+          break;
+        case SDL_APP_TERMINATING:
+          PlatformRequestQuit();
+          break;
+#endif
+        case SDL_CONTROLLERDEVICEADDED:
+        case SDL_CONTROLLERDEVICEREMOVED:
+          pad_device_event(&ev);
+          break;
+        case SDL_KEYDOWN: {
+          SDL_Keycode k = ev.key.keysym.sym;
+          if (k == SDLK_ESCAPE || k == SDLK_F12 || k == SDLK_AC_BACK)
+            engine_menu_visible = 0;
+          else if (k == SDLK_UP || k == SDLK_w)
+            sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+          else if (k == SDLK_DOWN || k == SDLK_s)
+            sel = (sel + 1) % ENG_COUNT;
+          else if (k == SDLK_LEFT)
+            eng_menu_change(sel, -1);
+          else if (k == SDLK_RIGHT || k == SDLK_RETURN || k == SDLK_KP_ENTER || k == SDLK_SPACE)
+            eng_menu_change(sel, 1);
+          break;
         }
-        if (k == SDLK_UP || k == SDLK_w) {
-          sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
-        } else if (k == SDLK_DOWN || k == SDLK_s) {
-          sel = (sel + 1) % ENG_COUNT;
-        } else if (k == SDLK_LEFT || k == SDLK_RIGHT || k == SDLK_RETURN || k == SDLK_SPACE) {
-          eng_menu_activate(sel);
-          if (sel == ENG_RESUME || sel == ENG_QUIT)
+        case SDL_CONTROLLERBUTTONDOWN:
+          switch (ev.cbutton.button) {
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+              sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+              break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+              sel = (sel + 1) % ENG_COUNT;
+              break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+              eng_menu_change(sel, -1);
+              break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            case SDL_CONTROLLER_BUTTON_A:
+            case SDL_CONTROLLER_BUTTON_X:
+              eng_menu_change(sel, 1);
+              break;
+            case SDL_CONTROLLER_BUTTON_B:
+            case SDL_CONTROLLER_BUTTON_START:
+            case SDL_CONTROLLER_BUTTON_BACK:
+              engine_menu_visible = 0;
+              break;
+          }
+          break;
+        case SDL_MOUSEMOTION:
+          if (ev.motion.which == SDL_TOUCH_MOUSEID)
             break;
+          window_to_output(ev.motion.x, ev.motion.y, &px, &py);
+          {
+            int i = eng_hit(&L, px, py);
+            if (i >= 0)
+              sel = i;
+          }
+          break;
+        case SDL_MOUSEWHEEL:
+          if (ev.wheel.y > 0)
+            sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+          else if (ev.wheel.y < 0)
+            sel = (sel + 1) % ENG_COUNT;
+          break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+          if (ev.button.which == SDL_TOUCH_MOUSEID)
+            break;
+          if (ev.button.button == SDL_BUTTON_RIGHT) {
+            if (ev.type == SDL_MOUSEBUTTONUP)
+              engine_menu_visible = 0;
+            break;
+          }
+          if (ev.button.button != SDL_BUTTON_LEFT)
+            break;
+          window_to_output(ev.button.x, ev.button.y, &px, &py);
+          down = (ev.type == SDL_MOUSEBUTTONDOWN);
+          up = !down;
+          break;
+        case SDL_FINGERDOWN:
+        case SDL_FINGERUP: {
+          int ww = 1, wh = 1;
+#ifdef SDL_MOUSE_TOUCHID
+          if (ev.tfinger.touchId == SDL_MOUSE_TOUCHID)
+            break;
+#endif
+          SDL_GetWindowSize(window, &ww, &wh);
+          window_to_output((int)(ev.tfinger.x * (float)ww + 0.5f),
+                           (int)(ev.tfinger.y * (float)wh + 0.5f), &px, &py);
+          down = (ev.type == SDL_FINGERDOWN);
+          up = !down;
+          break;
         }
+        default:
+          break;
       }
-      if (ev.type == SDL_CONTROLLERBUTTONDOWN) {
-        if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-          sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
-        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-          sel = (sel + 1) % ENG_COUNT;
-        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A ||
-                 ev.cbutton.button == SDL_CONTROLLER_BUTTON_X)
-          eng_menu_activate(sel);
-        else if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_B ||
-                 ev.cbutton.button == SDL_CONTROLLER_BUTTON_START)
+
+      if (down) {
+        pressed = eng_hit(&L, px, py);
+        outside = !eng_in_panel(&L, px, py);
+        if (pressed >= 0)
+          sel = pressed;
+      } else if (up) {
+        int i = eng_hit(&L, px, py);
+        if (i >= 0 && i == pressed)
+          eng_menu_change(i, eng_dir_at(&L, i, px));
+        else if (outside && !eng_in_panel(&L, px, py))
           engine_menu_visible = 0;
+        pressed = -1;
+        outside = 0;
       }
     }
     SDL_Delay(16);
   }
   engine_menu_visible = 0;
+  in_menu = 0;
   if (Screen)
     PowerRedrawArea(0, 0, 319, 199);
 }
@@ -1431,7 +1762,7 @@ static void platform_present_frame(void)
     dst.y += shake_oy;
     SDL_RenderCopy(renderer, texture, NULL, &dst);
   }
-  /* Android (and optional desktop) touch buttons sit in letterbox, above the game. */
+  /* Touch buttons sit in the letterbox, beside the game picture. */
   overlay_draw();
 }
 
@@ -1522,8 +1853,8 @@ static void sync_mouse_position(void)
  * A                   → skip speech (Shift)
  * B                   → Esc / abort sequence
  * Start               → Esc / abort sequence
- * Back                → quit request
- * X / Y               → USE / LOOK touch mode (overlay parity)
+ * Back                → options menu (has Quit)
+ * X / Y               → USE / LOOK touch mode (when touch buttons are on)
  */
 static int axis_dead(int v, int dead)
 {
@@ -1599,21 +1930,8 @@ static void pad_apply(void)
   Mouse.Middle = phys_middle;
 
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A))
-    overlay_shift_hold = 20; /* skip speech */
-  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_B) ||
-      SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START)) {
-    if (KeyAbortState == 1)
-      KeyAbortState = 2;
-    KeyScanCode = 1; /* Esc make */
-  }
-  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_BACK))
-    PlatformRequestQuit();
-#if defined(__ANDROID__) || defined(MOAS_OVERLAY_BUTTONS)
-  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_X))
-    touch_mode = 0;
-  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_Y))
-    touch_mode = 1;
-#endif
+    overlay_shift_hold = 20; /* skip speech while held */
+  /* B / Start / Back / X / Y are edge-triggered in pad_button_down. */
 
 #ifndef DOS
   if (pad_walk_cooldown > 0)
@@ -1625,28 +1943,151 @@ static void pad_apply(void)
 #endif
 }
 
+static void pad_device_event(const SDL_Event *ev)
+{
+  if (ev->type == SDL_CONTROLLERDEVICEADDED) {
+    if (!pad) {
+      pad = SDL_GameControllerOpen(ev->cdevice.which);
+      if (pad)
+        platform_log("gamepad connected: %s", SDL_GameControllerName(pad));
+    }
+  } else if (ev->type == SDL_CONTROLLERDEVICEREMOVED) {
+    if (pad && ev->cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad))) {
+      SDL_GameControllerClose(pad);
+      pad = NULL;
+      pad_use = pad_look = 0;
+      platform_log("gamepad disconnected");
+    }
+  }
+}
+
+static void pad_button_down(const SDL_ControllerButtonEvent *cb)
+{
+  if (!pad || cb->which != SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad)))
+    return;
+  switch (cb->button) {
+    case SDL_CONTROLLER_BUTTON_B:
+    case SDL_CONTROLLER_BUTTON_START:
+      synth_esc();
+      break;
+    case SDL_CONTROLLER_BUTTON_BACK:
+      PlatformEngineMenu();
+      break;
+    case SDL_CONTROLLER_BUTTON_X:
+      if (overlay_on)
+        touch_mode = MOAS_TOUCH_USE;
+      break;
+    case SDL_CONTROLLER_BUTTON_Y:
+      if (overlay_on)
+        touch_mode = MOAS_TOUCH_LOOK;
+      break;
+    default:
+      break;
+  }
+}
+
+/* Finger position: window coords (for mouse_to_logical) + output pixels. */
+static void finger_pos(const SDL_TouchFingerEvent *tf, int *wx, int *wy, int *ox, int *oy)
+{
+  int ww = 1, wh = 1;
+  SDL_GetWindowSize(window, &ww, &wh);
+  *wx = (int)(tf->x * (float)ww + 0.5f);
+  *wy = (int)(tf->y * (float)wh + 0.5f);
+  window_to_output(*wx, *wy, ox, oy);
+}
+
+/*
+ * Touch input is handled from SDL_FINGER* only. SDL also synthesizes mouse
+ * events for the first finger (which == SDL_TOUCH_MOUSEID); those are
+ * ignored so a tap is not seen twice and a finger on an overlay button does
+ * not drag the game cursor into the letterbox.
+ */
+static void handle_finger(const SDL_Event *ev)
+{
+  const SDL_TouchFingerEvent *tf = &ev->tfinger;
+  int wx, wy, ox, oy, ov;
+  short mx, my;
+
+#ifdef SDL_MOUSE_TOUCHID
+  if (tf->touchId == SDL_MOUSE_TOUCHID)
+    return; /* mouse-generated touch (SDL_HINT_MOUSE_TOUCH_EVENTS) */
+#endif
+  pointer_is_touch = 1;
+  finger_pos(tf, &wx, &wy, &ox, &oy);
+  ov = overlay_hit(ox, oy);
+
+  switch (ev->type) {
+    case SDL_FINGERDOWN:
+      if (ov) {
+        if (!overlay_down) {
+          overlay_finger = tf->fingerId;
+          overlay_press(ov);
+        }
+        return;
+      }
+      if (game_finger_down)
+        return; /* one finger drives the game cursor */
+      game_finger = tf->fingerId;
+      game_finger_down = 1;
+      mouse_to_logical(wx, wy, &mx, &my);
+      Mouse.x = mx;
+      Mouse.y = my;
+      phys_left = 1;
+      Mouse.Left = 1;
+      Mouse.ClickX = Mouse.x;
+      Mouse.ClickY = Mouse.y;
+      return;
+    case SDL_FINGERMOTION:
+      if (overlay_down && tf->fingerId == overlay_finger) {
+        overlay_pressed = (ov == overlay_down) ? overlay_down : 0;
+        return;
+      }
+      if (game_finger_down && tf->fingerId == game_finger) {
+        mouse_to_logical(wx, wy, &mx, &my);
+        Mouse.x = mx;
+        Mouse.y = my;
+      }
+      return;
+    case SDL_FINGERUP:
+      if (overlay_down && tf->fingerId == overlay_finger) {
+        overlay_release(ov);
+        return;
+      }
+      if (game_finger_down && tf->fingerId == game_finger) {
+        game_finger_down = 0;
+        mouse_to_logical(wx, wy, &mx, &my);
+        Mouse.x = mx;
+        Mouse.y = my;
+        phys_left = 0;
+        Mouse.Left = pad_use ? 1 : 0;
+        Mouse.ReleaseX = Mouse.x;
+        Mouse.ReleaseY = Mouse.y;
+      }
+      return;
+  }
+}
+
 void PlatformPumpEvents(void)
 {
   SDL_Event ev;
+
+  if (esc_break_pending) {
+    /* Synthetic Esc tap: LookKeys saw the make code last frame. */
+    if (KeyScanCode == 1)
+      KeyScanCode = 1 + 128;
+    esc_break_pending = 0;
+  }
   while (SDL_PollEvent(&ev)) {
     switch (ev.type) {
       case SDL_QUIT:
         PlatformRequestQuit();
         break;
       case SDL_CONTROLLERDEVICEADDED:
-        if (!pad) {
-          pad = SDL_GameControllerOpen(ev.cdevice.which);
-          if (pad)
-            platform_log("gamepad connected: %s", SDL_GameControllerName(pad));
-        }
-        break;
       case SDL_CONTROLLERDEVICEREMOVED:
-        if (pad && ev.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad))) {
-          SDL_GameControllerClose(pad);
-          pad = NULL;
-          pad_use = pad_look = 0;
-          platform_log("gamepad disconnected");
-        }
+        pad_device_event(&ev);
+        break;
+      case SDL_CONTROLLERBUTTONDOWN:
+        pad_button_down(&ev.cbutton);
         break;
 #ifdef __ANDROID__
       /*
@@ -1667,9 +2108,17 @@ void PlatformPumpEvents(void)
 #endif
       case SDL_MOUSEMOTION: {
         short mx, my;
+        if (ev.motion.which == SDL_TOUCH_MOUSEID)
+          break;
+        pointer_is_touch = 0;
         /* Physical mouse motion takes ownership back from the stick. */
         if (ev.motion.xrel != 0 || ev.motion.yrel != 0)
           pad_aiming = 0;
+        if (overlay_down) {
+          int rx, ry;
+          window_to_output(ev.motion.x, ev.motion.y, &rx, &ry);
+          overlay_pressed = (overlay_hit(rx, ry) == overlay_down) ? overlay_down : 0;
+        }
         mouse_to_logical(ev.motion.x, ev.motion.y, &mx, &my);
         Mouse.x = mx;
         Mouse.y = my;
@@ -1680,39 +2129,28 @@ void PlatformPumpEvents(void)
         /* Only update current button state. MouseCheck latches Last* each frame. */
         int down = (ev.type == SDL_MOUSEBUTTONDOWN);
         int rx, ry, ov;
+        short mx, my;
+        if (ev.button.which == SDL_TOUCH_MOUSEID)
+          break; /* handled as SDL_FINGER* */
+        pointer_is_touch = 0;
         window_to_output(ev.button.x, ev.button.y, &rx, &ry);
         ov = overlay_hit(rx, ry);
-        if (ov && ev.button.button == SDL_BUTTON_LEFT) {
-          if (down) {
-            overlay_pressed = ov;
-            /* ESC/SKIP act immediately; SAVE/LOAD wait for release. */
-            if (ov == OV_ESC || ov == OV_SKIP || ov == OV_MODE_USE || ov == OV_MODE_LOOK)
-              overlay_fire(ov);
-          } else {
-            if (overlay_pressed == ov && (ov == OV_SAVE || ov == OV_LOAD))
-              overlay_fire(ov);
-            else if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
-              overlay_fire(overlay_pressed); /* release slightly off button still counts */
-            overlay_pressed = 0;
+        if (ev.button.button == SDL_BUTTON_LEFT) {
+          if (down && ov) {
+            overlay_press(ov);
+            break; /* not a game click */
           }
-          break; /* do not inject a game click */
+          if (!down && overlay_down) {
+            overlay_release(ov);
+            break;
+          }
+        } else if (down && ov) {
+          break; /* right/middle on a button: nothing */
         }
-        if (ov) {
-          if (!down)
-            overlay_pressed = 0;
-          break; /* ignore release over overlay */
-        }
-        if (!down) {
-          if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
-            overlay_fire(overlay_pressed);
-          overlay_pressed = 0;
-        }
-        {
-          short mx, my;
-          mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
-          Mouse.x = mx;
-          Mouse.y = my;
-        }
+        /* Releases always reach the game, even over the letterbox. */
+        mouse_to_logical(ev.button.x, ev.button.y, &mx, &my);
+        Mouse.x = mx;
+        Mouse.y = my;
         if (ev.button.button == SDL_BUTTON_LEFT) {
           phys_left = down ? 1 : 0;
           Mouse.Left = phys_left || pad_use;
@@ -1732,69 +2170,11 @@ void PlatformPumpEvents(void)
         }
         break;
       }
-      case SDL_FINGERDOWN: {
-        int ww, wh, wx, wy, rx, ry, ov;
-        SDL_GetWindowSize(window, &ww, &wh);
-        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
-        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
-        window_to_output(wx, wy, &rx, &ry);
-        ov = overlay_hit(rx, ry);
-        if (ov) {
-          overlay_pressed = ov;
-          if (ov == OV_ESC || ov == OV_SKIP || ov == OV_MODE_USE || ov == OV_MODE_LOOK)
-            overlay_fire(ov);
-          break;
-        }
-        {
-          short mx, my;
-          mouse_to_logical(wx, wy, &mx, &my);
-          Mouse.x = mx;
-          Mouse.y = my;
-          phys_left = 1;
-          Mouse.Left = 1;
-          Mouse.ClickX = Mouse.x;
-          Mouse.ClickY = Mouse.y;
-        }
+      case SDL_FINGERDOWN:
+      case SDL_FINGERUP:
+      case SDL_FINGERMOTION:
+        handle_finger(&ev);
         break;
-      }
-      case SDL_FINGERUP: {
-        int ww, wh, wx, wy, rx, ry;
-        SDL_GetWindowSize(window, &ww, &wh);
-        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
-        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
-        window_to_output(wx, wy, &rx, &ry);
-        if (overlay_hit(rx, ry) || overlay_pressed) {
-          if (overlay_pressed == OV_SAVE || overlay_pressed == OV_LOAD)
-            overlay_fire(overlay_pressed);
-          overlay_pressed = 0;
-          break;
-        }
-        {
-          short mx, my;
-          mouse_to_logical(wx, wy, &mx, &my);
-          Mouse.x = mx;
-          Mouse.y = my;
-          phys_left = 0;
-          Mouse.Left = pad_use ? 1 : 0;
-          Mouse.ReleaseX = Mouse.x;
-          Mouse.ReleaseY = Mouse.y;
-        }
-        break;
-      }
-      case SDL_FINGERMOTION: {
-        /* Keep pressed highlight only while finger stays on a button. */
-        int ww, wh, wx, wy, rx, ry, ov;
-        if (!overlay_pressed)
-          break;
-        SDL_GetWindowSize(window, &ww, &wh);
-        wx = (int)(ev.tfinger.x * (float)ww + 0.5f);
-        wy = (int)(ev.tfinger.y * (float)wh + 0.5f);
-        window_to_output(wx, wy, &rx, &ry);
-        ov = overlay_hit(rx, ry);
-        if (ov != overlay_pressed)
-          overlay_pressed = ov; /* may become 0 when leaving */
-        break;
-      }
       case SDL_KEYDOWN:
       case SDL_KEYUP: {
         SDL_Keycode k = ev.key.keysym.sym;
@@ -1821,8 +2201,8 @@ void PlatformPumpEvents(void)
             PlatformEngineMenu();
             continue;
           }
-          if (k == SDLK_q ||
-              (k == SDLK_c && (mod & KMOD_CTRL)) ||
+          /* Alt+Q (DOS quit key) arrives via the conio queue below. */
+          if ((k == SDLK_c && (mod & KMOD_CTRL)) ||
               (k == SDLK_F4 && (mod & KMOD_ALT)) ||
               k == SDLK_AC_BACK)
             PlatformRequestQuit();
@@ -1830,7 +2210,11 @@ void PlatformPumpEvents(void)
           /* Feed DOS conio queue for LookKeys kbhit/getch path */
           {
             int ext = dos_ext_getch(sc);
-            if (ext >= 0) {
+            if ((mod & KMOD_ALT) && k >= SDLK_a && k <= SDLK_z && dos_sc > 0) {
+              /* BIOS: Alt+letter = 0, scancode (Alt+Q quit, master keys). */
+              key_enqueue(0);
+              key_enqueue((unsigned char)dos_sc);
+            } else if (ext >= 0) {
               key_enqueue(0);
               key_enqueue((unsigned char)ext);
             } else if (k >= 32 && k < 127) {
@@ -1861,7 +2245,7 @@ void PlatformPumpEvents(void)
    * (including after release — otherwise the soft cursor snaps back). Physical
    * mouse motion clears pad_aiming in SDL_MOUSEMOTION.
    */
-  if (!pad_aiming)
+  if (!pad_aiming && !pointer_is_touch)
     sync_mouse_position();
   pad_apply();
 #ifdef __EMSCRIPTEN__

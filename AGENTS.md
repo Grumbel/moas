@@ -14,7 +14,9 @@ Port to modern Linux using:
 - Prefer clean abstractions over `#ifdef` soup. Introduce a small platform layer.
 - No parallel histories; deliver cumulative git bundles from the original base.
 - Author commits as: Ingo Ruhnke <grumbel@gmail.com>
-- Trailer: Co-authored-by: Grok <grok@x.ai>
+- Trailer: Co-authored-by line naming the model that actually did the work,
+  e.g. `Co-authored-by: Claude Opus 5.5 <noreply@anthropic.com>` or
+  `Co-authored-by: Grok <grok@x.ai>`.
 - Document progress and next steps in TODO.md after every meaningful change.
 - Keep the original game logic intact; only replace the DOS hardware layer.
 

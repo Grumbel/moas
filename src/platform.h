@@ -32,7 +32,7 @@ void PlatformDelay(unsigned int ms);
 /* Non-zero after SDL_QUIT / explicit quit request. */
 int PlatformShouldQuit(void);
 
-/* Android/overlay: 1=Save 2=Load pending after button release; 0 if none. */
+/* Touch overlay: 1=Save 2=Load pending after button release; 0 if none. */
 int PlatformPollOverlayCmd(void);
 
 /* Request process exit (window close, Q, Alt+F4, etc.). */
@@ -57,8 +57,10 @@ int PlatformShiftDown(void);
 int PlatformGetch(void);
 
 
-/* Optional: set the logical palette (VGA 0-63 values expected). */
+/* Set the displayed (DAC) palette; VGA 6-bit values, upper bits ignored. */
 void PlatformSetPalette(const unsigned char *pal768);
+/* One DAC entry (outp 0x3c8/0x3c9 equivalent). */
+void PlatformSetPaletteEntry(int index, int r, int g, int b);
 
 /* Warp OS cursor so soft cursor and SDL agree (game coords 0..319 / 0..199). */
 void PlatformSetMousePos(short x, short y);

@@ -489,6 +489,13 @@ int SaveGameSlot(short slot);
 void MoasAutosaveOnExit(void);
 #ifndef DOS
 void MoasRegisterStaticNames(void);
+/* AUTOSAVE.SAV only at safe points; see io.c. */
+int MoasCanSave(void);
+void MoasAutosaveCheckpoint(int force);
+/* Set while main() runs the top-level MouseCheck loop; MouseCheck nesting. */
+extern int MoasMainLoopActive;
+extern int MoasMouseCheckDepth;
+extern unsigned MoasScriptSerial; /* bumped by every Execute() */
 #endif
 int MoasTryLoadAutosave(void);
 void LoadMusic(short Num);

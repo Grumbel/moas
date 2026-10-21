@@ -76,8 +76,7 @@ void InternalError(short num)
    */
   if (num == 0) {
 #ifndef DOS
-    MoasAutosaveOnExit();
-    PlatformRequestQuit();
+    PlatformRequestQuit(); /* autosaves if at a safe point */
     PlatformShutdown();
 #endif
     exit(0);
@@ -144,7 +143,13 @@ void LookKeys(void)
   {
     SaveGame(1);
     AutoSaveGame=0;
+#ifndef DOS
+    MoasAutosaveCheckpoint(1);
+#endif
   }
+#ifndef DOS
+  MoasAutosaveCheckpoint(0);
+#endif
 
   if (KeyScanCode!=LastKeyScanCode)
   {
@@ -341,9 +346,7 @@ static void MoasPaletteCycleStep(void)
   static short CycleCounter;
   short c, Von, Bis;
   uChar Tmp, x, y;
-#ifdef DOS
   uChar r, g, b;
-#endif
 
   if (DontCyclePal!=0 || PaletteCycleFirst>=PaletteCycleLast ||
       PaletteCycleFirst>=256 || PaletteCycleLast>=256 || !Palette)
@@ -368,21 +371,22 @@ static void MoasPaletteCycleStep(void)
   Palette[Von+1]=x;
   Palette[Von+2]=y;
 
-#ifndef DOS
-  PlatformSetPalette(Palette);
-#else
+  /* Only the cycled range goes to the DAC, scaled like the DOS IRQ did. */
   for (c=PaletteCycleFirst;c<=PaletteCycleLast;c++)
   {
     r=Palette[c+c+c];
     g=Palette[c+c+c+1];
     b=Palette[c+c+c+2];
     if (V_Colored==0) r=g=b=(r+g+b)/3;
+#ifdef DOS
     outp(0x3c8,c);
     outp(0x3c9,r*DayLightR/100);
     outp(0x3c9,g*DayLightG/100);
     outp(0x3c9,b*DayLightB/100);
-  }
+#else
+    PlatformSetPaletteEntry(c,r*DayLightR/100,g*DayLightG/100,b*DayLightB/100);
 #endif
+  }
 }
 
 void IveGotTooMuchTime(void)

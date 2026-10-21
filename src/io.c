@@ -930,21 +930,109 @@ int LoadGameSlot(short slot)
  */
 #define MOAS_AUTOSAVE_NAME "AUTOSAVE.SAV"
 
+#ifndef DOS
+/*
+ * The .SAV format only holds what the original F5 save holds: no script
+ * program counter, no C call stack. Saving while a script runs (cutscene,
+ * dialog choice, speech wait, Load/Save menu) therefore resumes into a
+ * broken room. Only save where the original game allows F5 *and* the
+ * engine is idle in the main loop (MouseCheck not nested inside Wait/
+ * GetClickOrEnter/WaitWhileSomeBodyIsWalking/...).
+ */
+int MoasCanSave(void)
+{
+  return Screen != NULL
+      && MoasMainLoopActive
+      && MoasMouseCheckDepth <= 1
+      && Window.Status == None
+      && PlayerHasControl == 1
+      && KeyAbortState == 0;
+}
+
+static int MoasWriteAutosave(const char *why)
+{
+  char savpath[512];
+  char tmppath[520];
+
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
+    MOAS_IO_LOG("moas: autosave: path too long\n");
+    return -1;
+  }
+  /* Write a temp file and rename so a kill mid-write keeps the old resume. */
+  snprintf(tmppath, sizeof(tmppath), "%s.tmp", savpath);
+  if (SaveGameToFile(tmppath, 1) != 0) {
+    MOAS_IO_LOG("moas: autosave (%s) failed (%s)\n", why, tmppath);
+    remove(tmppath);
+    return -1;
+  }
+#ifdef _WIN32
+  remove(savpath); /* rename() does not replace on Windows */
+#endif
+  if (rename(tmppath, savpath) != 0) {
+    MOAS_IO_LOG("moas: autosave (%s): rename to %s failed (errno=%d)\n",
+                why, savpath, errno);
+    remove(tmppath);
+    return -1;
+  }
+  MOAS_IO_LOG("moas: autosave (%s) ok (%s)\n", why, savpath);
+  moas_idbfs_sync();
+  return 0;
+}
+
+/*
+ * Quit / app backgrounded: snapshot now if the game is at a safe point,
+ * otherwise keep the last checkpoint from MoasAutosaveCheckpoint().
+ */
+void MoasAutosaveOnExit(void)
+{
+  if (moas_no_autosave)
+    return;
+  if (!MoasCanSave()) {
+    MOAS_IO_LOG("moas: autosave on exit skipped (script/dialog running); "
+                "keeping last checkpoint\n");
+    return;
+  }
+  (void)MoasWriteAutosave("exit");
+}
+
+/*
+ * Called every LookKeys. Keeps AUTOSAVE.SAV fresh so quitting during a
+ * cutscene/dialog still resumes close to where the player was:
+ * - immediately after a room change (CurrentProc differs from last save)
+ * - after the game's own checkpoint (AutoSaveGame / slot 9)
+ * - after any script ran (MoasScriptSerial), at most every 5 s
+ */
+void MoasAutosaveCheckpoint(int force)
+{
+  static short last_proc = -1;
+  static unsigned last_serial = 0;
+  static unsigned int last_ms = 0;
+  unsigned int now;
+
+  if (moas_no_autosave || !MoasCanSave())
+    return;
+  now = PlatformGetMillis();
+  if (force || CurrentProc != last_proc
+      || (MoasScriptSerial != last_serial && (now - last_ms) >= 5000u)) {
+    if (MoasWriteAutosave(CurrentProc != last_proc ? "room" : "checkpoint") == 0) {
+      last_proc = CurrentProc;
+      last_serial = MoasScriptSerial;
+      last_ms = now;
+    }
+  }
+}
+#else
 void MoasAutosaveOnExit(void)
 {
   char savpath[512];
 
   if (moas_no_autosave)
     return;
-  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
-    MOAS_IO_LOG("moas: autosave: path too long\n");
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
     return;
-  }
-  if (SaveGameToFile(savpath, 1) != 0)
-    MOAS_IO_LOG("moas: exit autosave failed (%s)\n", savpath);
-  else
-    MOAS_IO_LOG("moas: exit autosave ok (%s)\n", savpath);
+  (void)SaveGameToFile(savpath, 1);
 }
+#endif
 
 /* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
 int MoasTryLoadAutosave(void)

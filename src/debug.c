@@ -19,6 +19,7 @@ int moas_load_slot = -1;
 char moas_load_path[512];
 int moas_fullscreen = 0;
 int moas_no_autosave = 0;
+int moas_touch_controls = -1;
 
 static void usage(const char *argv0)
 {
@@ -38,6 +39,8 @@ static void usage(const char *argv0)
     "  --load SLOT|FILE        Same as --load=\n"
     "  --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit\n"
     "  -f, --fullscreen        Desktop fullscreen\n"
+    "  --touch-controls        Show on-screen Save/Load/Esc/Skip/Use/Look buttons\n"
+    "  --no-touch-controls     Hide them (default on desktop; toggle with F12)\n"
     "\n"
     "Examples:\n"
     "  %s --load=0\n"
@@ -193,6 +196,14 @@ void MoasParseArgs(int argc, char **argv)
         }
       }
       moas_skip_intro = 1; /* save already has the game state */
+      continue;
+    }
+    if (!strcmp(a, "--touch-controls")) {
+      moas_touch_controls = 1;
+      continue;
+    }
+    if (!strcmp(a, "--no-touch-controls")) {
+      moas_touch_controls = 0;
       continue;
     }
     if (!strcmp(a, "--no-autosave")) {

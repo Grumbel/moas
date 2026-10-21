@@ -36,6 +36,7 @@ static const char *ui_fallback[UI_COUNT] = {
   [UI_OV_SKIP]       = "SKIP",
   [UI_OV_USE]        = "USE",
   [UI_OV_LOOK]       = "LOOK",
+  [UI_OV_MENU]       = "MENU",
 };
 
 static const char *ui_names[UI_COUNT] = {
@@ -57,6 +58,7 @@ static const char *ui_names[UI_COUNT] = {
   [UI_OV_SKIP]       = "ov.skip",
   [UI_OV_USE]        = "ov.use",
   [UI_OV_LOOK]       = "ov.look",
+  [UI_OV_MENU]       = "ov.menu",
 };
 
 static char *ui_str[UI_COUNT];
