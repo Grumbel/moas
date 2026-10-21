@@ -39,6 +39,15 @@ unsigned char CharAvail[]=
 /* CP850: A-Z, ÄÖÜß, punct, a-z, äöü — must stay single-byte for game data */
 short CharAvailL=-1;
 
+/* Drop the first n chars in place. strcpy(s,s+n) overlaps, which is undefined
+   and garbles text with modern libc (e.g. "deaddead"). */
+static void StrDropFront(char *s,size_t n)
+{
+  size_t l=strlen(s);
+  if (n>l) n=l;
+  memmove(s,s+n,l-n+1);
+}
+
 void OpenWindow(char x1,char y,char x2)
 {
   short c;
@@ -506,7 +515,7 @@ void AddSayWindow(short PrsNum,short wx,short wy,char *Text)
   if (strncmp(Text,"CLR ",4)==0)
   {
     CloseSay(PrsNum);
-    strcpy(Text,Text+4);
+    StrDropFront(Text,4);
   }
 
   if (PrsNum==-1) PrsNum=Person[GetRealPersonNum(-1)].Num;
@@ -585,9 +594,9 @@ void ReTextSayWin(short WinNum)
     return;
   }
   if (strncmp(SayWindow[WinNum].Text," NW ",4)==0)
-    strcpy(SayWindow[WinNum].Text,SayWindow[WinNum].Text+4);
+    StrDropFront(SayWindow[WinNum].Text,4);
 
-  while (SayWindow[WinNum].Text[0]==32) strcpy(SayWindow[WinNum].Text,SayWindow[WinNum].Text+1);
+  while (SayWindow[WinNum].Text[0]==32) StrDropFront(SayWindow[WinNum].Text,1);
   strncpy(Buffer,SayWindow[WinNum].Text,200);  Buffer[199]=0;
   WinL=xp=strlen(Buffer);
   for (c=0;c<xp;c++)
@@ -650,7 +659,7 @@ void ReTextSayWin(short WinNum)
     tx+=LineL[y];
   }
   for (y=0;y<AnzLines;y++)
-    strcpy(SayWindow[WinNum].Text,SayWindow[WinNum].Text+LineL[y]);
+    StrDropFront(SayWindow[WinNum].Text,(unsigned char)LineL[y]);
   SayWindow[WinNum].y-=yp;
   if (SayWindow[WinNum].y<1) SayWindow[WinNum].y=1;
 

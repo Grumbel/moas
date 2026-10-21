@@ -62,6 +62,24 @@ int MoasMouseCheckDepth = 0;
 unsigned MoasScriptSerial = 0;
 #endif
 
+/* Fresh game: intro (proc 3) then the main program (proc 0 unless --proc). */
+static void MoasStartNewGame(void)
+{
+  if (!moas_skip_intro) {
+    MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
+    Execute(3, 0);
+  } else {
+    MoasDbg(MOAS_DBG_SCRIPT, "skipping intro (--skip-intro)");
+  }
+//ChkAuthorisation();
+  {
+    short proc = (moas_start_proc >= 0) ? (short)moas_start_proc : 0;
+    unsigned short addr = (unsigned short)moas_start_addr;
+    MoasDbg(MOAS_DBG_SCRIPT, "Execute main proc=%d addr=%u", (int)proc, (unsigned)addr);
+    Execute(proc, addr);
+  }
+}
+
 int main(int argc, char **argv)
 {
 //MallocFile=open("MrMalloc.Dok",O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
@@ -114,27 +132,29 @@ int main(int argc, char **argv)
     /* AUTOSAVE.SAV from previous exit. */
     MoasDbg(MOAS_DBG_LOAD, "restored AUTOSAVE.SAV");
   } else {
-    if (!moas_skip_intro) {
-      MoasDbg(MOAS_DBG_SCRIPT, "Execute intro proc=3 addr=0");
-      Execute(3, 0);
-    } else {
-      MoasDbg(MOAS_DBG_SCRIPT, "skipping intro (--skip-intro)");
-    }
-//ChkAuthorisation();
-    {
-      short proc = (moas_start_proc >= 0) ? (short)moas_start_proc : 0;
-      unsigned short addr = (unsigned short)moas_start_addr;
-      MoasDbg(MOAS_DBG_SCRIPT, "Execute main proc=%d addr=%u", (int)proc, (unsigned)addr);
-      Execute(proc, addr);
-    }
+    MoasStartNewGame();
   }
 #ifndef DOS
-  MoasMainLoopActive = 1;
-  while (!PlatformShouldQuit()) {
-    /* MouseCheck pumps events, presents, and delays on Linux. */
-    MouseCheck();
+  for (;;) {
+    MoasMainLoopActive = 1;
+    while (!PlatformShouldQuit()) {
+      /* MouseCheck pumps events, presents, and delays on Linux. */
+      MouseCheck();
+    }
+    MoasMainLoopActive = 0;
+    /* RESTART from the options menu: scripts have unwound, start over. */
+    if (!PlatformTakeRestart())
+      break;
+    MoasDbg(MOAS_DBG_SCRIPT, "restart from options menu");
+    MoasRemoveAutosave();
+    /* The menu may have been opened inside a dialog or text window. */
+    if (Window.Status != None)
+      CloseWindow();
+    KeyAbortState = 0;
+    PlayerHasControl = 1;
+    ResetGame();
+    MoasStartNewGame();
   }
-  MoasMainLoopActive = 0;
   /*
    * No autosave here: PlatformRequestQuit already saved (if safe) when the
    * quit was requested. Scripts unwind with all waits cut short after
@@ -163,6 +183,14 @@ short Execute(short ProcNum,unsigned short Adresse)
   while (1)
   {
     if (Programm[ProcNum].Data==0) { LadeProgramm(ProcNum); Prg=Programm[ProcNum].Data; }
+#ifndef DOS
+    /* Quit/restart pending: stop here instead of fast-forwarding the script. */
+    if (PlatformShouldQuit())
+    {
+      PlayerHasControl=LastControl;
+      return(1);
+    }
+#endif
     if (Adresse>=Programm[ProcNum].Length)
     {
       PlayerHasControl=LastControl;
@@ -608,6 +636,12 @@ void SetPersonProperties(short c,char Inf,short x,short y,short tx,short ty,USHO
 }
 void Restart(void)
 {
+  ResetGame();
+  Execute(0,0);
+}
+/* Restart() minus the Execute, so main() can start over from the top. */
+void ResetGame(void)
+{
   short c;
 
   for (c=0;c<5;c++)
@@ -622,7 +656,6 @@ void Restart(void)
   InitOntimes();    InitPictureData();
   InitDialogs();
   Clearscreen();
-  Execute(0,0);
 }
 void RedrawAllPersons(void)
 {

@@ -6,6 +6,50 @@
 
 # TODO / Handoff
 
+## Format strings in translations (2026-10-21)
+- `utf8_to_cp850()` (lang.c) replaced '%' with a space as a glyph the font
+  lacks, so "USE %s" became "USE  s". The verbs, "%i von %i" and power-parse
+  lines ("Leg %s in Briefkasten") are sprintf formats, so '%' now stays.
+- Translator-supplied formats are checked: the conversions (`%s`/`%i`, in
+  order) must match the German string, otherwise the entry is ignored with a
+  warning and German is used. This guards sprintf against "%s %s" typos.
+- UI ids for the overlay were `ov.*` in lang.c but `ui.overlay.*` in the
+  .pot/.po and moas-util, so they never loaded; renamed to `overlay.*`.
+  Added the missing `ui.slot.of` and `ui.overlay.menu` to moas-util, the .pot
+  and en.po (`moas-util strings pot` reproduces lang/manick.pot exactly).
+- Possible next: emit `#, c-format` for entries with '%' so `msgfmt -c`
+  checks translations too.
+
+## RESTART GAME menu entry, CLI "--opt VALUE" (2026-10-21)
+- Options menu (F12) has RESTART GAME between RESUME and QUIT. The first press
+  turns it into "RESTART - SURE?". The second press restarts, and moving off
+  the row cancels. `?` glyph added to the menu font.
+- Flow: `PlatformRequestRestart()` unwinds like a quit but skips the autosave.
+  main() then sees `PlatformTakeRestart()`, deletes AUTOSAVE.SAV
+  (`MoasRemoveAutosave`), closes any text window, calls `ResetGame()` (the
+  body of the original `Restart()`, which now wraps it) and runs the intro +
+  proc 0 again (`MoasStartNewGame`).
+- `Execute()` (non-DOS) returns at the next opcode once quit/restart is
+  pending, instead of fast-forwarding the script with all waits skipped.
+- Tested under Xvfb+xdotool: resume from autosave → restart → intro; menu QUIT
+  during the intro and in-game still exits cleanly. DOS build still compiles.
+- CLI: every option that takes a value accepts `--opt VALUE` and `--opt=VALUE`
+  (`opt_value()` in debug.c). `-d`/`--debug` with no list = all flags.
+- Next: test restart on Android/WASM, where the menu runs from the overlay.
+
+## Garbled say-window text (2026-10-21)
+- `print.c` stripped "CLR ", " NW ", leading spaces and finished lines with
+  `strcpy(s, s+n)`. The copy overlaps, which is undefined, and glibc's
+  vectorised strcpy duplicates chunks ("The elevator is deaddead.", and the
+  scrolling intro lines in prog 4). Now `StrDropFront()` (memmove).
+- Hit English more often only because string lengths and alignment differ.
+- Not yet checked visually in-game; headless smoke run (`SDL_VIDEODRIVER=dummy`) OK.
+- "Failed loading SDL3 library." = binary linked against an older glibc than
+  nixpkgs' SDL3 (stale CMake cache holding the host `cc`). Wipe the build dir
+  and configure inside `nix develop`. devShell now replaces the host
+  `LD_LIBRARY_PATH` (xanatoo pattern) but leaves `pkgs.sdl3` off it: that's a
+  different build than the SDL3 in sdl2-compat's RUNPATH.
+
 ## Portrait overlay, greyed Save/Load, runtime language switch (2026-10-21)
 - **Portrait:** `letterbox_geom` reserved side columns even when the window is
   taller than wide, shrinking the picture and leaving the space above/below

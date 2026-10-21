@@ -501,6 +501,7 @@ extern int MoasMouseCheckDepth;
 extern unsigned MoasScriptSerial; /* bumped by every Execute() */
 #endif
 int MoasTryLoadAutosave(void);
+void MoasRemoveAutosave(void);
 void LoadMusic(short Num);
 void LoadPack(void);
 void LoescheKopie(short PrsNum);
@@ -537,6 +538,7 @@ void RemovePerson(short Num);
 void RemoveStatists(void);
 void ResetDialog(short RefNum);
 void Restart(void);
+void ResetGame(void);
 void SaveGame(short CallerID);
 void SayWait(short Win);
 void SelectFromDialog(short VarNum,short DlgNum,char Respond);

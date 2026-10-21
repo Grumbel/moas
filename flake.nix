@@ -47,7 +47,8 @@
           dontStrip = true;
 
           nativeBuildInputs = with pkgs; [ cmake pkg-config ];
-          buildInputs = with pkgs; [ SDL2 ];
+          # nixpkgs SDL2 is sdl2-compat; it needs matching SDL3 on the loader path.
+          buildInputs = with pkgs; [ SDL2 sdl3 ];
 
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
@@ -147,7 +148,7 @@
           ${moasPreamble}
           moas-build
           exec "$MOAS_BUILD_DIR/moas" \
-            --datadir "''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            --datadir="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
             "$@"
         '';
 
@@ -168,7 +169,7 @@ except Exception:
   pass
 ' \
             --args "$MOAS_BUILD_DIR/moas" \
-            --datadir "''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            --datadir="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
             "$@"
         '';
 
@@ -230,6 +231,7 @@ except Exception:
             ninja
             pkg-config
             SDL2
+            sdl3
             gdb
             ccache
             clang-tools
@@ -243,8 +245,11 @@ except Exception:
             export MOAS_SOURCE="$PWD"
             export MOAS_BUILD_DIR="''${MOAS_BUILD_DIR:-/tmp/moas-build}"
             export MOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
-            # Avoid a hostile system LD_LIBRARY_PATH shadowing Nix SDL2
-            export LD_LIBRARY_PATH="''${LD_LIBRARY_PATH:-}"
+            # sdl2-compat dlopen()s SDL3 at runtime. Replace (not extend) the
+            # host LD_LIBRARY_PATH: a foreign one breaks sdl2-compat's dllinit().
+            # No sdl3 here: pkgs.sdl3 is a different build than the one
+            # sdl2-compat finds via its RUNPATH, and would shadow it.
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath (with pkgs; [ SDL2 libGL libx11 ])}''${MOAS_EXTRA_LD_LIBRARY_PATH:+:$MOAS_EXTRA_LD_LIBRARY_PATH}"
             echo "MOAS develop shell"
             echo "  MOAS_SOURCE=$MOAS_SOURCE"
             echo "  MOAS_BUILD_DIR=$MOAS_BUILD_DIR"

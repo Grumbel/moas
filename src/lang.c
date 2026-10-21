@@ -52,13 +52,13 @@ static const char *ui_names[UI_COUNT] = {
   [UI_LOAD_FAIL]     = "load.fail",
   [UI_SLOT_NONE]     = "slot.none",
   [UI_SLOT_OF]       = "slot.of",
-  [UI_OV_SAVE]       = "ov.save",
-  [UI_OV_LOAD]       = "ov.load",
-  [UI_OV_ESC]        = "ov.esc",
-  [UI_OV_SKIP]       = "ov.skip",
-  [UI_OV_USE]        = "ov.use",
-  [UI_OV_LOOK]       = "ov.look",
-  [UI_OV_MENU]       = "ov.menu",
+  [UI_OV_SAVE]       = "overlay.save",
+  [UI_OV_LOAD]       = "overlay.load",
+  [UI_OV_ESC]        = "overlay.esc",
+  [UI_OV_SKIP]       = "overlay.skip",
+  [UI_OV_USE]        = "overlay.use",
+  [UI_OV_LOOK]       = "overlay.look",
+  [UI_OV_MENU]       = "overlay.menu",
 };
 
 static char *ui_str[UI_COUNT];
@@ -157,6 +157,7 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
  * UTF-8 → bytes the bitmap font can show (CharAvail in print.c):
  *   A-Z ÄÖÜß  - .!?,:;' " 0-9 <>()[]  a-z äöü
  * Smart quotes/dashes/ellipsis collapse to ASCII so they are not drawn as '?'.
+ * '%' stays: verbs and power-parse lines are printf formats ("USE %s").
  */
 static void utf8_to_cp850(const char *in, char *out, size_t outsz)
 {
@@ -170,7 +171,7 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
         c = ' ';
       else if (c == '`')
         c = '\'';
-      else if (c == '#' || c == '$' || c == '%' || c == '&' || c == '*'
+      else if (c == '#' || c == '$' || c == '&' || c == '*'
                || c == '+' || c == '/' || c == '=' || c == '\\' || c == '^'
                || c == '{' || c == '}' || c == '|' || c == '~')
         c = ' ';
@@ -239,12 +240,59 @@ static int ui_id_from_name(const char *name)
   return -1;
 }
 
+/*
+ * Conversion letters of a printf format, in order ("BENUTZE %s MIT %s" → "ss").
+ * Flags/width are not used by any UI string and make the format unsafe.
+ * Returns -1 on anything but %s, %i, %d, %%.
+ */
+static int format_signature(const char *fmt, char *sig, size_t sigsz)
+{
+  size_t n = 0;
+  for (; *fmt; fmt++) {
+    if (*fmt != '%')
+      continue;
+    fmt++;
+    if (*fmt == 0)
+      return -1; /* trailing lone '%' */
+    if (*fmt == '%')
+      continue;
+    if (*fmt != 's' && *fmt != 'i' && *fmt != 'd')
+      return -1;
+    if (n + 1 >= sigsz)
+      return -1;
+    sig[n++] = (*fmt == 'd') ? 'i' : *fmt;
+  }
+  sig[n] = 0;
+  return 0;
+}
+
+/*
+ * Translations of format strings go to sprintf with the German arguments:
+ * a mismatch would crash. Warn and keep the German text instead.
+ */
+static int same_format(const char *orig, const char *tr, const char *what)
+{
+  char want[8], got[8];
+
+  if (!strcmp(orig, tr))
+    return 1;
+  if (format_signature(orig, want, sizeof(want)) == 0
+      && format_signature(tr, got, sizeof(got)) == 0
+      && strcmp(want, got) == 0)
+    return 1;
+  fprintf(stderr, "moas: lang: %s: \"%s\" does not match format of \"%s\"; ignored\n",
+          what, tr, orig);
+  return 0;
+}
+
 static void ui_set(int id, const char *text_utf8)
 {
   char buf[256];
   if (id < 0 || id >= UI_COUNT || !text_utf8)
     return;
   utf8_to_cp850(text_utf8, buf, sizeof(buf));
+  if (!same_format(ui_fallback[id], buf, ui_names[id]))
+    return;
   free(ui_str[id]);
   ui_str[id] = xstrdup_local(buf[0] ? buf : text_utf8);
 }
@@ -256,6 +304,8 @@ static void script_add(const char *key_utf8, const char *val_utf8)
   if (!key_utf8 || !key_utf8[0] || !val_utf8)
     return;
   utf8_to_cp850(val_utf8, val_cp, sizeof(val_cp));
+  if (!same_format(key_utf8, val_cp, "script"))
+    return;
   if (script_n >= script_cap) {
     int nc = script_cap ? script_cap * 2 : 512;
     LangEnt *n = (LangEnt *)realloc(script_tab, (size_t)nc * sizeof(LangEnt));

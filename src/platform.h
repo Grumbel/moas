@@ -38,6 +38,11 @@ int PlatformPollOverlayCmd(void);
 /* Request process exit (window close, Q, Alt+F4, etc.). */
 void PlatformRequestQuit(void);
 
+/* Unwind like a quit (no autosave), then main() starts a new game. */
+void PlatformRequestRestart(void);
+/* Non-zero once if a restart was requested; resets the quit state. */
+int PlatformTakeRestart(void);
+
 /* Modal engine settings (language, speed, fullscreen). F12. */
 void PlatformEngineMenu(void);
 

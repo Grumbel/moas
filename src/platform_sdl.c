@@ -74,6 +74,7 @@ static SDL_Texture  *texture  = NULL;
 static Uint32       *pixels   = NULL;
 static Uint32        start_ticks = 0;
 static int           running  = 1;
+static int           restart_requested;
 static SDL_GameController *pad = NULL;
 static int           pad_use = 0;   /* RT → left click */
 static int           pad_look = 0;  /* LT → right click */
@@ -572,8 +573,10 @@ static void platform_try_autosave(const char *reason)
 
 void PlatformRequestQuit(void)
 {
-  if (!running)
+  if (!running) {
+    restart_requested = 0; /* window closed while a restart unwinds: quit */
     return;
+  }
   /* Save before finish() — Android may kill us before main() exits the loop. */
   platform_try_autosave("request-quit");
   running = 0;
@@ -600,6 +603,25 @@ void PlatformRequestQuit(void)
     }
   }
 #endif
+}
+
+void PlatformRequestRestart(void)
+{
+  if (!running)
+    return;
+  /* Same unwind as a quit, but no autosave: that game is being abandoned. */
+  restart_requested = 1;
+  running = 0;
+  KeyAbortState = 2;
+}
+
+int PlatformTakeRestart(void)
+{
+  if (!restart_requested)
+    return 0;
+  restart_requested = 0;
+  running = 1;
+  return 1;
 }
 
 #ifdef __EMSCRIPTEN__
@@ -840,6 +862,7 @@ static const struct { char ch; unsigned char rows[7]; } ui_font_punct[] = {
   { ':', {0x00,0x0c,0x0c,0x00,0x0c,0x0c,0x00} },
   { '/', {0x01,0x01,0x02,0x04,0x08,0x10,0x10} },
   { '.', {0x00,0x00,0x00,0x00,0x00,0x0c,0x0c} },
+  { '?', {0x0e,0x11,0x01,0x02,0x04,0x00,0x04} },
 };
 
 static const unsigned char *ui_glyph(char ch)
@@ -1471,9 +1494,10 @@ static void overlay_draw(void)
  * the panel to close).
  */
 static int engine_menu_visible;
+static int restart_armed; /* RESTART clicked once; next click confirms */
 
 enum { ENG_LANG = 0, ENG_FULLSCREEN, ENG_TOUCH, ENG_SPEED, ENG_SPEECH,
-       ENG_RESUME, ENG_QUIT, ENG_COUNT };
+       ENG_RESUME, ENG_RESTART, ENG_QUIT, ENG_COUNT };
 
 typedef struct {
   SDL_Rect panel;
@@ -1618,6 +1642,9 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
       case ENG_RESUME:
         label = "RESUME";
         break;
+      case ENG_RESTART:
+        label = restart_armed ? "RESTART - SURE?" : "RESTART GAME";
+        break;
       case ENG_QUIT:
         label = "QUIT";
         break;
@@ -1674,6 +1701,17 @@ static void eng_menu_change(int sel, int dir)
       if (dir > 0)
         engine_menu_visible = 0;
       break;
+    case ENG_RESTART:
+      /* Autosave makes this the only way back to the intro; ask twice. */
+      if (dir > 0) {
+        if (!restart_armed) {
+          restart_armed = 1;
+          return;
+        }
+        engine_menu_visible = 0;
+        PlatformRequestRestart();
+      }
+      break;
     case ENG_QUIT:
       if (dir > 0) {
         engine_menu_visible = 0;
@@ -1702,6 +1740,7 @@ void PlatformEngineMenu(void)
     return;
   in_menu = 1;
   engine_menu_visible = 1;
+  restart_armed = 0;
   while (engine_menu_visible && running) {
     eng_layout(&L);
     platform_present_frame();
@@ -1829,6 +1868,8 @@ void PlatformEngineMenu(void)
         pressed = -1;
         outside = 0;
       }
+      if (sel != ENG_RESTART)
+        restart_armed = 0; /* moved away: RESTART needs two clicks again */
     }
     SDL_Delay(16);
   }

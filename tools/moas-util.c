@@ -898,12 +898,14 @@ static void extract_ui_strings(void)
     { "ui.save.fail", "Speichern fehlgeschlagen" },
     { "ui.load.fail", "Laden fehlgeschlagen" },
     { "ui.slot.none", "Kein Slot gewaehlt" },
+    { "ui.slot.of", "%i von %i" },
     { "ui.overlay.save", "SAVE" },
     { "ui.overlay.load", "LOAD" },
     { "ui.overlay.esc", "ESC" },
     { "ui.overlay.skip", "SKIP" },
     { "ui.overlay.use", "USE" },
     { "ui.overlay.look", "LOOK" },
+    { "ui.overlay.menu", "MENU" },
     { NULL, NULL }
   };
   int i;

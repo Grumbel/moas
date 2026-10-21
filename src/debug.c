@@ -28,19 +28,20 @@ static void usage(const char *argv0)
     "\n"
     "Options:\n"
     "  -h, --help              Show this help\n"
-    "  -d, --debug=LIST        Debug flags (script,input,wait,window,load,all)\n"
+    "  -d, --debug LIST        Debug flags (script,input,wait,window,load,all)\n"
     "  --skip-intro            Skip intro/title script\n"
-    "  --proc=N                Start program N after intro\n"
-    "  --addr=N                Start address in that program\n"
-    "  --datadir=PATH          Game data directory (MOAS_DATADIR)\n"
-    "  --statedir=PATH         Savegame directory (MOAS_STATEDIR)\n"
-    "  --load=SLOT|FILE        Load save at startup (slot 0-9 or path to .SAV)\n"
-    "  --lang=CODE             UI/script language (default de; loads lang/CODE.*)\n"
-    "  --load SLOT|FILE        Same as --load=\n"
+    "  --proc N                Start program N after intro\n"
+    "  --addr N                Start address in that program\n"
+    "  --datadir PATH          Game data directory (MOAS_DATADIR)\n"
+    "  --statedir PATH         Savegame directory (MOAS_STATEDIR)\n"
+    "  --load SLOT|FILE        Load save at startup (slot 0-9 or path to .SAV)\n"
+    "  --lang CODE             UI/script language (default de; loads lang/CODE.po)\n"
     "  --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit\n"
     "  -f, --fullscreen        Desktop fullscreen\n"
     "  --touch-controls        Show on-screen Save/Load/Esc/Skip/Use/Look buttons\n"
     "  --no-touch-controls     Hide them (default on desktop; toggle with F12)\n"
+    "\n"
+    "Options taking a value accept both --opt VALUE and --opt=VALUE.\n"
     "\n"
     "Examples:\n"
     "  %s --load=0\n"
@@ -78,6 +79,28 @@ static unsigned parse_debug_list(const char *list)
   return flags;
 }
 
+/*
+ * Match option NAME as "NAME=VALUE" or "NAME VALUE" (consumes argv[*i+1]).
+ * Returns the value, or NULL if argv[*i] is a different option.
+ */
+static const char *opt_value(int argc, char **argv, int *i, const char *name)
+{
+  const char *a = argv[*i];
+  size_t n = strlen(name);
+
+  if (strncmp(a, name, n) != 0)
+    return NULL;
+  if (a[n] == '=')
+    return a + n + 1;
+  if (a[n] != 0)
+    return NULL;
+  if (*i + 1 >= argc) {
+    fprintf(stderr, "moas: %s needs a value (try --help)\n", name);
+    exit(1);
+  }
+  return argv[++*i];
+}
+
 void MoasParseArgs(int argc, char **argv)
 {
   int i;
@@ -97,6 +120,7 @@ void MoasParseArgs(int argc, char **argv)
 
   for (i = 1; i < argc; i++) {
     const char *a = argv[i];
+    const char *v;
     if (!strcmp(a, "-h") || !strcmp(a, "--help")) {
       usage(argv[0] ? argv[0] : "moas");
       exit(0);
@@ -105,36 +129,33 @@ void MoasParseArgs(int argc, char **argv)
       moas_skip_intro = 1;
       continue;
     }
-    if (!strncmp(a, "--lang=", 7)) {
-      LangSetCode(a + 7);
+    if ((v = opt_value(argc, argv, &i, "--lang"))) {
+      LangSetCode(v);
       continue;
     }
-    if (!strcmp(a, "--lang") && i + 1 < argc) {
-      LangSetCode(argv[++i]);
-      continue;
-    }
-    if (!strncmp(a, "--debug=", 8)) {
-      moas_debug |= parse_debug_list(a + 8);
-      continue;
-    }
+    /* Bare -d / --debug at the end or before another option: all flags. */
     if (!strcmp(a, "-d") || !strcmp(a, "--debug")) {
-      if (i + 1 < argc)
+      if (i + 1 < argc && argv[i + 1][0] != '-')
         moas_debug |= parse_debug_list(argv[++i]);
       else
         moas_debug |= MOAS_DBG_ALL;
       continue;
     }
-    if (!strncmp(a, "--proc=", 7)) {
-      moas_start_proc = atoi(a + 7);
+    if ((v = opt_value(argc, argv, &i, "--debug"))) {
+      moas_debug |= parse_debug_list(v);
       continue;
     }
-    if (!strncmp(a, "--addr=", 7)) {
-      moas_start_addr = atoi(a + 7);
+    if ((v = opt_value(argc, argv, &i, "--proc"))) {
+      moas_start_proc = atoi(v);
       continue;
     }
-    if (!strncmp(a, "--datadir=", 10)) {
+    if ((v = opt_value(argc, argv, &i, "--addr"))) {
+      moas_start_addr = atoi(v);
+      continue;
+    }
+    if ((v = opt_value(argc, argv, &i, "--datadir"))) {
 #ifndef DOS
-      setenv("MOAS_DATADIR", a + 10, 1);
+      setenv("MOAS_DATADIR", v, 1);
 #endif
       continue;
     }
@@ -142,33 +163,14 @@ void MoasParseArgs(int argc, char **argv)
       moas_fullscreen = 1;
       continue;
     }
-    if (!strncmp(a, "--statedir=", 11)) {
+    if ((v = opt_value(argc, argv, &i, "--statedir"))) {
 #ifndef DOS
-      setenv("MOAS_STATEDIR", a + 11, 1);
+      setenv("MOAS_STATEDIR", v, 1);
 #endif
       continue;
     }
-    if (!strcmp(a, "--statedir")) {
-      if (i + 1 >= argc) {
-        fprintf(stderr, "moas: --statedir needs a path\n");
-        exit(1);
-      }
-#ifndef DOS
-      setenv("MOAS_STATEDIR", argv[++i], 1);
-#endif
-      continue;
-    }
-    if (!strncmp(a, "--load=", 7) || !strcmp(a, "--load")) {
-      const char *arg;
-      if (!strncmp(a, "--load=", 7))
-        arg = a + 7;
-      else {
-        if (i + 1 >= argc) {
-          fprintf(stderr, "moas: --load needs a slot (0-9) or file path\n");
-          exit(1);
-        }
-        arg = argv[++i];
-      }
+    if ((v = opt_value(argc, argv, &i, "--load"))) {
+      const char *arg = v;
       {
         /* Pure digits 0-9 → slot; otherwise path (or GAME n relative to state). */
         const char *p = arg;

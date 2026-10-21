@@ -72,6 +72,12 @@ msgid "Kein Slot gewaehlt"
 msgstr "No slot selected"
 
 #. source UI
+#: ui.slot.of
+msgctxt "ui.slot.of"
+msgid "%i von %i"
+msgstr "%i of %i"
+
+#. source UI
 #: ui.overlay.save
 msgctxt "ui.overlay.save"
 msgid "SAVE"
@@ -106,6 +112,12 @@ msgstr "USE"
 msgctxt "ui.overlay.look"
 msgid "LOOK"
 msgstr "LOOK"
+
+#. source UI
+#: ui.overlay.menu
+msgctxt "ui.overlay.menu"
+msgid "MENU"
+msgstr "MENU"
 
 #. GAME.PCK token 0
 #: pck.0

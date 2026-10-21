@@ -1060,6 +1060,19 @@ void MoasAutosaveOnExit(void)
 }
 #endif
 
+/* Restart: the next launch must not resume the abandoned game. */
+void MoasRemoveAutosave(void)
+{
+  char savpath[512];
+
+  if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
+    return;
+  if (remove(savpath) == 0) {
+    MOAS_IO_LOG("moas: removed %s (restart)\n", savpath);
+    moas_idbfs_sync();
+  }
+}
+
 /* Returns 0 if a resume file was loaded, -1 if skipped/missing/failed. */
 int MoasTryLoadAutosave(void)
 {
