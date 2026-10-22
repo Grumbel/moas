@@ -104,6 +104,19 @@
 - Tested headless (dummy video): values load, survive an autosave restore,
   CLI overrides apply. Not yet checked in a browser or on Android.
 
+## "NW" leaking into translated say windows (2026-10-22)
+- `utf8_to_cp850()` also turned '_' into a space. In the scripts '_' is a hard
+  space (drawn blank by CharNum, but not whitespace), and " NW ______ NW "
+  is a pause line. With real spaces, ReTextSayWin dropped the first " NW ",
+  stripped the leading blanks including the one before the next "NW", and
+  printed "NW Hello, I..." (e.g. script.p13.0x02c0, the phone call).
+  '_' and '@' now pass through unchanged, as they do in German.
+- en.po: 38 msgids (e.g. script.p1.0x08b9 "Beamen") had been replaced by
+  English text in 51cb4b0. Script strings are matched by msgid, so those
+  lines showed German. Restored from lang/manick.pot; en.po and the .pot
+  now agree on every msgctxt/msgid. Also restored dropped NW breaks in
+  script.p1.0x0643 / p4.0x0269 and the last line of the sign (p5.0x0142).
+
 ## Format strings in translations (2026-10-21)
 - `utf8_to_cp850()` (lang.c) replaced '%' with a space as a glyph the font
   lacks, so "USE %s" became "USE  s". The verbs, "%i von %i" and power-parse

@@ -2871,7 +2871,7 @@ msgstr "NW NW 4.7.96: NW Showdown painted and programmed. The beta version is co
 #: script.p1.0x0643
 msgctxt "script.p1.0x0643"
 msgid "NW NW 5.7.96-7.8.96: NW Selber noch mehrfach komplett gespielt und zahlreiche Bugs korrigiert. Die Betatester haben gute Arbeit geleistet und diverse weitere Bugs gefunden."
-msgstr "NW NW 5.7.96–7.8.96: I played through the whole game several more times and fixed numerous bugs. The beta testers did a good job and found various additional bugs."
+msgstr "NW NW 5.7.96–7.8.96: NW I played through the whole game several more times and fixed numerous bugs. The beta testers did a good job and found various additional bugs."
 
 #. prog 1 @ 06af op print_sentence
 #: script.p1.0x06af
@@ -2948,7 +2948,7 @@ msgstr "Change inventory"
 #. prog 1 @ 08b9 op add_option
 #: script.p1.0x08b9
 msgctxt "script.p1.0x08b9"
-msgid "Teleport"
+msgid "Beamen"
 msgstr "Teleport"
 
 #. prog 1 @ 08c8 op add_option
@@ -3098,7 +3098,7 @@ msgstr "take/put away letter"
 #. prog 1 @ 11d0 op add_option
 #: script.p1.0x11d0
 msgctxt "script.p1.0x11d0"
-msgid "Take/put away boombox"
+msgid "Ghettoblaster nehmen bzw. weglegen"
 msgstr "Take/put away boombox"
 
 #. prog 1 @ 11ef op add_option
@@ -3110,7 +3110,7 @@ msgstr "take/put away camera"
 #. prog 1 @ 120a op add_option
 #: script.p1.0x120a
 msgctxt "script.p1.0x120a"
-msgid "Take/put away wedge"
+msgid "Keil nehmen bzw. weglegen"
 msgstr "Take/put away wedge"
 
 #. prog 1 @ 1224 op add_option
@@ -3122,7 +3122,7 @@ msgstr "take/put away suitcase"
 #. prog 1 @ 123c op add_option
 #: script.p1.0x123c
 msgctxt "script.p1.0x123c"
-msgid "Take/put away credit card"
+msgid "Kreditkarte nehmen bzw. weglegen"
 msgstr "Take/put away credit card"
 
 #. prog 1 @ 1259 op add_option
@@ -3134,7 +3134,7 @@ msgstr "Take/put away oil"
 #. prog 1 @ 1272 op add_option
 #: script.p1.0x1272
 msgctxt "script.p1.0x1272"
-msgid "Take/put away newspaper"
+msgid "Zeitung nehmen bzw. weglegen"
 msgstr "Take/put away newspaper"
 
 #. prog 1 @ 128d op add_option
@@ -3152,7 +3152,7 @@ msgstr "[front.th] - Vors house"
 #. prog 1 @ 1489 op add_option
 #: script.p1.0x1489
 msgctxt "script.p1.0x1489"
-msgid "[flur.th] - In the stairwell"
+msgid "[flur.th] - Im Treppenhaus"
 msgstr "[flur.th] - In the stairwell"
 
 #. prog 1 @ 14a7 op add_option
@@ -3230,7 +3230,7 @@ msgstr "CLR (...)"
 #. prog 2 @ 0213 op add_say_window2
 #: script.p2.0x0213
 msgctxt "script.p2.0x0213"
-msgid "CLR ____(3 dots)____"
+msgid "CLR ____(3_Punkte)____"
 msgstr "CLR ____(3 dots)____"
 
 #. prog 2 @ 023e op add_say_window2
@@ -3296,7 +3296,7 @@ msgstr "CLR A wooden wedge. It can be used to hold doors open.."
 #. prog 2 @ 03a0 op say_if_found
 #: script.p2.0x03a0
 msgctxt "script.p2.0x03a0"
-msgid "CLR Three sticks of dynamite. NW That’s the bomb!"
+msgid "CLR Drei Stangen Dynamit. NW Bombige Sache!"
 msgstr "CLR Three sticks of dynamite. NW That’s the bomb!"
 
 #. prog 2 @ 03c5 op say_if_found
@@ -3434,7 +3434,7 @@ msgstr "CLR A virus-infected floppy disk."
 #. prog 2 @ 0690 op say_if_found
 #: script.p2.0x0690
 msgctxt "script.p2.0x0690"
-msgid "CLR Dry toast. Yuck."
+msgid "CLR Trockenes Toastbrot. Igitt."
 msgstr "CLR Dry toast. Yuck."
 
 #. prog 2 @ 06ac op say_if_found
@@ -3489,7 +3489,7 @@ msgstr "CLR A photo of the Moon with a Scheibe Toast. NW _____Cool._____"
 #: script.p2.0x089a
 msgctxt "script.p2.0x089a"
 msgid "CLR Ein echt scharfes Messer. NW Auf dem Zettel steht \"Beweisstück_A\"."
-msgstr "CLR A echt scharfes Messer. NW On the note stands \"Beweisstück_A\"."
+msgstr "CLR A really sharp knife. NW The note says \"Exhibit_A\"."
 
 #. prog 2 @ 08cf op say_if_found
 #: script.p2.0x08cf
@@ -3500,7 +3500,7 @@ msgstr "CLR A garden shovel."
 #. prog 2 @ 08ec op say_if_found
 #: script.p2.0x08ec
 msgctxt "script.p2.0x08ec"
-msgid "CLR Gulp!"
+msgid "CLR Schluck!"
 msgstr "CLR Gulp!"
 
 #. prog 2 @ 08fe op say_if_found
@@ -3536,7 +3536,7 @@ msgstr "warranty is void. NW Yours sincerely, NW Hungry Brothers Dumbwaiters.\""
 #. prog 2 @ 0a55 op add_say_window2
 #: script.p2.0x0a55
 msgctxt "script.p2.0x0a55"
-msgid "CLR Always with the self-promotion."
+msgid "CLR Immer diese Eigenwerbung."
 msgstr "CLR Always diese Eigenwerbung."
 
 #. prog 2 @ 0a72 op add_say_window2
@@ -3572,7 +3572,7 @@ msgstr "CLR Should I drink that, or what?"
 #. prog 2 @ 0b19 op say_if_found
 #: script.p2.0x0b19
 msgctxt "script.p2.0x0b19"
-msgid "CLR Tasty!"
+msgid "CLR Lecker!"
 msgstr "CLR Tasty!"
 
 #. prog 2 @ 0b2a op say_if_found
@@ -3614,7 +3614,7 @@ msgstr "CLR _____Extrablatt!_____ NW Slice of toast discovered on the Moon! NW V
 #. prog 2 @ 0c08 op say_if_found
 #: script.p2.0x0c08
 msgctxt "script.p2.0x0c08"
-msgid "CLR __Mmm!__ NW __Crunchy!__"
+msgid "CLR __Mmm!__ NW __Knusprig!__"
 msgstr "CLR __Mmm!__ NW __Crunchy!__"
 
 #. prog 2 @ 0c28 op say_if_found
@@ -3662,7 +3662,7 @@ msgstr "CLR What a racket!"
 #. prog 2 @ 0d30 op add_say_window2
 #: script.p2.0x0d30
 msgctxt "script.p2.0x0d30"
-msgid "CLR Glug. Glug. Glug."
+msgid "CLR Gluck. Gluck. Gluck."
 msgstr "CLR Glug. Glug. Glug."
 
 #. prog 2 @ 0d6c op add_say_window2
@@ -3686,7 +3686,7 @@ msgstr "CLR There’s my floppy disk"
 #. prog 2 @ 0de5 op add_say_window2
 #: script.p2.0x0de5
 msgctxt "script.p2.0x0de5"
-msgid "CLR The suitcase is empty."
+msgid "CLR Der Koffer ist leer."
 msgstr "CLR The suitcase is empty."
 
 #. prog 2 @ 0e0c op add_say_window2
@@ -3698,61 +3698,61 @@ msgstr "CLR Should I ihn essen, or what?"
 #. prog 2 @ 0e53 op add_say_window2
 #: script.p2.0x0e53
 msgctxt "script.p2.0x0e53"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0e84 op add_say_window2
 #: script.p2.0x0e84
 msgctxt "script.p2.0x0e84"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0eb5 op add_say_window2
 #: script.p2.0x0eb5
 msgctxt "script.p2.0x0eb5"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0ee6 op add_say_window2
 #: script.p2.0x0ee6
 msgctxt "script.p2.0x0ee6"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0f17 op add_say_window2
 #: script.p2.0x0f17
 msgctxt "script.p2.0x0f17"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0f48 op add_say_window2
 #: script.p2.0x0f48
 msgctxt "script.p2.0x0f48"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0f79 op add_say_window2
 #: script.p2.0x0f79
 msgctxt "script.p2.0x0f79"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0faa op add_say_window2
 #: script.p2.0x0faa
 msgctxt "script.p2.0x0faa"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 0fdb op add_say_window2
 #: script.p2.0x0fdb
 msgctxt "script.p2.0x0fdb"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 100c op add_say_window2
 #: script.p2.0x100c
 msgctxt "script.p2.0x100c"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 1040 op add_say_window2
@@ -3765,7 +3765,7 @@ msgstr "CLR I've already read that."
 #: script.p2.0x1077
 msgctxt "script.p2.0x1077"
 msgid "CLR Ahhaaa! NW So geht das! NW Ach soooo! NW So rum muß man die Kamera halten..."
-msgstr "CLR Ahhaaa! NW So that’s how it works! NW Ach soooo! NW That’s how you’re supposed to hold the camera..."
+msgstr "CLR Ahhaaa! NW So that’s how it works! NW Oh, I see! NW That’s how you’re supposed to hold the camera..."
 
 #. prog 2 @ 10bb op add_say_window
 #: script.p2.0x10bb
@@ -3776,13 +3776,13 @@ msgstr "Now everything makes sense!"
 #. prog 2 @ 10d2 op add_say_window2
 #: script.p2.0x10d2
 msgctxt "script.p2.0x10d2"
-msgid "CLR ____(2 dots)____"
+msgid "CLR ____(2_Punkte)____"
 msgstr "CLR ____(2 dots)____"
 
 #. prog 2 @ 10fe op add_say_window2
 #: script.p2.0x10fe
 msgctxt "script.p2.0x10fe"
-msgid "CLR Nice little scraps of paper!"
+msgid "CLR Nette Papierschnipsel!"
 msgstr "CLR Nice little scraps of paper!"
 
 #. prog 2 @ 112f op add_say_window2
@@ -3800,7 +3800,7 @@ msgstr "CLR Okay, it's safe in there!"
 #. prog 2 @ 11bb op add_say_window2
 #: script.p2.0x11bb
 msgctxt "script.p2.0x11bb"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 2 @ 11d2 op add_say_window2
@@ -3926,7 +3926,7 @@ msgstr "NW After enjoying his newfound freedom for a while, Jack reluctantly dec
 #. prog 4 @ 0119 op print_sentence
 #: script.p4.0x0119
 msgctxt "script.p4.0x0119"
-msgid "Mänick Mänschion V1.0 Copyright notice: NW -------------------------------------------- NW"
+msgid "Mänick Mänschion V1.0 Copyrighthinweis: NW -------------------------------------------- NW"
 msgstr "Mänick Mänschion V1.0 Copyright notice: NW -------------------------------------------- NW"
 
 #. prog 4 @ 016b op print_sentence
@@ -3950,14 +3950,14 @@ msgstr "2. It must be distributed free of charge, i.e. without a fee, reimbursem
 #. prog 4 @ 0208 op print_sentence
 #: script.p4.0x0208
 msgctxt "script.p4.0x0208"
-msgid "Mänick Mänschion Copyright notice: (continued) NW ------------------------------------------------------ NW"
+msgid "Mänick Mänschion Copyrighthinweis: (Fortsetzung) NW ------------------------------------------------------ NW"
 msgstr "Mänick Mänschion Copyright notice: (continued) NW ------------------------------------------------------ NW"
 
 #. prog 4 @ 0269 op print_sentence
 #: script.p4.0x0269
 msgctxt "script.p4.0x0269"
 msgid "Für die kommerzielle Nutzung, der Weitergabe gegen Entgelt oder als Teil eines kostenpflichtigen Produkts (z.B. Shareware CD) ist das schriftlich Einverständnis des Autors erforderlich. NW NW"
-msgstr "For commercial use, distribution for payment, or inclusion in a product that costs money (e.g. a shareware CD), written permission from the author is required."
+msgstr "For commercial use, distribution for payment, or inclusion in a product that costs money (e.g. a shareware CD), written permission from the author is required. NW NW"
 
 #. prog 4 @ 02d4 op print_sentence_plus
 #: script.p4.0x02d4
@@ -4017,7 +4017,7 @@ msgstr "Phew, that was far. NW I wonder why they didn't fly me back."
 #: script.p5.0x0142
 msgctxt "script.p5.0x0142"
 msgid "CLR Warnung! NW Das Haus ist baufällig, radioaktiv verseucht und von Zombies belagert. NW Und giftig. NW Und Privatbesitz. NW Eltern zahlen die Beerdigungskosten für ihre Kinder. NW Freundlich!"
-msgstr "CLR Warning! NW The house is dilapidated, contaminated with radioactive material, and surrounded by zombies. NW And poisonous. NW And private property. NW Parents pay the funeral costs for their children. NW"
+msgstr "CLR Warning! NW The house is dilapidated, contaminated with radioactive material, and surrounded by zombies. NW And poisonous. NW And private property. NW Parents pay the funeral costs for their children. NW Have a nice day!"
 
 #. prog 5 @ 01d3 op say_if_found
 #: script.p5.0x01d3
@@ -4089,7 +4089,7 @@ msgstr "CLR Grunz?"
 #: script.p6.0x0267
 msgctxt "script.p6.0x0267"
 msgid "CLR Soll ich den Balkon runterspringen?"
-msgstr "CLR Should I the Balkon runterspringen?"
+msgstr "CLR Should I try jumping off the balcony?"
 
 #. prog 6 @ 02af op add_say_window2
 #: script.p6.0x02af
@@ -4130,7 +4130,7 @@ msgstr "CLR Better not. NW Otherwise I'll break something."
 #. prog 6 @ 03b5 op add_say_window
 #: script.p6.0x03b5
 msgctxt "script.p6.0x03b5"
-msgid "CLR ____(1 dot)____"
+msgid "CLR ____(1_Punkt)____"
 msgstr "CLR ____(1 dot)____"
 
 #. prog 6 @ 044c op add_say_window
@@ -4400,7 +4400,7 @@ msgstr "____(1_Punkt)____"
 #. prog 6 @ 12fa op add_say_window2
 #: script.p6.0x12fa
 msgctxt "script.p6.0x12fa"
-msgid "CLR ____(2 dots)____"
+msgid "CLR ____(2_Punkte)____"
 msgstr "CLR ____(2 dots)____"
 
 #. prog 6 @ 131c op add_say_window2
@@ -4418,7 +4418,7 @@ msgstr "CLR There's a key lying there!"
 #. prog 6 @ 13ac op add_say_window2
 #: script.p6.0x13ac
 msgctxt "script.p6.0x13ac"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 6 @ 13d3 op add_say_window
@@ -4442,7 +4442,7 @@ msgstr "CLR There's a key lying there!"
 #. prog 6 @ 1495 op add_say_window2
 #: script.p6.0x1495
 msgctxt "script.p6.0x1495"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 6 @ 14bc op add_say_window
@@ -4466,7 +4466,7 @@ msgstr "CLR There's a key lying there!"
 #. prog 6 @ 157e op add_say_window2
 #: script.p6.0x157e
 msgctxt "script.p6.0x157e"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 6 @ 15a5 op add_say_window
@@ -4490,7 +4490,7 @@ msgstr "CLR There's a key lying there!"
 #. prog 6 @ 1667 op add_say_window2
 #: script.p6.0x1667
 msgctxt "script.p6.0x1667"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 6 @ 168e op add_say_window
@@ -4514,7 +4514,7 @@ msgstr "CLR There's a key lying there!"
 #. prog 6 @ 1750 op add_say_window2
 #: script.p6.0x1750
 msgctxt "script.p6.0x1750"
-msgid "CLR ____(4 dots)____"
+msgid "CLR ____(4_Punkte)____"
 msgstr "CLR ____(4 dots)____"
 
 #. prog 6 @ 1777 op add_say_window
@@ -4556,7 +4556,7 @@ msgstr "CLR O.K."
 #. prog 6 @ 18fe op add_say_window2
 #: script.p6.0x18fe
 msgctxt "script.p6.0x18fe"
-msgid "CLR ____(1 dot)____"
+msgid "CLR ____(1_Punkt)____"
 msgstr "CLR ____(1 dot)____"
 
 #. prog 6 @ 194a op add_say_window

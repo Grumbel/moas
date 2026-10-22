@@ -170,10 +170,10 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
   while (*p && o + 1 < outsz) {
     if (*p < 0x80) {
       unsigned char c = *p++;
-      /* glyphs not in CharAvail → nearest safe ASCII */
-      if (c == '_' || c == '@')
-        c = ' ';
-      else if (c == '`')
+      /* glyphs not in CharAvail → nearest safe ASCII.
+       * '_' and '@' stay: the engine draws them blank (CharNum), and say
+       * windows rely on '_' not being whitespace (" NW ______ NW " pauses). */
+      if (c == '`')
         c = '\'';
       else if (c == '#' || c == '$' || c == '&' || c == '*'
                || c == '+' || c == '/' || c == '=' || c == '\\' || c == '^'
