@@ -23,6 +23,12 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        # The SDL3 that sdl2-compat was built against (on its RUNPATH).
+        # ASan intercepts dlopen(), so the RUNPATH no longer applies when
+        # sdl2-compat loads SDL3; the develop shell puts this one on
+        # LD_LIBRARY_PATH instead. pkgs.sdl3 can be a different build.
+        compatSdl3 = pkgs.lib.findFirst (p: pkgs.lib.hasPrefix "sdl3" (p.pname or p.name or ""))
+          null pkgs.SDL2.buildInputs;
         # Open Watcom is Watcom-1.0 (redistributable; marked unfree in nixpkgs)
         dosPkgs = import nixpkgs {
           inherit system;
@@ -119,8 +125,9 @@
           mkdir -p "$MOAS_BUILD_DIR"
           cmake -S "$MOAS_SOURCE" -B "$MOAS_BUILD_DIR" \
             -DCMAKE_BUILD_TYPE="''${CMAKE_BUILD_TYPE:-Debug}" \
+            -DMOAS_SANITIZE="''${MOAS_SANITIZE-address,undefined}" \
             -DMOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
-          echo "moas-configure: $MOAS_BUILD_DIR (CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug})"
+          echo "moas-configure: $MOAS_BUILD_DIR (CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug}, MOAS_SANITIZE=''${MOAS_SANITIZE-address,undefined})"
         '';
 
         moasBuild = pkgs.writeShellScriptBin "moas-build" ''
@@ -136,6 +143,12 @@
             elif [ ! -d "$cached" ]; then
               echo "moas-build: cached source missing; reconfiguring" >&2
               need_cfg=1
+            else
+              san=$(grep -E '^MOAS_SANITIZE:' "$MOAS_BUILD_DIR/CMakeCache.txt" | head -1 | cut -d= -f2- || true)
+              if [ "$san" != "''${MOAS_SANITIZE-address,undefined}" ]; then
+                echo "moas-build: MOAS_SANITIZE changed ($san -> ''${MOAS_SANITIZE-address,undefined}); reconfiguring" >&2
+                need_cfg=1
+              fi
             fi
           fi
           if [ "$need_cfg" -eq 1 ]; then
@@ -245,16 +258,22 @@ except Exception:
             export MOAS_SOURCE="$PWD"
             export MOAS_BUILD_DIR="''${MOAS_BUILD_DIR:-/tmp/moas-build}"
             export MOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
+            # The engine never frees its resource buffers; leak reports at
+            # exit would bury real ASan errors. UBSan: print a stack trace.
+            export ASAN_OPTIONS="''${ASAN_OPTIONS:-detect_leaks=0}"
+            export UBSAN_OPTIONS="''${UBSAN_OPTIONS:-print_stacktrace=1}"
             # sdl2-compat dlopen()s SDL3 at runtime. Replace (not extend) the
             # host LD_LIBRARY_PATH: a foreign one breaks sdl2-compat's dllinit().
-            # No sdl3 here: pkgs.sdl3 is a different build than the one
-            # sdl2-compat finds via its RUNPATH, and would shadow it.
-            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath (with pkgs; [ SDL2 libGL libx11 ])}''${MOAS_EXTRA_LD_LIBRARY_PATH:+:$MOAS_EXTRA_LD_LIBRARY_PATH}"
+            # Not pkgs.sdl3: it is a different build than the one sdl2-compat
+            # finds via its RUNPATH, and would shadow it. compatSdl3 is that
+            # exact build; needed with ASan (see above).
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath ((with pkgs; [ SDL2 libGL libx11 ]) ++ pkgs.lib.optional (compatSdl3 != null) (compatSdl3.lib or compatSdl3))}''${MOAS_EXTRA_LD_LIBRARY_PATH:+:$MOAS_EXTRA_LD_LIBRARY_PATH}"
             echo "MOAS develop shell"
             echo "  MOAS_SOURCE=$MOAS_SOURCE"
             echo "  MOAS_BUILD_DIR=$MOAS_BUILD_DIR"
             echo "  MOAS_DATADIR=$MOAS_DATADIR"
             echo "  CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug}"
+            echo "  MOAS_SANITIZE=''${MOAS_SANITIZE-address,undefined}  (MOAS_SANITIZE= to disable)"
             echo "Commands: moas-configure | moas-build | moas-run | moas-run-gdb"
             echo "  moas-run --load=0   # example CLI after a save exists"
           '';

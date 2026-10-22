@@ -514,7 +514,9 @@ short PowerSelectFromWindow(void)   /* RefTable is Global Parameter */
     if (LastY!=y)
     {
       VMouse(3);
-      if (LastY!=-1)
+      /* LastY starts at -99 (nothing highlighted yet); the original only
+         excluded -1 and read RefTable[-99]. */
+      if (LastY>=0)
         for (y320=(cy=RefTable[LastY].y1)*320;cy<RefTable[LastY].y2;cy++,y320+=320)
           for (cx=4;cx<315;cx++)
             if (((unsigned char *)VGA_ADRESSE)[cx+y320]==255)

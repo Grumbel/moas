@@ -90,7 +90,15 @@ static volatile int  wasm_paused = 0;
 static void wasm_pause_spin(void);
 #endif
 static int           moas_shift_down = 0;
-static int           overlay_shift_hold = 0; /* synthetic Shift from overlay SKIP */
+/*
+ * Synthetic Shift (overlay SKIP, gamepad A) until this SDL tick. Time-based:
+ * the event pump runs in busy loops (SayWait), so a frame counter expired
+ * before UpDateSayWindows (every 4 game ticks, ~27 ms) could see it. Speech
+ * is dismissed on the Shift release edge, so the hold must outlast one
+ * UpDateSayWindows period.
+ */
+#define SHIFT_HOLD_MS 120
+static Uint32        overlay_shift_until = 0;
 static int           overlay_down = 0;       /* OV_* where the press started */
 static int           overlay_pressed = 0;    /* OV_* drawn pressed (pointer still on it) */
 static int           overlay_pending_cmd = 0; /* SAVE/LOAD after release → LookKeys */
@@ -111,7 +119,7 @@ static Uint32        sdl_palette[256];
 int PlatformShiftDown(void)
 {
   /* Overlay SKIP button and gamepad A synthesize Shift for speech skip. */
-  if (overlay_shift_hold > 0)
+  if (overlay_shift_until && (Sint32)(overlay_shift_until - SDL_GetTicks()) > 0)
     return 1;
   return moas_shift_down;
 }
@@ -1282,7 +1290,7 @@ static void overlay_fire(int which)
       break;
     case OV_SKIP:
       /* Synthetic Shift: speed up / dismiss speech bubbles (not full sequence abort). */
-      overlay_shift_hold = 20; /* ~frames while speech checks PlatformShiftDown */
+      overlay_shift_until = SDL_GetTicks() + SHIFT_HOLD_MS;
       break;
     case OV_MODE_USE:
       touch_mode = MOAS_TOUCH_USE;
@@ -1351,6 +1359,20 @@ static void overlay_set_enabled(int on)
   }
 #endif
   platform_log("touch controls %s", on ? "on" : "off");
+}
+
+static int is_touch_device(void);
+
+/* Keyboard equivalent shown in the button's top-right corner (not on touch). */
+static const char *overlay_key_name(int which)
+{
+  switch (which) {
+    case OV_SAVE: return "F5";
+    case OV_LOAD: return "F7";
+    case OV_SKIP: return "SHIFT";
+    case OV_MENU: return "F12";
+    default:      return NULL; /* ESC says it already; USE/LOOK are mouse buttons */
+  }
 }
 
 static void overlay_draw_button(int which, const SDL_Rect *r)
@@ -1454,6 +1476,16 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   else
     ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
                   label, ts, 255, 255, 255);
+
+  {
+    const char *key = overlay_key_name(which);
+    if (key && !is_touch_device()) {
+      /* 2x only when it stays clear of the centred icon ("SHIFT" doesn't). */
+      int ks = (face.h >= 70 && ui_text_width(key, 2) <= inner.w / 3) ? 2 : 1;
+      ui_draw_label(inner.x + inner.w - ui_text_width(key, ks) - pad,
+                    inner.y + pad / 2 + 1, key, ks, 255, 230, 140);
+    }
+  }
 }
 
 /* SAVE/LOAD only do something when LookKeys would honour them; LOAD
@@ -2135,9 +2167,6 @@ static void pad_apply(void)
   const int trig_dead = 12000;
   int use, look;
 
-  if (overlay_shift_hold > 0)
-    overlay_shift_hold--;
-
   if (!pad)
     return;
 
@@ -2195,7 +2224,7 @@ static void pad_apply(void)
   Mouse.Middle = phys_middle;
 
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A))
-    overlay_shift_hold = 20; /* skip speech while held */
+    overlay_shift_until = SDL_GetTicks() + SHIFT_HOLD_MS; /* skip speech while held */
   /* B / Start / Back / X / Y are edge-triggered in pad_button_down. */
 
 #ifndef DOS

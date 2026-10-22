@@ -6,6 +6,24 @@
 
 # TODO / Handoff
 
+## Sanitizers, touch SKIP fix, key names on buttons (2026-10-22)
+- `nix develop` builds use `-fsanitize=address,undefined` (CMake
+  `MOAS_SANITIZE`, env `MOAS_SANITIZE` in moas-configure; empty = off;
+  `-fno-sanitize=alignment` because bytecode params are unaligned shorts).
+  ASAN_OPTIONS=detect_leaks=0. ASan's dlopen interceptor loses sdl2-compat's
+  RUNPATH, so the shell adds that exact SDL3 (`compatSdl3`, from
+  `pkgs.SDL2.buildInputs`, `.lib` output) to LD_LIBRARY_PATH.
+- First sanitizer run (title, F12 menu, player choice, F1 menu): only
+  finding was PowerSelectFromWindow reading RefTable[-99] (LastY starts at
+  -99) and recolouring garbage rows. Fixed with `LastY>=0`.
+- Touch SKIP did nothing: the synthetic Shift was a 20-iteration counter
+  decremented in the event pump, which SayWait spins in a busy loop, so it
+  expired before UpDateSayWindows (every 4 ticks) saw it. Speech is dismissed
+  on the Shift release edge. Now a 120 ms time window (also gamepad A).
+- Overlay buttons show the key (F5/F7/SHIFT/F12) top-right; not on touch
+  devices. Tooltips skipped: no hover on touch, and the label is cheaper.
+- Next: run longer sanitized play sessions (rooms, inventory, saves).
+
 ## Key legend, Options entry in the game menu, touch lockout (2026-10-22)
 - Key legend (F5/F7/F12/Shift/Esc) drawn by `keyhints_draw()` in
   platform_sdl.c, bottom right of the game picture, on the start screen

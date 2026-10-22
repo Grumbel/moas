@@ -217,3 +217,19 @@ else()
   install(FILES data/metainfo/org.grumbel.moas.metainfo.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 endif()
+
+# Sanitizers for development builds, e.g. -DMOAS_SANITIZE=address,undefined
+# (the `nix develop` moas-configure sets this by default). Empty = off.
+set(MOAS_SANITIZE "" CACHE STRING "Comma-separated -fsanitize= list (empty = off)")
+if(MOAS_SANITIZE AND NOT EMSCRIPTEN AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  message(STATUS "Sanitizers: ${MOAS_SANITIZE}")
+  foreach(tgt moas moas-util)
+    if(TARGET ${tgt})
+      # Script bytecode is read as unaligned shorts (Parameter[] in
+      # Execute); by design, so UBSan's alignment check is just noise.
+      target_compile_options(${tgt} PRIVATE -fsanitize=${MOAS_SANITIZE}
+        -fno-sanitize=alignment -fno-omit-frame-pointer)
+      target_link_options(${tgt} PRIVATE -fsanitize=${MOAS_SANITIZE})
+    endif()
+  endforeach()
+endif()

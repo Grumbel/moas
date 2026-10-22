@@ -57,9 +57,20 @@ moas-run-gdb --load=0          # gdb: auto-run; stays open on crash
 | `MOAS_BUILD_DIR` | `/tmp/moas-build` |
 | `MOAS_DATADIR` | `$MOAS_SOURCE/manick` |
 | `CMAKE_BUILD_TYPE` | `Debug` |
+| `MOAS_SANITIZE` | `address,undefined` (set empty to disable) |
+| `ASAN_OPTIONS` | `detect_leaks=0` |
+| `UBSAN_OPTIONS` | `print_stacktrace=1` |
 
 Scripts refuse to run unless `MOAS_SOURCE` is set (enter via `nix develop`).
-`moas-build` reconfigures if the CMake source path changed.
+`moas-build` reconfigures if the CMake source path or `MOAS_SANITIZE` changed.
+
+Develop builds use ASan + UBSan (CMake `-DMOAS_SANITIZE=…`; off for package
+builds). UBSan's alignment check is disabled: the script interpreter reads
+unaligned shorts from the bytecode by design. Leak detection is off because the
+engine never frees its resource buffers. The shell puts sdl2-compat's own SDL3
+on `LD_LIBRARY_PATH`, since ASan's `dlopen` interceptor bypasses sdl2-compat's
+RUNPATH (symptom: "Failed loading SDL3 library."). Run the binary from inside
+`nix develop`.
 
 ## Build and run
 
@@ -395,6 +406,8 @@ These are **not** the same:
 **Shift** matches original DOS keyboard flag `0x417` (either Shift key). **Middle mouse** does the same as a Shift edge for speech.
 
 The touch **Skip** button acts like **Shift** (speech only); touch **Esc** is the sequence abort.
+Without a touchscreen (desktop `--touch-controls`), the buttons show their key
+in the top-right corner: F5, F7, SHIFT, F12.
 
 ### Master / debug keys
 
