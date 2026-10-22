@@ -284,7 +284,7 @@ static const char *const android_data_files[] = {
   "GAME.PCK", "GAME.XXX",
   "LICENCE.DAT", "Licence.Dat", "licence.dat",
   /* optional language packs (assets/lang/…) */
-  "lang/en.po",
+  "lang/en.po", "lang/es.po", "lang/fr.po", "lang/it.po", "lang/nl.po",
   NULL
 };
 
@@ -1680,8 +1680,15 @@ const char *PlatformPreferredLanguage(void)
 #if SDL_VERSION_ATLEAST(2, 0, 14)
   SDL_Locale *loc = SDL_GetPreferredLocales();
   /* Only the first choice: German as a fallback language is still English. */
-  if (loc && loc[0].language && !SDL_strcasecmp(loc[0].language, "de"))
-    lang = "de";
+  if (loc && loc[0].language) {
+    char code[8];
+    int i;
+    for (i = 0; loc[0].language[i] && i < (int)sizeof(code) - 1; i++)
+      code[i] = (char)SDL_tolower((unsigned char)loc[0].language[i]);
+    code[i] = 0;
+    if (LangFind(code))
+      lang = LangFind(code);
+  }
   platform_log("os locale: %s -> %s",
                (loc && loc[0].language) ? loc[0].language : "?", lang);
   SDL_free(loc);
@@ -1920,7 +1927,7 @@ static void eng_menu_change(int sel, int dir)
   switch (sel) {
     case ENG_LANG:
       code = LangGetCode();
-      LangSetCode((code && strcmp(code, "en") == 0) ? "de" : "en");
+      LangSetCode(LangStep(code, dir));
       MoasReloadLanguage();
       break;
     case ENG_FULLSCREEN:

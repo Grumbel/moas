@@ -474,3 +474,16 @@ Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame o
 - TeakEffekt (op 6): SDL palette + present; fixed Info1 index via pointer delta
 - PowerBlend: present each depth step; documented WalkNLayers never loaded
 - Speech/audio left alone (not used by this game data)
+
+## More languages: es, fr, it, nl (2026-10-22)
+- `lang_codes[]` in lang.c (de, en, es, fr, it, nl) is the one list:
+  `LangStep()` cycles it in the F12 menu (both directions), `LangFind()` maps
+  the OS locale (first choice only) to a pack, anything else stays `en`.
+- Android asset list (`android_data_files[]`) now includes all packs; the
+  other packages already copy `lang/*.po`.
+- The game font has only ÄÖÜß/äöü besides ASCII, and `utf8_to_cp850()` used to
+  turn every other accented letter into a space. `latin_fold()` folds
+  U+00C0..U+00FF and Œ/œ/Ÿ to base letters (é→e, ñ→n, ç→c, œ→oe); ¡ ¿ are
+  dropped, « » become '"'. Covers every non-ASCII char in the current packs.
+- Next: proper accented glyphs would need new font data in GAME.* (and the
+  5x7 SDL UI font); check long translations against say-window widths.

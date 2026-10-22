@@ -73,4 +73,10 @@ const char *LangLookup(const char *cp850_source);
 
 const char *LangGetCode(void);
 
+/* Languages with a pack in lang/ (plus built-in "de"), in options-menu order.
+ * LangFind: the table's copy of `code`, or NULL if it isn't one of them. */
+const char *LangFind(const char *code);
+/* The language `dir` steps (+1/-1) after `code`, wrapping around. */
+const char *LangStep(const char *code, int dir);
+
 #endif

@@ -132,6 +132,32 @@ const char *LangGetCode(void)
   return lang_code;
 }
 
+static const char *const lang_codes[] = { "de", "en", "es", "fr", "it", "nl" };
+#define LANG_CODES ((int)(sizeof(lang_codes) / sizeof(lang_codes[0])))
+
+static int lang_index(const char *code)
+{
+  int i;
+  for (i = 0; code && i < LANG_CODES; i++)
+    if (!strcmp(lang_codes[i], code))
+      return i;
+  return -1;
+}
+
+const char *LangFind(const char *code)
+{
+  int i = lang_index(code);
+  return i < 0 ? NULL : lang_codes[i];
+}
+
+const char *LangStep(const char *code, int dir)
+{
+  int i = lang_index(code);
+  if (i < 0)
+    return lang_codes[0];
+  return lang_codes[(i + (dir < 0 ? LANG_CODES - 1 : 1)) % LANG_CODES];
+}
+
 void LangSetCode(const char *code)
 {
   size_t i, n;
@@ -203,6 +229,37 @@ static void cp850_to_utf8(const unsigned char *in, char *out, size_t outsz)
  * Smart quotes/dashes/ellipsis collapse to ASCII so they are not drawn as '?'.
  * '%' stays: verbs and power-parse lines are printf formats ("USE %s").
  */
+/*
+ * The game font has no accents beyond ÄÖÜß/äöü: fold the other Latin
+ * letters (es/fr/it/nl) to their base letter. "" drops the character
+ * (Spanish ¡ ¿ would otherwise leave a leading space). NULL: no fold.
+ */
+static const char *latin_fold(unsigned int cp)
+{
+  static const char *const tab[0x40] = {
+    /* C0 */ "A", "A", "A", "A", NULL, "A", "AE", "C",
+    /* C8 */ "E", "E", "E", "E", "I", "I", "I", "I",
+    /* D0 */ "D", "N", "O", "O", "O", "O", NULL, "x",
+    /* D8 */ "O", "U", "U", "U", NULL, "Y", "TH", NULL,
+    /* E0 */ "a", "a", "a", "a", NULL, "a", "ae", "c",
+    /* E8 */ "e", "e", "e", "e", "i", "i", "i", "i",
+    /* F0 */ "d", "n", "o", "o", "o", "o", NULL, "-",
+    /* F8 */ "o", "u", "u", "u", NULL, "y", "th", "y",
+  };
+  if (cp >= 0xc0 && cp <= 0xff)
+    return tab[cp - 0xc0];
+  switch (cp) {
+    case 0xa1: case 0xbf: return "";     /* ¡ ¿ */
+    case 0xab: case 0xbb: return "\"";   /* « » */
+    case 0xaa: return "a";               /* ª */
+    case 0xb0: case 0xba: return "o";    /* ° º */
+    case 0x152: return "OE";
+    case 0x153: return "oe";
+    case 0x178: return "Y";
+  }
+  return NULL;
+}
+
 static void utf8_to_cp850(const char *in, char *out, size_t outsz)
 {
   size_t o = 0;
@@ -225,6 +282,8 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
     if ((p[0] & 0xe0) == 0xc0 && p[1]) {
       unsigned int cp = ((p[0] & 0x1f) << 6) | (p[1] & 0x3f);
       unsigned char c = 0;
+      const char *fold = latin_fold(cp);
+      p += 2;
       if (cp == 0xe4) c = 0x84;      /* ä */
       else if (cp == 0xf6) c = 0x94; /* ö */
       else if (cp == 0xfc) c = 0x81; /* ü */
@@ -234,10 +293,13 @@ static void utf8_to_cp850(const char *in, char *out, size_t outsz)
       else if (cp == 0xdf) c = 0xe1; /* ß */
       else if (cp == 0xa0) c = ' ';  /* nbsp */
       else if (cp == 0xb4 || cp == 0x60) c = '\'';
-      else
+      else if (fold) {
+        while (*fold && o + 1 < outsz)
+          out[o++] = *fold++;
+        continue;
+      } else
         c = ' '; /* unknown Latin-1-ish → space, not '?' */
       out[o++] = (char)c;
-      p += 2;
       continue;
     }
     if ((p[0] & 0xf0) == 0xe0 && p[1] && p[2]) {

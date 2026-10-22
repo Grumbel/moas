@@ -290,7 +290,11 @@ Search path:
 the resolved game data directory, `$MOAS_DATADIR` or found automatically).
 Every package (Android, web, Windows, R36S) ships `lang/` next to the game data.
 Without `--lang` / `MOAS_LANG` / a `language=` line in settings.ini, the
-language follows the OS: German → `de` (built-in German), anything else → `en`. The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
+language follows the OS: German → `de` (built-in German), Spanish, French,
+Italian and Dutch → `es`/`fr`/`it`/`nl`, anything else → `en`. The options menu
+cycles through the same list (`lang_codes[]` in `src/lang.c`). The game font has
+no accents besides ÄÖÜß/äöü, so other accented letters are folded to the base
+letter (é→e, ñ→n, ç→c, œ→oe; ¡ ¿ are dropped). The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
 Template with all strings: `lang/manick.pot` (from `moas-util strings pot`).
 
 ## Game data (`manick/`)
