@@ -6,6 +6,17 @@
 
 # TODO / Handoff
 
+## Crash entering the Keller: InternalError 1028 (2026-10-22)
+- Diele idle timer (proc 15 @864: `adress 87`, `wait 2`, re-arm) kept running
+  after the room changed. During `wait` the player keeps walking; reaching the
+  Keller exit fires the Jumper (TestIfPersonIsInTrap) and enters the Keller
+  inside the wait. The timer script then addressed person 87 (gone) →
+  GetRealPersonNum blocks on getch() ("stuck"), then InternalError 1028.
+  Likely latent in the DOS original too.
+- Fix (non-DOS): `OntimeEpoch` bumped in InitOntimes(); an Execute started by
+  UpDateOntimes aborts after Wait / WaitWhileSomeBodyIsWalking if the epoch
+  changed underneath it (its own init_ontimes resyncs).
+
 ## moas-util extract-png (2026-10-22)
 - `moas-util extract-png [all|bild|inv|phase]` writes `<kind>_NNNN.png`
   (8-bit indexed, own CRC/stored-deflate writer, no zlib dependency).

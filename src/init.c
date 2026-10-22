@@ -132,6 +132,9 @@ void InitOntimes(void)
 {
   short c;
   for (c=0;c<10;c++) Ontimes[c].TimeLeft=0;
+#ifndef DOS
+  OntimeEpoch++;
+#endif
 }
 void Init320Tab(void)
 {

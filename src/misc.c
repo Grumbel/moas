@@ -987,7 +987,12 @@ void UpDateOntimes(void)
     {
       Ontimes[c].TimeLeft--;
       if (Ontimes[c].TimeLeft==0)
+      {
+#ifndef DOS
+        ExecuteFromOntime=1;
+#endif
         Execute(Ontimes[c].Proc,Ontimes[c].Adresse);
+      }
     }
 }
 void Adress(short Prs,short Ref)

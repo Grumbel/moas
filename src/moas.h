@@ -262,6 +262,12 @@ MOAS_G struct ONTIME
   unsigned short TimeLeft;
   unsigned short Proc,Adresse;
 } Ontimes[10];
+#ifndef DOS
+/* Bumped by InitOntimes() (room entry); lets ontime scripts notice a room
+   change that happened while they were blocked in Wait. */
+MOAS_G unsigned short OntimeEpoch;
+MOAS_G char ExecuteFromOntime;
+#endif
 
 MOAS_G struct
 {

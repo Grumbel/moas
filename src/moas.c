@@ -176,6 +176,12 @@ short Execute(short ProcNum,unsigned short Adresse)
   unsigned char *Prg;
   short *Parameter;
   char LastControl=PlayerHasControl;
+#ifndef DOS
+  char FromOntime=ExecuteFromOntime;
+  unsigned short Epoch=OntimeEpoch;
+
+  ExecuteFromOntime=0;
+#endif
 
 #ifndef DOS
   MoasScriptSerial++; /* game state may change: autosave checkpoint due */
@@ -337,6 +343,19 @@ short Execute(short ProcNum,unsigned short Adresse)
       case 45:UnMarkArea(Label,Parameter[0]);   Adresse+=3; break;
       case 46:UnMarkArea(Jumper,Parameter[0]);  Adresse+=3; break;
       case 47:Wait(Parameter[0]);
+#ifndef DOS
+              /*
+               * The player keeps walking during Wait and may step into an
+               * exit (Jumper), entering another room. A timer script of the
+               * old room must not continue there: it would address persons
+               * that are gone (InternalError 1028) and re-arm its timer.
+               */
+              if (FromOntime && OntimeEpoch!=Epoch)
+              {
+                PlayerHasControl=LastControl;
+                return(1);
+              }
+#endif
               Adresse+=3;                                                break;
       case 48:PlayerHasControl=LastControl;
               return(0);          /*NotFound*/
@@ -352,6 +371,13 @@ short Execute(short ProcNum,unsigned short Adresse)
       case 54:if (KeyAbortState!=2) Adress(Parameter[0],Parameter[1]);
               Adresse+=5;                                                break;
       case 55:WaitWhileSomeBodyIsWalking(-1);
+#ifndef DOS
+              if (FromOntime && OntimeEpoch!=Epoch)   /* see case 47 */
+              {
+                PlayerHasControl=LastControl;
+                return(1);
+              }
+#endif
               Adresse++;                                                 break;
       case 56:Adresse=ParseIf(Adresse,Parameter[5],Parameter[0],Parameter[1],Parameter[2],Parameter[3],Parameter[4]);
               break;
@@ -361,6 +387,9 @@ short Execute(short ProcNum,unsigned short Adresse)
       case 58:Shake(Parameter[0],Parameter[1]);
               Adresse+=5;                                                break;
       case 59:InitOntimes();
+#ifndef DOS
+              Epoch=OntimeEpoch;  /* own room change, not a nested one */
+#endif
               Adresse++;                                                 break;
       case 60:if (Var[Parameter[0]]==Parameter[1])
               {
