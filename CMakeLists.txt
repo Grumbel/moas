@@ -68,6 +68,7 @@ set(MOAS_SOURCES
   src/if.c
   src/init.c
   src/lang.c
+  src/langgfx.c
   src/io.c
   src/misc.c
   src/moas.c
@@ -75,6 +76,7 @@ set(MOAS_SOURCES
   src/powerbld.c
   src/print.c
   src/platform_sdl.c
+  src/pngread.c
   src/settings.c
 )
 
@@ -144,7 +146,8 @@ endif()
 # Standalone data inspection tool (no SDL).
 if(NOT EMSCRIPTEN)
   add_executable(moas-util tools/moas-util.c tools/mu_common.c tools/mu_data.c
-    tools/mu_gfx.c tools/mu_png.c tools/mu_script.c)
+    tools/mu_gfx.c tools/mu_png.c tools/mu_script.c src/pngread.c)
+  target_include_directories(moas-util PRIVATE src)
   target_compile_definitions(moas-util PRIVATE
     $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>
   )
@@ -184,10 +187,11 @@ if(EMSCRIPTEN)
       configure_file("${_f}" "${_wasm_data}/${_name}" COPYONLY)
     endif()
   endforeach()
-  file(GLOB _lang_files "${CMAKE_SOURCE_DIR}/lang/*.po")
+  # .po files and per-language pictures (lang/<code>/<kind>/*.png)
+  file(GLOB_RECURSE _lang_files RELATIVE "${CMAKE_SOURCE_DIR}/lang"
+    "${CMAKE_SOURCE_DIR}/lang/*.po" "${CMAKE_SOURCE_DIR}/lang/*.png")
   foreach(_f ${_lang_files})
-    get_filename_component(_name "${_f}" NAME)
-    configure_file("${_f}" "${_wasm_data}/lang/${_name}" COPYONLY)
+    configure_file("${CMAKE_SOURCE_DIR}/lang/${_f}" "${_wasm_data}/lang/${_f}" COPYONLY)
   endforeach()
 
   set_target_properties(moas PROPERTIES SUFFIX ".html")

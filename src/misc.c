@@ -627,6 +627,7 @@ void MoasReloadLanguage(void)
   memcpy(saved, UnPackBuffer, sizeof(saved));
   LangInit();
   MoasRegisterStaticNames();
+  ReloadLangGraphics();
   memcpy(UnPackBuffer, saved, sizeof(saved));
 }
 #endif

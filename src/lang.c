@@ -650,50 +650,53 @@ static void load_po_file(const char *path)
   script_sort();
 }
 
-static int open_lang_file(char *path, size_t pathsz, const char *suffix)
+static int try_path(const char *path)
+{
+  FILE *f = fopen(path, "rb");
+  if (!f)
+    return -1;
+  fclose(f);
+  return 0;
+}
+
+int LangFindFile(char *path, size_t pathsz, const char *rel)
 {
   const char *data;
-  FILE *f;
-  /* 1) $MOAS_LANGDIR/code.suffix */
+  /* 1) $MOAS_LANGDIR/rel */
   {
     const char *ld = getenv("MOAS_LANGDIR");
     if (ld && ld[0]) {
-      snprintf(path, pathsz, "%s/%s.%s", ld, lang_code, suffix);
-      f = fopen(path, "rb");
-      if (f) {
-        fclose(f);
+      snprintf(path, pathsz, "%s/%s", ld, rel);
+      if (try_path(path) == 0)
         return 0;
-      }
     }
   }
-  /* 2) next to datadir: <datadir>/lang/code.suffix or <datadir>/../lang/.
+  /* 2) next to datadir: <datadir>/lang/rel or <datadir>/../lang/rel.
    * The resolved datadir, not just $MOAS_DATADIR: packages (Windows, R36S,
    * web, installed Linux) find the game data without the env var. */
 #ifndef DOS
   data = MoasDataDir();
   if (data && data[0]) {
-    snprintf(path, pathsz, "%s/lang/%s.%s", data, lang_code, suffix);
-    f = fopen(path, "rb");
-    if (f) {
-      fclose(f);
+    snprintf(path, pathsz, "%s/lang/%s", data, rel);
+    if (try_path(path) == 0)
       return 0;
-    }
-    snprintf(path, pathsz, "%s/../lang/%s.%s", data, lang_code, suffix);
-    f = fopen(path, "rb");
-    if (f) {
-      fclose(f);
+    snprintf(path, pathsz, "%s/../lang/%s", data, rel);
+    if (try_path(path) == 0)
       return 0;
-    }
   }
+#else
+  (void)data;
 #endif
-  /* 3) ./lang/code.suffix */
-  snprintf(path, pathsz, "lang/%s.%s", lang_code, suffix);
-  f = fopen(path, "rb");
-  if (f) {
-    fclose(f);
-    return 0;
-  }
-  return -1;
+  /* 3) ./lang/rel */
+  snprintf(path, pathsz, "lang/%s", rel);
+  return try_path(path);
+}
+
+static int open_lang_file(char *path, size_t pathsz, const char *suffix)
+{
+  char rel[64];
+  snprintf(rel, sizeof(rel), "%s.%s", lang_code, suffix);
+  return LangFindFile(path, pathsz, rel);
 }
 
 static void apply_verb_globals(void)

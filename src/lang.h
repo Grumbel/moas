@@ -3,6 +3,8 @@
 #ifndef MOAS_LANG_H
 #define MOAS_LANG_H
 
+#include <stddef.h>
+
 /*
  * Index-based UI strings + UnPack script translation (no gettext).
  *
@@ -72,6 +74,11 @@ void LangInit(void);
 const char *LangLookup(const char *cp850_source);
 
 const char *LangGetCode(void);
+
+/* Finds lang/<rel> (rel e.g. "en.po" or "en/phase/phase_053.png") in
+ * $MOAS_LANGDIR, next to the datadir, or in ./lang. 0 and the path in
+ * `path` if found, else -1. */
+int LangFindFile(char *path, size_t pathsz, const char *rel);
 
 /* Languages with a pack in lang/ (plus built-in "de"), in options-menu order.
  * LangFind: the table's copy of `code`, or NULL if it isn't one of them. */

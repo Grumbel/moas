@@ -54,6 +54,13 @@ done
 if [ -d "$GAME_SRC_DIR/lang" ]; then
   mkdir -p src/assets/lang
   cp "$GAME_SRC_DIR"/lang/*.po src/assets/lang/ 2>/dev/null || true
+  # per-language pictures (lang/<code>/<kind>/*.png)
+  for d in "$GAME_SRC_DIR"/lang/*/; do
+    [ -d "$d" ] && cp -r "$d" src/assets/lang/
+  done
+  chmod -R u+w src/assets/lang
+  # APK assets can't be listed at runtime; the app extracts what this names.
+  (cd src/assets && find lang -type f ! -name index.txt | sort) > src/assets/lang/index.txt
 fi
 echo "==> assets:"; ls -la src/assets
 

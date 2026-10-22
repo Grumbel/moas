@@ -187,6 +187,8 @@ let
       done
       mkdir -p $out/moas/data/lang
       cp ${../lang}/*.po $out/moas/data/lang/
+      # per-language pictures: lang/<code>/<kind>/*.png
+      for d in ${../lang}/*/; do cp -r "$d" $out/moas/data/lang/; done
       cp ${../mk/r36s/screenshot.png} $out/screenshot.png
       cp ${../mk/r36s/Moas.sh} $out/Moas.sh
       chmod +x $out/Moas.sh

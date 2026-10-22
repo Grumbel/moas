@@ -49,6 +49,8 @@ let
       done
       mkdir -p $out/lang
       cp ${../lang}/*.po $out/lang/
+      # per-language pictures: lang/<code>/<kind>/*.png
+      for d in ${../lang}/*/; do cp -r "$d" $out/lang/; done
       cp ${../COPYING} $out/COPYING.txt
       cp ${../data/icons/hicolor/256x256/apps/moas.png} $out/moas.png 2>/dev/null || true
       cat > $out/README.txt <<EOF

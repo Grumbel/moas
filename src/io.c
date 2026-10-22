@@ -28,6 +28,7 @@
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
 #include "lang.h"
+#include "langgfx.h"
 #include "person_disk.h"
 #include "save_disk.h"
 #include "datapath.h"
@@ -358,10 +359,27 @@ void LadeProgramm(short Num)
   memset(Programm[Num].Data + Programm[Num].Length, 0, 4);
   LadeBereich(Programm[Num].FileNum,Programm[Num].FilePos,Programm[Num].Length,Programm[Num].Data,Programm[Num].Check);
 }
+/* Decodes phase Num into its (allocated) Data, plus the language override. */
+static void UnpackPhase(short Num)
+{
+  long Length=Phase[Num].x*Phase[Num].y*Phase[Num].Anz;
+  char *Tmp;
+
+  /* Glass=254 leaves holes unwritten; soft cursor uses if(pix!=0). Unzeroed
+   * heap (Open Watcom DOS) left random bars in Phase[0]/[1] frames. */
+  memset(Phase[Num].Data, 0, (size_t)Length);
+  Tmp=MALLOC(Phase[Num].Length+5);
+  LadeBereich(Phase[Num].FileNum,Phase[Num].FilePos,Phase[Num].Length,Tmp,Phase[Num].Check);
+  UniversalUnpack(Tmp+1,Phase[Num].Data,Phase[Num].Length-1,254,Phase[Num].x);
+  FREE(Tmp);
+#ifndef DOS
+  LangGfxApply(LANGGFX_PHASE,Num,(unsigned char *)Phase[Num].Data,(int)Phase[Num].x,
+               (int)(Phase[Num].y*Phase[Num].Anz),(int)Phase[Num].x);
+#endif
+}
 void LadePhase(short Num)
 {
   register long Length;
-  char *Tmp;
 
   if (Num < 0)
     return; /* unused person / not yet assigned */
@@ -382,13 +400,7 @@ void LadePhase(short Num)
   if (Length <= 0) Length = 1;
 
   Phase[Num].Data=(char *)MALLOC(Length+5);
-  /* Glass=254 leaves holes unwritten; soft cursor uses if(pix!=0). Unzeroed
-   * heap (Open Watcom DOS) left random bars in Phase[0]/[1] frames. */
-  memset(Phase[Num].Data, 0, (size_t)Length);
-  Tmp=MALLOC(Phase[Num].Length+5);
-  LadeBereich(Phase[Num].FileNum,Phase[Num].FilePos,Phase[Num].Length,Tmp,Phase[Num].Check);
-  UniversalUnpack(Tmp+1,Phase[Num].Data,Phase[Num].Length-1,254,Phase[Num].x);
-  FREE(Tmp);
+  UnpackPhase(Num);
 }
 void DisplayBox(unsigned char *Data,short x,short y,short xs,short ys)
 {
@@ -433,6 +445,10 @@ void LadeBild(short Num)
       if (Eingeblendet) QuickSetPalette(Palette);
     }
     UnpackPicture(Bilder[Num].Data+1,0,Bilder[Num].Length-1);
+#ifndef DOS
+    LangGfxApply(LANGGFX_BILD,Num,(unsigned char *)Screen,(int)(Bilder[Num].x&16383),
+                 (int)Bilder[Num].y,320);
+#endif
     FREE(Bilder[Num].Data);
     PowerRedrawArea(0,0,319,Bilder[Num].y);
     if (Bilder[Num].x&16384) Bilder[Num].Length+=768;
@@ -448,6 +464,10 @@ void LadeBild(short Num)
       Tmp=Bilder[Num].Data+Bilder[Num].x*Bilder[Num].y-Bilder[Num].Length+5;
       LadeBereich(Bilder[Num].FileNum,Bilder[Num].FilePos,Bilder[Num].Length,Tmp,Bilder[Num].Check);
       UniversalUnpack(Tmp+1,Bilder[Num].Data,Bilder[Num].Length-1,254,Bilder[Num].x);
+#ifndef DOS
+      LangGfxApply(LANGGFX_BILD,Num,(unsigned char *)Bilder[Num].Data,(int)Bilder[Num].x,
+                   (int)Bilder[Num].y,(int)Bilder[Num].x);
+#endif
     }
     DisplayBox(Bilder[Num].Data,0,122,Bilder[Num].x,Bilder[Num].y);
   }
@@ -476,20 +496,51 @@ void LadeInfoBild(short Num,enum PICTYP Typ)
       CheckKopie(c);
     }
 }
-void LadeInventar(short Num)
+/* Decodes inventory picture Num into its Data, plus the language override. */
+static void UnpackInventar(short Num)
 {
   char *Tmp;
 
-  if (Num>=AnzInventar) InternalError(1024);
-  if (Inventar[Num].Data) return;
-
-  Inventar[Num].Data=(char *)MALLOC(32*24+5);
   memset(Inventar[Num].Data, 0, 32*24);
   Tmp=MALLOC(Inventar[Num].Length+5);
   LadeBereich(Inventar[Num].FileNum,Inventar[Num].FilePos,Inventar[Num].Length,Tmp,Inventar[Num].Check);
   UniversalUnpack(Tmp+1,Inventar[Num].Data,Inventar[Num].Length-1,254,32);
   FREE(Tmp);
+#ifndef DOS
+  LangGfxApply(LANGGFX_INV,Num,(unsigned char *)Inventar[Num].Data,32,24,32);
+#endif
 }
+void LadeInventar(short Num)
+{
+  if (Num>=AnzInventar) InternalError(1024);
+  if (Inventar[Num].Data) return;
+
+  Inventar[Num].Data=(char *)MALLOC(32*24+5);
+  UnpackInventar(Num);
+}
+#ifndef DOS
+/* After a language change: decode the cached pictures that had or now have
+ * an override again, in place (callers may hold the Data pointers). The
+ * current room picture changes with the next LadeBild. */
+void ReloadLangGraphics(void)
+{
+  short c;
+
+  for (c=0;c<AnzPhasen;c++)
+    if (Phase[c].Data && Phase[c].Length>0 && Phase[c].x>0 && Phase[c].y>0 &&
+        LangGfxChanged(LANGGFX_PHASE,c))
+      UnpackPhase(c);
+  for (c=0;c<AnzInventar;c++)
+    if (Inventar[c].Data && LangGfxChanged(LANGGFX_INV,c))
+      UnpackInventar(c);
+  /* Bild 0 (the box) is kept decoded; let the next LadeBild(0) redo it. */
+  if (AnzBilder>0 && Bilder[0].Data && LangGfxChanged(LANGGFX_BILD,0))
+  {
+    FREE(Bilder[0].Data);
+    Bilder[0].Data=NULL;
+  }
+}
+#endif
 void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSum)
 {
   short ifil;

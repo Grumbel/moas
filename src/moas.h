@@ -485,6 +485,9 @@ void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSu
 void LadeBild(short Num);
 void LadeInfoBild(short Num,enum PICTYP Typ);
 void LadeInventar(short Num);
+#ifndef DOS
+void ReloadLangGraphics(void);
+#endif
 void LadePhase(short Num);
 void LadeProgramm(short Num);
 void LargePrint(char *Message,char *Text,short TxtColor,short VgaXs);

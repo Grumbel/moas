@@ -6,6 +6,31 @@
 
 # TODO / Handoff
 
+## Per-language picture overrides (2026-10-22)
+- `lang/<code>/<kind>/<kind>_NNN.png` (kind bild/inv/phase, same names and
+  format as `moas-util unpack`: 8-bit indexed, game palette indices)
+  replace the decoded pixels at load time (`src/langgfx.c`, hooks in
+  LadePhase/LadeBild/LadeInventar). The PNG palette is ignored; size must
+  match the original or the file is skipped with a warning. Index 0 is
+  transparent in phases/inventory. `--debug=load` logs each override.
+- Language switch (F12): cached phases/inventory with an old or new
+  override are decoded again in place; the current room picture changes on
+  the next LadeBild.
+- PNG reader moved from tools/mu_png.c to src/pngread.c (shared).
+- Shipped on all targets: wasm (CMake GLOB_RECURSE), Windows/R36S (copy
+  lang subdirs), Android (build-apk.sh writes assets/lang/index.txt, the app
+  extracts what it lists; replaces the hardcoded .po list).
+- EN pictures: bild 11/59 ("Meanwhile", "Hours later"), phase 23.
+  Converted from truecolour sources: nearest colour (redmean) restricted to
+  palette indices identical in all rooms (0-79, 160-175, 240-245) plus those
+  the original used (phases), or the room palette minus the entries LadeBild
+  changes (bild); transparent pixels became index 0.
+- Next: EN versions of phases 53-68 (help and copyright pages, persons
+  68-83). A first set was too low quality and was left out; replacements
+  are needed. For RGB sources, the white background connected to the border
+  and white holes enclosed by yellow text should become index 0.
+- Not tested in game yet.
+
 ## Later: more translations, accented glyphs (2026-10-22, not started)
 - Game font (`CharAvail`, print.c) has A-Z, a-z, ÄÖÜß/äöü, digits and
   `- .!?,:;'"<>()[]`. `utf8_to_cp850()` turns anything else into a space,

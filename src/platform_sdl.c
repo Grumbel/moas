@@ -283,10 +283,12 @@ static const char *const android_data_files[] = {
   "GAME.1", "GAME.2", "GAME.3", "GAME.4",
   "GAME.PCK", "GAME.XXX",
   "LICENCE.DAT", "Licence.Dat", "licence.dat",
-  /* optional language packs (assets/lang/…) */
-  "lang/en.po", "lang/es.po", "lang/fr.po", "lang/it.po", "lang/nl.po",
   NULL
 };
+
+/* Language packs (assets/lang/…: .po files, lang/<code>/<kind>/<kind>_NNN.png) are
+ * listed in assets/lang/index.txt by build-apk.sh, one path per line. */
+#define ANDROID_LANG_INDEX "lang/index.txt"
 
 static int copy_asset_to(const char *asset_name, const char *dest_path)
 {
@@ -320,6 +322,51 @@ static int copy_asset_to(const char *asset_name, const char *dest_path)
   SDL_RWclose(rw);
   SDL_Log("extracted %s (%ld bytes) -> %s", asset_name, size, dest_path);
   return 0;
+}
+
+/* Copies asset `name` to dest_dir/name (creating subdirectories) unless it
+ * is already there and force is 0. */
+static int extract_asset(const char *name, const char *dest_dir, int force)
+{
+  char dest_file[640];
+  struct stat st;
+  char *p;
+
+  snprintf(dest_file, sizeof(dest_file), "%s/%s", dest_dir, name);
+  for (p = dest_file + strlen(dest_dir) + 1; (p = strchr(p, '/')) != NULL; p++) {
+    *p = 0;
+    if (stat(dest_file, &st) != 0)
+      mkdir(dest_file, 0755);
+    *p = '/';
+  }
+  if (!force && stat(dest_file, &st) == 0 && st.st_size > 0) {
+    SDL_Log("already present: %s (%ld bytes)", dest_file, (long)st.st_size);
+    return 0;
+  }
+  return copy_asset_to(name, dest_file);
+}
+
+/* Whole asset as a NUL-terminated string (SDL_free it), or NULL. */
+static char *read_asset_text(const char *name)
+{
+  SDL_RWops *rw = SDL_RWFromFile(name, "rb");
+  Sint64 size;
+  char *buf;
+
+  if (!rw) {
+    SDL_Log("asset missing: %s (%s)", name, SDL_GetError());
+    return NULL;
+  }
+  size = SDL_RWsize(rw);
+  buf = size >= 0 ? SDL_malloc((size_t)size + 1) : NULL;
+  if (buf && SDL_RWread(rw, buf, 1, (size_t)size) != (size_t)size) {
+    SDL_free(buf);
+    buf = NULL;
+  }
+  if (buf)
+    buf[size] = 0;
+  SDL_RWclose(rw);
+  return buf;
 }
 
 /* True if stamp matches this APK's MOAS_VERSION (re-extract after upgrade). */
@@ -365,7 +412,6 @@ void PlatformAndroidPrepareData(void)
 {
   const char *base;
   char dest_dir[512];
-  char dest_file[640];
   int i, ok = 0, fail = 0, force = 0;
   struct stat st;
 
@@ -396,26 +442,29 @@ void PlatformAndroidPrepareData(void)
   }
 
   for (i = 0; android_data_files[i]; i++) {
-    snprintf(dest_file, sizeof(dest_file), "%s/%s", dest_dir, android_data_files[i]);
-    {
-      /* Ensure subdirs (e.g. lang/) exist. */
-      char *slash = strrchr(dest_file, '/');
-      if (slash) {
-        *slash = 0;
-        if (stat(dest_file, &st) != 0)
-          mkdir(dest_file, 0755);
-        *slash = '/';
-      }
-    }
-    if (!force && stat(dest_file, &st) == 0 && st.st_size > 0) {
-      SDL_Log("already present: %s (%ld bytes)", dest_file, (long)st.st_size);
-      ok++;
-      continue;
-    }
-    if (copy_asset_to(android_data_files[i], dest_file) == 0)
+    if (extract_asset(android_data_files[i], dest_dir, force) == 0)
       ok++;
     else
       fail++;
+  }
+  {
+    char *index = read_asset_text(ANDROID_LANG_INDEX);
+    char *line = index, *next;
+    for (; line && *line; line = next) {
+      next = strchr(line, '\n');
+      if (next)
+        *next++ = 0;
+      else
+        next = line + strlen(line);
+      line[strcspn(line, "\r")] = 0;
+      if (!line[0] || strstr(line, ".."))
+        continue;
+      if (extract_asset(line, dest_dir, force) == 0)
+        ok++;
+      else
+        fail++;
+    }
+    SDL_free(index);
   }
   SDL_Log("asset extract: %d ok, %d failed/missing (force=%d)", ok, fail, force);
   if (ok > 0)
