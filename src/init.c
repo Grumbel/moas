@@ -404,12 +404,12 @@ void CoreMakeMegaTable(unsigned char *Table3D)
           if (!*p)
           {
             Ok=1;
-            if (p[-256] && b) p[4096]=p[-256];
-            else if (p[-16] && g) p[4096]=p[-16];
-            else if (p[256] && b<15) p[4096]=p[256];
-            else if (p[16] && g<15) p[4096]=p[16];
-            else if (p[-1] && 16>r) p[4096]=p[-1];
-            else if (p[1] && 1<r) p[4096]=p[1];
+            if (b && p[-256]) p[4096]=p[-256];
+            else if (g && p[-16]) p[4096]=p[-16];
+            else if (b<15 && p[256]) p[4096]=p[256];
+            else if (g<15 && p[16]) p[4096]=p[16];
+            else if (16>r && p[-1]) p[4096]=p[-1];
+            else if (1<r && p[1]) p[4096]=p[1];
           }
   }
 }

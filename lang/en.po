@@ -4299,19 +4299,19 @@ msgstr "Laß mich vorbei!"
 #: script.p6.0x0f52
 msgctxt "script.p6.0x0f52"
 msgid "Ist das hier das Zentrum für angewandte theoretische Physik?"
-msgstr "Is the here the Zentrum for angewandte theoretische Physik?"
+msgstr "Is this the center for applied theoretical physics?"
 
 #. prog 6 @ 0f7e op add_option
 #: script.p6.0x0f7e
 msgctxt "script.p6.0x0f7e"
 msgid "Ist das hier das Zentrum für angewandte theoretische Informatik?"
-msgstr "Is the here the Zentrum for angewandte theoretische Informatik?"
+msgstr "Is this the center for applied theoretical computer science?"
 
 #. prog 6 @ 0fad op add_option
 #: script.p6.0x0fad
 msgctxt "script.p6.0x0fad"
 msgid "Ist das hier das Zentrum für angewandte theoretische Mathematik?"
-msgstr "Is the here the Zentrum for angewandte theoretische Mathematik?"
+msgstr "Is this the center for applied theoretical mathematics?"
 
 #. prog 6 @ 1015 op add_say_window2
 #: script.p6.0x1015
@@ -4893,7 +4893,7 @@ msgstr "CLR Okay. NW Already done!"
 #: script.p9.0x0662
 msgctxt "script.p9.0x0662"
 msgid "CLR Netter Schrank."
-msgstr "CLR Nice wardrobe."
+msgstr "CLR Nice cupboard."
 
 #. prog 9 @ 0679 op say_if_found
 #: script.p9.0x0679

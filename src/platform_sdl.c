@@ -1566,6 +1566,16 @@ static void eng_toggle_fullscreen(void)
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
+/* F11 or Alt+Enter, ignoring key repeat. */
+static int is_fullscreen_key(const SDL_KeyboardEvent *key)
+{
+  SDL_Keycode k = key->keysym.sym;
+
+  if (key->repeat) return 0;
+  return k == SDLK_F11 ||
+         ((k == SDLK_RETURN || k == SDLK_KP_ENTER) && (key->keysym.mod & KMOD_ALT));
+}
+
 /*
  * Android, or a finger has been used: the overlay MENU button is then the
  * only way back into this menu, so TOUCH BUTTONS must not turn it off.
@@ -1921,7 +1931,9 @@ void PlatformEngineMenu(void)
           break;
         case SDL_KEYDOWN: {
           SDL_Keycode k = ev.key.keysym.sym;
-          if (k == SDLK_ESCAPE || k == SDLK_F12 || k == SDLK_AC_BACK)
+          if (is_fullscreen_key(&ev.key))
+            eng_toggle_fullscreen();
+          else if (k == SDLK_ESCAPE || k == SDLK_F12 || k == SDLK_AC_BACK)
             engine_menu_visible = 0;
           else if (k == SDLK_UP || k == SDLK_w)
             sel = eng_step(sel, -1);
@@ -2478,6 +2490,12 @@ void PlatformPumpEvents(void)
         int dos_sc = sdl_to_dos_scancode(sc);
         int down = (ev.type == SDL_KEYDOWN);
         moas_shift_down = (mod & KMOD_SHIFT) ? 1 : 0;
+
+        /* Handled before KeyScanCode so Alt+Enter doesn't also act as Enter. */
+        if (down && is_fullscreen_key(&ev.key)) {
+          eng_toggle_fullscreen();
+          continue;
+        }
 
         if (dos_sc >= 0) {
           /* XT make / break (+128) — LookKeys reads this every frame */

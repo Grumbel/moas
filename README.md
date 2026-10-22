@@ -388,6 +388,7 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **Alt+Q** | Quit (original DOS key) |
 | **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
 | **F12** | Options menu (SDL port) |
+| **F11** / **Alt+Enter** | Toggle fullscreen (SDL port) |
 
 The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc)
 in the bottom-right corner. It is hidden on touch devices.
