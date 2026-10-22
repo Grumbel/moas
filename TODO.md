@@ -6,6 +6,18 @@
 
 # TODO / Handoff
 
+## moas-util extract-png (2026-10-22)
+- `moas-util extract-png [all|bild|inv|phase]` writes `<kind>_NNNN.png`
+  (8-bit indexed, own CRC/stored-deflate writer, no zlib dependency).
+- Decoder is a bounds-checked copy of `UniversalUnpack`; all 235 graphics
+  in Mänick decode without errors.
+- Rooms (bild with x&16384) use their trailing palette. Bild 0 (options box)
+  and info maps use glass 254; info maps get the preceding room palette.
+  Sprites/inventory use the first room palette (or `--palette N`); index 0
+  is transparent for them, 255 for bild 0. The engine's palette tweaks in
+  `LadeBild` (random colours, 738.. range) are not applied.
+- Possible next: per-person palette guess for phases, frame-split output.
+
 ## Hotspot highlight: H key and HINT touch button (2026-10-22)
 - Holding **H** (or the overlay **HINT** button) outlines everything
   clickable in the room; it stays 1.5 s after release (fading over the last

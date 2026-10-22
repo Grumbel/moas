@@ -310,6 +310,7 @@ cmake -S . -B build && cmake --build build --target moas-util
 ./build/moas-util --datadir manick info
 ./build/moas-util --datadir manick list
 ./build/moas-util --datadir manick extract --outdir /tmp/moas-out [all|prog|bild|inv|phase]
+./build/moas-util --datadir manick extract-png --outdir /tmp/moas-png [all|bild|inv|phase]
 ./build/moas-util --datadir manick disasm [N]   # script program N, or all
 ./build/moas-util --datadir manick licence
 ./build/moas-util --datadir manick xxx          # GAME.XXX font summary
@@ -319,6 +320,10 @@ cmake -S . -B build && cmake --build build --target moas-util
 
 - **list** — every catalog entry (kind, index, container file, pos, length)
 - **extract** — raw resource blobs (not decompressed)
+- **extract-png** — decoded graphics as indexed PNG: rooms with their own
+  palette, inventory icons (32x24), animation phases (frames stacked
+  vertically), info maps (depth/walk masks). Sprites use the first room
+  palette; `--palette N` forces the palette of bild N for all images
 - **disasm** — linear disassembly of **prog** scripts using the engine’s
   opcode map; packed strings decoded via `GAME.PCK`
 

@@ -9,6 +9,7 @@
  *   moas-util [--datadir DIR] list
  *   moas-util [--datadir DIR] info
  *   moas-util [--datadir DIR] extract [--outdir DIR] [KIND]
+ *   moas-util [--datadir DIR] extract-png [--outdir DIR] [--palette N] [KIND]
  *   moas-util [--datadir DIR] licence
  *   moas-util [--datadir DIR] xxx
  *
@@ -377,6 +378,327 @@ static void cmd_extract(const Catalog *c, const char *kind_filter)
 
   if (errs)
     fprintf(stderr, "moas-util: %d extract error(s)\n", errs);
+}
+
+/* ---- graphics → PNG -------------------------------------------------- */
+
+static int g_palette_bild = -1;   /* --palette N: force palette of bild N */
+
+/* Bounds-checked port of UniversalUnpack (src/grafix.c). Returns 0 on success. */
+static int unpack_graphic(const uint8_t *src, long size, uint8_t *dst, long cap,
+                          uint8_t glass, long xs)
+{
+  static const int abk[3][4] = { { 1, -1, 1, -1 }, { 0, -2, 0, -2 }, { 0, -1, 0, -1 } };
+  short codes[256];
+  long c, t = 0, i;
+  int n;
+
+  if (size < 1) return -1;
+  for (i = 0; i < 256; i++) codes[i] = -1;
+  n = src[0];
+  if (1 + 2 * n > size) return -1;
+  for (i = 0; i < n; i++)
+    codes[src[1 + 2 * i]] = src[2 + 2 * i];
+  c = 1 + 2 * n;
+
+  while (c < size) {
+    uint8_t b = src[c];
+    if (b >= 248) {
+      if (b <= 250) {
+        const int *a = abk[b - 248];
+        long s1 = t + xs * a[1] + a[0], s2 = t + xs * a[3] + a[2] + 1;
+        if (s1 < 0 || s2 < 0 || s1 >= cap || s2 >= cap || t + 2 > cap) return -1;
+        dst[t] = dst[s1];
+        dst[t + 1] = dst[s2];
+        t += 2;
+        c += 1;
+      } else if (b == 255) {
+        long f, len;
+        if (c + 4 > size) return -1;
+        f = src[c + 1] | (src[c + 2] << 8);
+        len = src[c + 3];
+        if (f + len > cap || t + len > cap) return -1;
+        for (i = 0; i < len; i++) dst[t + i] = dst[f + i];
+        t += len;
+        c += 4;
+      } else {
+        long f, len, dist;
+        if (c + 3 > size) return -1;
+        f = src[c + 1] | (src[c + 2] << 8);
+        switch (b) {
+          case 251: len = (f >> 11) + 16; dist = (f & 2047) + len;  break;
+          case 252: len = (f >> 14) + 12; dist = (f & 16383) + len; break;
+          case 253: len = (f >> 14) + 8;  dist = (f & 16383) + len; break;
+          default:  len = (f >> 14) + 4;  dist = (f & 16383) + len; break;
+        }
+        if (t - dist < 0 || t + len > cap) return -1;
+        for (i = 0; i < len; i++) dst[t + i] = dst[t - dist + i];
+        t += len;
+        c += 3;
+      }
+    } else if (codes[b] != -1) {
+      long len;
+      if (c + 2 > size) return -1;
+      len = (src[c + 1] != 255) ? src[c + 1] + 3 : 513 + 3;
+      if (t + len > cap) return -1;
+      if (codes[b] != glass) memset(dst + t, codes[b], (size_t)len);
+      t += len;
+      c += 2;
+    } else {
+      if (t >= cap) return -1;
+      if (b != glass) dst[t] = b;
+      t++;
+      c++;
+    }
+  }
+  return 0;
+}
+
+static uint32_t g_crc_table[256];
+
+static uint32_t crc32_update(uint32_t crc, const uint8_t *p, size_t n)
+{
+  size_t i;
+  if (!g_crc_table[1]) {
+    uint32_t k, j, v;
+    for (k = 0; k < 256; k++) {
+      v = k;
+      for (j = 0; j < 8; j++) v = (v & 1) ? 0xedb88320u ^ (v >> 1) : v >> 1;
+      g_crc_table[k] = v;
+    }
+  }
+  for (i = 0; i < n; i++) crc = g_crc_table[(crc ^ p[i]) & 0xff] ^ (crc >> 8);
+  return crc;
+}
+
+static void put_be32(uint8_t *p, uint32_t v)
+{
+  p[0] = (uint8_t)(v >> 24); p[1] = (uint8_t)(v >> 16);
+  p[2] = (uint8_t)(v >> 8);  p[3] = (uint8_t)v;
+}
+
+static int png_chunk(FILE *fp, const char *type, const uint8_t *data, size_t n)
+{
+  uint8_t hdr[8], tail[4];
+  uint32_t crc;
+  put_be32(hdr, (uint32_t)n);
+  memcpy(hdr + 4, type, 4);
+  crc = crc32_update(0xffffffffu, hdr + 4, 4);
+  crc = crc32_update(crc, data, n) ^ 0xffffffffu;
+  put_be32(tail, crc);
+  return fwrite(hdr, 1, 8, fp) == 8 && (n == 0 || fwrite(data, 1, n, fp) == n) &&
+         fwrite(tail, 1, 4, fp) == 4 ? 0 : -1;
+}
+
+/* 8-bit indexed PNG; zlib stream uses stored (uncompressed) deflate blocks.
+ * pal is 768 bytes of VGA 6-bit RGB. transparent < 0 disables tRNS. */
+static int write_png(const char *path, const uint8_t *pix, int w, int h,
+                     const uint8_t *pal, int transparent)
+{
+  static const uint8_t sig[8] = { 0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n' };
+  uint8_t ihdr[13], plte[768], trns[256];
+  size_t raw_len = (size_t)(w + 1) * (size_t)h;
+  size_t nblocks = raw_len / 65535 + 1;
+  size_t zlen = 2 + raw_len + nblocks * 5 + 4;
+  uint8_t *z = xmalloc(zlen), *raw = xmalloc(raw_len);
+  size_t i, o = 0, pos = 0;
+  uint32_t s1 = 1, s2 = 0;
+  FILE *fp;
+  int y, rc;
+
+  for (y = 0; y < h; y++) {
+    raw[(size_t)y * (w + 1)] = 0; /* filter: none */
+    memcpy(raw + (size_t)y * (w + 1) + 1, pix + (size_t)y * w, (size_t)w);
+  }
+  z[o++] = 0x78; z[o++] = 0x01;
+  do {
+    size_t n = raw_len - pos > 65535 ? 65535 : raw_len - pos;
+    z[o++] = (pos + n == raw_len) ? 1 : 0;
+    z[o++] = (uint8_t)n; z[o++] = (uint8_t)(n >> 8);
+    z[o++] = (uint8_t)~n; z[o++] = (uint8_t)(~n >> 8);
+    memcpy(z + o, raw + pos, n);
+    o += n;
+    pos += n;
+  } while (pos < raw_len);
+  for (i = 0; i < raw_len; i++) {
+    s1 = (s1 + raw[i]) % 65521;
+    s2 = (s2 + s1) % 65521;
+  }
+  put_be32(z + o, (s2 << 16) | s1);
+  o += 4;
+
+  put_be32(ihdr, (uint32_t)w);
+  put_be32(ihdr + 4, (uint32_t)h);
+  ihdr[8] = 8; ihdr[9] = 3; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  for (i = 0; i < 768; i++) {
+    uint8_t v = pal[i] & 63;
+    plte[i] = (uint8_t)((v << 2) | (v >> 4));
+  }
+
+  fp = fopen(path, "wb");
+  if (!fp) {
+    fprintf(stderr, "moas-util: cannot write %s: %s\n", path, strerror(errno));
+    free(z); free(raw);
+    return -1;
+  }
+  rc = fwrite(sig, 1, 8, fp) == 8 ? 0 : -1;
+  if (!rc) rc = png_chunk(fp, "IHDR", ihdr, 13);
+  if (!rc) rc = png_chunk(fp, "PLTE", plte, 768);
+  if (!rc && transparent >= 0) {
+    memset(trns, 255, 256);
+    trns[transparent] = 0;
+    rc = png_chunk(fp, "tRNS", trns, (size_t)transparent + 1);
+  }
+  if (!rc) rc = png_chunk(fp, "IDAT", z, o);
+  if (!rc) rc = png_chunk(fp, "IEND", NULL, 0);
+  if (fclose(fp) != 0) rc = -1;
+  if (rc) fprintf(stderr, "moas-util: short write %s\n", path);
+  free(z);
+  free(raw);
+  return rc;
+}
+
+static uint8_t *load_blob(const MapFileDisk *e)
+{
+  char srcname[32];
+  uint8_t *buf;
+  int fd;
+  ssize_t n;
+  if (e->Length <= 0 || e->FileNum < 1) return NULL;
+  snprintf(srcname, sizeof(srcname), "GAME.%d", (int)e->FileNum);
+  fd = open_data(srcname);
+  if (fd < 0) return NULL;
+  if (lseek(fd, (off_t)e->FilePos, SEEK_SET) == (off_t)-1) { close(fd); return NULL; }
+  buf = xmalloc((size_t)e->Length);
+  n = read(fd, buf, (size_t)e->Length);
+  close(fd);
+  if (n != (ssize_t)e->Length) { free(buf); return NULL; }
+  return buf;
+}
+
+static int bild_has_palette(const MapFileDisk *e)
+{
+  return (e->x & 16384) && e->Length > 768;
+}
+
+/* Copy the 768-byte palette trailing bild idx into pal. */
+static int load_bild_palette(const Catalog *c, int idx, uint8_t *pal)
+{
+  uint8_t *buf;
+  if (idx < 0 || idx >= c->n_bild || !bild_has_palette(&c->bild[idx])) return -1;
+  buf = load_blob(&c->bild[idx]);
+  if (!buf) return -1;
+  memcpy(pal, buf + c->bild[idx].Length - 768, 768);
+  free(buf);
+  return 0;
+}
+
+/* Decode one resource and write it as PNG. w/h are output size; xs is the
+ * unpack stride (always equal to w here). */
+static int png_one(const char *kind, int idx, const MapFileDisk *e, long payload,
+                   int w, int h, uint8_t glass, const uint8_t *pal, int transparent)
+{
+  char outname[64], outpath[1024];
+  long cap = (long)w * h;
+  uint8_t *blob, *pix;
+  int rc;
+
+  if (w <= 0 || h <= 0 || payload < 1) {
+    printf("skip  %s[%d]  (empty)\n", kind, idx);
+    return 0;
+  }
+  blob = load_blob(e);
+  if (!blob) {
+    fprintf(stderr, "moas-util: cannot read %s[%d]\n", kind, idx);
+    return -1;
+  }
+  /* Slack: the engine's buffers are larger than w*h and streams may overrun. */
+  pix = xmalloc((size_t)cap + 1024);
+  memset(pix, 0, (size_t)cap + 1024);
+  if (unpack_graphic(blob + 1, payload - 1, pix, cap + 1024, glass, w) != 0) {
+    fprintf(stderr, "moas-util: %s[%d]: corrupt or unsupported pixel stream\n", kind, idx);
+    free(blob);
+    free(pix);
+    return -1;
+  }
+  free(blob);
+  snprintf(outname, sizeof(outname), "%s_%04d.png", kind, idx);
+  if (!path_join(outpath, sizeof(outpath), g_outdir, outname)) die("outdir path too long");
+  rc = write_png(outpath, pix, w, h, pal, transparent);
+  free(pix);
+  if (rc == 0) printf("wrote %s  (%dx%d)\n", outpath, w, h);
+  return rc;
+}
+
+static int want_kind(const char *filter, const char *kind)
+{
+  return !filter || !strcmp(filter, "all") || !strcmp(filter, kind) ||
+         (!strcmp(kind, "inv") && !strcmp(filter, "inventar"));
+}
+
+static void cmd_extract_png(const Catalog *c, const char *kind_filter)
+{
+  uint8_t sprite_pal[768], room_pal[768], tmp[768];
+  int i, errs = 0, have_room = 0;
+
+  if (!want_kind(kind_filter, "bild") && !want_kind(kind_filter, "inv") &&
+      !want_kind(kind_filter, "phase")) {
+    fprintf(stderr, "moas-util: unknown extract-png kind '%s' (all|bild|inv|phase)\n",
+            kind_filter);
+    exit(1);
+  }
+  if (mkdir_p(g_outdir) != 0)
+    die_errno(g_outdir);
+
+  /* Sprites carry no palette of their own: use --palette N or the first
+   * room palette. */
+  memset(sprite_pal, 0, sizeof(sprite_pal));
+  if (g_palette_bild >= 0) {
+    if (load_bild_palette(c, g_palette_bild, sprite_pal) != 0) {
+      fprintf(stderr, "moas-util: bild %d has no palette\n", g_palette_bild);
+      exit(1);
+    }
+  } else {
+    for (i = 0; i < c->n_bild; i++)
+      if (load_bild_palette(c, i, sprite_pal) == 0) break;
+  }
+  memcpy(room_pal, sprite_pal, sizeof(room_pal));
+
+  if (want_kind(kind_filter, "bild")) {
+    for (i = 0; i < c->n_bild; i++) {
+      const MapFileDisk *e = &c->bild[i];
+      if (bild_has_palette(e)) {
+        /* Room picture: 320 wide, palette trails the pixel stream. */
+        if (load_bild_palette(c, i, tmp) == 0) {
+          if (g_palette_bild < 0) memcpy(room_pal, tmp, sizeof(room_pal));
+          have_room = 1;
+        }
+        errs += png_one("bild", i, e, e->Length - 768, e->x & ~16384, e->y, 0,
+                        g_palette_bild >= 0 ? sprite_pal : tmp, -1) < 0;
+      } else if (i == 0) {
+        /* Bild 0: boxed overlay, 255 is transparent (DisplayBox). */
+        errs += png_one("bild", i, e, e->Length, e->x, e->y, 254, sprite_pal, 255) < 0;
+      } else {
+        /* Info maps (LadeInfoBild): 320 wide, shown with the preceding room
+         * palette. */
+        errs += png_one("bild", i, e, e->Length, 320, e->y, 254,
+                        have_room ? room_pal : sprite_pal, -1) < 0;
+      }
+    }
+  }
+  if (want_kind(kind_filter, "inv"))
+    for (i = 0; i < c->n_inv; i++)
+      errs += png_one("inv", i, &c->inv[i], c->inv[i].Length, 32, 24, 254, sprite_pal, 0) < 0;
+  if (want_kind(kind_filter, "phase"))
+    for (i = 0; i < c->n_phase; i++) {
+      /* Animation frames are stacked vertically. */
+      const MapFileDisk *e = &c->phase[i];
+      int frames = e->Anz > 0 ? e->Anz : 1;
+      errs += png_one("phase", i, e, e->Length, e->x, e->y * frames, 254, sprite_pal, 0) < 0;
+    }
+
+  if (errs)
+    fprintf(stderr, "moas-util: %d extract-png error(s)\n", errs);
 }
 
 static void cmd_licence(void)
@@ -1029,12 +1351,14 @@ static void usage(const char *argv0)
     "Options:\n"
     "  --datadir DIR   Directory with GAME.1, GAME.2, … (default: . or $MOAS_DATADIR)\n"
     "  --outdir DIR    Extract output directory (default: extracted)\n"
+    "  --palette N     extract-png: use the palette of bild N for every image\n"
     "  -h, --help      This help\n"
     "\n"
     "Commands:\n"
     "  info              File sizes and catalog counts\n"
     "  list              List every catalog entry in GAME.2\n"
     "  extract [KIND]    Write raw resource blobs (KIND: all|prog|bild|inv|phase)\n"
+    "  extract-png [KIND]  Decode graphics to PNG (KIND: all|bild|inv|phase)\n"
     "  licence           Print LICENCE.DAT text\n"
     "  xxx               Summarise GAME.XXX font tables\n"
     "  disasm [N]        Disassemble script program N (default: all)\n"
@@ -1044,10 +1368,11 @@ static void usage(const char *argv0)
     "  %s --datadir manick info\n"
     "  %s --datadir manick list | less\n"
     "  %s --datadir manick extract --outdir /tmp/moas-out bild\n"
+    "  %s --datadir manick extract-png --outdir /tmp/moas-png\n"
     "  %s --datadir manick disasm 0\n"
     "  %s --datadir manick strings pot > manick.pot\n"
     "  %s --datadir manick strings json > manick.de.json\n",
-    argv0, argv0, argv0, argv0, argv0, argv0, argv0);
+    argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0);
 }
 
 int main(int argc, char **argv)
@@ -1082,6 +1407,14 @@ int main(int argc, char **argv)
       g_outdir = argv[i] + 9;
       continue;
     }
+    if (!strcmp(argv[i], "--palette") && i + 1 < argc) {
+      g_palette_bild = atoi(argv[++i]);
+      continue;
+    }
+    if (!strncmp(argv[i], "--palette=", 10)) {
+      g_palette_bild = atoi(argv[i] + 10);
+      continue;
+    }
     if (argv[i][0] == '-') {
       fprintf(stderr, "moas-util: unknown option '%s'\n", argv[i]);
       usage(argv[0]);
@@ -1089,7 +1422,7 @@ int main(int argc, char **argv)
     }
     if (!cmd) {
       cmd = argv[i];
-    } else if ((!strcmp(cmd, "extract") || !strcmp(cmd, "disasm") || !strcmp(cmd, "strings"))
+    } else if ((!strcmp(cmd, "extract") || !strcmp(cmd, "extract-png") || !strcmp(cmd, "disasm") || !strcmp(cmd, "strings"))
                && !strcmp(extract_kind, "all")) {
       extract_kind = argv[i];
     } else {
@@ -1115,14 +1448,16 @@ int main(int argc, char **argv)
     cmd_xxx();
     return 0;
   }
-  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "disasm")
-      || !strcmp(cmd, "strings")) {
+  if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "extract-png")
+      || !strcmp(cmd, "disasm") || !strcmp(cmd, "strings")) {
     int prog_idx = -1;
     cat = load_catalog();
     if (!strcmp(cmd, "list"))
       cmd_list(&cat);
     else if (!strcmp(cmd, "extract"))
       cmd_extract(&cat, extract_kind);
+    else if (!strcmp(cmd, "extract-png"))
+      cmd_extract_png(&cat, extract_kind);
     else if (!strcmp(cmd, "strings")) {
       const char *fmt = "json";
       if (strcmp(extract_kind, "all") != 0)
