@@ -382,7 +382,7 @@ short WhatsAt(short x,short y)
   return(-1);
 }
 #ifndef DOS
-static short ClipRect(short *r,short x1,short y1,short x2,short y2,short Top)
+static short ClipRect(short *r,short x1,short y1,short x2,short y2,short Top,short Kind)
 {
   short t;
 
@@ -393,16 +393,20 @@ static short ClipRect(short *r,short x1,short y1,short x2,short y2,short Top)
   if (x2>319) x2=319;
   if (y2>199) y2=199;
   if (x1>x2 || y1>y2) return 0;
-  r[0]=x1; r[1]=y1; r[2]=x2; r[3]=y2;
+  r[0]=x1; r[1]=y1; r[2]=x2; r[3]=y2; r[4]=Kind;
   return 1;
 }
 /*
- * What WhatsAt can return in the room, for the port's hotspot highlight
- * (H key, HINT button): Label areas and the persons that have a
- * description, minus the player. Writes x1,y1,x2,y2 (inclusive, screen
- * pixels) per hotspot; persons get the bounds of their current frame,
- * and everything is cut off below the open inventory bar, which WhatsAt
- * checks first. Nothing while the room isn't playable (cutscene, window).
+ * Hotspots for the port's highlight (H key, HINT button). Kind 0: what
+ * WhatsAt can return, i.e. Label areas and the persons that have a
+ * description, minus the player. Kind 1, only in master mode: Jumper
+ * areas, which TestIfPersonIsInTrap fires when the player's feet walk into
+ * them. Those are exits but also any other walk-in trigger, too noisy for
+ * normal play.
+ * Writes x1,y1,x2,y2 (inclusive, screen pixels),kind per hotspot, exits
+ * first; persons get the bounds of their current frame, and everything is
+ * cut off below the open inventory bar, which WhatsAt checks first.
+ * Nothing while the room isn't playable (cutscene, window).
  */
 int MoasGetHotspots(short *rects,int max)
 {
@@ -416,9 +420,12 @@ int MoasGetHotspots(short *rects,int max)
     for (c=0;c<AnzInventar;c++)
       if (Inventar[c].x==-3 && (Inventar[c].y/10+1)*24>Top)
         Top=(Inventar[c].y/10+1)*24;
+  for (c=0;c<50 && n<max && V_Master;c++)
+    if (Marker[c].MarkTyp==Jumper)
+      n+=ClipRect(rects+5*n,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2,Top,1);
   for (c=0;c<50 && n<max;c++)
     if (Marker[c].MarkTyp==Label)
-      n+=ClipRect(rects+4*n,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2,Top);
+      n+=ClipRect(rects+5*n,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2,Top,0);
 
   pn=GetPlayerPersonNumber();
   for (c=0;c<MAX_PRS && n<max;c++)
@@ -439,7 +446,7 @@ int MoasGetHotspots(short *rects,int max)
           if (y>y2) y2=y;
         }
     if (x2>=0)
-      n+=ClipRect(rects+4*n,Person[c].x+x1,Person[c].y+y1,Person[c].x+x2,Person[c].y+y2,Top);
+      n+=ClipRect(rects+5*n,Person[c].x+x1,Person[c].y+y1,Person[c].x+x2,Person[c].y+y2,Top,0);
   }
   return n;
 }

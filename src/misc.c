@@ -333,7 +333,11 @@ void LookKeys(void)
                           V_Par1=V_Par2=1000;
                           ExecuteTheProgram();
                         }
+#ifndef DOS
+               case 20:if (getenv("THPRIV") || moas_master) /* or -d/--debug */
+#else
                case 20:if (getenv("THPRIV")) /*Is ThPrivilidge defined ?*/
+#endif
                          V_Master^=1;   break;
              }
     }

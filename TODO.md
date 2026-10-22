@@ -14,8 +14,8 @@
 - Areas come from `MoasGetHotspots()` (mouse.c, next to `WhatsAt`): Label
   markers plus persons with a description (bounds of their current frame),
   minus the player, clipped below the open inventory bar. Empty while
-  `Window.Status != None` or `PlayerHasControl != 1`. Jumpers (exits you
-  walk into) are not included, as WhatsAt doesn't return them either.
+  `Window.Status != None` or `PlayerHasControl != 1`. Jumpers (walk-in
+  areas) only in master mode, see below.
 - H still reaches the game (text entry); LookKeys ignores it. Not taken
   with Alt/Ctrl/GUI. Key legend has an "H SHOW HOTSPOTS" row.
 - HINT button: right column above MENU in landscape, the free third slot of
@@ -25,6 +25,14 @@
   fade-out work. The overlay button itself is untested (layout and touch);
   check landscape/portrait on a phone or with `--touch-controls`.
 - Possible next: gamepad button for it (needs a button-up hook in pad code).
+- Master mode also shows Jumper (walk-in) areas in cyan (kind 1 from
+  `MoasGetHotspots`). Not in normal play: jumpers are exits but also any
+  other walk-in trigger, so rooms like the lab get covered in boxes. Telling
+  real exits apart would need a look at each jumper's script.
+- `-d`/`--debug` (any form) sets `moas_master`: master mode is on at start
+  (`InitSystemVars`, so also after RESTART) and Alt+T works without THPRIV.
+  On non-DOS builds a load keeps the current V_Master instead of the saved
+  one. The original F1 fall-through into the Alt+T case still toggles it.
 
 ## Sanitizers, touch SKIP fix, key names on buttons (2026-10-22)
 - `nix develop` builds use `-fsanitize=address,undefined` (CMake

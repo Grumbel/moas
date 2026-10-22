@@ -21,6 +21,7 @@ int moas_fullscreen = -1;
 int moas_no_autosave = 0;
 int moas_touch_controls = -1;
 int moas_lang_explicit = 0;
+int moas_master = 0;
 
 static void usage(const char *argv0)
 {
@@ -29,7 +30,8 @@ static void usage(const char *argv0)
     "\n"
     "Options:\n"
     "  -h, --help              Show this help\n"
-    "  -d, --debug LIST        Debug flags (script,input,wait,window,load,all)\n"
+    "  -d, --debug LIST        Debug flags (script,input,wait,window,load,all);\n"
+    "                          also starts in master mode (like THPRIV + Alt+T)\n"
     "  --skip-intro            Skip intro/title script\n"
     "  --proc N                Start program N after intro\n"
     "  --addr N                Start address in that program\n"
@@ -144,10 +146,12 @@ void MoasParseArgs(int argc, char **argv)
         moas_debug |= parse_debug_list(argv[++i]);
       else
         moas_debug |= MOAS_DBG_ALL;
+      moas_master = 1;
       continue;
     }
     if ((v = opt_value(argc, argv, &i, "--debug"))) {
       moas_debug |= parse_debug_list(v);
+      moas_master = 1;
       continue;
     }
     if ((v = opt_value(argc, argv, &i, "--proc"))) {

@@ -413,8 +413,9 @@ in the top-right corner: F5, F7, SHIFT, F12, H.
 
 ### Master / debug keys
 
-Master mode can only be toggled if the environment variable **`THPRIV`** is set; then
-**Alt+T** toggles `V_Master`. Except for plain **p**, these are DOS extended keys
+Master mode can only be toggled if the environment variable **`THPRIV`** is set or the
+game was started with **`-d`/`--debug`** (SDL port; that also starts in master mode); then
+**Alt+T** toggles `V_Master`. On the SDL port it is not stored in or restored from savegames. Except for plain **p**, these are DOS extended keys
 (`getch()` returns 0, then the scan code), so they are Alt+letter or function keys.
 The case labels in `LookKeys` (`'1'`, `'#'`, …) are scan codes, not characters.
 
@@ -430,8 +431,9 @@ When master mode is on:
 | **F8** | Free some memory (debug) |
 | **Alt+H** | Hercules debug dump (stderr on non-DOS) |
 | **Alt+X** | Export label rectangle tool (console prompt) |
+| **H** (hold) | Hotspot highlight also shows walk-in areas (exits and other triggers) in cyan (SDL port) |
 
-Note: the F1 handler has no `break`, so with `THPRIV` set, **F1** also toggles master mode.
+Note: the F1 handler has no `break`, so with `THPRIV` set (or `--debug`), **F1** also toggles master mode.
 
 These are developer tools from the original engine, not needed for normal play.
 

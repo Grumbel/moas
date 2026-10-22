@@ -1326,10 +1326,13 @@ static void hint_frame(const SDL_Rect *r, int t)
   SDL_RenderFillRects(renderer, e, 4);
 }
 
-/* Outline what can be clicked in the room, over the game picture `pic`. */
+/*
+ * Outline what can be clicked in the room (gold) and, in master mode, the
+ * walk-in areas (cyan), over the game picture `pic`.
+ */
 static void hint_draw(const SDL_Rect *pic)
 {
-  short r[4 * HINT_MAX];
+  short r[5 * HINT_MAX];
   int a = hint_alpha(), n, i, u;
 
   if (!a || !renderer)
@@ -1342,18 +1345,20 @@ static void hint_draw(const SDL_Rect *pic)
     u = 1;
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   for (i = 0; i < n; i++) {
-    const short *h = r + 4 * i;
+    const short *h = r + 5 * i;
+    const SDL_Color c = h[4] ? (SDL_Color){ 80, 210, 255, 255 }
+                             : (SDL_Color){ 255, 206, 72, 255 };
     SDL_Rect b, o;
     b.x = pic->x + h[0] * pic->w / LOGICAL_W;
     b.y = pic->y + h[1] * pic->h / LOGICAL_H;
     b.w = pic->x + (h[2] + 1) * pic->w / LOGICAL_W - b.x;
     b.h = pic->y + (h[3] + 1) * pic->h / LOGICAL_H - b.y;
     o.x = b.x - u; o.y = b.y - u; o.w = b.w + 2 * u; o.h = b.h + 2 * u;
-    SDL_SetRenderDrawColor(renderer, 255, 206, 72, (Uint8)(a * 50 / 255));
+    SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, (Uint8)(a * 50 / 255));
     SDL_RenderFillRect(renderer, &b);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, (Uint8)(a * 160 / 255));
     hint_frame(&o, u);
-    SDL_SetRenderDrawColor(renderer, 255, 206, 72, (Uint8)a);
+    SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, (Uint8)a);
     hint_frame(&b, u);
   }
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);

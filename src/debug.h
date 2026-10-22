@@ -26,6 +26,7 @@ static int moas_fullscreen = 0;
 static int moas_no_autosave = 0; /* DOS: no CLI; always allow AUTOSAVE.SAV */
 static int moas_touch_controls = 0;
 static int moas_lang_explicit = 0;
+static int moas_master = 0;
 static void MoasParseArgs(int argc, char **argv) { (void)argc; (void)argv; }
 static void MoasDbg(unsigned flag, const char *fmt, ...) { (void)flag; (void)fmt; }
 #else
@@ -39,6 +40,7 @@ extern int moas_fullscreen;   /* -1 = settings.ini / windowed, 0 = window, 1 = d
 extern int moas_no_autosave;  /* 1 = skip exit AUTOSAVE.SAV and startup restore */
 extern int moas_touch_controls; /* -1 = platform default, 0 = off, 1 = on-screen buttons */
 extern int moas_lang_explicit; /* 1 = --lang / MOAS_LANG given; settings.ini must not override */
+extern int moas_master;       /* 1 = -d/--debug: master mode on at start, Alt+T works without THPRIV */
 
 void MoasParseArgs(int argc, char **argv);
 void MoasDbg(unsigned flag, const char *fmt, ...);

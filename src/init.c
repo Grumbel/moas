@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "debug.h"
 #ifndef DOS
 #include "datapath.h"
 #endif
@@ -148,6 +149,9 @@ void InitSystemVars(void)
   for (c=0;c<10;c++) SayProperties[c].PrsNum=-1;   /*Say Properties lschen*/
   for (c=0;c<MAX_PARSE;c++) PowerParse[c].Nummer=-1; /* PowerParser lschen*/
   V_Colored=1;  V_InventarState=1;
+#ifndef DOS
+  V_Master=moas_master; /* -d/--debug, also after a restart */
+#endif
   V_CursorState=1; /* software mouse cursor visible */
 }
 void InitVars(void)

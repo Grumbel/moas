@@ -802,7 +802,16 @@ int LoadGameFromFile(const char *path)
   ChkRead(ifil, (char *)Marker, sizeof(Marker));
 #endif
   ChkRead(ifil, (char *)Ontimes, sizeof(struct ONTIME) * 10);
+#ifndef DOS
+  {
+    /* Master mode belongs to the session (Alt+T, --debug), not the save. */
+    short Master = V_Master;
+    ChkRead(ifil, (char *)Var, AnzVars * 2);
+    V_Master = Master;
+  }
+#else
   ChkRead(ifil, (char *)Var, AnzVars * 2);
+#endif
   ChkRead(ifil, (char *)&CurrentProc, 2);
   ChkRead(ifil, (char *)&GhostMode, 1);
 #ifdef DOS
