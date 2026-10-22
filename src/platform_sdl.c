@@ -2024,23 +2024,23 @@ static void keyhints_draw(const SDL_Rect *avoid)
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
-/* Bottom centre of the game picture while the options menu is open. */
-static void version_draw(void)
+/*
+ * Centred on the screen just below the options panel: the bottom edge has
+ * the portrait touch buttons, the game picture can sit under the panel.
+ */
+static void version_draw(const EngLayout *L)
 {
-  int dx, dy, dw, dh, u;
+  int out_w = 640, out_h = 400, u = L->u > 1 ? L->u - 1 : 1, y;
   char buf[96];
 
-  if (!renderer)
-    return;
-  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
-  u = dh / 300;
-  if (u < 1)
-    u = 1;
+  SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
   snprintf(buf, sizeof(buf), "MOAS %s", MOAS_VERSION);
-  if (ui_text_width(buf, u) > dw - 8 * u)
+  if (ui_text_width(buf, u) > L->panel.w)
     u = 1;
-  ui_draw_label(dx + (dw - ui_text_width(buf, u)) / 2, dy + dh - 11 * u,
-                buf, u, 150, 150, 175);
+  y = L->panel.y + L->panel.h + 4 * L->u;
+  if (y > out_h - 8 * u)
+    y = out_h - 8 * u;
+  ui_draw_label((out_w - ui_text_width(buf, u)) / 2, y, buf, u, 150, 150, 175);
 }
 
 /* Forward: PlatformPresent draws the game + overlay under the menu. */
@@ -2070,7 +2070,7 @@ void PlatformEngineMenu(void)
     eng_menu_draw(&L, sel, pressed);
     overlay_draw_keys();
     keyhints_draw(&L.panel);
-    version_draw();
+    version_draw(&L);
     SDL_RenderPresent(renderer);
 
     while (engine_menu_visible && SDL_PollEvent(&ev)) {

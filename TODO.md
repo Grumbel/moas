@@ -13,8 +13,9 @@
   `-DPROJECT_VERSION_FULL` to every CMake build (desktop, win, r36s, wasm);
   Android still gets it via `GAME_VERSION`/`MOAS_VERSION` (ndk-build falls
   back to `unknown` outside Nix). `project()` gets the numeric part.
-- `moas --version`; options menu shows `MOAS <version>` bottom centre of
-  the game picture. The 5x7 font has no lowercase, so it reads `...-DEV.N+G...`.
+- `moas --version`; options menu shows `MOAS <version>` centred on the
+  screen just below the panel (the bottom edge has the portrait touch
+  buttons). The 5x7 font has no lowercase, so it reads `...-DEV.N+G...`.
 - DOS (Watcom) build doesn't use the version string.
 
 ## Language packs on all targets, OS default language, key labels (2026-10-22)
