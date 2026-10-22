@@ -161,12 +161,12 @@ default on Android and the web build; on desktop builds enable them with
 `--touch-controls` or **F12 → Touch buttons** (the window grows to make room):
 
 - **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
-- **Right:** Esc, Skip (top) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech); **Menu** (bottom) opens the options menu
+- **Right:** Esc, Skip (top) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech); **Hint** and **Menu** (bottom) — Hint outlines what can be clicked in the room (like **H**), Menu opens the options menu
 
 Save and Load are greyed out while they would be ignored (cutscene, dialogue,
 menu open); Load also when there is no savegame yet. In **portrait** the picture
 takes the full width and the buttons sit in two rows underneath (Save, Load,
-Esc, Skip / Use, Look, Menu) instead of in side columns.
+Esc, Skip / Use, Look, Hint, Menu) instead of in side columns.
 
 
 
@@ -389,8 +389,9 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
 | **F12** | Options menu (SDL port) |
 | **F11** / **Alt+Enter** | Toggle fullscreen (SDL port) |
+| **H** (hold) | Outline everything clickable in the room; stays up briefly after release (SDL port) |
 
-The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc)
+The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc, H)
 in the bottom-right corner. It is hidden on touch devices.
 
 ### Esc vs Shift (skipping)
@@ -408,7 +409,7 @@ These are **not** the same:
 
 The touch **Skip** button acts like **Shift** (speech only); touch **Esc** is the sequence abort.
 Without a touchscreen (desktop `--touch-controls`), the buttons show their key
-in the top-right corner: F5, F7, SHIFT, F12.
+in the top-right corner: F5, F7, SHIFT, F12, H.
 
 ### Master / debug keys
 

@@ -6,6 +6,26 @@
 
 # TODO / Handoff
 
+## Hotspot highlight: H key and HINT touch button (2026-10-22)
+- Holding **H** (or the overlay **HINT** button) outlines everything
+  clickable in the room; it stays 1.5 s after release (fading over the last
+  300 ms), so a tap is enough. Drawn by `hint_draw()` in platform_sdl.c on
+  top of the game picture, not into the 320x200 buffer.
+- Areas come from `MoasGetHotspots()` (mouse.c, next to `WhatsAt`): Label
+  markers plus persons with a description (bounds of their current frame),
+  minus the player, clipped below the open inventory bar. Empty while
+  `Window.Status != None` or `PlayerHasControl != 1`. Jumpers (exits you
+  walk into) are not included, as WhatsAt doesn't return them either.
+- H still reaches the game (text entry); LookKeys ignores it. Not taken
+  with Alt/Ctrl/GUI. Key legend has an "H SHOW HOTSPOTS" row.
+- HINT button: right column above MENU in landscape, the free third slot of
+  the lower row in portrait. Light-bulb icon, key "H" shown off-touch.
+  New UI string `ui.overlay.hint` ("HINT") in lang.c, moas-util, .pot, en.po.
+- Tested under Xvfb with save copies: H shows labels and an NPC, linger and
+  fade-out work. The overlay button itself is untested (layout and touch);
+  check landscape/portrait on a phone or with `--touch-controls`.
+- Possible next: gamepad button for it (needs a button-up hook in pad code).
+
 ## Sanitizers, touch SKIP fix, key names on buttons (2026-10-22)
 - `nix develop` builds use `-fsanitize=address,undefined` (CMake
   `MOAS_SANITIZE`, env `MOAS_SANITIZE` in moas-configure; empty = off;

@@ -120,6 +120,12 @@ msgid "MENU"
 msgstr "MENU"
 
 #. source UI
+#: ui.overlay.hint
+msgctxt "ui.overlay.hint"
+msgid "HINT"
+msgstr "HINT"
+
+#. source UI
 #: ui.menu.options
 msgctxt "ui.menu.options"
 msgid "Optionen (F12)"

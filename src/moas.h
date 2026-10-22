@@ -497,6 +497,8 @@ void MoasReloadLanguage(void);
 int MoasCanSave(void);
 int MoasCanOpenSaveMenu(void);
 int MoasAnySaveExists(void);
+/* Clickable areas in the room, 4 shorts each; see mouse.c. */
+int MoasGetHotspots(short *rects, int max);
 void MoasAutosaveCheckpoint(int force);
 /* Set while main() runs the top-level MouseCheck loop; MouseCheck nesting. */
 extern int MoasMainLoopActive;

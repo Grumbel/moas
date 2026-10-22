@@ -38,6 +38,7 @@ extern void MoasAutosaveOnExit(void);
 extern void MoasReloadLanguage(void);
 extern int MoasCanOpenSaveMenu(void);
 extern int MoasAnySaveExists(void);
+extern int MoasGetHotspots(short *rects, int max);
 #endif
 
 /* Minimal declarations of the globals we touch (defined elsewhere). */
@@ -838,7 +839,8 @@ enum {
   OV_MODE_USE,
   OV_MODE_LOOK,
   OV_MENU,
-  OV_COUNT = OV_MENU
+  OV_HINT,
+  OV_COUNT = OV_HINT
 };
 
 /* ---- 5x7 bitmap font (overlay labels, options menu) -------------------- */
@@ -1105,6 +1107,24 @@ static const char *const ov_icon_art[OV_COUNT][16] = {
     "................",
     "................",
   },
+  /* OV_HINT */ {
+    "......kkkk......",
+    "....kkyyyykk....",
+    "...kyywwyyyyk...",
+    "..kyywwyyyyyyk..",
+    "..kywwyyyyyyok..",
+    "..kyyyyyyyyyok..",
+    "..kyyyyyyyyyok..",
+    "...kyyyyyyyok...",
+    "....kyyyyyok....",
+    ".....kyyyok.....",
+    ".....kkkkkk.....",
+    ".....kllllk.....",
+    ".....kddddk.....",
+    ".....kllllk.....",
+    "......kddk......",
+    ".......kk.......",
+  },
 };
 static SDL_Texture *ov_icon_tex[OV_COUNT];
 
@@ -1158,7 +1178,7 @@ static void ov_free_icons(void)
     }
 }
 
-/* Rects for OV_SAVE..OV_MENU in out[0..OV_COUNT-1]. */
+/* Rects for OV_SAVE..OV_HINT in out[0..OV_COUNT-1]. */
 static void overlay_rects(SDL_Rect out[OV_COUNT])
 {
   int dx, dy, dw, dh, ww, wh;
@@ -1185,6 +1205,7 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
     OV_SET(OV_SKIP,      x0 + 3 * step, top_y);
     OV_SET(OV_MODE_USE,  x0,            low_y);
     OV_SET(OV_MODE_LOOK, x0 + step,     low_y);
+    OV_SET(OV_HINT,      x0 + 2 * step, low_y);
     OV_SET(OV_MENU,      x0 + 3 * step, low_y);
     return;
   }
@@ -1228,6 +1249,7 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
   OV_SET(OV_SKIP,      right_x, top_y + btn_h + gap);
   OV_SET(OV_MODE_USE,  left_x,  low_y);
   OV_SET(OV_MODE_LOOK, left_x,  low_y + btn_h + gap);
+  OV_SET(OV_HINT,      right_x, low_y);
   OV_SET(OV_MENU,      right_x, low_y + btn_h + gap);
 #undef OV_SET
 }
@@ -1261,6 +1283,80 @@ static void synth_esc(void)
     KeyAbortState = 2;
   KeyScanCode = 1;
   esc_break_pending = 1;
+}
+
+/* ---- Hotspot highlight (H key, HINT button) ---------------------------- */
+#define HINT_LINGER_MS 1500 /* still shown after letting go, so a tap works */
+#define HINT_FADE_MS    300
+#define HINT_MAX         80 /* 50 markers + MAX_PRS persons */
+static int    hint_key_down = 0;
+static Uint32 hint_until = 0;
+
+static void hint_release(void)
+{
+  hint_until = SDL_GetTicks() + HINT_LINGER_MS;
+}
+
+/* 0..255: full while held, fading out at the end of the linger time. */
+static int hint_alpha(void)
+{
+  Sint32 left;
+
+  if (hint_key_down || overlay_down == OV_HINT)
+    return 255;
+  if (!hint_until)
+    return 0;
+  left = (Sint32)(hint_until - SDL_GetTicks());
+  if (left <= 0) {
+    hint_until = 0;
+    return 0;
+  }
+  return left >= HINT_FADE_MS ? 255 : (int)(left * 255 / HINT_FADE_MS);
+}
+
+/* Border of thickness t just inside r. */
+static void hint_frame(const SDL_Rect *r, int t)
+{
+  SDL_Rect e[4] = {
+    { r->x, r->y, r->w, t },
+    { r->x, r->y + r->h - t, r->w, t },
+    { r->x, r->y + t, t, r->h - 2 * t },
+    { r->x + r->w - t, r->y + t, t, r->h - 2 * t },
+  };
+  SDL_RenderFillRects(renderer, e, 4);
+}
+
+/* Outline what can be clicked in the room, over the game picture `pic`. */
+static void hint_draw(const SDL_Rect *pic)
+{
+  short r[4 * HINT_MAX];
+  int a = hint_alpha(), n, i, u;
+
+  if (!a || !renderer)
+    return;
+  n = MoasGetHotspots(r, HINT_MAX);
+  if (!n)
+    return;
+  u = pic->h / LOGICAL_H;
+  if (u < 1)
+    u = 1;
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  for (i = 0; i < n; i++) {
+    const short *h = r + 4 * i;
+    SDL_Rect b, o;
+    b.x = pic->x + h[0] * pic->w / LOGICAL_W;
+    b.y = pic->y + h[1] * pic->h / LOGICAL_H;
+    b.w = pic->x + (h[2] + 1) * pic->w / LOGICAL_W - b.x;
+    b.h = pic->y + (h[3] + 1) * pic->h / LOGICAL_H - b.y;
+    o.x = b.x - u; o.y = b.y - u; o.w = b.w + 2 * u; o.h = b.h + 2 * u;
+    SDL_SetRenderDrawColor(renderer, 255, 206, 72, (Uint8)(a * 50 / 255));
+    SDL_RenderFillRect(renderer, &b);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, (Uint8)(a * 160 / 255));
+    hint_frame(&o, u);
+    SDL_SetRenderDrawColor(renderer, 255, 206, 72, (Uint8)a);
+    hint_frame(&b, u);
+  }
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
 /* SAVE/LOAD/MENU act on release; the rest on press. */
@@ -1324,6 +1420,8 @@ static void overlay_release(int which)
   /* Sliding off the button before lifting cancels, like a desktop button. */
   if (down && which == down && overlay_fires_on_release(down))
     overlay_fire(down);
+  if (down == OV_HINT)
+    hint_release();
 }
 
 int PlatformPollOverlayCmd(void)
@@ -1371,6 +1469,7 @@ static const char *overlay_key_name(int which)
     case OV_LOAD: return "F7";
     case OV_SKIP: return "SHIFT";
     case OV_MENU: return "F12";
+    case OV_HINT: return "H";
     default:      return NULL; /* ESC says it already; USE/LOOK are mouse buttons */
   }
 }
@@ -1385,9 +1484,11 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
     {  70,  74,  96, 255 },  /* Use  */
     {  70,  74,  96, 255 },  /* Look */
     {  70,  74,  96, 255 },  /* Menu */
+    { 150, 112,  30, 255 },  /* Hint */
   };
   static const int labels[OV_COUNT] = {
-    UI_OV_SAVE, UI_OV_LOAD, UI_OV_ESC, UI_OV_SKIP, UI_OV_USE, UI_OV_LOOK, UI_OV_MENU
+    UI_OV_SAVE, UI_OV_LOAD, UI_OV_ESC, UI_OV_SKIP, UI_OV_USE, UI_OV_LOOK, UI_OV_MENU,
+    UI_OV_HINT
   };
   int disabled = (which == OV_SAVE && !ov_save_ok) ||
                  (which == OV_LOAD && !ov_load_ok);
@@ -1831,6 +1932,7 @@ static const char *const keyhint_rows[][2] = {
   { "F12",   "OPTIONS" },
   { "SHIFT", "SKIP TEXT" },
   { "ESC",   "SKIP SCENE" },
+  { "H",     "SHOW HOTSPOTS" },
 };
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
 
@@ -2039,6 +2141,7 @@ void PlatformEngineMenu(void)
   }
   engine_menu_visible = 0;
   in_menu = 0;
+  hint_key_down = 0; /* its key-up went to the menu loop */
   MoasSettingsSave();
   if (Screen)
     PowerRedrawArea(0, 0, 319, 199);
@@ -2068,6 +2171,8 @@ static void platform_present_frame(void)
     dst.x += shake_ox;
     dst.y += shake_oy;
     SDL_RenderCopy(renderer, texture, NULL, &dst);
+    if (!engine_menu_visible)
+      hint_draw(&dst);
   }
   /* Touch buttons sit in the letterbox, beside the game picture. */
   overlay_draw();
@@ -2490,6 +2595,18 @@ void PlatformPumpEvents(void)
         int dos_sc = sdl_to_dos_scancode(sc);
         int down = (ev.type == SDL_KEYDOWN);
         moas_shift_down = (mod & KMOD_SHIFT) ? 1 : 0;
+
+        /* Hotspot highlight while H is held. The key still reaches the game
+         * (text entry); LookKeys ignores it. */
+        if (k == SDLK_h) {
+          if (!down) {
+            if (hint_key_down)
+              hint_release();
+            hint_key_down = 0;
+          } else if (!(mod & (KMOD_ALT | KMOD_CTRL | KMOD_GUI))) {
+            hint_key_down = 1;
+          }
+        }
 
         /* Handled before KeyScanCode so Alt+Enter doesn't also act as Enter. */
         if (down && is_fullscreen_key(&ev.key)) {

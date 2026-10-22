@@ -381,6 +381,69 @@ short WhatsAt(short x,short y)
   else return(Person[BestPerson].Num);
   return(-1);
 }
+#ifndef DOS
+static short ClipRect(short *r,short x1,short y1,short x2,short y2,short Top)
+{
+  short t;
+
+  if (x1>x2) { t=x1; x1=x2; x2=t; }
+  if (y1>y2) { t=y1; y1=y2; y2=t; }
+  if (x1<0) x1=0;
+  if (y1<Top) y1=Top;
+  if (x2>319) x2=319;
+  if (y2>199) y2=199;
+  if (x1>x2 || y1>y2) return 0;
+  r[0]=x1; r[1]=y1; r[2]=x2; r[3]=y2;
+  return 1;
+}
+/*
+ * What WhatsAt can return in the room, for the port's hotspot highlight
+ * (H key, HINT button): Label areas and the persons that have a
+ * description, minus the player. Writes x1,y1,x2,y2 (inclusive, screen
+ * pixels) per hotspot; persons get the bounds of their current frame,
+ * and everything is cut off below the open inventory bar, which WhatsAt
+ * checks first. Nothing while the room isn't playable (cutscene, window).
+ */
+int MoasGetHotspots(short *rects,int max)
+{
+  short c,d,x,y,pn,x1,y1,x2,y2,Top=0;
+  int n=0;
+  unsigned char *Frame;
+
+  if (!Screen || Window.Status!=None || PlayerHasControl!=1)
+    return 0;
+  if (V_InventarState)
+    for (c=0;c<AnzInventar;c++)
+      if (Inventar[c].x==-3 && (Inventar[c].y/10+1)*24>Top)
+        Top=(Inventar[c].y/10+1)*24;
+  for (c=0;c<50 && n<max;c++)
+    if (Marker[c].MarkTyp==Label)
+      n+=ClipRect(rects+4*n,Marker[c].x1,Marker[c].y1,Marker[c].x2,Marker[c].y2,Top);
+
+  pn=GetPlayerPersonNumber();
+  for (c=0;c<MAX_PRS && n<max;c++)
+  {
+    if (c==pn || Person[c].Num==-1 || !Person[c].Phase) continue;
+    for (d=0;d<AnzDescription;d++)
+      if (Description[d].Number==Person[c].Num) break;
+    if (d==AnzDescription) continue;
+    Frame=Person[c].Phase+Person[c].Sequence[Person[c].Counter][Person[c].Dir]*Person[c].xs*Person[c].ys;
+    x1=y1=32767; x2=y2=-1;
+    for (y=0;y<Person[c].ys;y++)
+      for (x=0;x<Person[c].xs;x++)
+        if (Frame[x+y*Person[c].xs])
+        {
+          if (x<x1) x1=x;
+          if (x>x2) x2=x;
+          if (y<y1) y1=y;
+          if (y>y2) y2=y;
+        }
+    if (x2>=0)
+      n+=ClipRect(rects+4*n,Person[c].x+x1,Person[c].y+y1,Person[c].x+x2,Person[c].y+y2,Top);
+  }
+  return n;
+}
+#endif
 void DisplayMouseText(short Color)
 {
   char String[100];
