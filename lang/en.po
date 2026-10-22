@@ -2913,7 +2913,7 @@ msgstr "NW NW 1.7–2.7.95: NW Game concept, entrance path, front of the house, 
 #: script.p1.0x02b6
 msgctxt "script.p1.0x02b6"
 msgid "NW NW 8.7-9.7.95: NW \"Inzwischen\"-Bild, \"Stunden-Später\"-Bild, Küche, Garten, Flur, \"Kaboom\"-Bild"
-msgstr "NW NW 8.7-9.7.95: NW \"Inzwischen\"-Bild, \"hours-Later\"-Bild, Küche, garden, Flur, \"Kaboom\"-Bild"
+msgstr "NW NW 8.7-9.7.95: NW \"In the meantime\" picture, \"Hours later\" picture, kitchen, garden, hallway, \"Kaboom\" picture"
 
 #. prog 1 @ 0300 op print_sentence_plus
 #: script.p1.0x0300
@@ -3603,7 +3603,7 @@ msgstr "CLR A photo of the Moon."
 #: script.p2.0x086e
 msgctxt "script.p2.0x086e"
 msgid "CLR Ein Foto vom Mond mit einer Scheibe Toast. NW _____Cool._____"
-msgstr "CLR A photo of the Moon with a Scheibe Toast. NW _____Cool._____"
+msgstr "CLR A photo of the Moon with a slice of toast. NW _____Cool._____"
 
 #. prog 2 @ 089a op say_if_found
 #: script.p2.0x089a
@@ -3657,7 +3657,7 @@ msgstr "warranty is void. NW Yours sincerely, NW Hungry Brothers Dumbwaiters.\""
 #: script.p2.0x0a55
 msgctxt "script.p2.0x0a55"
 msgid "CLR Immer diese Eigenwerbung."
-msgstr "CLR Always diese Eigenwerbung."
+msgstr "CLR Always this self-promotion."
 
 #. prog 2 @ 0a72 op add_say_window2
 #: script.p2.0x0a72
@@ -4269,7 +4269,7 @@ msgstr "CLR O.K."
 #: script.p6.0x04ff
 msgctxt "script.p6.0x04ff"
 msgid "____(10_Punkte)____ NW Hans Rosenthal meint: Das war spitze!"
-msgstr "____(10_Punkte)____ NW Hans Rosenthal would say: That was fantastic!"
+msgstr "____(10_Points)____ NW Hans Rosenthal would say: That was fantastic!"
 
 #. prog 6 @ 0617 op add_say_window2
 #: script.p6.0x0617
@@ -4413,13 +4413,13 @@ msgstr "Out of the way, you lump!"
 #: script.p6.0x0f25
 msgctxt "script.p6.0x0f25"
 msgid "Zur Seite du Zombie!"
-msgstr "Zur Seite you Zombie!"
+msgstr "Out of the way, you zombie!"
 
 #. prog 6 @ 0f3d op add_option
 #: script.p6.0x0f3d
 msgctxt "script.p6.0x0f3d"
 msgid "Laß mich vorbei!"
-msgstr "Laß mich vorbei!"
+msgstr "Let me pass!"
 
 #. prog 6 @ 0f52 op add_option
 #: script.p6.0x0f52
@@ -4467,31 +4467,31 @@ msgstr "No."
 #: script.p6.0x1079
 msgctxt "script.p6.0x1079"
 msgid "Danke, kein Interesse."
-msgstr "Thanks, kein Interesse."
+msgstr "Thanks, not interested."
 
 #. prog 6 @ 109a op add_say_window2
 #: script.p6.0x109a
 msgctxt "script.p6.0x109a"
 msgid "Cousin Bain hat ein Motel, 2 Meilen die Straße runter."
-msgstr "Cousin Bain has a Motel, 2 Meilen the Straße runter."
+msgstr "Cousin Bain has a motel, 2 miles down the road."
 
 #. prog 6 @ 10d1 op add_say_window2
 #: script.p6.0x10d1
 msgctxt "script.p6.0x10d1"
 msgid "Danke, den habe ich schon gesucht."
-msgstr "Thanks, the have I already gesucht."
+msgstr "Thank you, I've already been looking for that one."
 
 #. prog 6 @ 1116 op add_say_window2
 #: script.p6.0x1116
 msgctxt "script.p6.0x1116"
 msgid "CLR Der läßt mich bestimmt nicht rein. NW Ich muß versuchen, unbemerkt ins Haus zu kommen."
-msgstr "CLR The läßt mich bestimmt not rein. NW I must versuchen, unbemerkt ins house to come."
+msgstr "CLR He definitely won't let me in. NW I have to try to get into the house unnoticed."
 
 #. prog 6 @ 116d op add_say_window2
 #: script.p6.0x116d
 msgctxt "script.p6.0x116d"
 msgid "CLR Vielleicht sollte ich mir die vertrockneten Pflanzen noch einmal genauer ansehen..."
-msgstr "CLR Maybe sollte I mir the vertrockneten Pflanzen still einmal genauer ansehen..."
+msgstr "CLR Maybe I should take another closer look at the withered plants..."
 
 #. prog 6 @ 119e op say_if_found
 #: script.p6.0x119e
@@ -4503,7 +4503,7 @@ msgstr "CLR There's a knocker on the door"
 #: script.p6.0x11db
 msgctxt "script.p6.0x11db"
 msgid "CLR \"Nicht willkommen!\""
-msgstr "CLR \"Not willkommen!\""
+msgstr "CLR \"Not welcome!\""
 
 #. prog 6 @ 1295 op add_say_window2
 #: script.p6.0x1295
@@ -4515,7 +4515,7 @@ msgstr "Wisch - Wisch"
 #: script.p6.0x12b8
 msgctxt "script.p6.0x12b8"
 msgid "____(1_Punkt)____"
-msgstr "____(1_Punkt)____"
+msgstr "____(1_Point)____"
 
 #. prog 6 @ 12fa op add_say_window2
 #: script.p6.0x12fa
@@ -5301,7 +5301,7 @@ msgstr "CLR The door has neither a keyhole nor a handle."
 #: script.p11.0x0302
 msgctxt "script.p11.0x0302"
 msgid "CLR Die Tür hat weder Schlüsselloch, noch Griff."
-msgstr "CLR The door has weder Schlüsselloch, still Griff."
+msgstr "CLR The door has neither a keyhole nor a handle."
 
 #. prog 11 @ 04c2 op add_say_window2
 #: script.p11.0x04c2
@@ -6495,7 +6495,7 @@ msgstr "_"
 #: script.p14.0x025f
 msgctxt "script.p14.0x025f"
 msgid "Ja. Und das war's."
-msgstr "Yes. And the war's."
+msgstr "Yes. And that's it."
 
 #. prog 14 @ 028e op add_say_window
 #: script.p14.0x028e
@@ -7803,7 +7803,7 @@ msgstr "Mmmm, tastes like tomato. NW ________ NW ___Mmmm.___ NW ___(Chew)___ NW 
 #: script.p20.0x1801
 msgctxt "script.p20.0x1801"
 msgid "Wen haben wir denn da?!?!?"
-msgstr "Wen have we denn da?!?!?"
+msgstr "Who do we have here?!?!?"
 
 #. prog 23 @ 000c op set_room_name
 #: script.p23.0x000c
@@ -7881,7 +7881,7 @@ msgstr "CLR Yikes, that's dynamite!"
 #: script.p24.0x020a
 msgctxt "script.p24.0x020a"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3_Punkte)____"
+msgstr "CLR ____(3_Points)____"
 
 #. prog 24 @ 0236 op add_say_window
 #: script.p24.0x0236
