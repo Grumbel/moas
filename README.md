@@ -235,6 +235,10 @@ gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, ta
 left half of a value to step back, tap outside to close). Switching the language there
 takes effect at once, including object names and verbs (prog0's name table is
 re-registered); speech already on screen stays in the old language.
+The game's own menu (**F1**: Neustart / Projekttagebuch / … / Quit) gets an extra
+**Optionen (F12)** entry that opens the same menu. On touch devices the TOUCH BUTTONS
+row is hidden while the buttons are on, because the **Menu** button is then the only
+way back into the options menu.
 
 Primary format is a **gettext `.po` file** (`lang/<code>.po`):
 
@@ -366,13 +370,16 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **Tab** | Toggle inventory bar |
 | **Space** / **Enter** | Advance dialogue / confirm (also used with on-screen prompts) |
 | **S** | Same as right mouse button (when you have control) |
-| **;** (semicolon) | “Use” verb shortcut (`BENUTZE`) when you have control |
-| **F10** | File menu (when the window layout allows it) |
+| **F1** | Game menu (Neustart, Projekttagebuch, Projektteam, Optionen, Quit, Zurück) when you have control |
+| **F10** | Volume / speech speed / game speed panel (when the window layout allows it) |
 | **Shift** | Speed up / dismiss **speech bubbles** only (see below) |
 | **Esc** | Abort a **scripted sequence** when the script has armed skip (see below) |
 | **Alt+Q** | Quit (original DOS key) |
 | **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
 | **F12** | Options menu (SDL port) |
+
+The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc)
+in the bottom-right corner. It is hidden on touch devices.
 
 ### Esc vs Shift (skipping)
 
@@ -391,20 +398,25 @@ The touch **Skip** button acts like **Shift** (speech only); touch **Esc** is th
 
 ### Master / debug keys
 
-Enable master mode only if the environment variable **`THPRIV`** is set, then press **T** (scancode path) to toggle `V_Master`.
+Master mode can only be toggled if the environment variable **`THPRIV`** is set; then
+**Alt+T** toggles `V_Master`. Except for plain **p**, these are DOS extended keys
+(`getch()` returns 0, then the scan code), so they are Alt+letter or function keys.
+The case labels in `LookKeys` (`'1'`, `'#'`, …) are scan codes, not characters.
 
 When master mode is on:
 
 | Key | Action |
 |-----|--------|
-| **P** | Show mouse coordinates |
-| **1** | Full screen redraw |
-| **2** | Outline walk/label markers (`ShowMarker`) |
-| **I** / **J** | Blit `Info1` / `Info2` overlays |
-| **P** (scancode 25) | Redraw all persons |
-| **B** | Free some memory (debug) |
-| **#** | Hercules debug dump (stderr on non-DOS) |
-| **-** | Export label rectangle tool (console prompt) |
+| **p** | Show mouse coordinates |
+| **Alt+N** | Full screen redraw |
+| **Alt+M** | Outline walk/label markers (`ShowMarker`) |
+| **Alt+I** / **Alt+J** | Blit `Info1` / `Info2` overlays |
+| **Alt+P** | Redraw all persons |
+| **F8** | Free some memory (debug) |
+| **Alt+H** | Hercules debug dump (stderr on non-DOS) |
+| **Alt+X** | Export label rectangle tool (console prompt) |
+
+Note: the F1 handler has no `break`, so with `THPRIV` set, **F1** also toggles master mode.
 
 These are developer tools from the original engine, not needed for normal play.
 

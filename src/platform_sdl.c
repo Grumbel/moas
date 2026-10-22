@@ -47,7 +47,7 @@ extern uChar *Display;
 extern unsigned char *Palette;   /* 768 bytes, VGA 0-63 */
 extern char KeyAbortState;
 extern unsigned char KeyScanCode;
-extern short TotalSpeed, SpeechSpeed;
+extern short CurrentProc, TotalSpeed, SpeechSpeed;
 extern void PowerRedrawArea(short x1, short y1, short x2, short y2);
 
 
@@ -99,6 +99,7 @@ static int           overlay_on = 0;          /* on-screen buttons visible */
 static int           ov_save_ok = 1;          /* SAVE/LOAD usable right now */
 static int           ov_load_ok = 1;
 static int           pointer_is_touch = 0;    /* last pointer input was a finger */
+static int           touch_seen = 0;          /* any finger input this session */
 static SDL_FingerID  game_finger = 0;         /* finger acting as left button */
 static int           game_finger_down = 0;
 static SDL_FingerID  overlay_finger = 0;
@@ -1533,27 +1534,71 @@ static void eng_toggle_fullscreen(void)
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
+/*
+ * Android, or a finger has been used: the overlay MENU button is then the
+ * only way back into this menu, so TOUCH BUTTONS must not turn it off.
+ */
+static int is_touch_device(void)
+{
+#ifdef __ANDROID__
+  return 1;
+#else
+  return touch_seen;
+#endif
+}
+
+static int eng_row_visible(int i)
+{
+  if (i == ENG_TOUCH)
+    return !(overlay_on && is_touch_device());
+  return 1;
+}
+
+/* Next visible row in direction dir (+1/-1); dir 0 keeps sel if visible. */
+static int eng_step(int sel, int dir)
+{
+  int n;
+  if (dir == 0) {
+    if (eng_row_visible(sel))
+      return sel;
+    dir = 1;
+  }
+  for (n = 0; n < ENG_COUNT; n++) {
+    sel = (sel + dir + ENG_COUNT) % ENG_COUNT;
+    if (eng_row_visible(sel))
+      break;
+  }
+  return sel;
+}
+
 static void eng_layout(EngLayout *L)
 {
-  int out_w = 640, out_h = 400, u, i, y, row_h;
+  int out_w = 640, out_h = 400, u, i, y, row_h, rows = 0;
   const int cols = 24; /* widest row: "SPEECH SPEED    < 24 >" */
 
+  for (i = 0; i < ENG_COUNT; i++)
+    rows += eng_row_visible(i);
   SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
   u = out_h / 160;
   if (u > 4) u = 4;
   if (u < 1) u = 1;
   /* panel: 6u margin, 7u title + 6u gap, rows of 13u, 6u hint gap + 7 + 6u */
   while (u > 1 && ((cols * 6 + 12) * u > out_w - 16 ||
-                   (6 + 13 + ENG_COUNT * 13 + 6) * u + 7 + 6 * u > out_h - 16))
+                   (6 + 13 + rows * 13 + 6) * u + 7 + 6 * u > out_h - 16))
     u--;
   L->u = u;
   L->panel.w = (cols * 6 + 12) * u;
-  L->panel.h = (6 + 13 + ENG_COUNT * 13 + 6) * u + 7 + 6 * u;
+  L->panel.h = (6 + 13 + rows * 13 + 6) * u + 7 + 6 * u;
   L->panel.x = (out_w - L->panel.w) / 2;
   L->panel.y = (out_h - L->panel.h) / 2;
   row_h = 13 * u;
   y = L->panel.y + (6 + 13) * u;
-  for (i = 0; i < ENG_COUNT; i++, y += row_h) {
+  for (i = 0; i < ENG_COUNT; i++) {
+    if (!eng_row_visible(i)) {
+      memset(&L->item[i], 0, sizeof(L->item[i]));
+      L->value[i] = L->item[i];
+      continue;
+    }
     L->item[i].x = L->panel.x + 4 * u;
     L->item[i].y = y;
     L->item[i].w = L->panel.w - 8 * u;
@@ -1564,6 +1609,7 @@ static void eng_layout(EngLayout *L)
       L->value[i].x = L->item[i].x + L->item[i].w - L->value[i].w - 2 * u;
     } else
       L->value[i].w = 0;
+    y += row_h;
   }
 }
 
@@ -1622,6 +1668,8 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
     const char *label = "";
     int ty = it->y + (it->h - 7 * u) / 2;
 
+    if (!eng_row_visible(i))
+      continue;
     if (i == sel || i == pressed) {
       bar = *it;
       if (i == pressed)
@@ -1696,7 +1744,8 @@ static void eng_menu_change(int sel, int dir)
       eng_toggle_fullscreen();
       break;
     case ENG_TOUCH:
-      overlay_set_enabled(!overlay_on);
+      if (eng_row_visible(ENG_TOUCH))
+        overlay_set_enabled(!overlay_on);
       break;
     case ENG_SPEED:
       /* Same 1..8 range as the game's own F10 menu. */
@@ -1733,6 +1782,62 @@ static void eng_menu_change(int sel, int dir)
   }
 }
 
+/* ---- Key hints (start screen and options menu) -------------------------- */
+static const char *const keyhint_rows[][2] = {
+  { "F5",    "SAVE" },
+  { "F7",    "LOAD" },
+  { "F12",   "OPTIONS" },
+  { "SHIFT", "SKIP TEXT" },
+  { "ESC",   "SKIP SCENE" },
+};
+#define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
+
+/* The title room (prog 4: "Intro", "Anleitung", copyright notes). */
+static int keyhints_on_start_screen(void)
+{
+  return CurrentProc == 4;
+}
+
+/*
+ * Bottom right of the game picture, for keyboard players. Skipped on touch
+ * devices and when it would cover `avoid` (the options panel).
+ */
+static void keyhints_draw(const SDL_Rect *avoid)
+{
+  int dx, dy, dw, dh, u, i, kw = 0, tw = 0, pad, line_h;
+  SDL_Rect box;
+
+  if (!renderer || is_touch_device())
+    return;
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  u = dh / 300;
+  if (u < 1)
+    u = 1;
+  for (i = 0; i < KEYHINT_ROWS; i++) {
+    int w = ui_text_width(keyhint_rows[i][0], u);
+    if (w > kw) kw = w;
+    w = ui_text_width(keyhint_rows[i][1], u);
+    if (w > tw) tw = w;
+  }
+  pad = 3 * u;
+  line_h = 10 * u;
+  box.w = pad + kw + 5 * u + tw + pad;
+  box.h = pad + KEYHINT_ROWS * line_h - 3 * u + pad;
+  box.x = dx + dw - box.w - 4 * u;
+  box.y = dy + dh - box.h - 4 * u;
+  if (avoid && SDL_HasIntersection(&box, avoid))
+    return;
+
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, 150);
+  for (i = 0; i < KEYHINT_ROWS; i++) {
+    int y = box.y + pad + i * line_h;
+    ui_draw_label(box.x + pad, y, keyhint_rows[i][0], u, 255, 206, 72);
+    ui_draw_label(box.x + pad + kw + 5 * u, y, keyhint_rows[i][1], u, 255, 255, 255);
+  }
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+}
+
 /* Forward: PlatformPresent draws the game + overlay under the menu. */
 static void platform_present_frame(void);
 static void pad_device_event(const SDL_Event *ev);
@@ -1755,8 +1860,10 @@ void PlatformEngineMenu(void)
   restart_armed = 0;
   while (engine_menu_visible && running) {
     eng_layout(&L);
+    sel = eng_step(sel, 0);
     platform_present_frame();
     eng_menu_draw(&L, sel, pressed);
+    keyhints_draw(&L.panel);
     SDL_RenderPresent(renderer);
 
     while (engine_menu_visible && SDL_PollEvent(&ev)) {
@@ -1785,9 +1892,9 @@ void PlatformEngineMenu(void)
           if (k == SDLK_ESCAPE || k == SDLK_F12 || k == SDLK_AC_BACK)
             engine_menu_visible = 0;
           else if (k == SDLK_UP || k == SDLK_w)
-            sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+            sel = eng_step(sel, -1);
           else if (k == SDLK_DOWN || k == SDLK_s)
-            sel = (sel + 1) % ENG_COUNT;
+            sel = eng_step(sel, 1);
           else if (k == SDLK_LEFT)
             eng_menu_change(sel, -1);
           else if (k == SDLK_RIGHT || k == SDLK_RETURN || k == SDLK_KP_ENTER || k == SDLK_SPACE)
@@ -1797,10 +1904,10 @@ void PlatformEngineMenu(void)
         case SDL_CONTROLLERBUTTONDOWN:
           switch (ev.cbutton.button) {
             case SDL_CONTROLLER_BUTTON_DPAD_UP:
-              sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+              sel = eng_step(sel, -1);
               break;
             case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-              sel = (sel + 1) % ENG_COUNT;
+              sel = eng_step(sel, 1);
               break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
               eng_menu_change(sel, -1);
@@ -1829,9 +1936,9 @@ void PlatformEngineMenu(void)
           break;
         case SDL_MOUSEWHEEL:
           if (ev.wheel.y > 0)
-            sel = (sel + ENG_COUNT - 1) % ENG_COUNT;
+            sel = eng_step(sel, -1);
           else if (ev.wheel.y < 0)
-            sel = (sel + 1) % ENG_COUNT;
+            sel = eng_step(sel, 1);
           break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
@@ -1855,6 +1962,7 @@ void PlatformEngineMenu(void)
           if (ev.tfinger.touchId == SDL_MOUSE_TOUCHID)
             break;
 #endif
+          touch_seen = 1;
           SDL_GetWindowSize(window, &ww, &wh);
           window_to_output((int)(ev.tfinger.x * (float)ww + 0.5f),
                            (int)(ev.tfinger.y * (float)wh + 0.5f), &px, &py);
@@ -1919,6 +2027,8 @@ static void platform_present_frame(void)
   }
   /* Touch buttons sit in the letterbox, beside the game picture. */
   overlay_draw();
+  if (!engine_menu_visible && keyhints_on_start_screen())
+    keyhints_draw(NULL);
 }
 
 void PlatformPresent(void)
@@ -2168,6 +2278,7 @@ static void handle_finger(const SDL_Event *ev)
     return; /* mouse-generated touch (SDL_HINT_MOUSE_TOUCH_EVENTS) */
 #endif
   pointer_is_touch = 1;
+  touch_seen = 1;
   finger_pos(tf, &wx, &wy, &ox, &oy);
   ov = overlay_hit(ox, oy);
 

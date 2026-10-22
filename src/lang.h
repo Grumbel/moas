@@ -33,6 +33,7 @@ enum {
   UI_OV_USE,
   UI_OV_LOOK,
   UI_OV_MENU,
+  UI_MENU_OPTIONS,  /* host entry in the game's own menu (prog 1) */
   UI_COUNT
 };
 

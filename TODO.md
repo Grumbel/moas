@@ -6,6 +6,28 @@
 
 # TODO / Handoff
 
+## Key legend, Options entry in the game menu, touch lockout (2026-10-22)
+- Key legend (F5/F7/F12/Shift/Esc) drawn by `keyhints_draw()` in
+  platform_sdl.c, bottom right of the game picture, on the start screen
+  (`CurrentProc == 4`, the title room) and while the F12 menu is open (skipped
+  if it would overlap the panel). Not drawn on touch devices.
+- Game menu (prog 1, opened with F1): `Execute` injects a host option before
+  "Quit" (add_option at prog 1 @ 0x0151, RefNum 5). It uses RefNum 7, which the
+  script doesn't use, so its answer chain falls through to the
+  `goto select_from_dialog` at 0x07f2 and the menu shows again after the F12
+  menu closes. Text comes from `Ui(UI_MENU_OPTIONS)` ("ui.menu.options") via
+  the `DLG_HOST_TEXT` TextAdd sentinel. DLG_ALWAYS keeps it from toggling off.
+- F12 menu: TOUCH BUTTONS row hidden while the buttons are on and the device
+  is touch (Android, or any SDL finger event seen), so a phone player can't
+  remove the only way back into the menu. Android also ignores
+  `touch_buttons` from settings.ini.
+- README: master/debug keys are Alt+letter/F8 (extended scan codes), `;` was
+  really F1 (game menu), master toggle is Alt+T.
+- Tested under Xvfb: legend on the start screen and in the F12 menu; F1 menu
+  shows "Optionen (F12)" / "Options (F12)", opens the F12 menu, Esc returns to
+  the game menu, Back closes it. The hidden touch row is untested (no finger
+  input under Xvfb); check on Android / phone browser.
+
 ## Persistent settings (2026-10-22)
 - `src/settings.c`: `<config dir>/settings.ini` (key=value) keeps language,
   fullscreen, touch buttons, game speed, speech speed and volume. Written when

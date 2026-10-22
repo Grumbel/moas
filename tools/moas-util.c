@@ -906,6 +906,7 @@ static void extract_ui_strings(void)
     { "ui.overlay.use", "USE" },
     { "ui.overlay.look", "LOOK" },
     { "ui.overlay.menu", "MENU" },
+    { "ui.menu.options", "Optionen (F12)" },
     { NULL, NULL }
   };
   int i;

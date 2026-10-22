@@ -53,6 +53,9 @@
 #define DLG_OFF    1
 #define DLG_ALWAYS 2
 #define DLG_EMPTY  3
+/* Port: option text comes from Ui(), not from script data (TextAdd). */
+#define DLG_HOST_TEXT 0xFFFFu
+#define HOST_MENU_OPTION 7     /* RefNum unused by the prog 1 menu */
 #ifdef DOS
 #define Clearscreen() memset((char*)0xA0000,0,64000)
 #else
@@ -542,6 +545,7 @@ void ResetGame(void);
 void SaveGame(short CallerID);
 void SayWait(short Win);
 void SelectFromDialog(short VarNum,short DlgNum,char Respond);
+void AddHostMenuOption(short DlgName);
 void SetMousePos(short x,short y);
 void SetObject(short ObjNum,short Pos);
 void SetPerson(short Prs,char Inf,short x,short y,short tx,short ty,USHORT Bits,USHORT Mask);

@@ -119,6 +119,12 @@ msgctxt "ui.overlay.menu"
 msgid "MENU"
 msgstr ""
 
+#. source UI
+#: ui.menu.options
+msgctxt "ui.menu.options"
+msgid "Optionen (F12)"
+msgstr ""
+
 #. GAME.PCK token 0
 #: pck.0
 msgctxt "pck.0"

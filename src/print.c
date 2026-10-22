@@ -29,6 +29,7 @@
 #include "moas.h"
 #include "platform.h"
 #include "debug.h"
+#include "lang.h"
 
 char _SPACE_STRING[]=" ";
 
@@ -355,6 +356,40 @@ void AddOption(short DlgName,short RefNum,short State,short Querverweis,short Pr
     }
   InternalError(1040);
 }
+/*
+ * Port: extra entry in the game's own menu (prog 1, dialog 0) that opens the
+ * host options menu. RefNum 7 is unused by the script, so its answer chain
+ * falls through to "goto select_from_dialog" and the menu shows again.
+ * DLG_ALWAYS: picking it must not switch it off like a normal option.
+ */
+void AddHostMenuOption(short DlgName)
+{
+  short c,d;
+
+  for (c=0;c<20;c++)
+    if (Dialog[c].ReferenzNummer==DlgName)
+    {
+      for (d=0;d<30;d++) if (Dialog[c].Inhalt[d].Typ==DLG_EMPTY) break;
+      if (d==30) return;
+      Dialog[c].Inhalt[d].Typ=Dialog[c].Inhalt[d].StdTyp=DLG_ALWAYS;
+      Dialog[c].Inhalt[d].Querverweis=-1;
+      Dialog[c].Inhalt[d].TextAdd=DLG_HOST_TEXT;
+      Dialog[c].Inhalt[d].RefNum=HOST_MENU_OPTION;
+      return;
+    }
+}
+static char *DialogOptionText(short Dlg,short Opt)
+{
+  static char HostText[80];
+
+  if (Dialog[Dlg].Inhalt[Opt].TextAdd==DLG_HOST_TEXT)
+  {
+    strncpy(HostText,Ui(UI_MENU_OPTIONS),sizeof(HostText)-1);
+    HostText[sizeof(HostText)-1]=0;
+    return HostText;
+  }
+  return UnPack(Programm[Dialog[Dlg].TextProc].Data+Dialog[Dlg].Inhalt[Opt].TextAdd);
+}
 void ToggleDialogPoint(short DialogNum,short RefNum,short Mode)
 {
   short c,d;
@@ -392,7 +427,7 @@ void SelectFromDialog(short VarNum,short DlgNum,char Respond)
     if (Dialog[c].Inhalt[d].Typ==DLG_ON || Dialog[c].Inhalt[d].Typ==DLG_ALWAYS)
     {
       LadeProgramm(Dialog[c].TextProc);
-      Buffer=UnPack(Programm[Dialog[c].TextProc].Data+Dialog[c].Inhalt[d].TextAdd);
+      Buffer=DialogOptionText(c,d);
       for (e=0;Buffer[e];e++)
         if (strncmp(Buffer+e," NW ",4)==0)
         {
@@ -417,9 +452,9 @@ void SelectFromDialog(short VarNum,short DlgNum,char Respond)
       }
       RefTable[AnzRefs].y1=Window.YPos;
       PrintSentence(Buffer);
-      if (d!=49)
+      if (d!=49 && d+1<30)
       {
-        Buffer=UnPack(Programm[Dialog[c].TextProc].Data+Dialog[c].Inhalt[d+1].TextAdd);
+        Buffer=DialogOptionText(c,d+1);
         if (Buffer[0]=='+')
         {
           PrintSentence(Buffer+1);
@@ -441,9 +476,16 @@ void SelectFromDialog(short VarNum,short DlgNum,char Respond)
   if (Dialog[c].Inhalt[Selection].Typ==DLG_ON) Dialog[c].Inhalt[Selection].Typ=DLG_OFF;
     else if (Dialog[c].Inhalt[Selection].Typ==DLG_OFF) Dialog[c].Inhalt[Selection].Typ=DLG_ON;
   SetVar(VarNum,Dialog[c].Inhalt[Selection].RefNum);
+#ifndef DOS
+  if (Dialog[c].Inhalt[Selection].TextAdd==DLG_HOST_TEXT)
+  {
+    PlatformEngineMenu();
+    return;
+  }
+#endif
   if (Respond)
   {
-    AddSayWindow(-1,-1000,-1000,UnPack(Programm[Dialog[c].TextProc].Data+Dialog[c].Inhalt[Selection].TextAdd));
+    AddSayWindow(-1,-1000,-1000,DialogOptionText(c,Selection));
     SayWait(-1);
   }
 }

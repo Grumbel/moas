@@ -37,6 +37,7 @@ static const char *ui_fallback[UI_COUNT] = {
   [UI_OV_USE]        = "USE",
   [UI_OV_LOOK]       = "LOOK",
   [UI_OV_MENU]       = "MENU",
+  [UI_MENU_OPTIONS]  = "Optionen (F12)",
 };
 
 static const char *ui_names[UI_COUNT] = {
@@ -59,6 +60,7 @@ static const char *ui_names[UI_COUNT] = {
   [UI_OV_USE]        = "overlay.use",
   [UI_OV_LOOK]       = "overlay.look",
   [UI_OV_MENU]       = "overlay.menu",
+  [UI_MENU_OPTIONS]  = "menu.options",
 };
 
 static char *ui_str[UI_COUNT];

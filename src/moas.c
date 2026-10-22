@@ -383,7 +383,13 @@ short Execute(short ProcNum,unsigned short Adresse)
       case 66:AddSayWindow(Parameter[0],Parameter[1],Parameter[2],UnPack((char*)&Parameter[3]));
               Adresse+=8+strlen((char *)&Parameter[3]);
               SayWait(Parameter[0]);                                     break;
-      case 67:AddOption(Parameter[0],Parameter[1],Parameter[2],Parameter[3],ProcNum,Adresse+9);
+      case 67:
+#ifndef DOS
+              /* Game menu (prog 1): host "Options" entry just before Quit. */
+              if (ProcNum==1 && Adresse==0x0151 && Parameter[0]==0 && Parameter[1]==5)
+                AddHostMenuOption(0);
+#endif
+              AddOption(Parameter[0],Parameter[1],Parameter[2],Parameter[3],ProcNum,Adresse+9);
               Adresse+=10+strlen((char *)&Parameter[4]);                 break;
       case 68:AddDialog(Parameter[0]);
               Adresse+=3;                                                break;

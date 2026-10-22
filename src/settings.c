@@ -90,9 +90,13 @@ void MoasSettingsLoad(void)
         moas_fullscreen = b;
 #endif
     } else if (!strcmp(key, "touch_buttons")) {
+#ifndef __ANDROID__
+      /* Android: the MENU button is the only way into the options menu,
+       * so an older settings.ini with touch_buttons=0 must not hide it. */
       b = parse_bool(val);
       if (moas_touch_controls < 0 && b >= 0)
         moas_touch_controls = b;
+#endif
     } else if (!strcmp(key, "game_speed")) {
       cfg_total_speed = parse_int(val, 1, 8);
     } else if (!strcmp(key, "speech_speed")) {
