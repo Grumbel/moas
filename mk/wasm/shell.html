@@ -32,7 +32,20 @@
       height: auto;
       max-height: 72vh;
       background: #000;
+      position: relative;
     }
+    /* Shown whenever the game loop is not running (paused or crashed). */
+    #overlay {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.4rem;
+      background: rgba(5, 5, 12, 0.72);
+      cursor: pointer; text-align: center; user-select: none;
+    }
+    #overlay.on { display: flex; }
+    #overlay.error { cursor: default; background: rgba(40, 5, 5, 0.8); }
+    #overlay-title { font-size: clamp(1.2rem, 4vw, 2.4rem); font-weight: 600; letter-spacing: 0.08em; }
+    #overlay-hint { font-size: clamp(0.75rem, 1.8vw, 1rem); opacity: 0.8; }
     #wrap:fullscreen #slot, #wrap:-webkit-full-screen #slot {
       width: min(100vw, calc(100vh * 31 / 15));
       max-height: 100vh;
@@ -89,6 +102,10 @@
   <div id="wrap">
     <div id="slot">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+      <div id="overlay">
+        <div id="overlay-title">PAUSED</div>
+        <div id="overlay-hint">Click to resume</div>
+      </div>
     </div>
     <div id="status">Downloading…</div>
     <div id="progress"><div id="progress-bar"></div></div>
@@ -218,16 +235,61 @@
     }
 
     var pagePaused = false;
+    /* Paused only because the tab was hidden: resume when it is shown again.
+       An explicit pause by the user stays until they resume it. */
+    var autoPaused = false;
+    var gameCrashed = false;
+    var baseTitle = document.title;
 
-    function setPaused(on) {
-      pagePaused = !!on;
-      if (typeof Module._PlatformSetPaused === 'function')
-        Module._PlatformSetPaused(pagePaused ? 1 : 0);
+    function showOverlay(title, hint, isError) {
+      var ov = document.getElementById('overlay');
+      document.getElementById('overlay-title').textContent = title;
+      document.getElementById('overlay-hint').textContent = hint;
+      ov.classList.toggle('error', !!isError);
+      ov.classList.toggle('on', !!title);
+    }
+
+    function updatePauseUi() {
+      if (gameCrashed) return;
       var btn = document.getElementById('btn-pause');
       if (btn) btn.textContent = pagePaused ? 'Resume' : 'Pause';
+      document.title = (pagePaused ? '\u23F8 Paused \u2013 ' : '') + baseTitle;
+      if (pagePaused)
+        showOverlay('PAUSED', 'Click, or press P / Space / Esc, to resume');
+      else
+        showOverlay('');
+    }
+
+    function setPaused(on, auto) {
+      if (gameCrashed) return;
+      pagePaused = !!on;
+      autoPaused = pagePaused && !!auto;
+      if (typeof Module._PlatformSetPaused === 'function')
+        Module._PlatformSetPaused(pagePaused ? 1 : 0);
+      updatePauseUi();
+      if (!pagePaused) document.getElementById('canvas').focus();
     }
 
     function togglePause() { setPaused(!pagePaused); }
+
+    /* The game can also resume itself (P / Space / Esc while paused). */
+    function syncPauseState() {
+      if (gameCrashed || typeof Module._PlatformIsPaused !== 'function') return;
+      var p = !!Module._PlatformIsPaused();
+      if (p !== pagePaused) {
+        pagePaused = p;
+        if (!p) autoPaused = false;
+        updatePauseUi();
+      }
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) {
+        if (!pagePaused) setPaused(true, true);
+      } else if (pagePaused && autoPaused) {
+        setPaused(false);
+      }
+    }
 
     function toggleFullscreen() {
       var wrap = document.getElementById('wrap');
@@ -243,9 +305,11 @@
       var pause = document.getElementById('btn-pause');
       pause.disabled = false;
       pause.onclick = togglePause;
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden) setPaused(true);
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      document.getElementById('overlay').addEventListener('click', function() {
+        if (pagePaused) setPaused(false);
       });
+      setInterval(syncPauseState, 250);
       var dl = document.getElementById('btn-download');
       var ul = document.getElementById('btn-upload');
       var input = document.getElementById('file-upload');
@@ -292,6 +356,12 @@
     };
     Module.setStatus('Downloading…');
     window.onerror = function() {
+      if (!gameCrashed) {
+        gameCrashed = true;
+        document.title = '\u26A0 Stopped \u2013 ' + baseTitle;
+        showOverlay('GAME STOPPED', 'An error occurred (see the JavaScript console). Reload the page to restart.', true);
+        document.getElementById('btn-pause').disabled = true;
+      }
       Module.setStatus('Something went wrong, see the JavaScript console');
       Module.setStatus = function(text) { if (text) console.error('[status] ' + text); };
     };
