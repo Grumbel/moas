@@ -130,7 +130,8 @@ endif()
 
 # Standalone data inspection tool (no SDL).
 if(NOT EMSCRIPTEN)
-  add_executable(moas-util tools/moas-util.c)
+  add_executable(moas-util tools/moas-util.c tools/mu_common.c tools/mu_data.c
+    tools/mu_gfx.c tools/mu_png.c tools/mu_script.c)
   target_compile_definitions(moas-util PRIVATE
     $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>
   )
@@ -138,6 +139,16 @@ if(NOT EMSCRIPTEN)
     target_compile_options(moas-util PRIVATE -Wall -Wextra)
   endif()
   install(TARGETS moas-util RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+  # unpack + pack of the shipped data must give identical files.
+  if(NOT CMAKE_CROSSCOMPILING)
+    enable_testing()
+    add_test(NAME moas-util-roundtrip
+      COMMAND ${CMAKE_COMMAND} -DMOAS_UTIL=$<TARGET_FILE:moas-util>
+        -DDATADIR=${CMAKE_CURRENT_SOURCE_DIR}/manick
+        -DWORKDIR=${CMAKE_CURRENT_BINARY_DIR}/roundtrip
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/roundtrip.cmake)
+  endif()
 endif()
 
 if(EMSCRIPTEN)

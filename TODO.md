@@ -6,6 +6,38 @@
 
 # TODO / Handoff
 
+## moas-util unpack / pack (2026-10-22)
+- `unpack` writes a source tree (moas.txt catalog, scripts/*.mas, PNGs,
+  pck.txt, persons.txt); `pack` rebuilds all data files. With
+  `--reference manick` the output is byte-identical (ctest
+  `moas-util-roundtrip`); scripts/PCK/persons/catalog are identical anyway.
+- Code split into tools/mu_*.c (common, png incl. inflate, gfx codec,
+  script asm/disasm, data). `strings` output unchanged (pot/json/tsv
+  compared against the old tool).
+- Graphics format: header byte 4, code table, tokens (see mu_gfx.c). The
+  248..250 ops are never used. Codes = lowest unused pixel values, mapped
+  to colours that occur in runs, first-use order (157/235 match exactly).
+- Original packer not recovered. Encoder rules found: longest earlier match,
+  earliest on ties, source ends >= 2 before and starts >= 7 before the
+  current pixel, relative if encodable else absolute; run vs match by
+  pixels per byte. 98/235 token streams match; 37/235 byte-identical
+  (`moas-util gfx-test`). It's not an optimal parse (original is bigger).
+  Unexplained: some matches are cut at a colour change before a run or
+  another long match, and some d=L+2 matches next to a preceding run are
+  skipped. Next step for full fidelity would be more of that analysis.
+- Graphics checksums in GAME.2 don't match the data (engine ignores 1007,
+  "FastLink"); pack keeps stored ones for reused graphics, computes new ones.
+- PNG reader: indexed only, depth 1/2/4/8, non-interlaced. Walk maps use a
+  false-colour palette (bright = walkable), depth maps a grey ramp.
+- Checked: re-encoded data (no reference) runs; Xvfb screenshots of the
+  intro identical to the original data. Edit test: inserted script line
+  shifts labels correctly; edited walk map survives pack+unpack.
+- Script edits shift addresses: saves (ontime/script positions) and the
+  `ProcNum==1 && Adresse==0x0151` options hook in moas.c depend on them.
+- The game's copying terms (intro text) say the data must not be changed
+  when passing it on.
+
+
 ## UBSan: Tab320[200] in PowerRedrawArea (2026-10-22)
 - A person whose top edge is at y==200 (just below the screen) gave Y1==200,
   Y2==200 after clipping: zero rows to draw, but `Tab320[Y1]` was read out of

@@ -4,20 +4,19 @@
 /* SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com> */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
- * moas-util — inspect and extract Mänick / MOAS game data (GAME.*).
+ * moas-util — inspect, extract and rebuild Mänick / MOAS game data (GAME.*).
  *
- *   moas-util [--datadir DIR] list
- *   moas-util [--datadir DIR] info
+ *   moas-util [--datadir DIR] list | info | licence | xxx
  *   moas-util [--datadir DIR] extract [--outdir DIR] [KIND]
  *   moas-util [--datadir DIR] extract-png [--outdir DIR] [--palette N] [KIND]
- *   moas-util [--datadir DIR] licence
- *   moas-util [--datadir DIR] xxx
- *
- * KIND for extract: all | prog | bild | inventar | phase  (default: all)
+ *   moas-util [--datadir DIR] disasm [N]
+ *   moas-util [--datadir DIR] strings [FMT]
+ *   moas-util [--datadir DIR] unpack --outdir DIR
+ *   moas-util [--srcdir DIR] pack --outdir DIR [--reference DIR]
  *
  * GAME.2 is the resource catalog: counts + MapFileDisk records pointing
- * into GAME.1 / GAME.3 / GAME.4 (and similar). Payloads are left raw
- * (often compressed with the engine's pack format).
+ * into GAME.3 (scripts) and GAME.4 (graphics). unpack turns all data files
+ * into a source tree (text and PNG, see mu_data.c), pack builds them back.
  */
 
 #include <ctype.h>
@@ -29,140 +28,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#if defined(_WIN32)
-#include <direct.h>
-#endif
 
-#pragma pack(push, 1)
-typedef struct {
-  int8_t   FileNum;
-  int32_t  FilePos;
-  int32_t  Length;
-  uint32_t Data;
-  int32_t  x;
-  int32_t  y;
-  int32_t  Anz;
-  int8_t   InUse;
-  uint32_t Check;
-} MapFileDisk;
-#pragma pack(pop)
+#include "mu_common.h"
+#include "mu_data.h"
+#include "mu_gfx.h"
+#include "mu_png.h"
+#include "mu_script.h"
 
-_Static_assert(sizeof(MapFileDisk) == 30, "MapFileDisk");
-
-typedef struct {
-  int16_t n_prog, n_bild, n_inv, n_phase;
-  MapFileDisk *prog;
-  MapFileDisk *bild;
-  MapFileDisk *inv;
-  MapFileDisk *phase;
-} Catalog;
-
-static const char *g_datadir = ".";
 static const char *g_outdir = "extracted";
-
-static void die(const char *msg)
-{
-  fprintf(stderr, "moas-util: %s\n", msg);
-  exit(1);
-}
-
-static void die_errno(const char *what)
-{
-  fprintf(stderr, "moas-util: %s: %s\n", what, strerror(errno));
-  exit(1);
-}
-
-static int path_join(char *out, size_t outsz, const char *dir, const char *name)
-{
-  int n = snprintf(out, outsz, "%s/%s", dir, name);
-  return n > 0 && (size_t)n < outsz;
-}
-
-static int open_data(const char *name)
-{
-  char path[1024];
-  int fd;
-  if (!path_join(path, sizeof(path), g_datadir, name))
-    die("path too long");
-  fd = open(path, O_RDONLY);
-  if (fd < 0) {
-    /* case fold basename-style attempts */
-    char folded[256];
-    size_t i, n = strlen(name);
-    if (n >= sizeof(folded)) return -1;
-    for (i = 0; i < n; i++) folded[i] = (char)toupper((unsigned char)name[i]);
-    folded[n] = 0;
-    if (!path_join(path, sizeof(path), g_datadir, folded)) return -1;
-    fd = open(path, O_RDONLY);
-    if (fd >= 0) return fd;
-    for (i = 0; i < n; i++) folded[i] = (char)tolower((unsigned char)name[i]);
-    if (!path_join(path, sizeof(path), g_datadir, folded)) return -1;
-    fd = open(path, O_RDONLY);
-  }
-  return fd;
-}
-
-static int16_t read_i16(int fd)
-{
-  uint8_t b[2];
-  if (read(fd, b, 2) != 2) die("short read (i16)");
-  return (int16_t)(b[0] | (b[1] << 8));
-}
-
-static void *xmalloc(size_t n)
-{
-  void *p = malloc(n ? n : 1);
-  if (!p) die("out of memory");
-  return p;
-}
-
-static char *xstrdup(const char *s)
-{
-  size_t n = strlen(s) + 1;
-  char *p = xmalloc(n);
-  memcpy(p, s, n);
-  return p;
-}
-
-static MapFileDisk *read_table(int fd, int count)
-{
-  MapFileDisk *t;
-  size_t bytes;
-  if (count <= 0) return NULL;
-  bytes = (size_t)count * sizeof(MapFileDisk);
-  t = xmalloc(bytes);
-  if (read(fd, t, bytes) != (ssize_t)bytes) die("short read (map table)");
-  return t;
-}
-
-static Catalog load_catalog(void)
-{
-  Catalog c;
-  int fd = open_data("GAME.2");
-  if (fd < 0) die("cannot open GAME.2 (set --datadir to manick/)");
-  memset(&c, 0, sizeof(c));
-  c.n_prog  = read_i16(fd);
-  c.n_bild  = read_i16(fd);
-  c.n_inv   = read_i16(fd);
-  c.n_phase = read_i16(fd);
-  if (c.n_prog < 0 || c.n_bild < 0 || c.n_inv < 0 || c.n_phase < 0)
-    die("GAME.2: negative counts");
-  c.prog  = read_table(fd, c.n_prog);
-  c.bild  = read_table(fd, c.n_bild);
-  c.inv   = read_table(fd, c.n_inv);
-  c.phase = read_table(fd, c.n_phase);
-  close(fd);
-  return c;
-}
-
-static void free_catalog(Catalog *c)
-{
-  free(c->prog);
-  free(c->bild);
-  free(c->inv);
-  free(c->phase);
-  memset(c, 0, sizeof(*c));
-}
 
 static void print_entry(const char *kind, int idx, const MapFileDisk *e)
 {
@@ -175,14 +48,12 @@ static void print_entry(const char *kind, int idx, const MapFileDisk *e)
 
 static void cmd_list(const Catalog *c)
 {
-  int i;
+  int i, k;
   printf("# GAME.2 catalog  prog=%d  bild=%d  inventar=%d  phase=%d\n",
-         c->n_prog, c->n_bild, c->n_inv, c->n_phase);
+         c->n[K_PROG], c->n[K_BILD], c->n[K_INV], c->n[K_PHASE]);
   printf("# kind     idx  file    pos       len       x     y   anz  inuse  checksum\n");
-  for (i = 0; i < c->n_prog; i++)  print_entry("prog", i, &c->prog[i]);
-  for (i = 0; i < c->n_bild; i++)  print_entry("bild", i, &c->bild[i]);
-  for (i = 0; i < c->n_inv; i++)   print_entry("inv", i, &c->inv[i]);
-  for (i = 0; i < c->n_phase; i++) print_entry("phase", i, &c->phase[i]);
+  for (k = 0; k < K_COUNT; k++)
+    for (i = 0; i < c->n[k]; i++) print_entry(kind_names[k], i, &c->e[k][i]);
 }
 
 static long file_size_fd(int fd)
@@ -192,70 +63,61 @@ static long file_size_fd(int fd)
   return (long)st.st_size;
 }
 
-/* GAME.PCK dictionary for script UnPack. */
-static char *g_codes[257];
-static int g_anz_codes;
-static int g_pack_loaded;
-static char *g_pack_buf;
+/* GAME.PCK dictionary for script strings. */
+static Dict g_dict;
+static int g_dict_loaded;
 
-static void load_pack_codes(void)
+static void load_dict(void)
 {
-  int fd;
-  long sz;
-  int c, value = 0, NEW = 1;
-  if (g_pack_loaded) return;
-  g_pack_loaded = 1;
-  fd = open_data("GAME.PCK");
-  if (fd < 0) return;
-  sz = file_size_fd(fd);
-  if (sz < 5) { close(fd); return; }
-  g_pack_buf = xmalloc((size_t)(sz - 4));
-  if (read(fd, g_pack_buf, (size_t)(sz - 4)) != (ssize_t)(sz - 4)) {
-    free(g_pack_buf);
-    g_pack_buf = NULL;
-    close(fd);
-    return;
-  }
-  close(fd);
-  g_anz_codes = 0;
-  for (c = 1; c < (int)(sz - 4); c++, value++) {
-    g_pack_buf[c] ^= (char)(value & 0xff);
-    if (NEW) {
-      if (g_anz_codes < 256)
-        g_codes[g_anz_codes++] = g_pack_buf + c;
-      NEW = 0;
-    }
-    if (g_pack_buf[c] == 0) NEW = 1;
-  }
+  long len;
+  uint8_t *buf;
+  if (g_dict_loaded) return;
+  g_dict_loaded = 1;
+  buf = read_in(g_datadir, "GAME.PCK", &len);
+  if (buf && dict_from_pck(&g_dict, buf, len) != NULL) memset(&g_dict, 0, sizeof(g_dict));
+  free(buf);
 }
 
 static void unpack_to(char *out, size_t outsz, const uint8_t *packed)
 {
-  size_t used = 0;
-  int i, l;
-  load_pack_codes();
+  load_dict();
   out[0] = 0;
   if (!packed) return;
-  if (g_anz_codes <= 0) {
+  if (g_dict.n <= 0) {
     strncpy(out, (const char *)packed, outsz - 1);
     out[outsz - 1] = 0;
     return;
   }
-  l = (int)strlen((const char *)packed);
-  for (i = 0; i < l; i++) {
-    unsigned idx = (unsigned char)packed[i];
-    const char *piece = (idx < (unsigned)g_anz_codes) ? g_codes[idx] : NULL;
-    size_t plen;
-    if (!piece) continue;
-    plen = strlen(piece);
-    if (used + plen >= outsz - 1) break;
-    memcpy(out + used, piece, plen);
-    used += plen;
-    out[used] = 0;
-  }
+  dict_unpack(&g_dict, packed, out, outsz);
 }
 
+static int load_prog_blob(const Catalog *cat, int idx, uint8_t **out, int *out_len)
+{
+  char srcname[32];
+  const MapFileDisk *e;
+  int fd;
+  uint8_t *buf;
+  ssize_t n;
 
+  if (idx < 0 || idx >= cat->n[K_PROG]) return -1;
+  e = &cat->e[K_PROG][idx];
+  if (e->Length <= 0 || e->FileNum < 1) {
+    *out = NULL;
+    *out_len = 0;
+    return 0;
+  }
+  snprintf(srcname, sizeof(srcname), "GAME.%d", (int)e->FileNum);
+  fd = open_data(srcname);
+  if (fd < 0) return -1;
+  if (lseek(fd, (off_t)e->FilePos, SEEK_SET) < 0) { close(fd); return -1; }
+  buf = xmalloc((size_t)e->Length);
+  n = read(fd, buf, (size_t)e->Length);
+  close(fd);
+  if (n != (ssize_t)e->Length) { free(buf); return -1; }
+  *out = buf;
+  *out_len = (int)e->Length;
+  return 0;
+}
 
 static void cmd_info(void)
 {
@@ -279,20 +141,8 @@ static void cmd_info(void)
   }
   c = load_catalog();
   printf("catalog: prog=%d bild=%d inventar=%d phase=%d\n",
-         c.n_prog, c.n_bild, c.n_inv, c.n_phase);
+         c.n[K_PROG], c.n[K_BILD], c.n[K_INV], c.n[K_PHASE]);
   free_catalog(&c);
-}
-
-static int mkdir_p(const char *path)
-{
-  struct stat st;
-  if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) return 0;
-#if defined(_WIN32)
-  if (_mkdir(path) == 0) return 0;
-#else
-  if (mkdir(path, 0755) == 0) return 0;
-#endif
-  return -1;
 }
 
 static int extract_one(const char *kind, int idx, const MapFileDisk *e)
@@ -367,14 +217,14 @@ static void cmd_extract(const Catalog *c, const char *kind_filter)
     die_errno(g_outdir);
 
   if (!kind_filter || !strcmp(kind_filter, "all") || !strcmp(kind_filter, "prog"))
-    errs += extract_table("prog", c->prog, c->n_prog);
+    errs += extract_table("prog", c->e[K_PROG], c->n[K_PROG]);
   if (!kind_filter || !strcmp(kind_filter, "all") || !strcmp(kind_filter, "bild"))
-    errs += extract_table("bild", c->bild, c->n_bild);
+    errs += extract_table("bild", c->e[K_BILD], c->n[K_BILD]);
   if (!kind_filter || !strcmp(kind_filter, "all") || !strcmp(kind_filter, "inv") ||
       !strcmp(kind_filter, "inventar"))
-    errs += extract_table("inv", c->inv, c->n_inv);
+    errs += extract_table("inv", c->e[K_INV], c->n[K_INV]);
   if (!kind_filter || !strcmp(kind_filter, "all") || !strcmp(kind_filter, "phase"))
-    errs += extract_table("phase", c->phase, c->n_phase);
+    errs += extract_table("phase", c->e[K_PHASE], c->n[K_PHASE]);
 
   if (errs)
     fprintf(stderr, "moas-util: %d extract error(s)\n", errs);
@@ -383,180 +233,6 @@ static void cmd_extract(const Catalog *c, const char *kind_filter)
 /* ---- graphics → PNG -------------------------------------------------- */
 
 static int g_palette_bild = -1;   /* --palette N: force palette of bild N */
-
-/* Bounds-checked port of UniversalUnpack (src/grafix.c). Returns 0 on success. */
-static int unpack_graphic(const uint8_t *src, long size, uint8_t *dst, long cap,
-                          uint8_t glass, long xs)
-{
-  static const int abk[3][4] = { { 1, -1, 1, -1 }, { 0, -2, 0, -2 }, { 0, -1, 0, -1 } };
-  short codes[256];
-  long c, t = 0, i;
-  int n;
-
-  if (size < 1) return -1;
-  for (i = 0; i < 256; i++) codes[i] = -1;
-  n = src[0];
-  if (1 + 2 * n > size) return -1;
-  for (i = 0; i < n; i++)
-    codes[src[1 + 2 * i]] = src[2 + 2 * i];
-  c = 1 + 2 * n;
-
-  while (c < size) {
-    uint8_t b = src[c];
-    if (b >= 248) {
-      if (b <= 250) {
-        const int *a = abk[b - 248];
-        long s1 = t + xs * a[1] + a[0], s2 = t + xs * a[3] + a[2] + 1;
-        if (s1 < 0 || s2 < 0 || s1 >= cap || s2 >= cap || t + 2 > cap) return -1;
-        dst[t] = dst[s1];
-        dst[t + 1] = dst[s2];
-        t += 2;
-        c += 1;
-      } else if (b == 255) {
-        long f, len;
-        if (c + 4 > size) return -1;
-        f = src[c + 1] | (src[c + 2] << 8);
-        len = src[c + 3];
-        if (f + len > cap || t + len > cap) return -1;
-        for (i = 0; i < len; i++) dst[t + i] = dst[f + i];
-        t += len;
-        c += 4;
-      } else {
-        long f, len, dist;
-        if (c + 3 > size) return -1;
-        f = src[c + 1] | (src[c + 2] << 8);
-        switch (b) {
-          case 251: len = (f >> 11) + 16; dist = (f & 2047) + len;  break;
-          case 252: len = (f >> 14) + 12; dist = (f & 16383) + len; break;
-          case 253: len = (f >> 14) + 8;  dist = (f & 16383) + len; break;
-          default:  len = (f >> 14) + 4;  dist = (f & 16383) + len; break;
-        }
-        if (t - dist < 0 || t + len > cap) return -1;
-        for (i = 0; i < len; i++) dst[t + i] = dst[t - dist + i];
-        t += len;
-        c += 3;
-      }
-    } else if (codes[b] != -1) {
-      long len;
-      if (c + 2 > size) return -1;
-      len = (src[c + 1] != 255) ? src[c + 1] + 3 : 513 + 3;
-      if (t + len > cap) return -1;
-      if (codes[b] != glass) memset(dst + t, codes[b], (size_t)len);
-      t += len;
-      c += 2;
-    } else {
-      if (t >= cap) return -1;
-      if (b != glass) dst[t] = b;
-      t++;
-      c++;
-    }
-  }
-  return 0;
-}
-
-static uint32_t g_crc_table[256];
-
-static uint32_t crc32_update(uint32_t crc, const uint8_t *p, size_t n)
-{
-  size_t i;
-  if (!g_crc_table[1]) {
-    uint32_t k, j, v;
-    for (k = 0; k < 256; k++) {
-      v = k;
-      for (j = 0; j < 8; j++) v = (v & 1) ? 0xedb88320u ^ (v >> 1) : v >> 1;
-      g_crc_table[k] = v;
-    }
-  }
-  for (i = 0; i < n; i++) crc = g_crc_table[(crc ^ p[i]) & 0xff] ^ (crc >> 8);
-  return crc;
-}
-
-static void put_be32(uint8_t *p, uint32_t v)
-{
-  p[0] = (uint8_t)(v >> 24); p[1] = (uint8_t)(v >> 16);
-  p[2] = (uint8_t)(v >> 8);  p[3] = (uint8_t)v;
-}
-
-static int png_chunk(FILE *fp, const char *type, const uint8_t *data, size_t n)
-{
-  uint8_t hdr[8], tail[4];
-  uint32_t crc;
-  put_be32(hdr, (uint32_t)n);
-  memcpy(hdr + 4, type, 4);
-  crc = crc32_update(0xffffffffu, hdr + 4, 4);
-  crc = crc32_update(crc, data, n) ^ 0xffffffffu;
-  put_be32(tail, crc);
-  return fwrite(hdr, 1, 8, fp) == 8 && (n == 0 || fwrite(data, 1, n, fp) == n) &&
-         fwrite(tail, 1, 4, fp) == 4 ? 0 : -1;
-}
-
-/* 8-bit indexed PNG; zlib stream uses stored (uncompressed) deflate blocks.
- * pal is 768 bytes of VGA 6-bit RGB. transparent < 0 disables tRNS. */
-static int write_png(const char *path, const uint8_t *pix, int w, int h,
-                     const uint8_t *pal, int transparent)
-{
-  static const uint8_t sig[8] = { 0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n' };
-  uint8_t ihdr[13], plte[768], trns[256];
-  size_t raw_len = (size_t)(w + 1) * (size_t)h;
-  size_t nblocks = raw_len / 65535 + 1;
-  size_t zlen = 2 + raw_len + nblocks * 5 + 4;
-  uint8_t *z = xmalloc(zlen), *raw = xmalloc(raw_len);
-  size_t i, o = 0, pos = 0;
-  uint32_t s1 = 1, s2 = 0;
-  FILE *fp;
-  int y, rc;
-
-  for (y = 0; y < h; y++) {
-    raw[(size_t)y * (w + 1)] = 0; /* filter: none */
-    memcpy(raw + (size_t)y * (w + 1) + 1, pix + (size_t)y * w, (size_t)w);
-  }
-  z[o++] = 0x78; z[o++] = 0x01;
-  do {
-    size_t n = raw_len - pos > 65535 ? 65535 : raw_len - pos;
-    z[o++] = (pos + n == raw_len) ? 1 : 0;
-    z[o++] = (uint8_t)n; z[o++] = (uint8_t)(n >> 8);
-    z[o++] = (uint8_t)~n; z[o++] = (uint8_t)(~n >> 8);
-    memcpy(z + o, raw + pos, n);
-    o += n;
-    pos += n;
-  } while (pos < raw_len);
-  for (i = 0; i < raw_len; i++) {
-    s1 = (s1 + raw[i]) % 65521;
-    s2 = (s2 + s1) % 65521;
-  }
-  put_be32(z + o, (s2 << 16) | s1);
-  o += 4;
-
-  put_be32(ihdr, (uint32_t)w);
-  put_be32(ihdr + 4, (uint32_t)h);
-  ihdr[8] = 8; ihdr[9] = 3; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
-  for (i = 0; i < 768; i++) {
-    uint8_t v = pal[i] & 63;
-    plte[i] = (uint8_t)((v << 2) | (v >> 4));
-  }
-
-  fp = fopen(path, "wb");
-  if (!fp) {
-    fprintf(stderr, "moas-util: cannot write %s: %s\n", path, strerror(errno));
-    free(z); free(raw);
-    return -1;
-  }
-  rc = fwrite(sig, 1, 8, fp) == 8 ? 0 : -1;
-  if (!rc) rc = png_chunk(fp, "IHDR", ihdr, 13);
-  if (!rc) rc = png_chunk(fp, "PLTE", plte, 768);
-  if (!rc && transparent >= 0) {
-    memset(trns, 255, 256);
-    trns[transparent] = 0;
-    rc = png_chunk(fp, "tRNS", trns, (size_t)transparent + 1);
-  }
-  if (!rc) rc = png_chunk(fp, "IDAT", z, o);
-  if (!rc) rc = png_chunk(fp, "IEND", NULL, 0);
-  if (fclose(fp) != 0) rc = -1;
-  if (rc) fprintf(stderr, "moas-util: short write %s\n", path);
-  free(z);
-  free(raw);
-  return rc;
-}
 
 static uint8_t *load_blob(const MapFileDisk *e)
 {
@@ -576,55 +252,49 @@ static uint8_t *load_blob(const MapFileDisk *e)
   return buf;
 }
 
-static int bild_has_palette(const MapFileDisk *e)
-{
-  return (e->x & 16384) && e->Length > 768;
-}
-
 /* Copy the 768-byte palette trailing bild idx into pal. */
 static int load_bild_palette(const Catalog *c, int idx, uint8_t *pal)
 {
   uint8_t *buf;
-  if (idx < 0 || idx >= c->n_bild || !bild_has_palette(&c->bild[idx])) return -1;
-  buf = load_blob(&c->bild[idx]);
+  if (idx < 0 || idx >= c->n[K_BILD] || !bild_has_palette(&c->e[K_BILD][idx])) return -1;
+  buf = load_blob(&c->e[K_BILD][idx]);
   if (!buf) return -1;
-  memcpy(pal, buf + c->bild[idx].Length - 768, 768);
+  memcpy(pal, buf + c->e[K_BILD][idx].Length - 768, 768);
   free(buf);
   return 0;
 }
 
-/* Decode one resource and write it as PNG. w/h are output size; xs is the
- * unpack stride (always equal to w here). */
-static int png_one(const char *kind, int idx, const MapFileDisk *e, long payload,
-                   int w, int h, uint8_t glass, const uint8_t *pal, int transparent)
+/* Decode one resource and write it as PNG. pal is VGA 6-bit. */
+static int png_one(int kind, int idx, const MapFileDisk *e, const uint8_t *pal,
+                   const uint8_t *alpha)
 {
   char outname[64], outpath[1024];
-  long cap = (long)w * h;
-  uint8_t *blob, *pix;
+  int w = gfx_width(kind, e), h = gfx_height(kind, e);
+  long n = (long)w * h, payload = gfx_payload(kind, e);
+  uint8_t *blob, *pix, rgb[768];
   int rc;
 
   if (w <= 0 || h <= 0 || payload < 1) {
-    printf("skip  %s[%d]  (empty)\n", kind, idx);
+    printf("skip  %s[%d]  (empty)\n", kind_names[kind], idx);
     return 0;
   }
   blob = load_blob(e);
   if (!blob) {
-    fprintf(stderr, "moas-util: cannot read %s[%d]\n", kind, idx);
+    fprintf(stderr, "moas-util: cannot read %s[%d]\n", kind_names[kind], idx);
     return -1;
   }
-  /* Slack: the engine's buffers are larger than w*h and streams may overrun. */
-  pix = xmalloc((size_t)cap + 1024);
-  memset(pix, 0, (size_t)cap + 1024);
-  if (unpack_graphic(blob + 1, payload - 1, pix, cap + 1024, glass, w) != 0) {
-    fprintf(stderr, "moas-util: %s[%d]: corrupt or unsupported pixel stream\n", kind, idx);
+  pix = xmalloc((size_t)n);
+  if (gfx_decode(blob + 1, payload - 1, pix, n, w) != n) {
+    fprintf(stderr, "moas-util: %s[%d]: corrupt or unsupported pixel stream\n", kind_names[kind], idx);
     free(blob);
     free(pix);
     return -1;
   }
   free(blob);
-  snprintf(outname, sizeof(outname), "%s_%04d.png", kind, idx);
+  snprintf(outname, sizeof(outname), "%s_%04d.png", kind_names[kind], idx);
   if (!path_join(outpath, sizeof(outpath), g_outdir, outname)) die("outdir path too long");
-  rc = write_png(outpath, pix, w, h, pal, transparent);
+  vga_to_rgb(pal, rgb);
+  rc = png_write(outpath, pix, w, h, rgb, alpha);
   free(pix);
   if (rc == 0) printf("wrote %s  (%dx%d)\n", outpath, w, h);
   return rc;
@@ -638,7 +308,7 @@ static int want_kind(const char *filter, const char *kind)
 
 static void cmd_extract_png(const Catalog *c, const char *kind_filter)
 {
-  uint8_t sprite_pal[768], room_pal[768], tmp[768];
+  uint8_t sprite_pal[768], room_pal[768], tmp[768], alpha[256];
   int i, errs = 0, have_room = 0;
 
   if (!want_kind(kind_filter, "bild") && !want_kind(kind_filter, "inv") &&
@@ -659,43 +329,43 @@ static void cmd_extract_png(const Catalog *c, const char *kind_filter)
       exit(1);
     }
   } else {
-    for (i = 0; i < c->n_bild; i++)
+    for (i = 0; i < c->n[K_BILD]; i++)
       if (load_bild_palette(c, i, sprite_pal) == 0) break;
   }
   memcpy(room_pal, sprite_pal, sizeof(room_pal));
 
   if (want_kind(kind_filter, "bild")) {
-    for (i = 0; i < c->n_bild; i++) {
-      const MapFileDisk *e = &c->bild[i];
+    for (i = 0; i < c->n[K_BILD]; i++) {
+      const MapFileDisk *e = &c->e[K_BILD][i];
       if (bild_has_palette(e)) {
         /* Room picture: 320 wide, palette trails the pixel stream. */
         if (load_bild_palette(c, i, tmp) == 0) {
           if (g_palette_bild < 0) memcpy(room_pal, tmp, sizeof(room_pal));
           have_room = 1;
         }
-        errs += png_one("bild", i, e, e->Length - 768, e->x & ~16384, e->y, 0,
-                        g_palette_bild >= 0 ? sprite_pal : tmp, -1) < 0;
+        errs += png_one(K_BILD, i, e, g_palette_bild >= 0 ? sprite_pal : tmp, NULL) < 0;
       } else if (i == 0) {
         /* Bild 0: boxed overlay, 255 is transparent (DisplayBox). */
-        errs += png_one("bild", i, e, e->Length, e->x, e->y, 254, sprite_pal, 255) < 0;
+        memset(alpha, 255, sizeof(alpha));
+        alpha[255] = 0;
+        errs += png_one(K_BILD, i, e, sprite_pal, alpha) < 0;
       } else {
         /* Info maps (LadeInfoBild): 320 wide, shown with the preceding room
          * palette. */
-        errs += png_one("bild", i, e, e->Length, 320, e->y, 254,
-                        have_room ? room_pal : sprite_pal, -1) < 0;
+        errs += png_one(K_BILD, i, e, have_room ? room_pal : sprite_pal, NULL) < 0;
       }
     }
   }
+  /* Sprites: 254 is the glass colour; 0 shows through as well. */
+  memset(alpha, 255, sizeof(alpha));
+  alpha[0] = alpha[254] = 0;
   if (want_kind(kind_filter, "inv"))
-    for (i = 0; i < c->n_inv; i++)
-      errs += png_one("inv", i, &c->inv[i], c->inv[i].Length, 32, 24, 254, sprite_pal, 0) < 0;
+    for (i = 0; i < c->n[K_INV]; i++)
+      errs += png_one(K_INV, i, &c->e[K_INV][i], sprite_pal, alpha) < 0;
   if (want_kind(kind_filter, "phase"))
-    for (i = 0; i < c->n_phase; i++) {
+    for (i = 0; i < c->n[K_PHASE]; i++)
       /* Animation frames are stacked vertically. */
-      const MapFileDisk *e = &c->phase[i];
-      int frames = e->Anz > 0 ? e->Anz : 1;
-      errs += png_one("phase", i, e, e->Length, e->x, e->y * frames, 254, sprite_pal, 0) < 0;
-    }
+      errs += png_one(K_PHASE, i, &c->e[K_PHASE][i], sprite_pal, alpha) < 0;
 
   if (errs)
     fprintf(stderr, "moas-util: %d extract-png error(s)\n", errs);
@@ -759,309 +429,39 @@ static void cmd_xxx(void)
 }
 
 
-/* ---- script disassembler (prog resources) ---- */
 
-typedef struct {
-  int size;          /* fixed size in bytes including opcode; 0 = special */
-  const char *name;
-  const char *fmt;   /* printf-style over int16 params; NULL = dump raw shorts */
-} OpInfo;
-
-/* size: total bytes including opcode for sequential path. 0 = string (see insn_size). */
-static const OpInfo op_table[128] = {
-  [0]  = { 5,  "var_add_const",      "var[%d] += %d" },
-  [1]  = { 5,  "var_add_var",        "var[%d] += var[%d]" },
-  [2]  = { 16, "add_person",         NULL },
-  [4]  = { 3,  "click_close",        "mode=%d" },
-  [6]  = { 3,  "teak_effect",        "%d" },
-  [7]  = { 1,  "close_window",       NULL },
-  [10] = { 1,  "abort_redraw",       NULL },
-  [12] = { 3,  "say_wait",           "%d" },
-  [13] = { 17, "conditional_walk",   NULL },
-  [14] = { 3,  "click_or_enter",     "mode=%d" },
-  [15] = { 5,  "get_person_x",       "person=%d -> var[%d]" },
-  [16] = { 5,  "get_person_y",       "person=%d -> var[%d]" },
-  [17] = { 3,  "call_proc",          "proc=%d" },
-  [18] = { 11, "if",                 NULL },
-  [19] = { 5,  "set_ghost_level",    "person=%d level=%d" },
-  [20] = { 13, "if_person_in",       NULL },
-  [21] = { 5,  "if_wasnt_here",      "var=%d else_addr=%d" },
-  [22] = { 5,  "goto_proc",          "proc=%d addr=%d" },
-  [23] = { 1,  "arm_key_abort",      NULL },
-  [26] = { 3,  "print_var",          "var[%d]" },
-  [27] = { 11, "add_area_label",     NULL },
-  [28] = { 11, "add_area_jumper",    NULL },
-  [29] = { 1,  "clear_screen_init",  NULL },
-  [30] = { 7,  "ontime_jump",        "t=%d proc=%d addr=%d" },
-  [31] = { 3,  "open_window",        "%d" },
-  [32] = { 5,  "var_rand_const",     "var[%d] = rand(%d)+1" },
-  [33] = { 5,  "var_rand_var",       "var[%d] = rand(var[%d])+1" },
-  [34] = { 5,  "set_person_z",       "person=%d z=%d" },
-  [35] = { 3,  "remove_person",      "%d" },
-  [38] = { 5,  "var_set_const",      "var[%d] = %d" },
-  [39] = { 5,  "var_set_var",        "var[%d] = var[%d]" },
-  [40] = { 5,  "set_object",         "obj=%d val=%d" },
-  [41] = { 7,  "blend",              NULL },
-  [42] = { 7,  "load_bild",          NULL },
-  [43] = { 1,  "stop_all_walking",   NULL },
-  [44] = { 0,  "print_sentence",     "text" },
-  [45] = { 3,  "unmark_area",        "%d" },
-  [46] = { 3,  "unmark_area2",       "%d" },
-  [47] = { 3,  "wait",               "%d" },
-  [48] = { 1,  "return_not_found",   NULL },
-  [50] = { 1,  "return_found",       NULL },
-  [51] = { 1,  "restart",            NULL },
-  [52] = { 3,  "blend_in",           "%d" },
-  [53] = { 3,  "blend_out",          "%d" },
-  [54] = { 5,  "adress",             "%d %d" },
-  [55] = { 1,  "wait_while_walking", NULL },
-  [56] = { 13, "parse_if",           NULL },
-  [57] = { 16, "set_person",         NULL },
-  [58] = { 5,  "shake",              "%d %d" },
-  [59] = { 1,  "init_ontimes",       NULL },
-  [60] = { 0,  "if_eq_print",        "text" },
-  [61] = { 5,  "execute",            "proc=%d addr=%d" },
-  [62] = { 0,  "add_power_parse",    "text" },
-  [63] = { 9,  "check_file",         NULL },
-  [64] = { 0,  "display_message",    "text" },
-  [65] = { 0,  "add_description",    "text" },
-  [66] = { 0,  "add_say_window",     "text" },
-  [67] = { 0,  "add_option",         "text" },
-  [68] = { 3,  "add_dialog",         "%d" },
-  [69] = { 1,  "init_dialogs",       NULL },
-  [70] = { 3,  "remove_dialog",      "%d" },
-  [71] = { 3,  "reset_dialog",       "%d" },
-  [72] = { 5,  "select_from_dialog", "%d %d" },
-  [73] = { 7,  "toggle_dialog_point","%d %d %d" },
-  [74] = { 27, "if3",                NULL },
-  [75] = { 3,  "toggle_screen",      "%d" },
-  [76] = { 3,  "internal_error",     "code=%d" },
-  [77] = { 1,  "packing_off",        NULL },
-  [78] = { 5,  "select_from_dialog", "%d %d" },
-  [79] = { 1,  "menu_return",        NULL },
-  [80] = { 19, "if2",                NULL },
-  [81] = { 0,  "add_say_window2",    "text" },
-  [82] = { 13, "add_walk_area",      NULL },
-  [83] = { 1,  "remove_statists",    NULL },
-  [84] = { 0,  "print_sentence_plus","text" },
-  [85] = { 9,  "say_properties",     NULL },
-  [86] = { 3,  "close_say",          "%d" },
-  [87] = { 9,  "blend2",             NULL },
-  [88] = { 7,  "walk_person",        "p=%d x=%d y=%d" },
-  [89] = { 0,  "code_text",          "text" },
-  [90] = { 0,  "print_sentence_ret", "text" },
-  [91] = { 0,  "set_room_name",      "text" },
-  [92] = { 0,  "say_if",              "text" },
-  [93] = { 7,  "palette_cycle",      NULL },
-  [94] = { 1,  "look_keys",          NULL },
-  [95] = { 3,  "load_music",         "%d" },
-  [96] = { 7,  "iwalk",              NULL },
-  [97] = { 0,  "say_if_plus",         "text" },
-  [98] = { 0,  "say_if_plus2",        "text" },
-  [99] = { 0,  "say_if_found",       "text" },
-};
-
-static int16_t rd_i16(const uint8_t *p)
-{
-  return (int16_t)(p[0] | (p[1] << 8));
-}
-
-/* String ops: payload after opcode is bytes until NUL; total size = base + strlen.
- * base is bytes before the C string (including opcode). */
-static int string_insn_size(const uint8_t *code, int len, int pc, int base_before_string)
-{
-  int i = pc + base_before_string;
-  if (i >= len) return -1;
-  while (i < len && code[i] != 0) i++;
-  if (i >= len) return -1;
-  return (i + 1) - pc; /* include NUL */
-}
-
-static int insn_size(const uint8_t *code, int len, int pc)
-{
-  uint8_t op;
-  int sz;
-  if (pc >= len) return -1;
-  op = code[pc];
-  if (op >= 128 || op_table[op].name == NULL) {
-    return 1;
-  }
-  sz = op_table[op].size;
-  if (sz > 0) return sz;
-  /* Variable: Adresse += base + strlen(string); string starts after base-1 bytes from pc
-   * (base includes the opcode). */
-  switch (op) {
-    case 44: /* +=2+strlen, string at Parameter[0] = pc+1 — wait: +=2+strlen means base 2 */
-    case 64: /* +=2+strlen */
-    case 84:
-    case 91:
-      return string_insn_size(code, len, pc, 1); /* string at pc+1; size=2+strlen => base_before=1 includes only op, +strlen+NUL = 2+strlen if string at pc+1 */
-    case 60: /* +=6+strlen — short, short, string */
-      return string_insn_size(code, len, pc, 5);
-    case 62: /* +=4+strlen */
-    case 65:
-    case 89:
-      return string_insn_size(code, len, pc, 3);
-    case 66: /* +=8+strlen */
-    case 81:
-      return string_insn_size(code, len, pc, 7);
-    case 67: /* +=10+strlen */
-      return string_insn_size(code, len, pc, 9);
-    case 90: /* string at Parameter, then return */
-      return string_insn_size(code, len, pc, 1);
-    case 92: /* fall through to 99: Adresse+=8+strlen(Parameter[3]) */
-    case 97:
-    case 98:
-    case 99:
-      return string_insn_size(code, len, pc, 7);
-    default:
-      return 1;
-  }
-}
-
-static void print_cp850_str(const uint8_t *s, int max)
-{
-  int i;
-  putchar('"');
-  for (i = 0; s[i] && i < max; i++) {
-    unsigned char c = s[i];
-    if (c >= 32 && c < 127 && c != '"' && c != '\\') putchar((char)c);
-    else if (c == '\n') fputs("\\n", stdout);
-    else if (c == 0x81) fputs("ü", stdout);
-    else if (c == 0x84) fputs("ä", stdout);
-    else if (c == 0x8e) fputs("Ä", stdout);
-    else if (c == 0x94) fputs("ö", stdout);
-    else if (c == 0x99) fputs("Ö", stdout);
-    else if (c == 0x9a) fputs("Ü", stdout);
-    else if (c == 0xe1) fputs("ß", stdout);
-    else printf("\\x%02x", c);
-  }
-  putchar('"');
-}
-
-static void disasm_buffer(const uint8_t *code, int len, int prog_index)
-{
-  int pc = 0;
-  printf("; program %d  %d bytes\n", prog_index, len);
-  while (pc < len) {
-    uint8_t op = code[pc];
-    int sz = insn_size(code, len, pc);
-    int i, nshort;
-    const OpInfo *info = (op < 128) ? &op_table[op] : NULL;
-
-    printf("%04x: ", pc);
-    if (sz < 1) {
-      printf("db 0x%02x  ; truncated\n", op);
-      break;
-    }
-    for (i = 0; i < sz && i < 12; i++)
-      printf("%02x ", code[pc + i]);
-    for (; i < 12; i++)
-      printf("   ");
-
-    if (!info || !info->name) {
-      /* Likely padding or a size error; show rest as data once. */
-      printf("; non-code/unknown 0x%02x — remaining %d bytes (padding or desync)\n",
-             op, len - pc);
-      printf("; ");
-      {
-        int j;
-        for (j = pc; j < len && j < pc + 32; j++)
-          printf("%02x ", code[j]);
-        if (len - pc > 32) printf("...");
-        printf("\n");
-      }
-      break;
-    }
-
-    printf("%s", info->name);
-    nshort = (sz - 1) / 2;
-    if (info->size == 0) {
-      /* string-ish */
-      int off = 1;
-      if (op == 60) off = 5;
-      if (op == 62 || op == 65 || op == 89) off = 3;
-      if (op == 66 || op == 81) off = 7;
-      if (op == 67) off = 9;
-      if (op == 92 || op == 97 || op == 98 || op == 99) off = 7;
-      if (nshort >= 1 && off >= 3)
-        printf("  %d", (int)rd_i16(code + pc + 1));
-      if (pc + off < len) {
-        char ubuf[400];
-        unpack_to(ubuf, sizeof(ubuf), code + pc + off);
-        putchar(' ');
-        print_cp850_str((const uint8_t *)ubuf, (int)strlen(ubuf));
-      }
-    } else if (info->fmt && nshort > 0) {
-      int16_t a = 0, b = 0, c = 0, d = 0;
-      if (nshort >= 1) a = rd_i16(code + pc + 1);
-      if (nshort >= 2) b = rd_i16(code + pc + 3);
-      if (nshort >= 3) c = rd_i16(code + pc + 5);
-      if (nshort >= 4) d = rd_i16(code + pc + 7);
-      printf("  ");
-      printf(info->fmt, a, b, c, d);
-    } else if (nshort > 0) {
-      printf("  ");
-      for (i = 0; i < nshort && i < 8; i++)
-        printf("%d%s", (int)rd_i16(code + pc + 1 + i * 2),
-               i + 1 < nshort && i + 1 < 8 ? ", " : "");
-    }
-    putchar('\n');
-    pc += sz;
-  }
-}
-
-static int load_prog_blob(const Catalog *cat, int idx, uint8_t **out, int *out_len)
-{
-  char srcname[32];
-  const MapFileDisk *e;
-  int fd;
-  uint8_t *buf;
-  ssize_t n;
-
-  if (idx < 0 || idx >= cat->n_prog) return -1;
-  e = &cat->prog[idx];
-  if (e->Length <= 0 || e->FileNum < 1) {
-    *out = NULL;
-    *out_len = 0;
-    return 0;
-  }
-  snprintf(srcname, sizeof(srcname), "GAME.%d", (int)e->FileNum);
-  fd = open_data(srcname);
-  if (fd < 0) return -1;
-  if (lseek(fd, (off_t)e->FilePos, SEEK_SET) < 0) { close(fd); return -1; }
-  buf = xmalloc((size_t)e->Length);
-  n = read(fd, buf, (size_t)e->Length);
-  close(fd);
-  if (n != (ssize_t)e->Length) { free(buf); return -1; }
-  *out = buf;
-  *out_len = (int)e->Length;
-  return 0;
-}
+/* ---- script disassembler -------------------------------------------- */
 
 static void cmd_disasm(const Catalog *cat, int prog_index)
 {
-  uint8_t *buf = NULL;
-  int len = 0;
-  if (prog_index < 0) {
-    int i;
-    for (i = 0; i < cat->n_prog; i++) {
-      if (load_prog_blob(cat, i, &buf, &len) == 0 && buf) {
-        disasm_buffer(buf, len, i);
-        putchar('\n');
-        free(buf);
-        buf = NULL;
-      }
-    }
-    return;
+  int n = cat->n[K_PROG], i;
+  Prog *progs = xmalloc(sizeof(Prog) * (size_t)(n + 1));
+  load_dict();
+  for (i = 0; i < n; i++) {
+    uint8_t *buf = NULL;
+    int len = 0;
+    if (load_prog_blob(cat, i, &buf, &len) != 0) die("cannot load program %d", i);
+    progs[i].code = buf;
+    progs[i].len = len;
   }
-  if (load_prog_blob(cat, prog_index, &buf, &len) != 0 || !buf)
-    die("cannot load program");
-  disasm_buffer(buf, len, prog_index);
-  free(buf);
+  if (prog_index >= n) die("no program %d", prog_index);
+  for (i = 0; i < n; i++)
+    if (prog_index < 0 || i == prog_index) {
+      script_disasm(stdout, i, progs, n, &g_dict);
+      if (prog_index < 0) putchar('\n');
+    }
+  for (i = 0; i < n; i++) free(progs[i].code);
+  free(progs);
 }
 
-
+/* Instruction walk for `strings`: unknown opcodes are skipped a byte at a
+ * time, as this command always did. */
+static int strings_insn_size(const uint8_t *code, int len, int pc)
+{
+  int sz = script_insn_size(code, len, pc);
+  if (sz < 0 && pc < len && !script_op_name(code[pc])) return 1;
+  return sz;
+}
 
 /* ---- extract translatable strings ------------------------------------ */
 
@@ -1124,19 +524,6 @@ static void json_escape(const char *s, char *out, size_t outsz)
   out[o] = 0;
 }
 
-/* Byte offset of packed C-string relative to opcode (op at pc). */
-static int string_param_off(uint8_t op)
-{
-  switch (op) {
-    case 44: case 64: case 84: case 90: case 91: return 1;
-    case 62: case 65: case 89: return 3;
-    case 60: return 5;
-    case 66: case 81: case 92: case 97: case 98: case 99: return 7;
-    case 67: return 9;
-    default: return -1;
-  }
-}
-
 typedef struct {
   char *id;
   char *text;   /* UTF-8 */
@@ -1159,7 +546,6 @@ static void rows_add(const char *id, const char *text_utf8, const char *ref)
   r->id = xstrdup(id);
   r->text = xstrdup(text_utf8);
   r->ref = xstrdup(ref);
-  if (!r->id || !r->text || !r->ref) die("out of memory");
 }
 
 static void extract_prog_strings(const Catalog *cat, int prog_index)
@@ -1170,19 +556,19 @@ static void extract_prog_strings(const Catalog *cat, int prog_index)
     return;
   while (pc < len) {
     uint8_t op = buf[pc];
-    int sz = insn_size(buf, len, pc);
-    int soff = string_param_off(op);
+    int sz = strings_insn_size(buf, len, pc);
+    int soff = script_string_offset(op);
     if (sz < 1) break;
     if (soff >= 0 && pc + soff < len) {
       const uint8_t *packed = buf + pc + soff;
       char unpacked[512], utf8[1024], id[64], ref[96];
-      const OpInfo *info = (op < 128) ? &op_table[op] : NULL;
+      const char *name = script_op_name(op);
       unpack_to(unpacked, sizeof(unpacked), packed);
       if (unpacked[0]) {
         cp850_to_utf8((const uint8_t *)unpacked, utf8, sizeof(utf8));
         snprintf(id, sizeof(id), "script.p%d.0x%04x", prog_index, pc);
         snprintf(ref, sizeof(ref), "prog %d @ %04x op %s",
-                 prog_index, pc, info && info->name ? info->name : "?");
+                 prog_index, pc, name ? name : "?");
         rows_add(id, utf8, ref);
       }
     }
@@ -1195,10 +581,10 @@ static void extract_pck_strings(void)
 {
   int i;
   char utf8[512], id[32], ref[32];
-  load_pack_codes();
-  for (i = 0; i < g_anz_codes; i++) {
-    if (!g_codes[i] || !g_codes[i][0]) continue;
-    cp850_to_utf8((const uint8_t *)g_codes[i], utf8, sizeof(utf8));
+  load_dict();
+  for (i = 0; i < g_dict.n; i++) {
+    if (!g_dict.piece[i][0]) continue;
+    cp850_to_utf8((const uint8_t *)g_dict.piece[i], utf8, sizeof(utf8));
     snprintf(id, sizeof(id), "pck.%d", i);
     snprintf(ref, sizeof(ref), "GAME.PCK token %d", i);
     rows_add(id, utf8, ref);
@@ -1321,7 +707,7 @@ static void cmd_strings(const Catalog *cat, const char *fmt)
   g_nrows = 0;
   extract_ui_strings();
   extract_pck_strings();
-  for (i = 0; i < cat->n_prog; i++)
+  for (i = 0; i < cat->n[K_PROG]; i++)
     extract_prog_strings(cat, i);
 
   if (!fmt || !fmt[0] || !strcmp(fmt, "json"))
@@ -1346,11 +732,14 @@ static void usage(const char *argv0)
   fprintf(stderr,
     "Usage: %s [options] <command> [args]\n"
     "\n"
-    "Inspect and extract MOAS / Mänick game data (GAME.* files).\n"
+    "Inspect, extract and rebuild MOAS / Mänick game data (GAME.* files).\n"
     "\n"
     "Options:\n"
     "  --datadir DIR   Directory with GAME.1, GAME.2, … (default: . or $MOAS_DATADIR)\n"
-    "  --outdir DIR    Extract output directory (default: extracted)\n"
+    "  --outdir DIR    Output directory (default: extracted)\n"
+    "  --srcdir DIR    pack: source tree written by unpack (default: .)\n"
+    "  --reference DIR pack: reuse the packed graphics of these data files where\n"
+    "                  the pixels are unchanged (needed for identical output)\n"
     "  --palette N     extract-png: use the palette of bild N for every image\n"
     "  -h, --help      This help\n"
     "\n"
@@ -1363,6 +752,10 @@ static void usage(const char *argv0)
     "  xxx               Summarise GAME.XXX font tables\n"
     "  disasm [N]        Disassemble script program N (default: all)\n"
     "  strings [FMT]     Extract translatable text (json|json-map|pot|tsv, default json)\n"
+    "  unpack            Convert all data files into an editable source tree in --outdir\n"
+    "                    (scripts as text, graphics as PNG, catalog/persons as text)\n"
+    "  pack              Build the data files from --srcdir into --outdir\n"
+    "  gfx-test          Re-encode every graphic, report which come out identical\n"
     "\n"
     "Examples:\n"
     "  %s --datadir manick info\n"
@@ -1371,14 +764,18 @@ static void usage(const char *argv0)
     "  %s --datadir manick extract-png --outdir /tmp/moas-png\n"
     "  %s --datadir manick disasm 0\n"
     "  %s --datadir manick strings pot > manick.pot\n"
-    "  %s --datadir manick strings json > manick.de.json\n",
-    argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0);
+    "  %s --datadir manick strings json > manick.de.json\n"
+    "  %s --datadir manick --outdir manick-src unpack\n"
+    "  %s --srcdir manick-src --outdir build/data --reference manick pack\n",
+    argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0);
 }
 
 int main(int argc, char **argv)
 {
   const char *cmd = NULL;
   const char *extract_kind = "all";
+  const char *srcdir = ".", *reference = NULL;
+  int have_outdir = 0;
   Catalog cat;
   int i;
   const char *env;
@@ -1401,10 +798,28 @@ int main(int argc, char **argv)
     }
     if (!strcmp(argv[i], "--outdir") && i + 1 < argc) {
       g_outdir = argv[++i];
+      have_outdir = 1;
       continue;
     }
     if (!strncmp(argv[i], "--outdir=", 9)) {
       g_outdir = argv[i] + 9;
+      have_outdir = 1;
+      continue;
+    }
+    if (!strcmp(argv[i], "--srcdir") && i + 1 < argc) {
+      srcdir = argv[++i];
+      continue;
+    }
+    if (!strncmp(argv[i], "--srcdir=", 9)) {
+      srcdir = argv[i] + 9;
+      continue;
+    }
+    if (!strcmp(argv[i], "--reference") && i + 1 < argc) {
+      reference = argv[++i];
+      continue;
+    }
+    if (!strncmp(argv[i], "--reference=", 12)) {
+      reference = argv[i] + 12;
       continue;
     }
     if (!strcmp(argv[i], "--palette") && i + 1 < argc) {
@@ -1446,6 +861,17 @@ int main(int argc, char **argv)
   }
   if (!strcmp(cmd, "xxx")) {
     cmd_xxx();
+    return 0;
+  }
+  if (!strcmp(cmd, "unpack") || !strcmp(cmd, "pack")) {
+    /* Writing a whole tree into ./extracted by accident is unhelpful. */
+    if (!have_outdir) die("%s needs --outdir", cmd);
+    if (!strcmp(cmd, "unpack")) cmd_unpack(g_datadir, g_outdir);
+    else cmd_pack(srcdir, g_outdir, reference);
+    return 0;
+  }
+  if (!strcmp(cmd, "gfx-test")) {
+    cmd_gfx_test(g_datadir);
     return 0;
   }
   if (!strcmp(cmd, "list") || !strcmp(cmd, "extract") || !strcmp(cmd, "extract-png")

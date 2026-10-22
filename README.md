@@ -30,7 +30,7 @@ effects may not yet match the original DOS release.
   under the name **Mänick Mänschion**
 - Cross builds: Windows (MinGW), Android (APK with packed `manick/` assets),
   WebAssembly (Emscripten + ASYNCIFY), R36S/PortMaster
-- **`moas-util`**: list/extract data resources, disassemble scripts, extract strings for translation
+- **`moas-util`**: list/extract data resources, disassemble scripts, extract strings for translation, unpack all data into editable text/PNG and pack it back
 
 Known limitations include unfinished speech-channel wiring and legacy effects
 such as `PowerBlend` and `WalkNLayers`. Optional music banks (`GAME*.TSS`) are
@@ -324,8 +324,47 @@ cmake -S . -B build && cmake --build build --target moas-util
   palette, inventory icons (32x24), animation phases (frames stacked
   vertically), info maps (depth/walk masks). Sprites use the first room
   palette; `--palette N` forces the palette of bild N for all images
-- **disasm** — linear disassembly of **prog** scripts using the engine’s
-  opcode map; packed strings decoded via `GAME.PCK`
+- **disasm** — disassembly of **prog** scripts in the `unpack` syntax
+  (labels, decoded strings)
+
+### Editing the game data (`unpack` / `pack`)
+
+```sh
+./build/moas-util --datadir manick --outdir manick-src unpack
+# edit manick-src/...
+./build/moas-util --srcdir manick-src --outdir build/data --reference manick pack
+./build/moas --datadir build/data
+```
+
+`unpack` converts every data file into a source tree; `pack` builds
+GAME.1–4, GAME.PCK, GAME.XXX and LICENCE.DAT back from it:
+
+| File | Contents |
+|------|----------|
+| `moas.txt` | GAME.2 catalog: one line per resource (sizes, file, checksum) and the order of resources in each GAME.N |
+| `scripts/prog_NNN.mas` | script programs as assembler text; jump targets are labels, so code can be inserted |
+| `bild/`, `inv/`, `phase/` | graphics as 8-bit indexed PNG; pixel values are palette indices |
+| `pck.txt` | GAME.PCK, the text dictionary script strings are packed with |
+| `persons.txt` | GAME.1 person templates |
+| `GAME.XXX`, `LICENCE.DAT` | copied as they are |
+
+Room pictures carry their palette in the PNG. Walk maps (Info2, see the
+`; walk map of bild N` comments in `moas.txt`) get a false-colour palette:
+bright = walkable (index ≥ 128), dark = blocked, the hue shows the floor
+value (index & 127); green/grey is floor 0. Depth maps (Info1) are a grey
+ramp. Keep the image indexed with the full 256-entry palette when editing.
+
+With `--reference DIR`, graphics whose pixels (and palette) are unchanged
+reuse the packed bytes from that data directory, so an unedited tree packs
+to byte-identical files (`ctest` checks this). Without it, or for edited
+images, `pack` encodes the graphics itself: the result decodes to the same
+pixels and is a little smaller, but the bytes differ (the original packer is
+lost; `moas-util gfx-test` shows how close the encoder gets). Scripts,
+dictionary, persons and catalog always compile to identical bytes.
+
+Script strings must be covered by `pck.txt` entries (an error names the
+first uncovered text). Script edits move code: old save games and the
+`prog 1 @0151` options-menu hook in `src/moas.c` refer to fixed addresses.
 
 ## Controls
 
