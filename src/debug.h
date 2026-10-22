@@ -25,6 +25,7 @@ static char moas_load_path[512];
 static int moas_fullscreen = 0;
 static int moas_no_autosave = 0; /* DOS: no CLI; always allow AUTOSAVE.SAV */
 static int moas_touch_controls = 0;
+static int moas_lang_explicit = 0;
 static void MoasParseArgs(int argc, char **argv) { (void)argc; (void)argv; }
 static void MoasDbg(unsigned flag, const char *fmt, ...) { (void)flag; (void)fmt; }
 #else
@@ -34,9 +35,10 @@ extern int moas_start_proc;   /* -1 = default 0 after intro */
 extern int moas_start_addr;
 extern int moas_load_slot;     /* -1 = none; 0..9 = GAME{n}.SAV */
 extern char moas_load_path[512]; /* explicit path; empty if unset */
-extern int moas_fullscreen;   /* request desktop-fullscreen window */
+extern int moas_fullscreen;   /* -1 = settings.ini / windowed, 0 = window, 1 = desktop fullscreen */
 extern int moas_no_autosave;  /* 1 = skip exit AUTOSAVE.SAV and startup restore */
 extern int moas_touch_controls; /* -1 = platform default, 0 = off, 1 = on-screen buttons */
+extern int moas_lang_explicit; /* 1 = --lang / MOAS_LANG given; settings.ini must not override */
 
 void MoasParseArgs(int argc, char **argv);
 void MoasDbg(unsigned flag, const char *fmt, ...);

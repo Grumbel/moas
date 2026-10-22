@@ -31,6 +31,7 @@
 #include "debug.h"
 #include "person_disk.h"
 #include "datapath.h"
+#include "settings.h"
 #ifndef DOS
 #include "platform.h"
 /* Windows: SDL2main expects SDL_main; including SDL.h renames main via macro. */
@@ -94,6 +95,7 @@ int main(int argc, char **argv)
   MOAS_ALOG("assets prepared");
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
   MoasLogDirectories();
+  MoasSettingsLoad();
   LangInit();
   MOAS_ALOG("data dir ready, calling InitAll");
 #else
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
   DontCyclePal=1;
   InitAll();
   DontCyclePal=0;
+  MoasSettingsApplyGame();
 #ifndef DOS
   PlatformPresent();
 #endif

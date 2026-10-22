@@ -6,6 +6,24 @@
 
 # TODO / Handoff
 
+## Persistent settings (2026-10-22)
+- `src/settings.c`: `<config dir>/settings.ini` (key=value) keeps language,
+  fullscreen, touch buttons, game speed, speech speed and volume. Written when
+  the F12 menu or the game's F10 FileMenu closes and at `PlatformShutdown`;
+  only rewritten when the content changed (tmp file + rename; IDBFS sync on web).
+- Load order: `MoasSettingsLoad()` after `MoasInitDataPath`, before
+  `LangInit`/`PlatformInit`; `MoasSettingsApplyGame()` after `InitAll`
+  (InitVars resets the speeds).
+- `--lang`/`MOAS_LANG`, `-f`/`--windowed` (new), `--touch-controls`/
+  `--no-touch-controls` win over the file. `moas_fullscreen` is now -1 = unset.
+  The file stores the state at exit, so a CLI override also ends up saved.
+- Fullscreen from the file is ignored on web (needs a user gesture) and Android.
+- Savegames still contain TotalSpeed/SpeechSpeed (format unchanged), but on
+  non-DOS builds loading keeps the current speeds. DOS keeps the original.
+- Web: shell.html mounts `/moas-config` on IDBFS next to `/moas-state`.
+- Tested headless (dummy video): values load, survive an autosave restore,
+  CLI overrides apply. Not yet checked in a browser or on Android.
+
 ## Format strings in translations (2026-10-21)
 - `utf8_to_cp850()` (lang.c) replaced '%' with a space as a glyph the font
   lacks, so "USE %s" became "USE  s". The verbs, "%i von %i" and power-parse

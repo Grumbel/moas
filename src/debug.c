@@ -17,9 +17,10 @@ int moas_start_proc = -1;
 int moas_start_addr = 0;
 int moas_load_slot = -1;
 char moas_load_path[512];
-int moas_fullscreen = 0;
+int moas_fullscreen = -1;
 int moas_no_autosave = 0;
 int moas_touch_controls = -1;
+int moas_lang_explicit = 0;
 
 static void usage(const char *argv0)
 {
@@ -38,6 +39,7 @@ static void usage(const char *argv0)
     "  --lang CODE             UI/script language (default de; loads lang/CODE.po)\n"
     "  --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit\n"
     "  -f, --fullscreen        Desktop fullscreen\n"
+    "  --windowed              Start in a window (overrides settings.ini)\n"
     "  --touch-controls        Show on-screen Save/Load/Esc/Skip/Use/Look buttons\n"
     "  --no-touch-controls     Hide them (default on desktop; toggle with F12)\n"
     "\n"
@@ -110,8 +112,10 @@ void MoasParseArgs(int argc, char **argv)
   if (env && *env)
     moas_debug |= parse_debug_list(env);
   env = getenv("MOAS_LANG");
-  if (env && *env)
+  if (env && *env) {
     LangSetCode(env);
+    moas_lang_explicit = 1;
+  }
 #ifdef __ANDROID__
   /* Always surface load diagnostics on logcat until the port is solid. */
   if (!env || !*env)
@@ -131,6 +135,7 @@ void MoasParseArgs(int argc, char **argv)
     }
     if ((v = opt_value(argc, argv, &i, "--lang"))) {
       LangSetCode(v);
+      moas_lang_explicit = 1;
       continue;
     }
     /* Bare -d / --debug at the end or before another option: all flags. */
@@ -161,6 +166,10 @@ void MoasParseArgs(int argc, char **argv)
     }
     if (!strcmp(a, "--fullscreen") || !strcmp(a, "-f")) {
       moas_fullscreen = 1;
+      continue;
+    }
+    if (!strcmp(a, "--windowed")) {
+      moas_fullscreen = 0;
       continue;
     }
     if ((v = opt_value(argc, argv, &i, "--statedir"))) {

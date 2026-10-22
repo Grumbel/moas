@@ -20,7 +20,7 @@ const char *MoasDataDir(void);
  */
 const char *MoasStateDir(void);
 
-/* Config directory (reserved; no config files yet).
+/* Config directory (settings.ini, see settings.h).
  * Linux: $XDG_CONFIG_HOME/moas or ~/.config/moas
  * Windows: %APPDATA%\\moas
  * Android: <internal>/moas-config

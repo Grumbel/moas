@@ -131,16 +131,20 @@
     var statusElement = document.getElementById('status');
     var progressBar = document.getElementById('progress-bar');
 
-    /* Game state dir is /moas-state (datapath.c __EMSCRIPTEN__). IndexedDB. */
+    /* Saves in /moas-state, settings.ini in /moas-config (datapath.c
+       __EMSCRIPTEN__). Both live in IndexedDB. */
     var STATE_DIR = '/moas-state';
+    var CONFIG_DIR = '/moas-config';
 
     function mountState() {
       try { FS.mkdirTree(STATE_DIR); } catch (e) {}
+      try { FS.mkdirTree(CONFIG_DIR); } catch (e) {}
       if (!FS.filesystems || !FS.filesystems.IDBFS) {
         console.warn('moas: IDBFS not linked; saves will not persist across reloads');
         return;
       }
       FS.mount(FS.filesystems.IDBFS, {}, STATE_DIR);
+      FS.mount(FS.filesystems.IDBFS, {}, CONFIG_DIR);
       Module.addRunDependency('moas-state');
       FS.syncfs(true, function(err) {
         if (err) console.warn('moas: loading browser saves failed', err);

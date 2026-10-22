@@ -63,6 +63,7 @@ set(MOAS_SOURCES
   src/powerbld.c
   src/print.c
   src/platform_sdl.c
+  src/settings.c
 )
 
 if(EMSCRIPTEN)

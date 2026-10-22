@@ -8,6 +8,7 @@
 #include "platform.h"
 #include "lang.h"
 #include "debug.h"
+#include "settings.h"
 
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
@@ -445,7 +446,7 @@ int PlatformInit(void)
 
   {
     Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-    if (moas_fullscreen)
+    if (moas_fullscreen == 1)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     {
       int win_w = LOGICAL_W * SCALE;
@@ -517,7 +518,7 @@ int PlatformInit(void)
     int w = 0, h = 0;
     SDL_GetWindowSize(window, &w, &h);
     platform_log("PlatformInit ok: window %dx%d scale=%d fullscreen=%d",
-                 w, h, SCALE, moas_fullscreen);
+                 w, h, SCALE, moas_fullscreen == 1);
   }
   /* Prefer XInput/standard mappings when present. */
   SDL_GameControllerEventState(SDL_ENABLE);
@@ -663,6 +664,7 @@ void PlatformShutdown(void)
   if (done) return;
   done = 1;
   running = 0;
+  MoasSettingsSave(); /* needs the window for the fullscreen state */
 
   /* Destroy SDL objects before freeing our buffers. */
   ov_free_icons();
@@ -1512,6 +1514,16 @@ static int eng_is_fullscreen(void)
   return (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
 }
 
+int PlatformIsFullscreen(void)
+{
+  return eng_is_fullscreen();
+}
+
+int PlatformTouchControlsOn(void)
+{
+  return overlay_on;
+}
+
 static void eng_toggle_fullscreen(void)
 {
   if (!window) return;
@@ -1875,6 +1887,7 @@ void PlatformEngineMenu(void)
   }
   engine_menu_visible = 0;
   in_menu = 0;
+  MoasSettingsSave();
   if (Screen)
     PowerRedrawArea(0, 0, 319, 199);
 }

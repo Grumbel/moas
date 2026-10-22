@@ -32,6 +32,7 @@
 #include "save_disk.h"
 #include "datapath.h"
 #include "debug.h"
+#include "settings.h"
 #include <errno.h>
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -804,8 +805,14 @@ int LoadGameFromFile(const char *path)
   ChkRead(ifil, (char *)Var, AnzVars * 2);
   ChkRead(ifil, (char *)&CurrentProc, 2);
   ChkRead(ifil, (char *)&GhostMode, 1);
+#ifdef DOS
   ChkRead(ifil, (char *)&TotalSpeed, 2);
   ChkRead(ifil, (char *)&SpeechSpeed, 2);
+#else
+  /* Speeds are a user setting (settings.ini): keep the current ones. */
+  ChkRead(ifil, (char *)&h, 2);
+  ChkRead(ifil, (char *)&h, 2);
+#endif
   ChkRead(ifil, (char *)&DayLightR, 2);
   ChkRead(ifil, (char *)&DayLightG, 2);
   ChkRead(ifil, (char *)&DayLightB, 2);
@@ -1191,6 +1198,7 @@ void FileMenu(void)
   }
   DontCyclePal--;
   PowerRedrawArea(0,122,114,199);
+  MoasSettingsSave();
 }
 
 #ifdef DOS
