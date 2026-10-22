@@ -18,6 +18,8 @@ Port to modern Linux using:
   e.g. `Co-authored-by: Claude Opus 5.5 <noreply@anthropic.com>` or
   `Co-authored-by: Grok <grok@x.ai>`.
 - Document progress and next steps in TODO.md after every meaningful change.
+- Always commit when a piece of work is done, without waiting to be asked.
+  It can be amended later; uncommitted work just causes trouble.
 - Keep the original game logic intact; only replace the DOS hardware layer.
 
 ## Architecture notes (as of port start)

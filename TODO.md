@@ -6,6 +6,25 @@
 
 # TODO / Handoff
 
+## Later: more translations, accented glyphs (2026-10-22, not started)
+- Game font (`CharAvail`, print.c) has A-Z, a-z, ÄÖÜß/äöü, digits and
+  `- .!?,:;'"<>()[]`. `utf8_to_cp850()` turns anything else into a space,
+  so "café" draws as "caf ".
+- Possible with the current font: Dutch (only ë/ï lost, e.g. "ruïne"),
+  Finnish (ä/ö only), Indonesian/Malay, Swahili.
+- Need new glyphs: Spanish (ñ áéíóú ¿¡), French (éèêàçùôœ...), Portuguese
+  (ãõç...), Italian (àèéìòù; "perche'" fallback is ugly), Nordic (åæø).
+  Polish/Czech/Turkish need more.
+- Plan: don't touch GAME.XXX (copying terms forbid changed data). Compose
+  accented glyphs at load time: base letter + accent mark (acute, grave,
+  circumflex, tilde, diaeresis, ring, cedilla), appended to the glyph tables
+  of all 7 fonts; map them in `utf8_to_cp850` like äöü.
+- First step: measure glyph heights. Lowercase likely has room above the
+  x-height; capitals may fill the cell. Fallback: no accents on capitals.
+- SDL 5x7 menu/overlay font has no lowercase or accents; needs the same.
+- Size: 1446 strings, ~7900 words in manick.pot. Translators need context;
+  some puzzles/dialogue may rely on German wordplay.
+
 ## Version from top-level VERSION file (2026-10-22)
 - `VERSION` (`0.1.0-dev`) replaces the hardcoded `0.1.0-sdl` in flake.nix
   and CMakeLists.txt. The flake appends `.<revCount>+g<shortRev>` for `-dev`
