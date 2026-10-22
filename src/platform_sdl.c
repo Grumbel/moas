@@ -9,6 +9,7 @@
 #include "lang.h"
 #include "debug.h"
 #include "settings.h"
+#include "version.h"
 
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
@@ -275,9 +276,6 @@ static void platform_log(const char *fmt, ...)
 }
 
 #ifdef __ANDROID__
-#ifndef MOAS_VERSION
-#define MOAS_VERSION "unknown"
-#endif
 
 /* Game data files staged under APK assets/ by mk/android/scripts/build-apk.sh.
  * Optional licence name variants cover case differences on case-sensitive FS. */
@@ -2026,6 +2024,25 @@ static void keyhints_draw(const SDL_Rect *avoid)
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
+/* Bottom centre of the game picture while the options menu is open. */
+static void version_draw(void)
+{
+  int dx, dy, dw, dh, u;
+  char buf[96];
+
+  if (!renderer)
+    return;
+  letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
+  u = dh / 300;
+  if (u < 1)
+    u = 1;
+  snprintf(buf, sizeof(buf), "MOAS %s", MOAS_VERSION);
+  if (ui_text_width(buf, u) > dw - 8 * u)
+    u = 1;
+  ui_draw_label(dx + (dw - ui_text_width(buf, u)) / 2, dy + dh - 11 * u,
+                buf, u, 150, 150, 175);
+}
+
 /* Forward: PlatformPresent draws the game + overlay under the menu. */
 static void platform_present_frame(void);
 static void pad_device_event(const SDL_Event *ev);
@@ -2053,6 +2070,7 @@ void PlatformEngineMenu(void)
     eng_menu_draw(&L, sel, pressed);
     overlay_draw_keys();
     keyhints_draw(&L.panel);
+    version_draw();
     SDL_RenderPresent(renderer);
 
     while (engine_menu_visible && SDL_PollEvent(&ev)) {

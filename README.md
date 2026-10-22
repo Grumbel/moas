@@ -218,6 +218,18 @@ Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
 binary runs on ArkOS’s glibc and SDL2. Controls and install notes:
 `mk/r36s/README.md`. Launch with `--fullscreen`.
 
+## Versioning
+
+The top-level `VERSION` file is the only source of truth. In git it always
+ends in `-dev` (e.g. `0.1.0-dev`); Nix builds append the revision count and
+short hash (`0.1.0-dev.1615+gf1fb306`, `...-dirty` for a dirty tree). A
+release `VERSION` (no `-dev`) is used as-is. CMake reads `VERSION` unless
+`-DPROJECT_VERSION_FULL=...` is passed (the flake does). `moas --version`
+prints it, and the options menu (F12) shows it at the bottom.
+
+Release: set `VERSION` to e.g. `0.1.0`, commit, tag `v0.1.0`, then bump
+`VERSION` to the next `-dev` (e.g. `0.1.1-dev`).
+
 ## Translation strings
 
 Script dialogue and object names live as packed tokens in `GAME.PCK` and as
@@ -491,6 +503,7 @@ These are developer tools from the original engine, not needed for normal play.
 
 ```text
 -h, --help              Show help
+--version               Show the version and exit
 -d, --debug=LIST        Enable comma-separated debug categories
 --skip-intro            Skip the intro/title script
 --proc=N                Start at program N

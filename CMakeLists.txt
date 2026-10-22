@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
-project(moas C)
+
+# Source of truth: top-level VERSION (e.g. "0.1.0-dev"), or
+# -DPROJECT_VERSION_FULL=... from packaging (Nix may append .<revCount>+g<rev>).
+if(NOT DEFINED PROJECT_VERSION_FULL)
+  file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PROJECT_VERSION_FULL LIMIT_COUNT 1)
+endif()
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS VERSION)
+
+# project() needs a numeric version; strip -dev / +git / similar suffixes.
+string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" _project_version_cmake "${PROJECT_VERSION_FULL}")
+
+project(moas VERSION ${_project_version_cmake} LANGUAGES C)
+message(STATUS "MOAS version: ${PROJECT_VERSION_FULL}")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -100,6 +112,7 @@ target_compile_definitions(moas PRIVATE
   $<$<NOT:$<BOOL:${WIN32}>>:LINUX>
   $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>
   "MOAS_DATADIR=\"${MOAS_DATADIR}\""
+  "MOAS_VERSION=\"${PROJECT_VERSION_FULL}\""
 )
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
@@ -157,9 +170,7 @@ if(EMSCRIPTEN)
   # Touch overlay buttons on by default (as on Android); runtime switch
   # --touch-controls / F12 menu exists on every SDL target.
   target_compile_definitions(moas PRIVATE MOAS_OVERLAY_BUTTONS)
-  if(NOT DEFINED MOAS_VERSION)
-    set(MOAS_VERSION "0.1.0-sdl")
-  endif()
+  set(MOAS_VERSION "${PROJECT_VERSION_FULL}")
   set(MOAS_SOURCE_URL "https://github.com/Grumbel/moas")
   configure_file(mk/wasm/shell.html ${CMAKE_CURRENT_BINARY_DIR}/shell.html @ONLY)
 

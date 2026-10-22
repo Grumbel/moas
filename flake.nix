@@ -43,7 +43,16 @@
             ];
         };
 
-        version = "0.1.0-sdl";
+        # Single source of truth: ./VERSION. Dev builds (x.y.z-dev) get
+        # .<revCount>+g<shortRev>; releases use the file as-is.
+        versionBase = pkgs.lib.fileContents ./VERSION;
+        gitRev = "${self.shortRev or self.dirtyShortRev or "dirty"}";
+        isDev = pkgs.lib.strings.hasInfix "-dev" versionBase;
+        version =
+          if isDev then
+            "${versionBase}.${toString (self.revCount or 0)}+g${gitRev}"
+          else
+            versionBase;
 
         moas = pkgs.stdenv.mkDerivation {
           pname = "moas";
@@ -59,6 +68,7 @@
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
             "-DMOAS_DATADIR=${placeholder "out"}/share/moas"
+            "-DPROJECT_VERSION_FULL=${version}"
           ];
 
           meta = with pkgs.lib; {

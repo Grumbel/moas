@@ -30,6 +30,7 @@ let
         "-DSDL2_DIR=${sdl2}/lib/cmake/SDL2"
         # Data lives next to the .exe in the shipped folder
         "-DMOAS_DATADIR=."
+        "-DPROJECT_VERSION_FULL=${version}"
       ];
     };
 

@@ -151,6 +151,7 @@ let
       "-DCMAKE_BUILD_TYPE=Release"
       "-DCMAKE_SKIP_RPATH=ON"
       "-DMOAS_DATADIR=data"
+      "-DPROJECT_VERSION_FULL=${version}"
       # Sources #include <SDL.h>; eoan places the header at include/SDL2/SDL.h.
       # (Kurvenrausch uses <SDL2/SDL.h> and can pass include/ alone.)
       "-DSDL2_INCLUDE_DIRS=${sysroot}/usr/include/SDL2"

@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "lang.h"
 #include "compat.h"
+#include "version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +31,7 @@ static void usage(const char *argv0)
     "\n"
     "Options:\n"
     "  -h, --help              Show this help\n"
+    "  --version               Show the version and exit\n"
     "  -d, --debug LIST        Debug flags (script,input,wait,window,load,all);\n"
     "                          also starts in master mode (like THPRIV + Alt+T)\n"
     "  --skip-intro            Skip intro/title script\n"
@@ -130,6 +132,10 @@ void MoasParseArgs(int argc, char **argv)
     const char *v;
     if (!strcmp(a, "-h") || !strcmp(a, "--help")) {
       usage(argv[0] ? argv[0] : "moas");
+      exit(0);
+    }
+    if (!strcmp(a, "--version")) {
+      printf("moas %s\n", MOAS_VERSION);
       exit(0);
     }
     if (!strcmp(a, "--skip-intro")) {

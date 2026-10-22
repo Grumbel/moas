@@ -66,7 +66,7 @@ let
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$out \
         -DSDL2_ROOT=${sdl2Wasm} \
-        -DMOAS_VERSION=${version} \
+        -DPROJECT_VERSION_FULL=${version} \
         -DMOAS_DATADIR=/data
       cmake --build build --parallel ''${NIX_BUILD_CORES:-1}
       runHook postBuild
