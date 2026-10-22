@@ -6,6 +6,31 @@
 
 # TODO / Handoff
 
+## Options menu + key legend translatable, MENU button → OPTIONS (2026-10-22)
+- SDL options menu (F12) and the start-screen key legend were hardcoded
+  English. Now `UI_OPT_*` / `UI_KEY_*` with German fallbacks (msgid) and
+  English in en.po, like the other UI strings; manick.pot regenerated
+  (`moas-util strings pot` output identical to the file).
+- Overlay MENU button renamed OPTIONS to match the window title
+  (`ui.overlay.menu` → `ui.overlay.options`).
+- The SDL bitmap font has A-Z, 0-9 and `<>+-:/.?` only: German strings use
+  UE for Ü, and a translation with other characters would draw blanks.
+- Overlay button labels still fall back to English (SAVE, LOAD, ...) in
+  German mode; long German words would not fit the buttons.
+
+## Touch overlay: Skip Scene / Skip Text, new order (2026-10-22)
+- The touch Esc button only ever aborted armed sequences (`synth_esc` sets
+  KeyAbortState/KeyScanCode=1; it does not queue a getch 27, so it never
+  closed dialogue choices or waits). Renamed to **Skip Scene** (film-frame
+  icon, key hint ESC); Skip is now **Skip Text** (speech-bubble icon).
+  UI keys `ui.overlay.esc/skip` → `ui.overlay.skip_scene/skip_text`.
+- Landscape right column: Menu, Hint (top) / Skip Scene, Skip Text (bottom).
+- Portrait: `ov_portrait()` reserves a top row (Save Load -- Hint Menu) and a
+  bottom block of two columns (Use/Look left, Skip Scene/Skip Text right);
+  picture centred between them.
+- Not checked on a device: the top row sits 8 px from the top edge, which
+  may collide with a notch / status bar on Android.
+
 ## moas-util unpack / pack (2026-10-22)
 - `unpack` writes a source tree (moas.txt catalog, scripts/*.mas, PNGs,
   pck.txt, persons.txt); `pack` rebuilds all data files. With

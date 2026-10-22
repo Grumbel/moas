@@ -90,16 +90,16 @@ msgid "LOAD"
 msgstr "LOAD"
 
 #. source UI
-#: ui.overlay.esc
-msgctxt "ui.overlay.esc"
-msgid "ESC"
-msgstr "ESC"
+#: ui.overlay.skip_scene
+msgctxt "ui.overlay.skip_scene"
+msgid "SKIP SCENE"
+msgstr "SKIP SCENE"
 
 #. source UI
-#: ui.overlay.skip
-msgctxt "ui.overlay.skip"
-msgid "SKIP"
-msgstr "SKIP"
+#: ui.overlay.skip_text
+msgctxt "ui.overlay.skip_text"
+msgid "SKIP TEXT"
+msgstr "SKIP TEXT"
 
 #. source UI
 #: ui.overlay.use
@@ -114,10 +114,10 @@ msgid "LOOK"
 msgstr "LOOK"
 
 #. source UI
-#: ui.overlay.menu
-msgctxt "ui.overlay.menu"
-msgid "MENU"
-msgstr "MENU"
+#: ui.overlay.options
+msgctxt "ui.overlay.options"
+msgid "OPTIONS"
+msgstr "OPTIONS"
 
 #. source UI
 #: ui.overlay.hint
@@ -130,6 +130,126 @@ msgstr "HINT"
 msgctxt "ui.menu.options"
 msgid "Optionen (F12)"
 msgstr "Options (F12)"
+
+#. source UI
+#: ui.opt.title
+msgctxt "ui.opt.title"
+msgid "OPTIONEN"
+msgstr "OPTIONS"
+
+#. source UI
+#: ui.opt.hint_touch
+msgctxt "ui.opt.hint_touch"
+msgid "ZEILE ANTIPPEN - DANEBEN TIPPEN SCHLIESST"
+msgstr "TAP A ROW - TAP OUTSIDE TO CLOSE"
+
+#. source UI
+#: ui.opt.hint_keys
+msgctxt "ui.opt.hint_keys"
+msgid "KLICK ODER PFEILE/ENTER - ESC/F12 SCHLIESST"
+msgstr "CLICK OR ARROWS/ENTER - ESC/F12 CLOSES"
+
+#. source UI
+#: ui.opt.language
+msgctxt "ui.opt.language"
+msgid "SPRACHE"
+msgstr "LANGUAGE"
+
+#. source UI
+#: ui.opt.fullscreen
+msgctxt "ui.opt.fullscreen"
+msgid "VOLLBILD"
+msgstr "FULLSCREEN"
+
+#. source UI
+#: ui.opt.touch
+msgctxt "ui.opt.touch"
+msgid "TOUCH-TASTEN"
+msgstr "TOUCH BUTTONS"
+
+#. source UI
+#: ui.opt.speed
+msgctxt "ui.opt.speed"
+msgid "SPIELTEMPO"
+msgstr "GAME SPEED"
+
+#. source UI
+#: ui.opt.speech
+msgctxt "ui.opt.speech"
+msgid "SPRECHTEMPO"
+msgstr "SPEECH SPEED"
+
+#. source UI
+#: ui.opt.resume
+msgctxt "ui.opt.resume"
+msgid "WEITER"
+msgstr "RESUME"
+
+#. source UI
+#: ui.opt.restart
+msgctxt "ui.opt.restart"
+msgid "NEU STARTEN"
+msgstr "RESTART GAME"
+
+#. source UI
+#: ui.opt.restart_sure
+msgctxt "ui.opt.restart_sure"
+msgid "NEU STARTEN - SICHER?"
+msgstr "RESTART - SURE?"
+
+#. source UI
+#: ui.opt.quit
+msgctxt "ui.opt.quit"
+msgid "BEENDEN"
+msgstr "QUIT"
+
+#. source UI
+#: ui.opt.on
+msgctxt "ui.opt.on"
+msgid "AN"
+msgstr "ON"
+
+#. source UI
+#: ui.opt.off
+msgctxt "ui.opt.off"
+msgid "AUS"
+msgstr "OFF"
+
+#. source UI
+#: ui.key.save
+msgctxt "ui.key.save"
+msgid "SPEICHERN"
+msgstr "SAVE"
+
+#. source UI
+#: ui.key.load
+msgctxt "ui.key.load"
+msgid "LADEN"
+msgstr "LOAD"
+
+#. source UI
+#: ui.key.options
+msgctxt "ui.key.options"
+msgid "OPTIONEN"
+msgstr "OPTIONS"
+
+#. source UI
+#: ui.key.skip_text
+msgctxt "ui.key.skip_text"
+msgid "TEXT UEBERSPRINGEN"
+msgstr "SKIP TEXT"
+
+#. source UI
+#: ui.key.skip_scene
+msgctxt "ui.key.skip_scene"
+msgid "SZENE UEBERSPRINGEN"
+msgstr "SKIP SCENE"
+
+#. source UI
+#: ui.key.hotspots
+msgctxt "ui.key.hotspots"
+msgid "HOTSPOTS ZEIGEN"
+msgstr "SHOW HOTSPOTS"
 
 #. GAME.PCK token 0
 #: pck.0

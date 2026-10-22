@@ -28,13 +28,34 @@ enum {
   UI_SLOT_OF,       /* "%i von %i" / "%i of %i" */
   UI_OV_SAVE,
   UI_OV_LOAD,
-  UI_OV_ESC,
-  UI_OV_SKIP,
+  UI_OV_SKIP_SCENE,
+  UI_OV_SKIP_TEXT,
   UI_OV_USE,
   UI_OV_LOOK,
-  UI_OV_MENU,
+  UI_OV_OPTIONS,
   UI_OV_HINT,
   UI_MENU_OPTIONS,  /* host entry in the game's own menu (prog 1) */
+  /* SDL options menu (F12) and key legend; SDL font has A-Z only, no umlauts */
+  UI_OPT_TITLE,
+  UI_OPT_HINT_TOUCH,
+  UI_OPT_HINT_KEYS,
+  UI_OPT_LANGUAGE,
+  UI_OPT_FULLSCREEN,
+  UI_OPT_TOUCH,
+  UI_OPT_SPEED,
+  UI_OPT_SPEECH,
+  UI_OPT_RESUME,
+  UI_OPT_RESTART,
+  UI_OPT_RESTART_SURE,
+  UI_OPT_QUIT,
+  UI_OPT_ON,
+  UI_OPT_OFF,
+  UI_KEY_SAVE,
+  UI_KEY_LOAD,
+  UI_KEY_OPTIONS,
+  UI_KEY_SKIP_TEXT,
+  UI_KEY_SKIP_SCENE,
+  UI_KEY_HOTSPOTS,
   UI_COUNT
 };
 

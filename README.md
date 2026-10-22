@@ -161,12 +161,13 @@ default on Android and the web build; on desktop builds enable them with
 `--touch-controls` or **F12 → Touch buttons** (the window grows to make room):
 
 - **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
-- **Right:** Esc, Skip (top) — Esc aborts armed sequences; Skip acts like **Shift** (speed up / dismiss speech); **Hint** and **Menu** (bottom) — Hint outlines what can be clicked in the room (like **H**), Menu opens the options menu
+- **Right:** **Options** and **Hint** (top) — Options opens the options menu, Hint outlines what can be clicked in the room (like **H**); **Skip Scene** and **Skip Text** (bottom) — Skip Scene is **Esc** (aborts armed cutscenes), Skip Text acts like **Shift** (speed up / dismiss speech)
 
 Save and Load are greyed out while they would be ignored (cutscene, dialogue,
 menu open); Load also when there is no savegame yet. In **portrait** the picture
-takes the full width and the buttons sit in two rows underneath (Save, Load,
-Esc, Skip / Use, Look, Hint, Menu) instead of in side columns.
+takes the full width, with Save, Load — Hint, Options in a row above it and two
+columns below it: Use over Look on the left, Skip Scene over Skip Text on the
+right.
 
 
 
@@ -201,7 +202,7 @@ The HTML shell (`mk/wasm/shell.html`) provides:
 - **Fullscreen**, **Pause/Resume**, **Download saves** / **Upload saves…**
 - Help text for mouse, touch, and keyboard
 - **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
-- On-canvas touch overlay (Save / Load / USE / LOOK / Esc / Skip), same as Android
+- On-canvas touch overlay (Save / Load / USE / LOOK / Options / Hint / Skip Scene / Skip Text), same as Android
 - **Gamepad:** left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc
 
 Save files are exported as `moas-saves.json` and can be imported on another browser.
@@ -451,9 +452,9 @@ These are **not** the same:
 
 **Shift** matches original DOS keyboard flag `0x417` (either Shift key). **Middle mouse** does the same as a Shift edge for speech.
 
-The touch **Skip** button acts like **Shift** (speech only); touch **Esc** is the sequence abort.
+The touch **Skip Text** button acts like **Shift** (speech only); touch **Skip Scene** is **Esc**, the sequence abort.
 Without a touchscreen (desktop `--touch-controls`), the buttons show their key
-in the top-right corner: F5, F7, SHIFT, F12, H.
+in the top-right corner: F5, F7, ESC, SHIFT, F12, H.
 
 ### Master / debug keys
 
@@ -496,7 +497,7 @@ These are developer tools from the original engine, not needed for normal play.
 --load SLOT|FILE        Same as --load=
 --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit
 -f, --fullscreen        Desktop fullscreen
---touch-controls        Show the on-screen Save/Load/Esc/Skip/Use/Look/Menu buttons
+--touch-controls        Show the on-screen Save/Load/Use/Look/Options/Hint/Skip buttons
 --no-touch-controls     Hide them (default except Android / web)
 ```
 

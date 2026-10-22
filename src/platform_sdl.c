@@ -717,17 +717,19 @@ void PlatformSetPalette(const unsigned char *pal768)
 
 /*
  * Portrait (taller than wide, e.g. a phone held upright): the picture uses
- * the full width and the buttons go in two rows of four underneath, instead
+ * the full width, with one row of buttons above it and two below, instead
  * of squeezing the picture between side columns and leaving the space above
- * and below empty. Returns 0 when there is no room for that.
+ * and below empty. Returns 0 when there is no room for that. top_h / bot_h
+ * are the heights reserved above and below the picture.
  */
-static int ov_portrait(int ww, int wh, int *bw, int *bh, int *block_h)
+static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
 {
-  int w, h, block, dh;
+  int w, h, top, bot, dh;
 
   if (!overlay_on || wh <= ww)
     return 0;
-  w = (ww - 2 * OV_MARGIN - 3 * OV_GAP) / 4;
+  /* Four across the top row, with a wider gap between the two pairs. */
+  w = (ww - 2 * OV_MARGIN - 5 * OV_GAP) / 4;
   if (w > 200)
     w = 200;
   if (w < 64)
@@ -737,13 +739,15 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *block_h)
     h = 52;
   if (h > 120)
     h = 120;
-  block = 2 * h + OV_GAP + 2 * OV_MARGIN;
+  top = h + 2 * OV_MARGIN;
+  bot = 2 * h + OV_GAP + 2 * OV_MARGIN;
   dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
-  if (wh - dh < block)
+  if (wh - dh < top + bot)
     return 0;
   if (bw) *bw = w;
   if (bh) *bh = h;
-  if (block_h) *block_h = block;
+  if (top_h) *top_h = top;
+  if (bot_h) *bot_h = bot;
   return 1;
 }
 
@@ -752,7 +756,7 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
                            int *out_ww, int *out_wh)
 {
   int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
-  int dw, dh, dx, dy, block_h;
+  int dw, dh, dx, dy, top_h, bot_h;
   float sx, sy, scale;
 
   if (renderer)
@@ -770,15 +774,16 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   dx = (ww - dw) / 2;
   dy = (wh - dh) / 2;
 
-  if (ov_portrait(ww, wh, NULL, NULL, &block_h)) {
-    /* Full width, centred in the space above the button rows. */
+  if (ov_portrait(ww, wh, NULL, NULL, &top_h, &bot_h)) {
+    /* Full width, centred between the button rows. */
     dw = ww;
     dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
     dx = 0;
-    dy = (wh - block_h - dh) / 2;
+    dy = top_h + (wh - top_h - bot_h - dh) / 2;
   } else if (overlay_on)
   /*
-   * Keep side columns free for the touch overlay (Save/Load/USE/LOOK, Esc/Skip).
+   * Keep side columns free for the touch overlay (Save/Load/USE/LOOK left,
+   * Options/Hint/Skip right).
    * overlay_rects needs dx >= btn_w + margins (~80–136). If the natural
    * letterbox is narrower (near-16:10 panels), shrink the game viewport so
    * buttons sit beside the picture instead of on top of it.
@@ -834,11 +839,11 @@ enum {
   OV_NONE = 0,
   OV_SAVE,
   OV_LOAD,
-  OV_ESC,
-  OV_SKIP,
+  OV_SKIP_SCENE,
+  OV_SKIP_TEXT,
   OV_MODE_USE,
   OV_MODE_LOOK,
-  OV_MENU,
+  OV_OPTIONS,
   OV_HINT,
   OV_COUNT = OV_HINT
 };
@@ -974,7 +979,8 @@ static void ui_fill_rounded_solid(const SDL_Rect *r, int rad, Uint8 R, Uint8 G, 
 /*
  * Buttons live in the side letterbox (renderer-output pixels), never on top
  * of the 320x200 picture. Left column: Save / Load (top), Use / Look
- * (bottom, thumb reach). Right column: Esc / Skip (top), Menu (bottom).
+ * (bottom, thumb reach). Right column: Options / Hint (top), Skip Scene /
+ * Skip Text (bottom). Portrait: see ov_portrait().
  * Enabled by default on Android and the web build; elsewhere via
  * --touch-controls or the options menu (F12).
  */
@@ -1017,39 +1023,39 @@ static const char *const ov_icon_art[OV_COUNT][16] = {
     ".kkkkkkkkkkkkkk.",
     "................",
   },
-  /* OV_ESC */ {
+  /* OV_SKIP_SCENE: film frame with skip-to-end */ {
     "................",
-    ".....kkkkkk.....",
-    "....krrrrrrk....",
-    "...krrrrrrrrk...",
-    "..krrwrrrrwrrk..",
-    "..krwwwrrwwwrk..",
-    "..krrwwwwwwrrk..",
-    "..krrrwwwwrrrk..",
-    "..krrrwwwwrrrk..",
-    "..krrwwwwwwrrk..",
-    "..krwwwrrwwwrk..",
-    "..krrwrrrrwrrk..",
-    "...krrrrrrrrk...",
-    "....krrrrrrk....",
-    ".....kkkkkk.....",
+    ".kkkkkkkkkkkkkk.",
+    ".kdwwddwwddwwdk.",
+    ".kddddddddddddk.",
+    ".kdbbbbbbbbbbdk.",
+    ".kdbwbbwbbwwbdk.",
+    ".kdbwwbwwbwwbdk.",
+    ".kdbwwwwwwwwbdk.",
+    ".kdbwwwwwwwwbdk.",
+    ".kdbwwbwwbwwbdk.",
+    ".kdbwbbwbbwwbdk.",
+    ".kdbbbbbbbbbbdk.",
+    ".kddddddddddddk.",
+    ".kdwwddwwddwwdk.",
+    ".kkkkkkkkkkkkkk.",
     "................",
   },
-  /* OV_SKIP */ {
+  /* OV_SKIP_TEXT: speech bubble with fast-forward */ {
     "................",
-    "................",
-    ".kk.....kk......",
-    ".kwk....kwk.....",
-    ".kwwk...kwwk....",
-    ".kwwwk..kwwwk...",
-    ".kwwwwk.kwwwwk..",
-    ".kwwwwwkkwwwwwk.",
-    ".kwwwwwkkwwwwwk.",
-    ".kwwwwk.kwwwwk..",
-    ".kwwwk..kwwwk...",
-    ".kwwk...kwwk....",
-    ".kwk....kwk.....",
-    ".kk.....kk......",
+    "..kkkkkkkkkkkk..",
+    ".kwwwwwwwwwwwwk.",
+    ".kwwwwwwwwwwwwk.",
+    ".kwwdwwwdwwwwwk.",
+    ".kwwddwwddwwwwk.",
+    ".kwwdddwdddwwwk.",
+    ".kwwddwwddwwwwk.",
+    ".kwwdwwwdwwwwwk.",
+    ".kwwwwwwwwwwwwk.",
+    "..kwwwkkkkkkkk..",
+    "..kwwk..........",
+    "..kwk...........",
+    "..kk............",
     "................",
     "................",
   },
@@ -1089,7 +1095,7 @@ static const char *const ov_icon_art[OV_COUNT][16] = {
     "................",
     "................",
   },
-  /* OV_MENU */ {
+  /* OV_OPTIONS */ {
     "................",
     "................",
     "................",
@@ -1193,20 +1199,23 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
 
 #define OV_SET(i, X, Y) (out[(i) - 1].x = (X), out[(i) - 1].y = (Y), \
                          out[(i) - 1].w = btn_w, out[(i) - 1].h = btn_h)
-  if (ov_portrait(ww, wh, &btn_w, &btn_h, NULL)) {
-    /* Two rows of four under the picture; Use/Look/Menu on the lower,
-     * thumb-friendly row, like the low cluster in landscape. */
-    int x0 = (ww - (4 * btn_w + 3 * gap)) / 2, step = btn_w + gap;
-    low_y = wh - margin - btn_h;
-    top_y = low_y - gap - btn_h;
-    OV_SET(OV_SAVE,      x0,            top_y);
-    OV_SET(OV_LOAD,      x0 + step,     top_y);
-    OV_SET(OV_ESC,       x0 + 2 * step, top_y);
-    OV_SET(OV_SKIP,      x0 + 3 * step, top_y);
-    OV_SET(OV_MODE_USE,  x0,            low_y);
-    OV_SET(OV_MODE_LOOK, x0 + step,     low_y);
-    OV_SET(OV_HINT,      x0 + 2 * step, low_y);
-    OV_SET(OV_MENU,      x0 + 3 * step, low_y);
+  if (ov_portrait(ww, wh, &btn_w, &btn_h, NULL, NULL)) {
+    /* Save Load -- Hint Options in a row above the picture; below it, the
+     * thumb columns of landscape: Use / Look left, Skip Scene / Skip Text
+     * right. */
+    int step = btn_w + gap;
+    left_x = margin;
+    right_x = ww - margin - btn_w;
+    top_y = margin;
+    low_y = wh - margin - 2 * btn_h - gap;
+    OV_SET(OV_SAVE,       left_x,          top_y);
+    OV_SET(OV_LOAD,       left_x + step,   top_y);
+    OV_SET(OV_HINT,       right_x - step,  top_y);
+    OV_SET(OV_OPTIONS,       right_x,         top_y);
+    OV_SET(OV_MODE_USE,   left_x,          low_y);
+    OV_SET(OV_MODE_LOOK,  left_x,          low_y + btn_h + gap);
+    OV_SET(OV_SKIP_SCENE, right_x,         low_y);
+    OV_SET(OV_SKIP_TEXT,  right_x,         low_y + btn_h + gap);
     return;
   }
 
@@ -1237,7 +1246,7 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
     left_x = margin;
     right_x = ww - margin - btn_w;
   }
-  /* Menu/abort cluster at the top; Use/Look + Menu low for thumbs. */
+  /* Save/Load and Options/Hint at the top; Use/Look and the skips low for thumbs. */
   top_y = margin;
   low_y = wh - margin - (btn_h * 2 + gap);
   if (low_y < top_y + btn_h * 2 + gap * 3)
@@ -1245,12 +1254,12 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
 
   OV_SET(OV_SAVE,      left_x,  top_y);
   OV_SET(OV_LOAD,      left_x,  top_y + btn_h + gap);
-  OV_SET(OV_ESC,       right_x, top_y);
-  OV_SET(OV_SKIP,      right_x, top_y + btn_h + gap);
+  OV_SET(OV_OPTIONS,      right_x, top_y);
+  OV_SET(OV_HINT,      right_x, top_y + btn_h + gap);
   OV_SET(OV_MODE_USE,  left_x,  low_y);
   OV_SET(OV_MODE_LOOK, left_x,  low_y + btn_h + gap);
-  OV_SET(OV_HINT,      right_x, low_y);
-  OV_SET(OV_MENU,      right_x, low_y + btn_h + gap);
+  OV_SET(OV_SKIP_SCENE, right_x, low_y);
+  OV_SET(OV_SKIP_TEXT,  right_x, low_y + btn_h + gap);
 #undef OV_SET
 }
 
@@ -1367,7 +1376,7 @@ static void hint_draw(const SDL_Rect *pic)
 /* SAVE/LOAD/MENU act on release; the rest on press. */
 static int overlay_fires_on_release(int which)
 {
-  return which == OV_SAVE || which == OV_LOAD || which == OV_MENU;
+  return which == OV_SAVE || which == OV_LOAD || which == OV_OPTIONS;
 }
 
 static void overlay_fire(int which)
@@ -1385,11 +1394,11 @@ static void overlay_fire(int which)
       overlay_pending_cmd = (which == OV_SAVE) ? 1 : 2;
       MOAS_ALOG("overlay: queued %s", which == OV_SAVE ? "SAVE" : "LOAD");
       break;
-    case OV_ESC:
+    case OV_SKIP_SCENE:
       synth_esc();
       MOAS_ALOG("overlay: ESC abort=%d", (int)KeyAbortState);
       break;
-    case OV_SKIP:
+    case OV_SKIP_TEXT:
       /* Synthetic Shift: speed up / dismiss speech bubbles (not full sequence abort). */
       overlay_shift_until = SDL_GetTicks() + SHIFT_HOLD_MS;
       break;
@@ -1399,7 +1408,7 @@ static void overlay_fire(int which)
     case OV_MODE_LOOK:
       touch_mode = MOAS_TOUCH_LOOK;
       break;
-    case OV_MENU:
+    case OV_OPTIONS:
       PlatformEngineMenu();
       break;
     default:
@@ -1472,10 +1481,11 @@ static const char *overlay_key_name(int which)
   switch (which) {
     case OV_SAVE: return "F5";
     case OV_LOAD: return "F7";
-    case OV_SKIP: return "SHIFT";
-    case OV_MENU: return "F12";
+    case OV_SKIP_SCENE: return "ESC";
+    case OV_SKIP_TEXT:  return "SHIFT";
+    case OV_OPTIONS: return "F12";
     case OV_HINT: return "H";
-    default:      return NULL; /* ESC says it already; USE/LOOK are mouse buttons */
+    default:      return NULL; /* USE/LOOK are mouse buttons */
   }
 }
 
@@ -1484,15 +1494,15 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   static const SDL_Color face_cols[OV_COUNT] = {
     {  40, 132,  70, 255 },  /* Save */
     {  44,  98, 176, 255 },  /* Load */
-    { 156,  44,  44, 255 },  /* Esc  */
-    { 196, 120,  36, 255 },  /* Skip */
+    { 156,  44,  44, 255 },  /* Skip Scene */
+    { 196, 120,  36, 255 },  /* Skip Text  */
     {  70,  74,  96, 255 },  /* Use  */
     {  70,  74,  96, 255 },  /* Look */
-    {  70,  74,  96, 255 },  /* Menu */
+    {  70,  74,  96, 255 },  /* Options */
     { 150, 112,  30, 255 },  /* Hint */
   };
   static const int labels[OV_COUNT] = {
-    UI_OV_SAVE, UI_OV_LOAD, UI_OV_ESC, UI_OV_SKIP, UI_OV_USE, UI_OV_LOOK, UI_OV_MENU,
+    UI_OV_SAVE, UI_OV_LOAD, UI_OV_SKIP_SCENE, UI_OV_SKIP_TEXT, UI_OV_USE, UI_OV_LOOK, UI_OV_OPTIONS,
     UI_OV_HINT
   };
   int disabled = (which == OV_SAVE && !ov_save_ok) ||
@@ -1627,7 +1637,7 @@ static void overlay_draw(void)
 }
 
 
-/* ---- Options menu (F12 / overlay MENU / gamepad Back) ------------------ */
+/* ---- Options menu (F12 / overlay OPTIONS / gamepad Back) ------------------ */
 /*
  * Port-side settings, not the game's own F10 FileMenu. Works with keyboard,
  * gamepad, mouse (hover + click, wheel, right-click closes) and touch
@@ -1683,8 +1693,8 @@ static int is_fullscreen_key(const SDL_KeyboardEvent *key)
 }
 
 /*
- * Android, or a finger has been used: the overlay MENU button is then the
- * only way back into this menu, so TOUCH BUTTONS must not turn it off.
+ * Android, or a finger has been used: the overlay OPTIONS button is then the
+ * only way back into this menu, so Touch buttons must not turn it off.
  */
 static int is_touch_device(void)
 {
@@ -1791,9 +1801,8 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
   int out_w = 640, out_h = 400, i, u = L->u;
   SDL_Rect dim, rim, bar;
   char val[16];
-  const char *title = "OPTIONS";
-  const char *hint = overlay_on ? "TAP A ROW - TAP OUTSIDE TO CLOSE"
-                                : "CLICK OR ARROWS/ENTER - ESC/F12 CLOSES";
+  const char *title = Ui(UI_OPT_TITLE);
+  const char *hint = Ui(overlay_on ? UI_OPT_HINT_TOUCH : UI_OPT_HINT_KEYS);
 
   SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -1828,33 +1837,33 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
     val[0] = 0;
     switch (i) {
       case ENG_LANG:
-        label = "LANGUAGE";
+        label = Ui(UI_OPT_LANGUAGE);
         snprintf(val, sizeof(val), "%s", (LangGetCode() && LangGetCode()[0]) ? LangGetCode() : "de");
         break;
       case ENG_FULLSCREEN:
-        label = "FULLSCREEN";
-        snprintf(val, sizeof(val), "%s", eng_is_fullscreen() ? "ON" : "OFF");
+        label = Ui(UI_OPT_FULLSCREEN);
+        snprintf(val, sizeof(val), "%s", Ui(eng_is_fullscreen() ? UI_OPT_ON : UI_OPT_OFF));
         break;
       case ENG_TOUCH:
-        label = "TOUCH BUTTONS";
-        snprintf(val, sizeof(val), "%s", overlay_on ? "ON" : "OFF");
+        label = Ui(UI_OPT_TOUCH);
+        snprintf(val, sizeof(val), "%s", Ui(overlay_on ? UI_OPT_ON : UI_OPT_OFF));
         break;
       case ENG_SPEED:
-        label = "GAME SPEED";
+        label = Ui(UI_OPT_SPEED);
         snprintf(val, sizeof(val), "%d", (int)TotalSpeed);
         break;
       case ENG_SPEECH:
-        label = "SPEECH SPEED";
+        label = Ui(UI_OPT_SPEECH);
         snprintf(val, sizeof(val), "%d", (int)SpeechSpeed);
         break;
       case ENG_RESUME:
-        label = "RESUME";
+        label = Ui(UI_OPT_RESUME);
         break;
       case ENG_RESTART:
-        label = restart_armed ? "RESTART - SURE?" : "RESTART GAME";
+        label = Ui(restart_armed ? UI_OPT_RESTART_SURE : UI_OPT_RESTART);
         break;
       case ENG_QUIT:
-        label = "QUIT";
+        label = Ui(UI_OPT_QUIT);
         break;
     }
     if (L->value[i].w > 0) {
@@ -1931,13 +1940,13 @@ static void eng_menu_change(int sel, int dir)
 }
 
 /* ---- Key hints (start screen and options menu) -------------------------- */
-static const char *const keyhint_rows[][2] = {
-  { "F5",    "SAVE" },
-  { "F7",    "LOAD" },
-  { "F12",   "OPTIONS" },
-  { "SHIFT", "SKIP TEXT" },
-  { "ESC",   "SKIP SCENE" },
-  { "H",     "SHOW HOTSPOTS" },
+static const struct { const char *key; int text; } keyhint_rows[] = {
+  { "F5",    UI_KEY_SAVE },
+  { "F7",    UI_KEY_LOAD },
+  { "F12",   UI_KEY_OPTIONS },
+  { "SHIFT", UI_KEY_SKIP_TEXT },
+  { "ESC",   UI_KEY_SKIP_SCENE },
+  { "H",     UI_KEY_HOTSPOTS },
 };
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
 
@@ -1963,9 +1972,9 @@ static void keyhints_draw(const SDL_Rect *avoid)
   if (u < 1)
     u = 1;
   for (i = 0; i < KEYHINT_ROWS; i++) {
-    int w = ui_text_width(keyhint_rows[i][0], u);
+    int w = ui_text_width(keyhint_rows[i].key, u);
     if (w > kw) kw = w;
-    w = ui_text_width(keyhint_rows[i][1], u);
+    w = ui_text_width(Ui(keyhint_rows[i].text), u);
     if (w > tw) tw = w;
   }
   pad = 3 * u;
@@ -1981,8 +1990,8 @@ static void keyhints_draw(const SDL_Rect *avoid)
   ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, 150);
   for (i = 0; i < KEYHINT_ROWS; i++) {
     int y = box.y + pad + i * line_h;
-    ui_draw_label(box.x + pad, y, keyhint_rows[i][0], u, 255, 206, 72);
-    ui_draw_label(box.x + pad + kw + 5 * u, y, keyhint_rows[i][1], u, 255, 255, 255);
+    ui_draw_label(box.x + pad, y, keyhint_rows[i].key, u, 255, 206, 72);
+    ui_draw_label(box.x + pad + kw + 5 * u, y, Ui(keyhint_rows[i].text), u, 255, 255, 255);
   }
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
