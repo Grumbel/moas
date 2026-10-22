@@ -185,8 +185,10 @@
 ## Key legend, Options entry in the game menu, touch lockout (2026-10-22)
 - Key legend (F5/F7/F12/Shift/Esc) drawn by `keyhints_draw()` in
   platform_sdl.c, bottom right of the game picture, on the start screen
-  (`CurrentProc == 4`, the title room) and while the F12 menu is open (skipped
-  if it would overlap the panel). Not drawn on touch devices.
+  (`CurrentProc == 4`, the title room) and while the F12 menu is open. If it
+  would overlap the panel it is drawn at a smaller scale, and skipped only if
+  it still overlaps at scale 1. (The German labels made the box wider, so it
+  used to vanish in DE but show in EN.) Not drawn on touch devices.
 - Game menu (prog 1, opened with F1): `Execute` injects a host option before
   "Quit" (add_option at prog 1 @ 0x0151, RefNum 5). It uses RefNum 7, which the
   script doesn't use, so its answer chain falls through to the

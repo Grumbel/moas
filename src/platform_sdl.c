@@ -1984,11 +1984,12 @@ static int keyhints_on_start_screen(void)
 
 /*
  * Bottom right of the game picture, for keyboard players. Skipped on touch
- * devices and when it would cover `avoid` (the options panel).
+ * devices. Drawn smaller when it would cover `avoid` (the options panel),
+ * skipped if it still does: longer translations make the box wider.
  */
 static void keyhints_draw(const SDL_Rect *avoid)
 {
-  int dx, dy, dw, dh, u, i, kw = 0, tw = 0, pad, line_h;
+  int dx, dy, dw, dh, u, i, kw, tw, pad, line_h;
   SDL_Rect box;
 
   if (!renderer || is_touch_device())
@@ -1997,20 +1998,26 @@ static void keyhints_draw(const SDL_Rect *avoid)
   u = dh / 300;
   if (u < 1)
     u = 1;
-  for (i = 0; i < KEYHINT_ROWS; i++) {
-    int w = ui_text_width(keyhint_rows[i].key, u);
-    if (w > kw) kw = w;
-    w = ui_text_width(Ui(keyhint_rows[i].text), u);
-    if (w > tw) tw = w;
+  for (;;) {
+    kw = tw = 0;
+    for (i = 0; i < KEYHINT_ROWS; i++) {
+      int w = ui_text_width(keyhint_rows[i].key, u);
+      if (w > kw) kw = w;
+      w = ui_text_width(Ui(keyhint_rows[i].text), u);
+      if (w > tw) tw = w;
+    }
+    pad = 3 * u;
+    line_h = 10 * u;
+    box.w = pad + kw + 5 * u + tw + pad;
+    box.h = pad + KEYHINT_ROWS * line_h - 3 * u + pad;
+    box.x = dx + dw - box.w - 4 * u;
+    box.y = dy + dh - box.h - 4 * u;
+    if (!avoid || !SDL_HasIntersection(&box, avoid))
+      break;
+    if (u == 1)
+      return;
+    u--;
   }
-  pad = 3 * u;
-  line_h = 10 * u;
-  box.w = pad + kw + 5 * u + tw + pad;
-  box.h = pad + KEYHINT_ROWS * line_h - 3 * u + pad;
-  box.x = dx + dw - box.w - 4 * u;
-  box.y = dy + dh - box.h - 4 * u;
-  if (avoid && SDL_HasIntersection(&box, avoid))
-    return;
 
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, 150);
