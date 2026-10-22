@@ -46,6 +46,8 @@ let
         esac
         [ -f "$f" ] && cp "$f" $out/
       done
+      mkdir -p $out/lang
+      cp ${../lang}/*.po $out/lang/
       cp ${../COPYING} $out/COPYING.txt
       cp ${../data/icons/hicolor/256x256/apps/moas.png} $out/moas.png 2>/dev/null || true
       cat > $out/README.txt <<EOF

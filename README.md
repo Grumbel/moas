@@ -241,7 +241,7 @@ moas --lang=en
 # or: MOAS_LANG=en moas
 ```
 
-SDL host: press **F12** (or the touch **Menu** button, or gamepad **Back**) for the options menu
+SDL host: press **F12** (or the touch **Options** button, or gamepad **Back**) for the options menu
 (language, fullscreen, touch buttons, game/speech speed, quit). It works with keyboard,
 gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, tap the
 left half of a value to step back, tap outside to close). Switching the language there
@@ -249,7 +249,7 @@ takes effect at once, including object names and verbs (prog0's name table is
 re-registered); speech already on screen stays in the old language.
 The game's own menu (**F1**: Neustart / Projekttagebuch / … / Quit) gets an extra
 **Optionen (F12)** entry that opens the same menu. On touch devices the TOUCH BUTTONS
-row is hidden while the buttons are on, because the **Menu** button is then the only
+row is hidden while the buttons are on, because the **Options** button is then the only
 way back into the options menu.
 
 Primary format is a **gettext `.po` file** (`lang/<code>.po`):
@@ -274,8 +274,11 @@ match `msgid` to the built-in German string. All non-empty `msgstr` values
 also feed the script `UnPack` map keyed by `msgid`.
 
 Search path:
-`$MOAS_LANGDIR`, `$MOAS_DATADIR/lang`, `$MOAS_DATADIR/../lang`, `./lang`.
-Default `de` keeps built-in German. The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
+`$MOAS_LANGDIR`, `<datadir>/lang`, `<datadir>/../lang`, `./lang` (`<datadir>` is
+the resolved game data directory, `$MOAS_DATADIR` or found automatically).
+Every package (Android, web, Windows, R36S) ships `lang/` next to the game data.
+Without `--lang` / `MOAS_LANG` / a `language=` line in settings.ini, the
+language follows the OS: German → `de` (built-in German), anything else → `en`. The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
 Template with all strings: `lang/manick.pot` (from `moas-util strings pot`).
 
 ## Game data (`manick/`)
@@ -454,7 +457,8 @@ These are **not** the same:
 
 The touch **Skip Text** button acts like **Shift** (speech only); touch **Skip Scene** is **Esc**, the sequence abort.
 Without a touchscreen (desktop `--touch-controls`), the buttons show their key
-in the top-right corner: F5, F7, ESC, SHIFT, F12, H.
+in the top-right corner while the options menu is open: F5, F7, ESC, SHIFT, F12, H,
+and LMB / RMB on Use / Look.
 
 ### Master / debug keys
 

@@ -95,6 +95,9 @@ int main(int argc, char **argv)
   MOAS_ALOG("assets prepared");
   MoasInitDataPath(argv && argv[0] ? argv[0] : "moas");
   MoasLogDirectories();
+  /* settings.ini (a language chosen before) overrides the OS guess. */
+  if (!moas_lang_explicit)
+    LangSetCode(PlatformPreferredLanguage());
   MoasSettingsLoad();
   LangInit();
   MOAS_ALOG("data dir ready, calling InitAll");

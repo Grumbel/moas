@@ -6,6 +6,20 @@
 
 # TODO / Handoff
 
+## Language packs on all targets, OS default language, key labels (2026-10-22)
+- Android never got `lang/en.po`: `nix/android.nix`'s source fileset was
+  `src` + `manick` only, so build-apk.sh found no `lang/` (the extract list
+  already had `lang/en.po`). Windows, R36S and web didn't ship it either.
+  Added `lang/` to all four; `lang.c` now searches `MoasDataDir()/lang`
+  instead of only `$MOAS_DATADIR/lang`.
+- Default language: `PlatformPreferredLanguage()` (SDL_GetPreferredLocales,
+  first entry only): German → de, else en. settings.ini still wins, so an
+  existing install that saved `language=de` under the old default stays
+  German until changed in F12.
+- Key names on the touch buttons only while the options menu is open,
+  drawn after its dimming (`overlay_draw_keys`), one size for all buttons;
+  Use/Look show LMB/RMB. Use/Look icons are now a hand and an eye.
+
 ## Options menu + key legend translatable, MENU button → OPTIONS (2026-10-22)
 - SDL options menu (F12) and the start-screen key legend were hardcoded
   English. Now `UI_OPT_*` / `UI_KEY_*` with German fallbacks (msgid) and

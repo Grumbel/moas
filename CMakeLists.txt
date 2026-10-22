@@ -173,6 +173,11 @@ if(EMSCRIPTEN)
       configure_file("${_f}" "${_wasm_data}/${_name}" COPYONLY)
     endif()
   endforeach()
+  file(GLOB _lang_files "${CMAKE_SOURCE_DIR}/lang/*.po")
+  foreach(_f ${_lang_files})
+    get_filename_component(_name "${_f}" NAME)
+    configure_file("${_f}" "${_wasm_data}/lang/${_name}" COPYONLY)
+  endforeach()
 
   set_target_properties(moas PROPERTIES SUFFIX ".html")
   target_link_options(moas PRIVATE

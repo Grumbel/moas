@@ -604,9 +604,11 @@ static int open_lang_file(char *path, size_t pathsz, const char *suffix)
       }
     }
   }
-  /* 2) next to datadir: <datadir>/../lang/code.suffix or <datadir>/lang/ */
+  /* 2) next to datadir: <datadir>/lang/code.suffix or <datadir>/../lang/.
+   * The resolved datadir, not just $MOAS_DATADIR: packages (Windows, R36S,
+   * web, installed Linux) find the game data without the env var. */
 #ifndef DOS
-  data = getenv("MOAS_DATADIR");
+  data = MoasDataDir();
   if (data && data[0]) {
     snprintf(path, pathsz, "%s/lang/%s.%s", data, lang_code, suffix);
     f = fopen(path, "rb");

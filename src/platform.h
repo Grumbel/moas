@@ -50,6 +50,9 @@ void PlatformEngineMenu(void);
 int PlatformIsFullscreen(void);
 int PlatformTouchControlsOn(void);
 
+/* Default language from the OS locale: "de" for German, else "en". */
+const char *PlatformPreferredLanguage(void);
+
 /* Touch interaction mode: 0=USE (default verbs), 1=LOOK (SIEHE on object tap). */
 #define MOAS_TOUCH_USE  0
 #define MOAS_TOUCH_LOOK 1

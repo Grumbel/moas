@@ -1059,39 +1059,39 @@ static const char *const ov_icon_art[OV_COUNT][16] = {
     "................",
     "................",
   },
-  /* OV_MODE_USE */ {
-    ".......kk.......",
-    "........k.......",
-    ".....kkkkkk.....",
-    "....khhkkwwk....",
-    "...khhhkkwwwk...",
-    "...khhhkkwwwk...",
-    "...khhhkkwwwk...",
-    "...kkkkkkkkkk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "....kwwwwwlk....",
-    ".....kkkkkk.....",
+  /* OV_MODE_USE: hand */ {
+    "......kk........",
+    ".....kssk.......",
+    ".....kssk.......",
+    ".....kssk.......",
+    ".....ksskkkkkk..",
+    ".....ksskssSssk.",
+    ".kkk.ksskssSssk.",
+    ".kssksssSssSssk.",
+    ".kssssssssssssk.",
+    "..ksssssssssssk.",
+    "...kssssssssssk.",
+    "....kssssssssk..",
+    ".....kssssssk...",
+    ".....kkkkkkkk...",
     "................",
     "................",
   },
-  /* OV_MODE_LOOK */ {
-    ".......kk.......",
-    "........k.......",
+  /* OV_MODE_LOOK: eye */ {
+    "................",
+    "................",
+    "................",
     ".....kkkkkk.....",
-    "....kwwkkhhk....",
-    "...kwwwkkhhhk...",
-    "...kwwwkkhhhk...",
-    "...kwwwkkhhhk...",
-    "...kkkkkkkkkk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "...kwwwwwwwlk...",
-    "....kwwwwwlk....",
+    "...kkwwwwwwkk...",
+    "..kwwwbbbbwwwk..",
+    ".kwwwbbbbbbwwwk.",
+    "kwwwbbkkwkbbwwwk",
+    "kwwwbbkkkkbbwwwk",
+    ".kwwwbbbbbbwwwk.",
+    "..kwwwbbbbwwwk..",
+    "...kkwwwwwwkk...",
     ".....kkkkkk.....",
+    "................",
     "................",
     "................",
   },
@@ -1146,7 +1146,8 @@ static Uint32 ov_icon_rgba(char c)
     case 'o': return 0xFFC8902Cu; /* folder shade */
     case 'r': return 0xFFD23C32u; /* stop red */
     case 'G': return 0xFF52D06Au; /* arrow green */
-    case 'h': return 0xFFFFC832u; /* pressed mouse button */
+    case 's': return 0xFFF2C69Au; /* skin */
+    case 'S': return 0xFFC8946Au; /* skin shade */
     default:  return 0x00000000u;
   }
 }
@@ -1475,7 +1476,8 @@ static void overlay_set_enabled(int on)
 
 static int is_touch_device(void);
 
-/* Keyboard equivalent shown in the button's top-right corner (not on touch). */
+/* Keyboard equivalent shown in the button's top-right corner while the
+ * options menu is open (not on touch). */
 static const char *overlay_key_name(int which)
 {
   switch (which) {
@@ -1485,7 +1487,9 @@ static const char *overlay_key_name(int which)
     case OV_SKIP_TEXT:  return "SHIFT";
     case OV_OPTIONS: return "F12";
     case OV_HINT: return "H";
-    default:      return NULL; /* USE/LOOK are mouse buttons */
+    case OV_MODE_USE:  return "LMB";
+    case OV_MODE_LOOK: return "RMB";
+    default:      return NULL;
   }
 }
 
@@ -1592,15 +1596,26 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   else
     ui_draw_label(face.x + (face.w - tw) / 2, face.y + face.h - label_h - pad,
                   label, ts, 255, 255, 255);
+}
 
-  {
-    const char *key = overlay_key_name(which);
-    if (key && !is_touch_device()) {
-      /* 2x only when it stays clear of the centred icon ("SHIFT" doesn't). */
-      int ks = (face.h >= 70 && ui_text_width(key, 2) <= inner.w / 3) ? 2 : 1;
-      ui_draw_label(inner.x + inner.w - ui_text_width(key, ks) - pad,
-                    inner.y + pad / 2 + 1, key, ks, 255, 230, 140);
-    }
+/*
+ * Key names on the buttons, drawn over the options menu's dimming so they
+ * stay bright. One size for all buttons; covering part of the icon is fine.
+ */
+static void overlay_draw_keys(void)
+{
+  SDL_Rect r[OV_COUNT];
+  int i;
+
+  if (!renderer || !overlay_on || is_touch_device())
+    return;
+  overlay_rects(r);
+  for (i = 0; i < OV_COUNT; i++) {
+    const char *key = overlay_key_name(i + 1);
+    int ks = r[i].h >= 70 ? 2 : 1, pad = r[i].h / 16 + 2;
+    if (key)
+      ui_draw_label(r[i].x + r[i].w - 2 - pad - ui_text_width(key, ks),
+                    r[i].y + 2 + pad / 2 + 1, key, ks, 255, 230, 140);
   }
 }
 
@@ -1661,6 +1676,21 @@ static int eng_is_fullscreen(void)
 {
   if (!window) return 0;
   return (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
+}
+
+const char *PlatformPreferredLanguage(void)
+{
+  const char *lang = "en";
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+  SDL_Locale *loc = SDL_GetPreferredLocales();
+  /* Only the first choice: German as a fallback language is still English. */
+  if (loc && loc[0].language && !SDL_strcasecmp(loc[0].language, "de"))
+    lang = "de";
+  platform_log("os locale: %s -> %s",
+               (loc && loc[0].language) ? loc[0].language : "?", lang);
+  SDL_free(loc);
+#endif
+  return lang;
 }
 
 int PlatformIsFullscreen(void)
@@ -2021,6 +2051,7 @@ void PlatformEngineMenu(void)
     sel = eng_step(sel, 0);
     platform_present_frame();
     eng_menu_draw(&L, sel, pressed);
+    overlay_draw_keys();
     keyhints_draw(&L.panel);
     SDL_RenderPresent(renderer);
 

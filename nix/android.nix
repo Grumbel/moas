@@ -70,10 +70,10 @@ let
     include $(PREBUILT_SHARED_LIBRARY)
   '';
 
-  # Sources + game data for the APK (manick/ becomes assets/).
+  # Sources + game data for the APK (manick/ and lang/ become assets/).
   gameSrc = pkgs.lib.fileset.toSource {
     root = ../.;
-    fileset = pkgs.lib.fileset.unions [ ../src ../manick ];
+    fileset = pkgs.lib.fileset.unions [ ../src ../manick ../lang ];
   };
 
   apkName = "moas-${version}.apk";

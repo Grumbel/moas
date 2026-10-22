@@ -184,6 +184,8 @@ let
         esac
         [ -f "$f" ] && cp "$f" $out/moas/data/
       done
+      mkdir -p $out/moas/data/lang
+      cp ${../lang}/*.po $out/moas/data/lang/
       cp ${../mk/r36s/screenshot.png} $out/screenshot.png
       cp ${../mk/r36s/Moas.sh} $out/Moas.sh
       chmod +x $out/Moas.sh
