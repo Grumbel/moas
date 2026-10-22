@@ -634,8 +634,6 @@ int PlatformTakeRestart(void)
 }
 
 #ifdef __EMSCRIPTEN__
-EMSCRIPTEN_KEEPALIVE void PlatformEngineMenu(void);
-
 EMSCRIPTEN_KEEPALIVE void PlatformSetPaused(int paused)
 {
   wasm_paused = paused ? 1 : 0;
