@@ -6,6 +6,11 @@
 
 # TODO / Handoff
 
+## UBSan: Tab320[200] in PowerRedrawArea (2026-10-22)
+- A person whose top edge is at y==200 (just below the screen) gave Y1==200,
+  Y2==200 after clipping: zero rows to draw, but `Tab320[Y1]` was read out of
+  bounds. Skip persons with `Y2<=Y1`; all row loops ran Y2-Y1 times anyway.
+
 ## Crash entering the Keller: InternalError 1028 (2026-10-22)
 - Diele idle timer (proc 15 @864: `adress 87`, `wait 2`, re-arm) kept running
   after the room changed. During `wait` the player keeps walking; reaching the

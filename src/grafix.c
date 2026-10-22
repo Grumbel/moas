@@ -204,7 +204,9 @@ void PowerRedrawArea(short x1,short y1,short x2,short y2)                       
     ys=Person[c].ys;
     X1=max(x1,Person[c].x);   X2=min(x2,Person[c].x+xs-1);
     Y1=max(y1,Person[c].y);   Y2=min(y2+1,Person[c].y+ys);
-    if (X2<X1 || Y2<Y1) continue;
+    /* Y2 is exclusive: Y2==Y1 draws no rows, but a person standing at
+       y==200 would still index Tab320[200] below. */
+    if (X2<X1 || Y2<=Y1) continue;
     PrsData=Person[c].Phase+Person[c].Sequence[Person[c].Counter][Person[c].Dir]*xs*ys;
     Tmp=PRedrawTmpBak;
     if (Person[c].y<y1) PrsData+=(y1-Person[c].y)*xs;
