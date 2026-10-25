@@ -19,7 +19,7 @@ L_0043:
         add_area_jumper 315, 0, 325, 199, 754  ; @0047
         add_area_jumper 0, 0, 95, 96, 777  ; @0052
         add_area_label 119, 78, 158, 99, 2014  ; @005d
-        add_area_label 63, 56, 116, 97, 2034  ; @0068
+        add_area_label 63, 70, 116, 97, 2034  ; @0068
         return_found  ; @0073
 L_0074:
         if 2, 1, -62, 2014, L_027a  ; @0074
@@ -82,7 +82,7 @@ L_00fd:
         add_area_jumper 315, 0, 325, 199, 754  ; @0212
         add_area_jumper 0, 0, 95, 96, 777  ; @021d
         add_area_label 119, 78, 158, 99, 2014  ; @0228
-        add_area_label 63, 56, 116, 97, 2034  ; @0233
+        add_area_label 63, 70, 116, 97, 2034  ; @0233
         var_add_const 8, 4  ; @023e
         add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @0243
         return_found  ; @0259
