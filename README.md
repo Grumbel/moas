@@ -28,7 +28,7 @@ effects may not yet match the original DOS release.
 - Debug logging for scripts, input, waits, windows, and data loading
 - FreeDesktop integration (`.desktop`, hicolor icons, AppStream metainfo)
   under the name **Mänick Mänschion**
-- Cross builds: Windows (MinGW), Android (APK with packed `manick/` assets),
+- Cross builds: Windows (MinGW), Android (APK with the game data as assets),
   WebAssembly (Emscripten + ASYNCIFY), R36S/PortMaster
 - **`moas-util`**: list/extract data resources, disassemble scripts, extract strings for translation, unpack all data into editable text/PNG and pack it back
 
@@ -55,7 +55,7 @@ moas-run-gdb --load=0          # gdb: auto-run; stays open on crash
 |----------|---------|
 | `MOAS_SOURCE` | `$PWD` (flake root) |
 | `MOAS_BUILD_DIR` | `/tmp/moas-build` |
-| `MOAS_DATADIR` | `$MOAS_SOURCE/manick` |
+| `MOAS_DATADIR` | `$MOAS_BUILD_DIR/gamedata` |
 | `CMAKE_BUILD_TYPE` | `Debug` |
 | `MOAS_SANITIZE` | `address,undefined` (set empty to disable) |
 | `ASAN_OPTIONS` | `detect_leaks=0` |
@@ -90,12 +90,13 @@ cmake --build build
 ./build/moas
 ```
 
-The development shell sets `MOAS_DATADIR` to the repository's `manick/`
-directory by default. Outside that shell, run from the repository root or set
-the data directory explicitly:
+The build packs the game data from `manick-src/` into `build/gamedata/`
+(see [Game data](#game-data-manick-src)), and `./build/moas` finds it there.
+The development shell sets `MOAS_DATADIR` to `$MOAS_BUILD_DIR/gamedata`.
+Elsewhere, set the data directory explicitly:
 
 ```sh
-MOAS_DATADIR="$PWD/manick" ./build/moas
+MOAS_DATADIR="$PWD/build/gamedata" ./build/moas
 ```
 
 You can also configure and build directly with CMake on other Linux systems:
@@ -103,7 +104,7 @@ You can also configure and build directly with CMake on other Linux systems:
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build --parallel
-MOAS_DATADIR="$PWD/manick" ./build/moas
+./build/moas
 ```
 
 To build and run the Nix package directly:
@@ -177,7 +178,7 @@ nix run .#install-android-moas   # install on a device with adb
 ```
 
 NDK build of `libmain.so` against a prebuilt SDL2, packaged with SDL’s Java
-activity (`nix/android.nix`, `mk/android/`). Game data from `manick/` is
+activity (`nix/android.nix`, `mk/android/`). The packed game data is
 packaged as APK assets and extracted to internal storage on first run
 (`MOAS_DATADIR`). Useful logcat filter:
 
@@ -297,7 +298,22 @@ no accents besides ÄÖÜß/äöü, so other accented letters are folded to the 
 letter (é→e, ñ→n, ç→c, œ→oe; ¡ ¿ are dropped). The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
 Template with all strings: `lang/manick.pot` (from `moas-util strings pot`).
 
-## Game data (`manick/`)
+## Game data (`manick-src/`)
+
+The game data is kept in the repository in two forms:
+
+- **`manick-src/`**: the data unpacked by `moas-util unpack` (scripts as
+  text, graphics as PNG, see [Editing the game data](#editing-the-game-data-unpack--pack)).
+  This is what the builds use: CMake target `gamedata` packs it into
+  `<build>/gamedata/`, and `nix build .#moas-gamedata` does the same for the
+  Nix packages (cross builds get it via `-DMOAS_GAMEDATA_DIR=`, as they can't
+  run `moas-util`).
+- **`manick/`**: the original release, left untouched. It is the reference
+  for packing: graphics with unchanged pixels keep their original bytes, so
+  the packed files are identical to `manick/` as long as `manick-src/` isn't
+  edited. `nix run .#moas-dos-original` runs `manick/GAME.EXE` on it.
+
+The packed files:
 
 | File | Role |
 |------|------|
@@ -349,12 +365,16 @@ cmake -S . -B build && cmake --build build --target moas-util
 
 ### Editing the game data (`unpack` / `pack`)
 
+Edit `manick-src/` and rebuild; the `gamedata` target repacks it. By hand:
+
 ```sh
-./build/moas-util --datadir manick --outdir manick-src unpack
-# edit manick-src/...
 ./build/moas-util --srcdir manick-src --outdir build/data --reference manick pack
 ./build/moas --datadir build/data
 ```
+
+`manick-src/` was made with `moas-util --datadir manick --outdir manick-src
+unpack`, then `oxipng -o 4 --nx --strip safe -r manick-src` (`unpack` writes
+uncompressed PNGs; `--nx` keeps the palettes as they are).
 
 `unpack` converts every data file into a source tree; `pack` builds
 GAME.1–4, GAME.PCK, GAME.XXX and LICENCE.DAT back from it:

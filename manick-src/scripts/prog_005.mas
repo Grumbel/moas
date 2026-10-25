@@ -1,0 +1,85 @@
+; MOAS script, program 5 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_012b  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Der Weg zum Haus"  ; @000c
+        load_bild 1, 2, 3  ; @001a
+        blend 100, 100, 100  ; @0021
+        blend_in 8  ; @0028
+        wait_while_walking  ; @002b
+        add_area_jumper -20, 0, 0, 200, 561  ; @002c
+        add_area_jumper 319, 0, 340, 200, 941  ; @0037
+        add_area_label 17, 125, 48, 157, 2001  ; @0042
+        add_area_label 47, 136, 153, 163, 2002  ; @004d
+        add_area_label 153, 145, 218, 172, 2002  ; @0058
+        add_area_label 218, 147, 319, 173, 2002  ; @0063
+        if_wasnt_here 86, L_00f1  ; @006e
+        open_window 25  ; @0073
+        print_sentence_ret "Du hörst das Zirpen der Grillen in der Nacht. Der Kies knirscht unter deinen Füßen und du hast das Gefühl, daß du nicht der einzige bist, der dieses Geräusch verursacht. Aber jedesmal wenn du stehenbleibst, hörst du nichts mehr."  ; @0076
+L_00f1:
+        if 2, 70, -62, 1, L_012a  ; @00f1
+        add_say_window2 -1, -1000, -1000, "Uff, das war weit. NW Ich frage mich, warum die mich nicht zurückgeflogen haben."  ; @00fc
+L_012a:
+        return_found  ; @012a
+L_012b:
+        if 2, 1, -62, 2001, L_01b7  ; @012b
+        iwalk -1, 53, 173  ; @0136
+        adress -1, 10006  ; @013d
+        say_if_found 0, 4, -1, "CLR Warnung! NW Das Haus ist baufällig, radioaktiv verseucht und von Zombies belagert. NW Und giftig. NW Und Privatbesitz. NW Eltern zahlen die Beerdigungskosten für ihre Kinder. NW Freundlich!"  ; @0142
+L_01b7:
+        if 2, 1, -62, 2002, L_0230  ; @01b7
+        conditional_walk -1, 1, 0, 0, 60, 188, 66, 172  ; @01c2
+        say_if_found 0, 4, -1, "CLR Der Zaun war mal sehr schön, aber das ist wohl lange her. NW Jetzt ist er total verwahrlost. NW Irgendetwas großes schein einfach durch ihn durchgetrampelt zu sein."  ; @01d3
+L_0230:
+        return_not_found  ; @0230
+        blend_out 8  ; @0231
+        clear_screen_init  ; @0234
+        if_wasnt_here 87, L_0399  ; @0235
+        arm_key_abort  ; @023a
+        remove_statists  ; @023b
+        var_set_var 31, 14  ; @023c
+        var_set_const 14, 0  ; @0241
+        set_person -1, 800, 186, 284, 176, 0, -1, 0  ; @0246
+        load_bild 11, 9, 9  ; @0256
+        blend 100, 100, 100  ; @025d
+        blend_in 2  ; @0264
+        click_or_enter 6  ; @0267
+        blend_out 2  ; @026a
+        clear_screen_init  ; @026d
+        load_bild 66, 67, 68  ; @026e
+        add_person 128, 102, 156, 0, 0, 16384, 0, 10  ; @0275
+        add_person 124, 101, 158, 0, 0, -16384, 0, 10  ; @0285
+        add_person 125, 222, 158, 0, 0, -16384, 0, 10  ; @0295
+        add_person 49, 120, 134, 0, 0, 16384, 0, 10  ; @02a5
+        adress 49, 10004  ; @02b5
+        add_person 126, 213, 111, 0, 0, 16384, 0, 10  ; @02ba
+        set_person_z 128, 10  ; @02ca
+        set_person_z 124, 10  ; @02cf
+        set_person_z 125, 10  ; @02d4
+        set_ghost_level 124, 96  ; @02d9
+        set_ghost_level 125, 96  ; @02de
+        blend_in 2  ; @02e3
+        say_properties 3, 49, 15, 2  ; @02e6
+        say_properties 5, 128, 20, 2  ; @02ef
+        add_say_window 49, -1000, -1000, "Soll ich dir jetzt deinen hübschen Körper zerstrahlen.. NW ..oder soll ich dir das Gehirn raussaugen? NW ___-Seufz-___ NW Wenn ich mich doch nur entscheiden könnte."  ; @02f8
+        add_say_window 128, 102, 110, "Gar nichts werden Sie tun! NW Mein Freund wird mich retten!"  ; @0359
+        add_say_window 49, -1000, -1000, "Ist klar..."  ; @037f
+        wait 8  ; @038d
+        abort_redraw  ; @0390
+        blend_out 2  ; @0391
+        var_set_var 14, 31  ; @0394
+L_0399:
+        set_person -1, 320, 186, 284, 176, 0, -1, 0  ; @0399
+        remove_statists  ; @03a9
+        call_proc 6  ; @03aa
+        unmark_area2 941  ; @03ad
+        walk_person -1, 350, 187  ; @03b0
+        add_say_window -1, -1000, -1000, "Moment mal."  ; @03b7
+        walk_person -1, 310, 187  ; @03c6
+        adress -1, 10004  ; @03cd
+        add_say_window2 -1, -1000, -1000, "Ich kann Sandy nicht einfach dem verrückten Dr. Ed überlassen."  ; @03d2
+        add_area_jumper 319, 0, 340, 200, 941  ; @03f4

@@ -1,0 +1,90 @@
+; MOAS script, program 23 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_006c  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Im Kellergang"  ; @000c
+        load_bild 60, 61, 62  ; @0017
+        blend_in 2  ; @001e
+        wait_while_walking  ; @0021
+        add_area_jumper 306, 151, 319, 177, 109  ; @0022
+        add_area_jumper 231, 188, 296, 199, 225  ; @002d
+        add_area_jumper 0, 139, 20, 169, 309  ; @0038
+        add_area_jumper 56, 109, 109, 144, 386  ; @0043
+        if 2, 69, -62, 1, L_006b  ; @004e
+        add_area_jumper 0, 0, 160, 199, 543  ; @0059
+        ontime_jump 5, 23, L_0234  ; @0064
+L_006b:
+        return_found  ; @006b
+L_006c:
+        return_not_found  ; @006c
+        if 2, 43, -62, 1, L_00b1  ; @006d
+        unmark_area2 109  ; @0078
+        stop_all_walking  ; @007b
+        add_say_window -1, -1000, -1000, "CLR Ich sollte den Doc besser nicht noch mehr reizen!"  ; @007c
+        iwalk -1, 280, 160  ; @009e
+        add_area_jumper 306, 151, 319, 177, 109  ; @00a5
+        return_found  ; @00b0
+L_00b1:
+        if 2, 69, -62, 1, L_00c8  ; @00b1
+        var_set_const 69, 0  ; @00bc
+        ontime_jump 0, 23, L_0234  ; @00c1
+L_00c8:
+        blend_out 2  ; @00c8
+        remove_person 32000  ; @00cb
+        add_person 96, 309, 181, 280, 181, 32, 0, 0  ; @00ce
+        call_proc 18  ; @00de
+        if 2, 69, -62, 1, L_011e  ; @00e1
+        unmark_area2 225  ; @00ec
+        ontime_jump 0, 23, L_0234  ; @00ef
+        add_say_window2 -1, -1000, -1000, "__Oh-oh!__"  ; @00f6
+        set_person -1, 0, 0, 0, -20, 0, -1, 58  ; @0108
+        wait_while_walking  ; @0118
+        goto_proc 23, L_019a  ; @0119
+L_011e:
+        blend_out 2  ; @011e
+        remove_statists  ; @0121
+        set_person -1, 160, 131, 160, 140, 0, -1, 0  ; @0122
+        call_proc 20  ; @0132
+        unmark_area2 309  ; @0135
+        stop_all_walking  ; @0138
+        add_say_window -1, -1000, -1000, "CLR Nein danke. Ich war oft genug in der Verdummungs- maschine die dort drin ist."  ; @0139
+        iwalk -1, 40, 160  ; @016f
+        add_area_jumper 0, 139, 20, 169, 309  ; @0176
+        return_found  ; @0181
+        blend_out 2  ; @0182
+        remove_statists  ; @0185
+        set_person -1, 160, 290, 160, 190, 0, -1, 0  ; @0186
+        call_proc 26  ; @0196
+        return_found  ; @0199
+L_019a:
+        stop_all_walking  ; @019a
+        add_person 49, 262, 189, 262, 175, 1024, 0, 0  ; @019b
+        say_properties 3, 49, 15, 2  ; @01ab
+        add_say_window 49, -1000, -1000, "Stehenbleiben!"  ; @01b4
+        say_wait 32000  ; @01c5
+        adress -1, 49  ; @01c8
+        add_say_window -1, -1000, -1000, "Nein, nicht schon wieder."  ; @01cd
+        add_say_window 49, -1000, -1000, "Oh doch!"  ; @01e1
+        wait 8  ; @01ef
+        blend_out 2  ; @01f2
+        remove_person 32000  ; @01f5
+        add_person 1, 168, 169, 168, 169, 1056, 0, 0  ; @01f8
+        adress 1, 10002  ; @0208
+        var_set_const 33, 1  ; @020d
+        say_properties 0, 1, 27, 2  ; @0212
+        call_proc 11  ; @021b
+        return_found  ; @021e
+        unmark_area2 543  ; @021f
+        ontime_jump 0, 23, L_0234  ; @0222
+        var_set_const 69, 0  ; @0229
+        goto_proc 23, L_019a  ; @022e
+        return_found  ; @0233
+L_0234:
+        var_set_const 69, 0  ; @0234
+        unmark_area2 543  ; @0239
+        goto_proc 23, L_019a  ; @023c
+        return_found  ; @0241

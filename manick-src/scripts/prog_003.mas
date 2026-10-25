@@ -1,0 +1,18 @@
+; MOAS script, program 3 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        var_set_const 25, 1  ; @0000
+        if 2, 25, -62, 1, L_001a  ; @0005
+        var_set_const 26, 0  ; @0010
+        var_set_const 27, 1  ; @0015
+L_001a:
+        if 2, 25, -62, 0, L_002f  ; @001a
+        var_set_const 26, 1  ; @0025
+        var_set_const 27, 0  ; @002a
+L_002f:
+        blend 100, 100, 100  ; @002f
+        clear_screen_init  ; @0036
+        return_found  ; @0037

@@ -6,6 +6,24 @@
 
 # TODO / Handoff
 
+## Game data built from manick-src/ (2026-10-25)
+- `manick-src/` = `moas-util unpack` of `manick/`, PNGs recompressed with
+  `oxipng -o 4 --nx --strip safe` (6.8 MB → 1.7 MB; `--nx` keeps palettes
+  and indices). `manick/` stays untouched as the original/reference.
+- CMake target `gamedata` (ALL) packs it into `<build>/gamedata/` with
+  `--reference manick`; output is byte-identical to `manick/` (all 235
+  graphics reused). `-DMOAS_GAMEDATA_DIR=` uses already packed data instead
+  (required for wasm; other cross builds just skip installing data).
+- Nix: `nix/gamedata.nix` (`.#moas-gamedata`, unversioned) builds a host
+  moas-util with `$CC` and packs. Desktop, Windows, R36S, Android
+  (`GAME_DATA_DIR` in build-apk.sh), wasm and the DOS rebuild use it.
+  `moas-dos-original` still ships `manick/` (and DOS4GW.EXE comes from there).
+- Runtime lookup: `$exe/gamedata` is tried after env/built-in and before
+  `./manick`. Dev shell `MOAS_DATADIR` → `$MOAS_BUILD_DIR/gamedata`.
+- `moas-util-roundtrip` ctest still checks unpack+pack of `manick/`. No test
+  that `manick-src/` equals `manick/` (it is meant to be edited).
+- Re-running `unpack` would write uncompressed PNGs again; run oxipng after.
+
 ## Options menu: Save/Load, Settings submenu (2026-10-25)
 - R36S has no other way to reach Save/Load, so the F12 / OPTIONS / pad Back
   menu now has two pages. Main: RESUME, SAVE, LOAD, SETTINGS, RESTART, QUIT.

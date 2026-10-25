@@ -1,0 +1,600 @@
+; MOAS script, program 1 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        var_set_const 29, 0  ; @0000
+        var_set_const 30, 0  ; @0005
+        if 2, 0, -62, 9, L_0099  ; @000a
+        if 0, 1, -62, 2, L_0025  ; @0015
+        var_set_const 29, 1  ; @0020
+L_0025:
+        if 0, 1, -63, 2, L_0035  ; @0025
+        var_set_const 30, 1  ; @0030
+L_0035:
+        if2 10, 1, -64, 1000, 0, 1, -61, 2000, L_0099  ; @0035
+        if2 10, 2, -61, 1000, 1, 2, -64, 2000, L_006f  ; @0048
+        var_set_var 31, 1  ; @005b
+        var_set_var 1, 2  ; @0060
+        var_set_var 2, 31  ; @0065
+        goto_proc 1, L_0099  ; @006a
+L_006f:
+        if3 10, 2, -64, 1000, 0, 2, -61, 2000, 0, 2, -61, 1, L_0099  ; @006f
+        var_set_var 31, 1  ; @008a
+        var_set_var 1, 2  ; @008f
+        var_set_var 2, 31  ; @0094
+L_0099:
+        if2 10, 1, -62, 1000, 1, 1, -62, 1024, L_0811  ; @0099
+        if 2, 0, -62, 4, L_00e4  ; @00ac
+        open_window 25  ; @00b7
+        print_sentence "Du hast_"  ; @00ba
+        print_var 8  ; @00c0
+        print_sentence_ret "_Punkte von insgesammt 200 möglichen Punkten."  ; @00c3
+L_00e4:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0811  ; @00e4
+        var_set_const 15, 1  ; @00f7
+        add_person 32, 160, 200, 0, 0, 16384, 0, 10  ; @00fc
+        var_set_const 15, 0  ; @010c
+        set_person_z 32, 20000  ; @0111
+        add_dialog 0  ; @0116
+        add_option 0, 1, 1, -1, "Neustart"  ; @0119
+        add_option 0, 3, 1, -1, "Projekttagebuch"  ; @0129
+        add_option 0, 4, 1, -1, "Projektteam"  ; @013e
+        add_option 0, 5, 1, -1, "Quit"  ; @0151
+        add_option 0, 6, 1, -1, "Zurück"  ; @015e
+L_016c:
+        select_from_dialog 31, 0  ; @016c
+        if 2, 31, -62, 1, L_01e2  ; @0171
+        open_window 25  ; @017c
+        print_sentence_plus "Noch einmal von vorne spielen? Bist du sicher?"  ; @017f
+        add_dialog 1  ; @019a
+        add_option 1, 1, 1, -1, "Ja, aber sicher!"  ; @019d
+        add_option 1, 2, 1, -1, "Nein, war'n Irrtum."  ; @01ac
+        select_from_dialog 31, 1  ; @01c4
+        remove_dialog 1  ; @01c9
+        remove_dialog 0  ; @01cc
+        if 2, 31, -62, 1, L_01db  ; @01cf
+        restart  ; @01da
+L_01db:
+        remove_person 32  ; @01db
+        remove_dialog 0  ; @01de
+        return_found  ; @01e1
+L_01e2:
+        if 2, 31, -62, 5, L_024f  ; @01e2
+        open_window 25  ; @01ed
+        print_sentence_plus "Aufhören_? Bist du sicher?"  ; @01f0
+        add_dialog 1  ; @0202
+        add_option 1, 1, 1, -1, "Ja, aber sicher!"  ; @0205
+        add_option 1, 2, 1, -1, "Nein, war'n Irrtum."  ; @0214
+        select_from_dialog 31, 1  ; @022c
+        remove_dialog 1  ; @0231
+        remove_dialog 0  ; @0234
+        if 2, 31, -62, 1, L_0248  ; @0237
+        blend_out 1  ; @0242
+        internal_error 0  ; @0245
+L_0248:
+        remove_person 32  ; @0248
+        remove_dialog 0  ; @024b
+        return_found  ; @024e
+L_024f:
+        if 2, 31, -62, 3, L_0758  ; @024f
+        open_window 25  ; @025a
+        print_sentence "Die Entstehungsgeschichte dieses Spieles:"  ; @025d
+        print_sentence "NW NW 1.7-2.7.95: NW Spielidee, Eingangsweg, Hausfront, Titelbild, Spielerauswahl, Intro"  ; @0276
+        print_sentence "NW NW 8.7-9.7.95: NW \"Inzwischen\"-Bild, \"Stunden-Später\"-Bild, Küche, Garten, Flur, \"Kaboom\"-Bild"  ; @02b6
+        print_sentence_plus "NW NW 21.7-23.7.95: NW Kamera und diverse Fotos, Flur verbessert, Raum des Butlers, Fangroutine, Cheat-Ikone zum debuggen"  ; @0300
+        open_window 25  ; @034f
+        print_sentence "29.7-30.7.95: NW Kamera-Cheat, Käfig und Auge im Raum des Butlers, Gang mit Kaktee und Lampen; Zerstörungssequenz"  ; @0352
+        print_sentence "NW NW 5.8-6.8.95: NW Puzzleteile versteckt, Wasserglas eingeführt, Dialog mit Kaktus begonnen"  ; @03a1
+        print_sentence "NW NW Dann eine große Pause. Ich hab' an meiner Bibliothek gearbeitet, versucht einige andere Sachen ins Rollen zu bringen."  ; @03e1
+        print_sentence_plus "NW NW 11.6-17.6.96: NW Diele eingebaut, Öl, Kalender, Toast und Diskette hinzugefügt, Kreditkarte und Show-Bild gemalt, Doom Sequenz und Tutorium geschrieben, Dachboden gemalt und eingebaut. Mond gemalt."  ; @0425
+        open_window 25  ; @04a6
+        print_sentence "18.6.96: NW Mansarde, Teleskop und Kinderzimmer gemalt und eingebaut. Mond und Maschine gemalt."  ; @04a9
+        print_sentence "NW NW 19.6.96: NW Kaminsequenz gemalt und eingebaut"  ; @04e5
+        print_sentence "NW NW 20.6.96-24.6.96: NW Toasterzimmer und Kellergang gemalt und eingebaut (Story hierfür neu ausgedacht); Maschine und Mondbild eingebaut; Safe gemalt und eingebaut; Grab eingebaut"  ; @0507
+        print_sentence_plus "NW NW 29.6.96: NW Sequenzen für Toasterzimmer, Kellergang und Maschinenraum eingebaut"  ; @0579
+        open_window 25  ; @05af
+        print_sentence "30.6.96: NW Showmaster gemalt, Gameshow eingebaut"  ; @05b2
+        print_sentence "NW NW 1.7.96-2.7.96: NW Einige Zwischensequenzen eingebaut"  ; @05d7
+        print_sentence "NW NW 4.7.96: NW Showdown gemalt und programmiert. Die Betaversion ist abgeschlossen. Habe einge Tester kontaktiert."  ; @05fe
+        print_sentence_plus "NW NW 5.7.96-7.8.96: NW Selber noch mehrfach komplett gespielt und zahlreiche Bugs korrigiert. Die Betatester haben gute Arbeit geleistet und diverse weitere Bugs gefunden."  ; @0643
+        open_window 25  ; @06ac
+        print_sentence "Insgesamt: ungefähr 30 volle Tage (Plus ein paar Stunden Gedankenspielereien für die Rätsel und die Bilder)"  ; @06af
+        print_sentence_plus "NW NW (Und vorher über mehrere Jahre verteilt die Entwicklung des Adventure-Systens inlusive Datenkonverter, Compiler, zwei Packer und Interpreter)"  ; @06f6
+        remove_person 32  ; @0751
+        remove_dialog 0  ; @0754
+        return_found  ; @0757
+L_0758:
+        if 2, 31, -62, 4, L_07e0  ; @0758
+        open_window 25  ; @0763
+        print_sentence "Die Verantwortlichen..."  ; @0766
+        print_sentence "NW NW Idee, Rätsel, Programmierung, Grafik:"  ; @0774
+        print_sentence "NW _________ Thomas Holz"  ; @0791
+        print_sentence "NW NW Beta Testing:"  ; @079e
+        print_sentence "NW _________ Maik Esser"  ; @07ac
+        print_sentence "NW _________ Robert Kleinert"  ; @07b9
+        print_sentence_plus "NW _________ Wolfgang Büning"  ; @07c7
+        remove_person 32  ; @07d9
+        remove_dialog 0  ; @07dc
+        return_found  ; @07df
+L_07e0:
+        if 2, 31, -62, 6, L_07f2  ; @07e0
+        remove_dialog 0  ; @07eb
+        remove_person 32  ; @07ee
+        return_found  ; @07f1
+L_07f2:
+        if2 10, 31, -63, 6, 0, 31, -63, 6, L_080a  ; @07f2
+        goto_proc 1, L_016c  ; @0805
+L_080a:
+        remove_dialog 0  ; @080a
+        remove_person 32  ; @080d
+        return_found  ; @0810
+L_0811:
+        if 2, 1, -62, 1002, L_169c  ; @0811
+        if 2, 0, -62, 4, L_0859  ; @081c
+        open_window 2136  ; @0827
+        print_sentence_ret "Dies ist Mänick Mäschion. (C) Copyright 1996 bei Thomas Holz."  ; @082a
+L_0859:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_169c  ; @0859
+        var_set_const 15, 1  ; @086c
+        add_person 32, 160, 200, 0, 0, 16384, 0, 10  ; @0871
+        var_set_const 15, 0  ; @0881
+        set_person_z 32, 20000  ; @0886
+        add_dialog 2  ; @088b
+        add_option 2, 1, 3, -1, "Variable ändern"  ; @088e
+        add_option 2, 2, 3, -1, "Inventar ändern"  ; @08a3
+        add_option 2, 3, 3, -1, "Beamen"  ; @08b9
+        add_option 2, 99, 3, -1, "Zurück"  ; @08c8
+L_08d6:
+        select_from_dialog 31, 2  ; @08d6
+        if 2, 31, -62, 1, L_11a7  ; @08db
+L_08e6:
+        add_dialog 3  ; @08e6
+        if 2, 33, -62, 0, L_0914  ; @08e9
+        add_option 3, 1, 1, -1, "PlayerIsStoopid auf 1 setzen"  ; @08f4
+L_0914:
+        if 2, 33, -62, 1, L_093f  ; @0914
+        add_option 3, 1, 1, -1, "PlayerIsStoopid auf 0 setzen"  ; @091f
+L_093f:
+        if 2, 36, -62, 0, L_096a  ; @093f
+        add_option 3, 2, 1, -1, "SpielerKannKnipsen auf 1 setzen"  ; @094a
+L_096a:
+        if 2, 36, -62, 1, L_0995  ; @096a
+        add_option 3, 2, 1, -1, "SpielerKannKnipsen auf 0 setzen"  ; @0975
+L_0995:
+        if 2, 37, -62, 0, L_09bd  ; @0995
+        add_option 3, 3, 1, -1, "GangIstRuiniert auf 1 setzen"  ; @09a0
+L_09bd:
+        if 2, 37, -62, 1, L_09e5  ; @09bd
+        add_option 3, 3, 1, -1, "GangIstRuiniert auf 0 setzen"  ; @09c8
+L_09e5:
+        if 2, 38, -62, 0, L_0a0f  ; @09e5
+        add_option 3, 4, 1, -1, "KaktusIstGemein auf 1 setzen"  ; @09f0
+L_0a0f:
+        if 2, 38, -62, 1, L_0a39  ; @0a0f
+        add_option 3, 4, 1, -1, "KaktusIstGemein auf 0 setzen"  ; @0a1a
+L_0a39:
+        if 2, 39, -62, 0, L_0a64  ; @0a39
+        add_option 3, 5, 1, -1, "KühlschrankKlemmt auf 1 setzen"  ; @0a44
+L_0a64:
+        if 2, 39, -62, 1, L_0a8f  ; @0a64
+        add_option 3, 5, 1, -1, "KühlschrankKlemmt auf 0 setzen"  ; @0a6f
+L_0a8f:
+        if 2, 40, -62, 0, L_0ac0  ; @0a8f
+        add_option 3, 6, 1, -1, "LetterState auf 1 (InBasket) setzen"  ; @0a9a
+L_0ac0:
+        if 2, 40, -62, 1, L_0af0  ; @0ac0
+        add_option 3, 6, 1, -1, "LetterState auf 2 (PapierKorb) setzen"  ; @0acb
+L_0af0:
+        if 2, 40, -62, 2, L_0b21  ; @0af0
+        add_option 3, 6, 1, -1, "LetterState auf 0 (NotCreated) setzen"  ; @0afb
+L_0b21:
+        if 2, 41, -62, 0, L_0b57  ; @0b21
+        add_option 3, 7, 1, -1, "LetterReadState auf 1 (read and dialed) setzen"  ; @0b2c
+L_0b57:
+        if 2, 41, -62, 1, L_0b88  ; @0b57
+        add_option 3, 7, 1, -1, "LetterReadState auf 0 (unread) setzen"  ; @0b62
+L_0b88:
+        if 2, 42, -62, 0, L_0bad  ; @0b88
+        add_option 3, 8, 1, -1, "HornissenDa auf 1 setzen"  ; @0b93
+L_0bad:
+        if 2, 42, -62, 1, L_0bd2  ; @0bad
+        add_option 3, 8, 1, -1, "HornissenDa auf 0 setzen"  ; @0bb8
+L_0bd2:
+        if 2, 43, -62, 0, L_0bfb  ; @0bd2
+        add_option 3, 9, 1, -1, "BombedTheMaschine auf 1 setzen"  ; @0bdd
+L_0bfb:
+        if 2, 43, -62, 1, L_0c24  ; @0bfb
+        add_option 3, 9, 1, -1, "BombedTheMaschine auf 0 setzen"  ; @0c06
+L_0c24:
+        if 2, 44, -62, 0, L_0c4f  ; @0c24
+        add_option 3, 10, 1, -1, "KenntSafezahl auf 1 setzen"  ; @0c2f
+L_0c4f:
+        if 2, 44, -62, 1, L_0c7a  ; @0c4f
+        add_option 3, 10, 1, -1, "KenntSafezahl auf 0 setzen"  ; @0c5a
+L_0c7a:
+        add_option 3, 99, 1, -1, "Zurück"  ; @0c7a
+        select_from_dialog 31, 3  ; @0c88
+        remove_dialog 3  ; @0c8d
+        if 2, 31, -62, 1, L_0f7d  ; @0c90
+        if 2, 33, -62, 0, L_0e08  ; @0c9b
+        var_set_const 33, 1  ; @0ca6
+        var_set_const 15, 1  ; @0cab
+        get_person_x -1, 34  ; @0cb0
+        get_person_y -1, 35  ; @0cb5
+        remove_person 0  ; @0cba
+        add_person 1, 160, 100, 0, 0, 1056, 0, 10  ; @0cbd
+L_0ccd:
+        get_person_x -1, 31  ; @0ccd
+        if 0, 31, -61, 34, L_0cf2  ; @0cd2
+        set_person -1, 10, 0, 0, 0, 0, -1, 58  ; @0cdd
+        goto_proc 1, L_0ccd  ; @0ced
+L_0cf2:
+        get_person_x -1, 31  ; @0cf2
+        if 0, 31, -60, 34, L_0d17  ; @0cf7
+        set_person -1, -10, 0, 0, 0, 0, -1, 58  ; @0d02
+        goto_proc 1, L_0cf2  ; @0d12
+L_0d17:
+        get_person_y -1, 31  ; @0d17
+        if 0, 31, -61, 35, L_0d3c  ; @0d1c
+        set_person -1, 0, 10, 0, 0, 0, -1, 58  ; @0d27
+        goto_proc 1, L_0d17  ; @0d37
+L_0d3c:
+        get_person_y -1, 31  ; @0d3c
+        if 0, 31, -60, 35, L_0d61  ; @0d41
+        set_person -1, 0, -10, 0, 0, 0, -1, 58  ; @0d4c
+        goto_proc 1, L_0d3c  ; @0d5c
+L_0d61:
+        get_person_x -1, 31  ; @0d61
+        if 0, 31, -61, 34, L_0d86  ; @0d66
+        set_person -1, 1, 0, 0, 0, 0, -1, 58  ; @0d71
+        goto_proc 1, L_0d61  ; @0d81
+L_0d86:
+        get_person_x -1, 31  ; @0d86
+        if 0, 31, -60, 34, L_0dab  ; @0d8b
+        set_person -1, -1, 0, 0, 0, 0, -1, 58  ; @0d96
+        goto_proc 1, L_0d86  ; @0da6
+L_0dab:
+        get_person_y -1, 31  ; @0dab
+        if 0, 31, -61, 35, L_0dd0  ; @0db0
+        set_person -1, 0, 1, 0, 0, 0, -1, 58  ; @0dbb
+        goto_proc 1, L_0dab  ; @0dcb
+L_0dd0:
+        get_person_y -1, 31  ; @0dd0
+        if 0, 31, -60, 35, L_0df5  ; @0dd5
+        set_person -1, 0, -1, 0, 0, 0, -1, 58  ; @0de0
+        goto_proc 1, L_0dd0  ; @0df0
+L_0df5:
+        say_properties 0, 1, 27, 2  ; @0df5
+        var_set_const 15, 0  ; @0dfe
+        var_set_const 31, -1  ; @0e03
+L_0e08:
+        if2 10, 33, -62, 1, 0, 31, -62, 1, L_0f78  ; @0e08
+        var_set_const 33, 0  ; @0e1b
+        var_set_const 15, 1  ; @0e20
+        get_person_x -1, 34  ; @0e25
+        get_person_y -1, 35  ; @0e2a
+        remove_person 1  ; @0e2f
+        add_person 0, 160, 100, 0, 0, 1056, 0, 10  ; @0e32
+L_0e42:
+        get_person_x -1, 31  ; @0e42
+        if 0, 31, -61, 34, L_0e67  ; @0e47
+        set_person -1, 10, 0, 0, 0, 0, -1, 58  ; @0e52
+        goto_proc 1, L_0e42  ; @0e62
+L_0e67:
+        get_person_x -1, 31  ; @0e67
+        if 0, 31, -60, 34, L_0e8c  ; @0e6c
+        set_person -1, -10, 0, 0, 0, 0, -1, 58  ; @0e77
+        goto_proc 1, L_0e67  ; @0e87
+L_0e8c:
+        get_person_y -1, 31  ; @0e8c
+        if 0, 31, -61, 35, L_0eb1  ; @0e91
+        set_person -1, 0, 10, 0, 0, 0, -1, 58  ; @0e9c
+        goto_proc 1, L_0e8c  ; @0eac
+L_0eb1:
+        get_person_y -1, 31  ; @0eb1
+        if 0, 31, -60, 35, L_0ed6  ; @0eb6
+        set_person -1, 0, -10, 0, 0, 0, -1, 58  ; @0ec1
+        goto_proc 1, L_0eb1  ; @0ed1
+L_0ed6:
+        get_person_x -1, 31  ; @0ed6
+        if 0, 31, -61, 34, L_0efb  ; @0edb
+        set_person -1, 1, 0, 0, 0, 0, -1, 58  ; @0ee6
+        goto_proc 1, L_0ed6  ; @0ef6
+L_0efb:
+        get_person_x -1, 31  ; @0efb
+        if 0, 31, -60, 34, L_0f20  ; @0f00
+        set_person -1, -1, 0, 0, 0, 0, -1, 58  ; @0f0b
+        goto_proc 1, L_0efb  ; @0f1b
+L_0f20:
+        get_person_y -1, 31  ; @0f20
+        if 0, 31, -61, 35, L_0f45  ; @0f25
+        set_person -1, 0, 1, 0, 0, 0, -1, 58  ; @0f30
+        goto_proc 1, L_0f20  ; @0f40
+L_0f45:
+        get_person_y -1, 31  ; @0f45
+        if 0, 31, -60, 35, L_0f6a  ; @0f4a
+        set_person -1, 0, -1, 0, 0, 0, -1, 58  ; @0f55
+        goto_proc 1, L_0f45  ; @0f65
+L_0f6a:
+        say_properties 0, 0, 27, 2  ; @0f6a
+        var_set_const 15, 0  ; @0f73
+L_0f78:
+        adress -1, 10006  ; @0f78
+L_0f7d:
+        if 2, 31, -62, 2, L_0fb5  ; @0f7d
+        if 2, 36, -62, 0, L_0f9d  ; @0f88
+        var_set_const 36, 1  ; @0f93
+        var_set_const 31, -1  ; @0f98
+L_0f9d:
+        if2 10, 36, -62, 1, 0, 31, -63, -1, L_0fb5  ; @0f9d
+        var_set_const 36, 0  ; @0fb0
+L_0fb5:
+        if 2, 31, -62, 3, L_0fed  ; @0fb5
+        if 2, 37, -62, 0, L_0fd5  ; @0fc0
+        var_set_const 37, 1  ; @0fcb
+        var_set_const 31, -1  ; @0fd0
+L_0fd5:
+        if2 10, 37, -62, 1, 0, 31, -63, -1, L_0fed  ; @0fd5
+        var_set_const 37, 0  ; @0fe8
+L_0fed:
+        if 2, 31, -62, 4, L_1025  ; @0fed
+        if 2, 38, -62, 0, L_100d  ; @0ff8
+        var_set_const 38, 1  ; @1003
+        var_set_const 31, -1  ; @1008
+L_100d:
+        if2 10, 38, -62, 1, 0, 31, -63, -1, L_1025  ; @100d
+        var_set_const 38, 0  ; @1020
+L_1025:
+        if 2, 31, -62, 5, L_105d  ; @1025
+        if 2, 39, -62, 0, L_1045  ; @1030
+        var_set_const 39, 1  ; @103b
+        var_set_const 31, -1  ; @1040
+L_1045:
+        if2 10, 39, -62, 1, 0, 31, -63, -1, L_105d  ; @1045
+        var_set_const 39, 0  ; @1058
+L_105d:
+        if 2, 31, -62, 6, L_10b2  ; @105d
+        if 2, 40, -62, 0, L_107d  ; @1068
+        var_set_const 40, 1  ; @1073
+        var_set_const 31, -1  ; @1078
+L_107d:
+        if2 10, 40, -62, 1, 0, 31, -63, -1, L_109a  ; @107d
+        var_set_const 40, 2  ; @1090
+        var_set_const 31, -1  ; @1095
+L_109a:
+        if2 10, 40, -62, 2, 0, 31, -63, -1, L_10b2  ; @109a
+        var_set_const 40, 0  ; @10ad
+L_10b2:
+        if 2, 31, -62, 7, L_10ea  ; @10b2
+        if 2, 41, -62, 0, L_10d2  ; @10bd
+        var_set_const 41, 1  ; @10c8
+        var_set_const 31, -1  ; @10cd
+L_10d2:
+        if2 10, 41, -62, 1, 0, 31, -63, -1, L_10ea  ; @10d2
+        var_set_const 41, 0  ; @10e5
+L_10ea:
+        if 2, 31, -62, 8, L_1122  ; @10ea
+        if 2, 42, -62, 0, L_110a  ; @10f5
+        var_set_const 42, 1  ; @1100
+        var_set_const 31, -1  ; @1105
+L_110a:
+        if2 10, 42, -62, 1, 0, 31, -63, -1, L_1122  ; @110a
+        var_set_const 42, 0  ; @111d
+L_1122:
+        if 2, 31, -62, 9, L_115a  ; @1122
+        if 2, 43, -62, 0, L_1142  ; @112d
+        var_set_const 43, 1  ; @1138
+        var_set_const 31, -1  ; @113d
+L_1142:
+        if2 10, 43, -62, 1, 0, 31, -63, -1, L_115a  ; @1142
+        var_set_const 43, 0  ; @1155
+L_115a:
+        if 2, 31, -62, 10, L_1192  ; @115a
+        if 2, 44, -62, 0, L_117a  ; @1165
+        var_set_const 44, 1  ; @1170
+        var_set_const 31, -1  ; @1175
+L_117a:
+        if2 10, 44, -62, 1, 0, 31, -63, -1, L_1192  ; @117a
+        var_set_const 44, 0  ; @118d
+L_1192:
+        if 2, 31, -63, 99, L_11a2  ; @1192
+        goto_proc 1, L_08e6  ; @119d
+L_11a2:
+        var_set_const 31, -1  ; @11a2
+L_11a7:
+        if 2, 31, -62, 2, L_1460  ; @11a7
+L_11b2:
+        add_dialog 4  ; @11b2
+        add_option 4, 4, 1, -1, "Brief nehmen bzw. weglegen"  ; @11b5
+        add_option 4, 2, 1, -1, "Ghettoblaster nehmen bzw. weglegen"  ; @11d0
+        add_option 4, 1, 1, -1, "Kamera nehmen bzw. weglegen"  ; @11ef
+        add_option 4, 7, 1, -1, "Keil nehmen bzw. weglegen"  ; @120a
+        add_option 4, 6, 1, -1, "Koffer nehmen bzw. weglegen"  ; @1224
+        add_option 4, 5, 1, -1, "Kreditkarte nehmen bzw. weglegen"  ; @123c
+        add_option 4, 3, 1, -1, "Öl nehmen bzw. weglegen"  ; @1259
+        add_option 4, 8, 1, -1, "Zeitung nehmen bzw. weglegen"  ; @1272
+        add_option 4, 99, 1, -1, "Zurück"  ; @128d
+        select_from_dialog 31, 4  ; @129b
+        remove_dialog 4  ; @12a0
+        if2 14, 31, -62, 1, 0, 1015, -62, -50, L_12c0  ; @12a3
+        set_object 1015, -55  ; @12b6
+        var_set_const 31, -1  ; @12bb
+L_12c0:
+        if2 14, 31, -62, 1, 0, 1015, -62, -55, L_12d8  ; @12c0
+        set_object 1015, -50  ; @12d3
+L_12d8:
+        if2 14, 31, -62, 2, 0, 1001, -62, -50, L_12f5  ; @12d8
+        set_object 1001, -55  ; @12eb
+        var_set_const 31, -1  ; @12f0
+L_12f5:
+        if2 14, 31, -62, 2, 0, 1001, -62, -55, L_130d  ; @12f5
+        set_object 1001, -50  ; @1308
+L_130d:
+        if2 14, 31, -62, 3, 0, 1034, -62, -50, L_132a  ; @130d
+        set_object 1034, -55  ; @1320
+        var_set_const 31, -1  ; @1325
+L_132a:
+        if2 14, 31, -62, 3, 0, 1034, -62, -55, L_1342  ; @132a
+        set_object 1034, -50  ; @133d
+L_1342:
+        if2 14, 31, -62, 4, 0, 1003, -62, -50, L_135f  ; @1342
+        set_object 1003, -55  ; @1355
+        var_set_const 31, -1  ; @135a
+L_135f:
+        if2 14, 31, -62, 4, 0, 1003, -62, -55, L_1377  ; @135f
+        set_object 1003, -50  ; @1372
+L_1377:
+        if2 14, 31, -62, 5, 0, 1030, -62, -50, L_1394  ; @1377
+        set_object 1030, -55  ; @138a
+        var_set_const 31, -1  ; @138f
+L_1394:
+        if2 14, 31, -62, 5, 0, 1030, -62, -55, L_13ac  ; @1394
+        set_object 1030, -50  ; @13a7
+L_13ac:
+        if2 14, 31, -62, 6, 0, 1040, -62, -50, L_13c9  ; @13ac
+        set_object 1040, -55  ; @13bf
+        var_set_const 31, -1  ; @13c4
+L_13c9:
+        if2 14, 31, -62, 6, 0, 1040, -62, -55, L_13e1  ; @13c9
+        set_object 1040, -50  ; @13dc
+L_13e1:
+        if2 14, 31, -62, 7, 0, 1009, -62, -50, L_13fe  ; @13e1
+        set_object 1009, -55  ; @13f4
+        var_set_const 31, -1  ; @13f9
+L_13fe:
+        if2 14, 31, -62, 7, 0, 1009, -62, -55, L_1416  ; @13fe
+        set_object 1009, -50  ; @1411
+L_1416:
+        if2 14, 31, -62, 8, 0, 1042, -62, -50, L_1433  ; @1416
+        set_object 1042, -55  ; @1429
+        var_set_const 31, -1  ; @142e
+L_1433:
+        if2 14, 31, -62, 8, 0, 1042, -62, -55, L_144b  ; @1433
+        set_object 1042, -50  ; @1446
+L_144b:
+        if 2, 31, -63, 99, L_145b  ; @144b
+        goto_proc 1, L_11b2  ; @1456
+L_145b:
+        var_set_const 31, -1  ; @145b
+L_1460:
+        if 2, 31, -62, 3, L_1685  ; @1460
+        add_dialog 5  ; @146b
+        add_option 5, 1, 1, -1, "[front.th] - Vors Haus"  ; @146e
+        add_option 5, 2, 1, -1, "[flur.th] - Im Treppenhaus"  ; @1489
+        add_option 5, 3, 1, -1, "[butler.th] - Oben im Raum des Butlers"  ; @14a7
+        add_option 5, 4, 1, -1, "[wald.th] - Der Garten des Hauses"  ; @14cb
+        add_option 5, 5, 1, -1, "[mansarde.th] - Der Mansardenraum unterm Dach"  ; @14ea
+        add_option 5, 6, 1, -1, "[toast.th] - Der Raum mit dem Toaster"  ; @1511
+        add_option 5, 7, 1, -1, "[volt.th] - Der Kellergang"  ; @1530
+        add_option 5, 99, 1, -1, "Zurück"  ; @154e
+        select_from_dialog 31, 5  ; @155c
+        remove_dialog 5  ; @1561
+        if 2, 31, -62, 1, L_158e  ; @1564
+        blend_out 1  ; @156f
+        remove_statists  ; @1572
+        remove_dialog 2  ; @1573
+        set_person -1, 152, 136, 152, 136, 0, -1, 0  ; @1576
+        adress -1, 10004  ; @1586
+        call_proc 6  ; @158b
+L_158e:
+        if 2, 31, -62, 2, L_15b8  ; @158e
+        blend_out 1  ; @1599
+        remove_statists  ; @159c
+        remove_dialog 2  ; @159d
+        set_person -1, 169, 119, 169, 126, 0, -1, 0  ; @15a0
+        adress -1, 10004  ; @15b0
+        call_proc 11  ; @15b5
+L_15b8:
+        if 2, 31, -62, 3, L_15e2  ; @15b8
+        blend_out 1  ; @15c3
+        remove_statists  ; @15c6
+        remove_dialog 2  ; @15c7
+        set_person -1, 320, 175, 300, 175, 0, -1, 0  ; @15ca
+        adress -1, 10004  ; @15da
+        call_proc 12  ; @15df
+L_15e2:
+        if 2, 31, -62, 4, L_1607  ; @15e2
+        blend_out 1  ; @15ed
+        remove_statists  ; @15f0
+        remove_dialog 2  ; @15f1
+        set_person -1, 320, 166, 215, 166, 0, -1, 0  ; @15f4
+        call_proc 10  ; @1604
+L_1607:
+        if 2, 31, -62, 5, L_162c  ; @1607
+        blend_out 1  ; @1612
+        remove_statists  ; @1615
+        remove_dialog 2  ; @1616
+        set_person -1, 0, 87, 100, 145, 0, -1, 0  ; @1619
+        call_proc 17  ; @1629
+L_162c:
+        if 2, 31, -62, 6, L_1656  ; @162c
+        blend_out 1  ; @1637
+        remove_statists  ; @163a
+        remove_dialog 2  ; @163b
+        set_person -1, 215, 131, 215, 131, 0, -1, 0  ; @163e
+        adress -1, 10004  ; @164e
+        call_proc 20  ; @1653
+L_1656:
+        if 2, 31, -62, 7, L_1680  ; @1656
+        blend_out 1  ; @1661
+        remove_statists  ; @1664
+        remove_dialog 2  ; @1665
+        set_person -1, 160, 160, 160, 160, 0, -1, 0  ; @1668
+        adress -1, 10004  ; @1678
+        call_proc 23  ; @167d
+L_1680:
+        var_set_const 31, -1  ; @1680
+L_1685:
+        if 2, 31, -63, 99, L_1695  ; @1685
+        goto_proc 1, L_08d6  ; @1690
+L_1695:
+        remove_dialog 2  ; @1695
+        remove_person 32  ; @1698
+        return_found  ; @169b
+L_169c:
+        if 2, 33, -62, 1, L_1819  ; @169c
+        if2 10, 0, -62, 9, 0, 1, -62, 35, L_16bf  ; @16a7
+        goto_proc 1, L_1819  ; @16ba
+L_16bf:
+        if3 42, 0, -62, 9, 0, 1, -62, 1006, 0, 2, -62, 1007, L_16df  ; @16bf
+        goto_proc 1, L_1819  ; @16da
+L_16df:
+        if3 10, 0, -62, 9, 0, 1, -62, 1008, 0, 1, -62, 2, L_16ff  ; @16df
+        goto_proc 1, L_1819  ; @16fa
+L_16ff:
+        if3 42, 0, -62, 9, 0, 1, -62, 2, 0, 2, -62, 1005, L_171f  ; @16ff
+        goto_proc 1, L_1819  ; @171a
+L_171f:
+        if3 42, 0, -62, 9, 0, 1, -62, 3, 0, 2, -62, 1005, L_173f  ; @171f
+        goto_proc 1, L_1819  ; @173a
+L_173f:
+        if2 10, 0, -62, 9, 0, 1, -62, 2041, L_1757  ; @173f
+        goto_proc 1, L_1819  ; @1752
+L_1757:
+        parse_if 0, 50, 51, 53, 52, L_1769  ; @1757
+        goto_proc 1, L_1819  ; @1764
+L_1769:
+        var_rand_const 31, 6  ; @1769
+        if 2, 31, -62, 1, L_178a  ; @176e
+        add_say_window2 -1, -1000, -1000, "CLR Grunz."  ; @1779
+L_178a:
+        if 2, 31, -62, 2, L_17a6  ; @178a
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @1795
+L_17a6:
+        if 2, 31, -62, 3, L_17c1  ; @17a6
+        add_say_window2 -1, -1000, -1000, "CLR ehh?"  ; @17b1
+L_17c1:
+        if 2, 31, -62, 4, L_17dd  ; @17c1
+        add_say_window2 -1, -1000, -1000, "CLR -sabber-"  ; @17cc
+L_17dd:
+        if 2, 31, -62, 5, L_17fe  ; @17dd
+        add_say_window2 -1, -1000, -1000, "CLR ? NW ?? NW ???"  ; @17e8
+L_17fe:
+        if 2, 31, -62, 6, L_1818  ; @17fe
+        add_say_window2 -1, -1000, -1000, "CLR (...)"  ; @1809
+L_1818:
+        return_found  ; @1818
+L_1819:
+        return_not_found  ; @1819

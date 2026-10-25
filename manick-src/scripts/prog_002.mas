@@ -1,0 +1,427 @@
+; MOAS script, program 2 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if3 42, 0, -62, 9, 0, 1, -62, 1006, 0, 2, -62, 1007, L_02af  ; @0000
+        if 2, 33, -62, 1, L_022a  ; @001b
+        arm_key_abort  ; @0026
+        var_set_const 33, 0  ; @0027
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @002c
+        adress -1, 10000  ; @003c
+        var_set_const 14, 0  ; @0041
+        var_set_const 20, 0  ; @0046
+        display_message ""  ; @004b
+        var_set_const 15, 1  ; @004d
+        add_person 32, 160, 200, 0, 0, 16384, 0, 10  ; @0052
+        add_person 31, 160, 0, 0, 0, 16384, 0, 10  ; @0062
+        set_person_z 31, 21000  ; @0072
+        var_set_const 15, 0  ; @0077
+        set_person_z 32, 20000  ; @007c
+        walk_person 31, 160, 130  ; @0081
+        click_or_enter 5  ; @0088
+        walk_person 31, 160, 300  ; @008b
+        remove_person 32  ; @0092
+        remove_person 31  ; @0095
+        var_set_const 15, 1  ; @0098
+        get_person_x -1, 34  ; @009d
+        get_person_y -1, 35  ; @00a2
+        remove_person 1  ; @00a7
+        add_person 0, 160, 100, 0, 0, 1056, 0, 10  ; @00aa
+L_00ba:
+        get_person_x -1, 31  ; @00ba
+        if 0, 31, -61, 34, L_00df  ; @00bf
+        set_person 0, 10, 0, 0, 0, 0, -1, 58  ; @00ca
+        goto_proc 2, L_00ba  ; @00da
+L_00df:
+        get_person_x -1, 31  ; @00df
+        if 0, 31, -60, 34, L_0104  ; @00e4
+        set_person 0, -10, 0, 0, 0, 0, -1, 58  ; @00ef
+        goto_proc 2, L_00df  ; @00ff
+L_0104:
+        get_person_y -1, 31  ; @0104
+        if 0, 31, -61, 35, L_0129  ; @0109
+        set_person 0, 0, 10, 0, 0, 0, -1, 58  ; @0114
+        goto_proc 2, L_0104  ; @0124
+L_0129:
+        get_person_y -1, 31  ; @0129
+        if 0, 31, -60, 35, L_014e  ; @012e
+        set_person 0, 0, -10, 0, 0, 0, -1, 58  ; @0139
+        goto_proc 2, L_0129  ; @0149
+L_014e:
+        get_person_x -1, 31  ; @014e
+        if 0, 31, -61, 34, L_0173  ; @0153
+        set_person 0, 1, 0, 0, 0, 0, -1, 58  ; @015e
+        goto_proc 2, L_014e  ; @016e
+L_0173:
+        get_person_x -1, 31  ; @0173
+        if 0, 31, -60, 34, L_0198  ; @0178
+        set_person 0, -1, 0, 0, 0, 0, -1, 58  ; @0183
+        goto_proc 2, L_0173  ; @0193
+L_0198:
+        get_person_y -1, 31  ; @0198
+        if 0, 31, -61, 35, L_01bd  ; @019d
+        set_person 0, 0, 1, 0, 0, 0, -1, 58  ; @01a8
+        goto_proc 2, L_0198  ; @01b8
+L_01bd:
+        get_person_y -1, 31  ; @01bd
+        if 0, 31, -60, 35, L_01e2  ; @01c2
+        set_person 0, 0, -1, 0, 0, 0, -1, 58  ; @01cd
+        goto_proc 2, L_01bd  ; @01dd
+L_01e2:
+        var_set_const 15, 0  ; @01e2
+        set_object 1006, -54  ; @01e7
+        set_object 1007, -54  ; @01ec
+        set_object 1008, -50  ; @01f1
+        var_set_const 14, 1  ; @01f6
+        var_set_const 20, 1  ; @01fb
+        say_properties 0, 0, 27, 2  ; @0200
+        if_wasnt_here 79, L_0229  ; @0209
+        var_add_const 8, 3  ; @020e
+        add_say_window2 999, 160, 199, "CLR ____(3_Punkte)____"  ; @0213
+L_0229:
+        abort_redraw  ; @0229
+L_022a:
+        set_object 1006, -54  ; @022a
+        set_object 1007, -54  ; @022f
+        set_object 1008, -50  ; @0234
+        if_wasnt_here 80, L_026f  ; @0239
+        add_say_window2 -1, -1000, -1000, "CLR Ich bin ja so genial! NW Ich bin geheilt! NW Ich bin nicht mehr blöd!"  ; @023e
+        return_found  ; @026e
+L_026f:
+        if_wasnt_here 81, L_0297  ; @026f
+        add_say_window2 -1, -1000, -1000, "CLR Ich bin ja so genial! NW Ich bin geheilt!"  ; @0274
+        return_found  ; @0296
+L_0297:
+        add_say_window2 -1, -1000, -1000, "CLR Ich bin ja so genial!"  ; @0297
+        return_found  ; @02ae
+L_02af:
+        if 2, 0, -62, 4, L_0a89  ; @02af
+        say_if_found 1, 1004, -1, "CLR \"Bitte benutzen Sie den Türklopfer!\""  ; @02ba
+        say_if_found 1, 1005, -1, "CLR Ein Schlüssel aus grober Bronze."  ; @02da
+        say_if_found 1, 1048, -1, "CLR Ein Sicherheitsschlüssel mit vielen kleinen Zähnen."  ; @02f6
+        say_if_found 1, 1006, -1, "CLR Ein Teil eines Puzzles."  ; @0320
+        say_if_found 1, 1007, -1, "CLR Ein Puzzleteil."  ; @033b
+        say_if_found 1, 1008, -1, "CLR Das sieht gar nicht so schwer aus, wie es ist.."  ; @0352
+        say_if_found 1, 1009, -1, "CLR Ein Holzkeil. Damit kann man Türen offen halten."  ; @0376
+        say_if_found 1, 1010, -1, "CLR Drei Stangen Dynamit. NW Bombige Sache!"  ; @03a0
+        say_if_found 1, 1011, -1, "CLR Eine Dose mit Fleisch."  ; @03c5
+        say_if_found 1, 1012, -1, "CLR Eine alte Zuchini. NW Zah wie Leder."  ; @03de
+        say_if_found 1, 1013, -1, "CLR Eine Flasche mit Ketchup. NW Noch fast voll."  ; @03ff
+        say_if_found 1, 1014, -1, "CLR Eine halbvolle Müslipackung."  ; @0424
+        say_if_found 1, 1015, -1, "CLR Eine Sofortbildkamera."  ; @0444
+        say_if_found 1, 1016, -1, "CLR Das Foto eines Fotos."  ; @0461
+        say_if_found 1, 1017, -1, "CLR Ein wenig unscharf."  ; @0479
+        say_if_found 1, 1018, -1, "CLR Das Foto einer Dose NW Andy Warhole wäre stolz auf mich."  ; @0490
+        say_if_found 1, 1019, -1, "CLR Das Foto einer Zuchini."  ; @04c1
+        say_if_found 1, 1020, -1, "CLR Das Foto eines Briefkasten. NW Sinnvoll."  ; @04d8
+        say_if_found 1, 1021, -1, "CLR Das Foto einer Flasche Ketchup."  ; @04f9
+        say_if_found 1, 1022, -1, "CLR Das Foto einer Kaktee."  ; @0516
+        say_if_found 1, 1023, -1, "CLR Das Foto einer Packung Müsli. NW Sieht nach echter Kunst aus."  ; @052e
+        say_if_found 1, 1025, -1, "CLR Das Foto eines Kaktus."  ; @055a
+        say_if_found 1, 1026, -1, "CLR Ein Buch. NW \"Fotografieren für Follidioten\""  ; @0573
+        say_if_found 1, 1001, -1, "CLR Da ist eine Kasette drin."  ; @0598
+        say_if_found 1, 1028, -1, "CLR Ein leeres Wasserglas"  ; @05b1
+        say_if_found 1, 1029, -1, "CLR Ein volles Wasserglas"  ; @05c9
+        say_if_found 1, 1030, -1, "CLR Die bleierne BlasterCard. NW Für Schwerverbrecher, Obdachlose und Studenten."  ; @05e2
+        say_if_found 1, 1034, -1, "CLR Ein fast leeres Ölkännchen aus Plastik. NW Es ist ziemlich schmierig. NW Ekelig!"  ; @061a
+        say_if_found 1, 1035, -1, "CLR _____Wow!_____ NW Ein Fest für die Augen!"  ; @0650
+        say_if_found 1, 1036, -1, "CLR Eine virenverseuchte Diskette."  ; @0671
+        say_if_found 1, 1037, -1, "CLR Trockenes Toastbrot. Igitt."  ; @0690
+        say_if_found 1, 1038, -1, "CLR Ein Paket. NW Es ist von der Speiseaufzugfirma Gebrüder Hungrig und an Dr. Ed adressiert."  ; @06ac
+        say_if_found 1, 1039, -1, "CLR Ein nagelneuer Motor für einen Speiseaufzug. NW Der zieht meine Armbanduhr an. Da müssen starte Magneten drin sein."  ; @06ef
+        say_if_found 1, 1027, -1, "CLR Eine Computermaus für den seriellen Port. Drei Tasten. Stoßgedämpfe, langlebige Mikroschalter. Umschaltbar für MS und PC Modus."  ; @073c
+        say_if_found 1, 1040, -1, "CLR Ein recht kleiner, aber stabiler und wärmebeständiger Alu-Koffer Modell Space-Fit. NW Da geht nicht viel rein, aber was drin ist, ist auch sicher!"  ; @0795
+        say_if_found 1, 1041, -1, "CLR Ich bin reich!"  ; @07e8
+        say_if_found 1, 1042, -1, "CLR _____Extrablatt!_____ NW Toastscheibe auf dem Mond entdeckt! NW Verschiedene terroristische Gruppen und Toastbrothersteller bekannten sich zu der Tat."  ; @07fb
+        say_if_found 1, 1043, -1, "CLR Ein Foto vom Mond."  ; @0856
+        say_if_found 1, 1044, -1, "CLR Ein Foto vom Mond mit einer Scheibe Toast. NW _____Cool._____"  ; @086e
+        say_if_found 1, 1045, -1, "CLR Ein echt scharfes Messer. NW Auf dem Zettel steht \"Beweisstück_A\"."  ; @089a
+        say_if_found 1, 1047, -1, "CLR Eine Schaufel für den Garten."  ; @08cf
+        say_if_found 1, 21, -1, "CLR Schluck!"  ; @08ec
+        say_if_found 1, 55, -1, "CLR _____Wow!_____"  ; @08fe
+        if 2, 1, -62, 1003, L_0a2c  ; @0912
+        add_say_window2 -1, -1000, -1000, "CLR \"Sehr geehrter Dr. Ed! NW Wir bedauern, daß Sie mit unserem Produkt nicht zufrieden sind. NW"  ; @091d
+        add_say_window2 -1, -1000, -1000, "Leider sehen wir uns außerstande den zerstörten Elektromotor zu ersetzen.. NW ..da der Transport von 25kg.. NW"  ; @095e
+        add_say_window2 -1, -1000, -1000, "..menschlicher Körperteile.. NW ..klar außerhalb der technischen Spezifikationen liegt.. NW ..und somit der"  ; @09a6
+        add_say_window2 -1, -1000, -1000, "Garantieanspruch erlischt. NW Mit freundlichen Grüßen: NW Speiseaufzüge Gebrüder Hungrig.\""  ; @09eb
+        return_found  ; @0a2b
+L_0a2c:
+        if 2, 1, -62, 1046, L_0a72  ; @0a2c
+        close_say -1  ; @0a37
+        add_person 106, 160, 170, 0, 0, 16384, 0, 10  ; @0a3a
+        set_person_z 106, 1000  ; @0a4a
+        click_or_enter 20  ; @0a4f
+        remove_person 106  ; @0a52
+        add_say_window2 -1, -1000, -1000, "CLR Immer diese Eigenwerbung."  ; @0a55
+        return_found  ; @0a71
+L_0a72:
+        add_say_window2 -1, -1000, -1000, "Sieht ganz normal aus."  ; @0a72
+        return_found  ; @0a88
+L_0a89:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_1145  ; @0a89
+        say_if_found 1, 1010, -1, "CLR Bin ich John Wayne?"  ; @0a9c
+        say_if_found 1, 1011, -1, "CLR Nein, danke. Da weiß man nie was drin ist."  ; @0ab4
+        say_if_found 1, 1012, -1, "CLR Nein, danke. Die ist alt und wie aus Leder."  ; @0ada
+        say_if_found 1, 1013, -1, "CLR Soll ich das trinken, oder was?"  ; @0afd
+        say_if_found 1, 1014, -1, "CLR Lecker!"  ; @0b19
+        say_if_found 1, 1015, -1, "CLR Was soll ich denn fotografieren?"  ; @0b2a
+        say_if_found 1, 1006, -1, "CLR Alleine ist es ziemlich nutzlos."  ; @0b48
+        say_if_found 1, 1007, -1, "CLR Alleine ist das ziemlich nutzlos."  ; @0b63
+        say_if_found 1, 1005, -1, "CLR Was soll ich denn aufschliessen?"  ; @0b7e
+        say_if_found 1, 1028, -1, "CLR Das Glas ist leer!"  ; @0b99
+        say_if_found 1, 1042, -1, "CLR _____Extrablatt!_____ NW Toastscheibe auf dem Mond entdeckt! NW Verschiedene terroristische Gruppen und Toastbrothersteller bekannten sich zu der Tat."  ; @0bad
+        say_if_found 1, 1030, -1, "CLR __Mmm!__ NW __Knusprig!__"  ; @0c08
+        say_if_found 1, 1034, -1, "CLR Was soll ich damit einschleimen?"  ; @0c28
+        say_if_found 1, 1035, -1, "CLR __Wow!__ NW Der Bild vom nächsten Monat ist noch besser!"  ; @0c42
+        say_if_found 1, 1041, -1, "CLR ...in die Taler springen und herumwühlen wie ein Maulwurf..."  ; @0c6e
+        say_if_found 1, 1045, -1, "CLR Soll ich mir die Pulsadern aufschneiden, oder was?"  ; @0c99
+        say_if_found 1, 55, -1, "CLR Den laß ich da hängen. NW Ich brauche ihn nicht mehr."  ; @0cc2
+        if 2, 1, -62, 1001, L_0d25  ; @0ce8
+        say_if_found 71, 0, -1, "CLR Yeah yeah yeah!"  ; @0cf3
+        say_if_found 71, 1, -1, "CLR Was ein Gekreische!"  ; @0d0e
+L_0d25:
+        if 2, 1, -62, 1029, L_0d56  ; @0d25
+        add_say_window2 -1, -1000, -1000, "CLR Gluck. Gluck. Gluck."  ; @0d30
+        set_object 1028, -50  ; @0d4b
+        set_object 1029, -54  ; @0d50
+        return_found  ; @0d55
+L_0d56:
+        if 2, 1, -62, 1040, L_0dfa  ; @0d56
+        if 3, 1041, -62, -55, L_0db9  ; @0d61
+        add_say_window2 -1, -1000, -1000, "CLR Der Koffer ist voller Geld!"  ; @0d6c
+        set_object 1041, -50  ; @0d86
+        if 3, 1036, -62, 22, L_0db8  ; @0d8b
+        add_say_window2 -1, -1000, -1000, "Und da ist ja auch meine Diskette."  ; @0d96
+        set_object 1036, -50  ; @0db3
+L_0db8:
+        return_found  ; @0db8
+L_0db9:
+        if 3, 1036, -62, 22, L_0de5  ; @0db9
+        add_say_window2 -1, -1000, -1000, "CLR Da ist ja meine Diskette"  ; @0dc4
+        set_object 1036, -50  ; @0ddf
+        return_found  ; @0de4
+L_0de5:
+        add_say_window2 -1, -1000, -1000, "CLR Der Koffer ist leer."  ; @0de5
+        return_found  ; @0df9
+L_0dfa:
+        parse_if 1, 1004, 1009, -999, -999, L_0e28  ; @0dfa
+        adress -1, 10004  ; @0e07
+        add_say_window2 -1, -1000, -1000, "CLR Soll ich ihn essen, oder was?"  ; @0e0c
+        return_found  ; @0e27
+L_0e28:
+        if 2, 1, -62, 1008, L_0e43  ; @0e28
+        set_object 1006, -50  ; @0e33
+        set_object 1007, -50  ; @0e38
+        set_object 1008, -54  ; @0e3d
+        return_found  ; @0e42
+L_0e43:
+        if 2, 1, -62, 1016, L_0e74  ; @0e43
+        set_object 1016, -55  ; @0e4e
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0e53
+        var_set_const 83, 0  ; @0e6e
+        return_found  ; @0e73
+L_0e74:
+        if 2, 1, -62, 1017, L_0ea5  ; @0e74
+        set_object 1017, -55  ; @0e7f
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0e84
+        var_set_const 83, 0  ; @0e9f
+        return_found  ; @0ea4
+L_0ea5:
+        if 2, 1, -62, 1018, L_0ed6  ; @0ea5
+        set_object 1018, -55  ; @0eb0
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0eb5
+        var_set_const 83, 0  ; @0ed0
+        return_found  ; @0ed5
+L_0ed6:
+        if 2, 1, -62, 1019, L_0f07  ; @0ed6
+        set_object 1019, -55  ; @0ee1
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0ee6
+        var_set_const 83, 0  ; @0f01
+        return_found  ; @0f06
+L_0f07:
+        if 2, 1, -62, 1020, L_0f38  ; @0f07
+        set_object 1020, -55  ; @0f12
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0f17
+        var_set_const 83, 0  ; @0f32
+        return_found  ; @0f37
+L_0f38:
+        if 2, 1, -62, 1021, L_0f69  ; @0f38
+        set_object 1021, -55  ; @0f43
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0f48
+        var_set_const 83, 0  ; @0f63
+        return_found  ; @0f68
+L_0f69:
+        if 2, 1, -62, 1022, L_0f9a  ; @0f69
+        set_object 1022, -55  ; @0f74
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0f79
+        var_set_const 83, 0  ; @0f94
+        return_found  ; @0f99
+L_0f9a:
+        if 2, 1, -62, 1023, L_0fcb  ; @0f9a
+        set_object 1023, -55  ; @0fa5
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0faa
+        var_set_const 83, 0  ; @0fc5
+        return_found  ; @0fca
+L_0fcb:
+        if 2, 1, -62, 1043, L_0ffc  ; @0fcb
+        set_object 1043, -55  ; @0fd6
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @0fdb
+        var_set_const 83, 0  ; @0ff6
+        return_found  ; @0ffb
+L_0ffc:
+        if 2, 1, -62, 1044, L_102d  ; @0ffc
+        set_object 1044, -55  ; @1007
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @100c
+        var_set_const 83, 0  ; @1027
+        return_found  ; @102c
+L_102d:
+        if2 10, 1, -62, 1026, 0, 36, -62, 1, L_105a  ; @102d
+        add_say_window2 -1, -1000, -1000, "CLR Das habe ich schon gelesen."  ; @1040
+        return_found  ; @1059
+L_105a:
+        if2 10, 1, -62, 1026, 0, 36, -62, 0, L_10ee  ; @105a
+        adress -1, 10000  ; @106d
+        var_set_const 36, 1  ; @1072
+        add_say_window -1, -1000, -1000, "CLR Ahhaaa! NW So geht das! NW Ach soooo! NW So rum muß man die Kamera halten..."  ; @1077
+        adress -1, 10004  ; @10b6
+        add_say_window -1, -1000, -1000, "Jetzt ist alles klar!"  ; @10bb
+        var_add_const 8, 2  ; @10cd
+        add_say_window2 999, 160, 199, "CLR ____(2_Punkte)____"  ; @10d2
+        set_object 1026, -54  ; @10e8
+        return_found  ; @10ed
+L_10ee:
+        if 2, 1, -62, 1046, L_111a  ; @10ee
+        set_object 1046, -54  ; @10f9
+        add_say_window2 -1, -1000, -1000, "CLR Nette Papierschnipsel!"  ; @10fe
+        return_found  ; @1119
+L_111a:
+        if 2, 1, -62, 1038, L_1145  ; @111a
+        set_object 1038, -54  ; @1125
+        set_object 1039, -50  ; @112a
+        add_say_window2 -1, -1000, -1000, "Da ist ein Motor drin."  ; @112f
+        return_found  ; @1144
+L_1145:
+        if2 2, 0, -62, 9, 0, 1, -63, 2, L_1446  ; @1145
+        if 2, 2, -62, 1015, L_116d  ; @1158
+        var_set_var 2, 1  ; @1163
+        var_set_const 1, 1015  ; @1168
+L_116d:
+        if2 10, 1, -62, 1040, 1, 2, -62, 1040, L_11ef  ; @116d
+        if2 10, 1, -62, 1036, 1, 2, -62, 1036, L_11d2  ; @1180
+        add_say_window2 -1, -1000, -1000, "CLR Okay, darin ist sie sicher!"  ; @1193
+        set_object 1036, 22  ; @11ac
+        if_wasnt_here 85, L_11d1  ; @11b1
+        var_add_const 8, 4  ; @11b6
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @11bb
+L_11d1:
+        return_found  ; @11d1
+L_11d2:
+        add_say_window2 -1, -1000, -1000, "CLR Warum sollte ich das in den Koffer tun?"  ; @11d2
+        return_found  ; @11ee
+L_11ef:
+        if 2, 1, -62, 1015, L_1399  ; @11ef
+        if 2, 83, -62, 1, L_1221  ; @11fa
+        add_say_window -1, -1000, -1000, "CLR Ich werf' das Alte erst mal weg!"  ; @1205
+L_1221:
+        if 2, 83, -62, 0, L_1241  ; @1221
+        add_say_window -1, -1000, -1000, "CLR O.K."  ; @122c
+        var_set_const 83, 1  ; @123c
+L_1241:
+        blend 200, 200, 200  ; @1241
+        var_set_const 31, 0  ; @1248
+        parse_if 2, 1016, 1017, 1018, 1019, L_125f  ; @124d
+        var_set_const 31, 1  ; @125a
+L_125f:
+        parse_if 2, 1020, 1021, 1022, 1023, L_1271  ; @125f
+        var_set_const 31, 1  ; @126c
+L_1271:
+        parse_if 2, 1024, -999, -999, -999, L_1283  ; @1271
+        var_set_const 31, 1  ; @127e
+L_1283:
+        set_object 1016, -55  ; @1283
+        set_object 1017, -55  ; @1288
+        set_object 1018, -55  ; @128d
+        set_object 1019, -55  ; @1292
+        set_object 1020, -55  ; @1297
+        set_object 1021, -55  ; @129c
+        set_object 1022, -55  ; @12a1
+        set_object 1023, -55  ; @12a6
+        set_object 1024, -55  ; @12ab
+        set_object 1043, -55  ; @12b0
+        set_object 1044, -55  ; @12b5
+        if 2, 36, -62, 0, L_12e2  ; @12ba
+        set_object 1017, -50  ; @12c5
+        add_say_window2 -1, -1000, -1000, "CLR Das war wohl nichts."  ; @12ca
+L_12e2:
+        if 2, 36, -62, 1, L_138e  ; @12e2
+        if 2, 31, -62, 1, L_12fd  ; @12ed
+        set_object 1016, -50  ; @12f8
+L_12fd:
+        if 2, 31, -62, 0, L_138e  ; @12fd
+        if 2, 2, -62, 1011, L_131d  ; @1308
+        set_object 1018, -50  ; @1313
+        goto_proc 2, L_138e  ; @1318
+L_131d:
+        if 2, 2, -62, 1012, L_1332  ; @131d
+        set_object 1019, -50  ; @1328
+        goto_proc 2, L_138e  ; @132d
+L_1332:
+        if 2, 2, -62, 1013, L_1347  ; @1332
+        set_object 1021, -50  ; @133d
+        goto_proc 2, L_138e  ; @1342
+L_1347:
+        if 2, 2, -62, 1014, L_135c  ; @1347
+        set_object 1023, -50  ; @1352
+        goto_proc 2, L_138e  ; @1357
+L_135c:
+        if 2, 2, -62, 1000, L_1371  ; @135c
+        set_object 1024, -50  ; @1367
+        goto_proc 2, L_138e  ; @136c
+L_1371:
+        set_object 1017, -50  ; @1371
+        add_say_window2 -1, -1000, -1000, "CLR Das war wohl nichts."  ; @1376
+L_138e:
+        wait 3  ; @138e
+        blend 100, 100, 100  ; @1391
+        return_found  ; @1398
+L_1399:
+        if 2, 2, -62, 1045, L_1403  ; @1399
+        say_if_found 1, 1012, -1, "CLR Ich brauche keine Zuchini-Scheiben. NW Es sei denn, ich finde noch Knoblaubsauce..."  ; @13a4
+        say_if_found 1, 1037, -1, "CLR Toastbrot ist im allgemeinen schon vorgeschnitten!"  ; @13dc
+L_1403:
+        if 2, 1, -62, 1012, L_142a  ; @1403
+        say_if_found 2, 1037, -1, "CLR Ich mag kein Zuchini-Sandwich."  ; @140e
+L_142a:
+        say_if_found 1, 1034, -1, "CLR Das braucht nicht geschmiert werden."  ; @142a
+L_1446:
+        if 2, 0, -62, 11, L_1462  ; @1446
+        print_sentence_ret "Ach, du schaffst das schon."  ; @1451
+L_1462:
+        if 2, 0, -62, 53, L_14ac  ; @1462
+        close_say -1  ; @146d
+        adress -1, 10004  ; @1470
+        if 2, 33, -62, 0, L_1491  ; @1475
+        add_say_window2 -1, -1000, -1000, "CLR Hmmm."  ; @1480
+L_1491:
+        if 2, 33, -62, 1, L_14ab  ; @1491
+        add_say_window2 -1, -1000, -1000, "CLR Eh?"  ; @149c
+L_14ab:
+        return_found  ; @14ab
+L_14ac:
+        parse_if 0, 52, 51, 50, -999, L_1526  ; @14ac
+        if2 10, 18, -62, 1, 0, 0, -62, 52, L_14dc  ; @14b9
+        print_sentence_ret "Unmatched C_WALK!"  ; @14cc
+L_14dc:
+        if2 10, 18, -62, 1, 0, 0, -62, 51, L_14ff  ; @14dc
+        print_sentence_ret "Unmatched M_WALK!"  ; @14ef
+L_14ff:
+        if2 10, 18, -62, 1, 0, 0, -62, 50, L_1525  ; @14ff
+        print_sentence_ret "Unmatched M_SPEECH !"  ; @1512
+L_1525:
+        return_found  ; @1525
+L_1526:
+        say_if_found 0, 7, -1, "CLR Das kann ich nicht bewegen."  ; @1526
+        add_say_window2 -1, -1000, -1000, "CLR Besser nicht."  ; @153b
+        return_found  ; @154e

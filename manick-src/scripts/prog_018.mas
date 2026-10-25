@@ -1,0 +1,168 @@
+; MOAS script, program 18 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0100  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Bei der Maschine"  ; @000c
+        if 2, 60, -62, 1, L_0045  ; @0016
+        if 2, 43, -62, 0, L_0033  ; @0021
+        load_bild 47, 49, 50  ; @002c
+L_0033:
+        if 2, 43, -62, 1, L_0045  ; @0033
+        load_bild 51, 49, 50  ; @003e
+L_0045:
+        if 2, 60, -62, 0, L_0057  ; @0045
+        load_bild 48, 49, 50  ; @0050
+L_0057:
+        palette_cycle 224, 225, 16  ; @0057
+        blend_in 8  ; @005e
+        wait_while_walking  ; @0061
+        add_area_jumper 307, 0, 319, 199, 1442  ; @0062
+        add_area_label 162, 167, 177, 177, 2033  ; @006d
+        add_area_label 293, 170, 298, 175, 2032  ; @0078
+        say_properties 0, 96, 27, 2  ; @0083
+        if_wasnt_here 154, L_00ff  ; @008c
+        open_window 25  ; @0091
+        print_sentence_plus "Du weist nicht was, aber in diesem Raum ist irgendetwas sehr sehr großes und sehr sehr böses. Du hörst ein elektrisches Summen und riechst die verbrauchte Elektrizität wie bei einem alten Eisenbahntrafo."  ; @0094
+L_00ff:
+        return_found  ; @00ff
+L_0100:
+        if 2, 1, -62, 2033, L_040f  ; @0100
+        iwalk -1, 170, 181  ; @010b
+        adress -1, 10000  ; @0112
+        say_if_found 0, 4, -1, "CLR Da ist eine Öffnung in der Maschine. NW Eine rote Kruste ist darin zu erkennen!"  ; @0117
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0173  ; @0149
+        add_say_window2 -1, -1000, -1000, "CLR Was soll ich damit machen?"  ; @015c
+        return_found  ; @0172
+L_0173:
+        if2 10, 0, -62, 9, 0, 2, -62, 1027, L_01b4  ; @0173
+        add_say_window2 -1, -1000, -1000, "CLR Ich fürchte das Werk des Teufels hat keinen Mausanschluß."  ; @0186
+        return_found  ; @01b3
+L_01b4:
+        if2 10, 0, -62, 9, 0, 2, -62, 1045, L_01f7  ; @01b4
+        add_say_window2 -1, -1000, -1000, "CLR Aber klar doch. NW Damit werde ich diesem Gigant so richtig zeigen!"  ; @01c7
+        return_found  ; @01f6
+L_01f7:
+        if2 10, 0, -62, 9, 0, 2, -62, 1010, L_040f  ; @01f7
+        display_message ""  ; @020a
+        var_set_var 31, 14  ; @020c
+        var_set_const 14, 0  ; @0211
+        add_say_window -1, -1000, -1000, "CLR Friß das, du Höllenmaschine!"  ; @0216
+        set_object 1010, -54  ; @0234
+        var_add_const 8, 10  ; @0239
+        add_say_window 999, 160, 199, "____(10_Punkte)____"  ; @023e
+        wait 5  ; @0251
+        var_set_const 43, 1  ; @0254
+        unmark_area2 1442  ; @0259
+        walk_person -1, 310, 181  ; @025c
+        wait 10  ; @0263
+        load_bild 12, 9, 9  ; @0266
+        shake 40, 4  ; @026d
+        blend_out 2  ; @0272
+        clear_screen_init  ; @0275
+        remove_person 32000  ; @0276
+        load_bild 60, 61, 62  ; @0279
+        add_person 49, 0, 162, 180, 160, 17408, 0, 0  ; @0280
+        adress 49, 10002  ; @0290
+        add_person 0, 200, 160, 200, 160, 1056, 0, 0  ; @0295
+        adress 0, 10006  ; @02a5
+        say_properties 0, 0, 27, 2  ; @02aa
+        say_properties 3, 49, 15, 2  ; @02b3
+        blend_in 2  ; @02bc
+        add_say_window2 0, -1000, -1000, "Uh-oh....."  ; @02bf
+        add_say_window 49, -1000, -1000, "Was war denn das für ein Lärm?!?!?"  ; @02cf
+        wait_while_walking  ; @02ea
+        wait 20  ; @02eb
+        blend_out 2  ; @02ee
+        clear_screen_init  ; @02f1
+        remove_person 32000  ; @02f2
+        load_bild 19, 20, 21  ; @02f5
+        add_person 30, 67, 182, 0, 0, 0, 0, 10  ; @02fc
+        if 3, 1009, -62, -54, L_031c  ; @030c
+        adress 30, 10004  ; @0317
+L_031c:
+        var_set_const 33, 1  ; @031c
+        add_person 1, 78, 192, 168, 169, 1056, 0, 0  ; @0321
+        say_properties 0, 1, 27, 2  ; @0331
+        blend_in 2  ; @033a
+        wait_while_walking  ; @033d
+        add_say_window -1, -1000, -1000, "Grunz??"  ; @033e
+        wait 20  ; @034c
+        blend_out 2  ; @034f
+        clear_screen_init  ; @0352
+        remove_person 32000  ; @0353
+        load_bild 51, 49, 50  ; @0356
+        add_person 95, 170, 181, 170, 181, 16384, 0, 0  ; @035d
+        blend_in 2  ; @036d
+        say_properties 3, 95, 15, 2  ; @0370
+        wait 10  ; @0379
+        add_say_window 95, -1000, -1000, "_______Tssss!_______ NW Hat dieser Kerl doch glatt meine 1.1 Gigawatt Mikrowelle gesprengt! NW ---Seufz--- NW Bevor ich die nicht repariert habe, gibt es keine Pizza."  ; @037c
+        wait 5  ; @03e8
+        blend_out 2  ; @03eb
+        remove_person 32000  ; @03ee
+        add_person 1, 168, 169, 168, 169, 1056, 0, 0  ; @03f1
+        adress 1, 10002  ; @0401
+        var_set_var 14, 31  ; @0406
+        call_proc 11  ; @040b
+        return_found  ; @040e
+L_040f:
+        if 2, 1, -62, 2032, L_05a1  ; @040f
+        iwalk -1, 296, 181  ; @041a
+        adress -1, 10000  ; @0421
+        say_if_found 0, 4, -1, "CLR Ein Lichtschalter"  ; @0426
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_05a1  ; @0439
+        var_add_const 60, 1  ; @044c
+        if 2, 60, -62, 2, L_0461  ; @0451
+        var_set_const 60, 0  ; @045c
+L_0461:
+        if 2, 60, -62, 0, L_0495  ; @0461
+        clear_screen_init  ; @046c
+        load_bild 48, 49, 50  ; @046d
+        add_area_jumper 307, 0, 319, 199, 1442  ; @0474
+        add_area_label 162, 167, 177, 177, 2033  ; @047f
+        add_area_label 293, 170, 298, 175, 2032  ; @048a
+L_0495:
+        if 2, 60, -62, 1, L_05a0  ; @0495
+        clear_screen_init  ; @04a0
+        load_bild 47, 49, 50  ; @04a1
+        add_area_jumper 307, 0, 319, 199, 1442  ; @04a8
+        add_area_label 162, 167, 177, 177, 2033  ; @04b3
+        add_area_label 293, 170, 298, 175, 2032  ; @04be
+        if_wasnt_here 156, L_05a0  ; @04c9
+        open_window 25  ; @04ce
+        print_sentence "Das Werk des Teufels. Es ist diese furchtbare Maschine (da bist du dir sicher), die den armen Doc in einen Wahnsinnigen verwandelt hat. Tausenden von Lämpchen blinken."  ; @04d1
+        print_sentence "Du hörst das Summen von Elektronen in maroden Kupferdrähten und der Geruch von durchgebrannten Sicherungen sticht in deiner Nase."  ; @0531
+        click_close 32000  ; @0578
+        add_say_window2 -1, -1000, -1000, "CLR Ich muß diese Maschine irgendwie vernichten!"  ; @057b
+L_05a0:
+        return_found  ; @05a0
+L_05a1:
+        return_not_found  ; @05a1
+        blend_out 2  ; @05a2
+        remove_person 32000  ; @05a5
+        add_person 0, 300, 168, 280, 168, 1056, 0, 0  ; @05a8
+        say_properties 0, 0, 27, 2  ; @05b8
+        blend_out 2  ; @05c1
+        clear_screen_init  ; @05c4
+        remove_statists  ; @05c5
+        load_bild 60, 61, 62  ; @05c6
+        add_person 49, 100, 162, 80, 160, 17408, 0, 0  ; @05cd
+        adress 49, 10006  ; @05dd
+        set_person -1, 300, 168, 280, 168, 0, -1, 0  ; @05e2
+        say_properties 3, 49, 15, 2  ; @05f2
+        blend_in 2  ; @05fb
+        wait_while_walking  ; @05fe
+        adress 49, 10002  ; @05ff
+        adress -1, 10006  ; @0604
+        add_say_window 49, -1000, -1000, "Wen haben wir denn da?"  ; @0609
+        wait 20  ; @061d
+        blend_out 2  ; @0620
+        remove_person 32000  ; @0623
+        add_person 1, 168, 169, 168, 169, 1056, 0, 0  ; @0626
+        adress 1, 10002  ; @0636
+        var_set_const 33, 1  ; @063b
+        say_properties 0, 1, 27, 2  ; @0640
+        call_proc 11  ; @0649

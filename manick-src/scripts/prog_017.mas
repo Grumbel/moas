@@ -1,0 +1,228 @@
+; MOAS script, program 17 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_00ab  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Unter dem Dach"  ; @000c
+        load_bild 44, 45, 46  ; @0016
+        if 3, 1026, -62, -55, L_0038  ; @001d
+        add_person 85, 248, 93, 0, 0, 16384, 0, 10  ; @0028
+L_0038:
+        blend_in 8  ; @0038
+        wait_while_walking  ; @003b
+        add_area_label 79, 10, 130, 141, 2022  ; @003c
+        add_area_label 145, 83, 176, 109, 2018  ; @0047
+        add_area_label 197, 120, 220, 129, 2025  ; @0052
+        add_area_label 196, 104, 217, 120, 2026  ; @005d
+        add_area_label 134, 103, 156, 114, 2030  ; @0068
+        add_area_jumper 52, 127, 64, 155, 2432  ; @0073
+        add_area_jumper 24, 128, 72, 149, 2432  ; @007e
+        add_area_jumper 282, 135, 307, 155, 2404  ; @0089
+        add_area_jumper 291, 138, 313, 162, 2404  ; @0094
+        add_area_jumper 303, 152, 315, 174, 2404  ; @009f
+        return_found  ; @00aa
+L_00ab:
+        if 2, 1, -62, 85, L_00fa  ; @00ab
+        iwalk -1, 248, 142  ; @00b6
+        adress -1, 10000  ; @00bd
+        say_if_found 0, 4, -1, "CLR Ein Buch."  ; @00c2
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_00fa  ; @00d3
+        set_object 1026, -50  ; @00e6
+        remove_person 85  ; @00eb
+        add_say_window2 -1, -1000, -1000, "Ok."  ; @00ee
+        return_found  ; @00f9
+L_00fa:
+        if 2, 1, -62, 2022, L_01d3  ; @00fa
+        iwalk -1, 102, 145  ; @0105
+        adress -1, 10000  ; @010c
+        say_if_found 0, 4, -1, "CLR Ein alter, gemauerter Kamin."  ; @0111
+        say_if_found 0, 7, -1, "Aber klar. Wohin soll ich den Kamin tragen?"  ; @012d
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0177  ; @014c
+        add_say_window2 -1, -1000, -1000, "CLR Die Asche ist noch warm."  ; @015f
+        return_found  ; @0176
+L_0177:
+        if2 10, 0, -62, 9, 0, 2, -62, 1010, L_01a4  ; @0177
+        add_say_window2 -1, -1000, -1000, "CLR Ich bin doch nicht lebensmüde!"  ; @018a
+        return_found  ; @01a3
+L_01a4:
+        if2 2, 0, -62, 9, 0, 1, -63, 2, L_01d3  ; @01a4
+        add_say_window2 -1, -1000, -1000, "CLR Das brauche ich vielleicht noch!"  ; @01b7
+        return_found  ; @01d2
+L_01d3:
+        if 2, 1, -62, 2018, L_0258  ; @01d3
+        iwalk -1, 161, 143  ; @01de
+        adress -1, 10000  ; @01e5
+        say_if_found 0, 4, -1, "CLR Die Tür ist völlig verstaubt. NW Die hat schon lange niemand mehr geöffnet."  ; @01ea
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0258  ; @0220
+        add_say_window2 -1, -1000, -1000, "CLR Zwecklos. Das Schränkchen steht im Weg."  ; @0233
+        return_found  ; @0257
+L_0258:
+        if 2, 1, -62, 2030, L_05f5  ; @0258
+        iwalk -1, 143, 143  ; @0263
+        adress -1, 10000  ; @026a
+        say_if_found 0, 4, -1, "CLR Ein Faxgerät. Damit kann ich Bilder in alle Welt verschicken."  ; @026f
+        if 2, 0, -62, 9, L_05f5  ; @029c
+        if 0, 1, -62, 2, L_02d6  ; @02a7
+        adress -1, 10004  ; @02b2
+        add_say_window2 -1, -1000, -1000, "CLR Soll ich jetzt Faxen machen, oder was?"  ; @02b7
+        return_found  ; @02d5
+L_02d6:
+        if 2, 2, -62, 1044, L_054a  ; @02d6
+        if_wasnt_here 150, L_052f  ; @02e1
+        adress -1, 10004  ; @02e6
+        add_say_window -1, -1000, -1000, "CLR Das ist genau das richtige für die \"Wild\"-Redaktion!"  ; @02eb
+        adress -1, 10000  ; @0312
+        set_object 1044, -54  ; @0317
+        var_set_const 83, 0  ; @031c
+        add_say_window -1, -1000, -1000, "CLR So. Hmm. Ja, das wär's"  ; @0321
+        adress -1, 10004  ; @033d
+        click_or_enter 4  ; @0342
+        blend_out 2  ; @0345
+        set_person -1, 600, 74, 600, 74, 0, -1, 0  ; @0348
+        clear_screen_init  ; @0358
+        var_set_var 31, 14  ; @0359
+        var_set_const 14, 0  ; @035e
+        arm_key_abort  ; @0363
+        remove_statists  ; @0364
+        load_bild 11, 9, 9  ; @0365
+        blend 100, 100, 100  ; @036c
+        blend_in 2  ; @0373
+        click_or_enter 6  ; @0376
+        blend_out 2  ; @0379
+        load_bild 4, 5, 6  ; @037c
+        blend 100, 100, 100  ; @0383
+        add_person 2, 121, 133, 121, 133, 0, 0, 0  ; @038a
+        add_person 3, 152, 133, 152, 133, 0, 0, 0  ; @039a
+        add_person 4, 135, 139, 135, 139, 16384, 0, 0  ; @03aa
+        add_person 22, 233, 155, 0, 0, 16384, 0, 10  ; @03ba
+        add_person 23, 240, 154, 0, 0, 16384, 0, 10  ; @03ca
+        add_person 24, 247, 153, 0, 0, 16384, 0, 10  ; @03da
+        add_person 25, 254, 153, 0, 0, 16384, 0, 10  ; @03ea
+        add_person 26, 261, 152, 0, 0, 16384, 0, 10  ; @03fa
+        add_person 65, 0, 40, 53, 0, 16384, 0, 2  ; @040a
+        set_person 65, -99, 40, 53, 0, 16384, 0, 34  ; @041a
+        set_person_z 4, -100  ; @042a
+        set_person_z 65, 400  ; @042f
+        blend_in 8  ; @0434
+        wait_while_walking  ; @0437
+        add_person 111, 73, 20, 196, 143, 16384, 0, 0  ; @0438
+        set_person 65, 0, 0, 370, 0, 0, -1, 50  ; @0448
+        set_person_z 111, 300  ; @0458
+        walk_person 111, 196, 143  ; @045d
+        add_person 60, 202, 148, 0, 0, 16384, 0, 10  ; @0464
+        remove_person 111  ; @0474
+        wait_while_walking  ; @0477
+        click_or_enter 4  ; @0478
+        abort_redraw  ; @047b
+        blend_out 2  ; @047c
+        clear_screen_init  ; @047f
+        set_person -1, 143, 143, 143, 143, 0, -1, 0  ; @0480
+        remove_statists  ; @0490
+        var_set_var 14, 31  ; @0491
+        var_set_const 57, 4  ; @0496
+        load_bild 44, 45, 46  ; @049b
+        if 3, 1026, -62, -55, L_04bd  ; @04a2
+        add_person 85, 248, 93, 0, 0, 16384, 0, 10  ; @04ad
+L_04bd:
+        blend_in 8  ; @04bd
+        add_area_label 79, 10, 130, 141, 2022  ; @04c0
+        add_area_label 145, 83, 176, 109, 2018  ; @04cb
+        add_area_label 197, 120, 220, 129, 2025  ; @04d6
+        add_area_label 196, 104, 217, 120, 2026  ; @04e1
+        add_area_label 134, 103, 156, 114, 2030  ; @04ec
+        add_area_jumper 52, 127, 64, 155, 2432  ; @04f7
+        add_area_jumper 24, 128, 72, 149, 2432  ; @0502
+        add_area_jumper 282, 135, 307, 155, 2404  ; @050d
+        add_area_jumper 291, 138, 313, 162, 2404  ; @0518
+        add_area_jumper 303, 152, 315, 174, 2404  ; @0523
+        return_found  ; @052e
+L_052f:
+        add_say_window2 -1, -1000, -1000, "CLR Das habe ich schon erledigt."  ; @052f
+        return_found  ; @0549
+L_054a:
+        parse_if 2, 1004, 1043, 1003, 1046, L_0575  ; @054a
+        add_say_window2 -1, -1000, -1000, "CLR Ich schätze, daß interessiert keinen."  ; @0557
+        return_found  ; @0574
+L_0575:
+        parse_if 2, 1006, 1007, 1008, -999, L_05a6  ; @0575
+        add_say_window2 -1, -1000, -1000, "CLR Warum sollte ich ein Puzzleteil faxen?"  ; @0582
+        return_found  ; @05a5
+L_05a6:
+        if2 10, 2, -64, 1016, 0, 2, -65, 1025, L_05d6  ; @05a6
+        add_say_window2 -1, -1000, -1000, "CLR Ich schätze, daß will keiner sehen."  ; @05b9
+        return_found  ; @05d5
+L_05d6:
+        add_say_window2 -1, -1000, -1000, "CLR Das kriege ich nicht ins Faxgerät."  ; @05d6
+        return_found  ; @05f4
+L_05f5:
+        if 2, 1, -62, 2025, L_08a0  ; @05f5
+        iwalk -1, 208, 152  ; @0600
+        adress -1, 10000  ; @0607
+        say_if_found 0, 4, -1, "CLR Ein 786 mit 2000 Mhz und AT-Bus. Kurios. NW Aber da scheint eine Art Überwachungs- oder Steuerungsprogramm zu laufen."  ; @060c
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_06bc  ; @065e
+        add_say_window2 -1, -1000, -1000, "CLR Ja, das Tetris läuft ohne rucken. NW Aber das Steuerungsprogramm kann ich nicht beeinflussen. NW Das ist zu gut geschützt"  ; @0671
+        return_found  ; @06bb
+L_06bc:
+        if2 10, 0, -62, 9, 0, 2, -62, 1029, L_06fd  ; @06bc
+        add_say_window2 -1, -1000, -1000, "CLR Nette Idee. NW Aber der Computer ist Idiotensicher und Wasserdicht."  ; @06cf
+        return_found  ; @06fc
+L_06fd:
+        if2 10, 0, -62, 9, 0, 2, -62, 1027, L_0730  ; @06fd
+        add_say_window2 -1, -1000, -1000, "CLR Da ist schon eine Maus dran angeschlossen!"  ; @0710
+        return_found  ; @072f
+L_0730:
+        if2 10, 0, -62, 9, 0, 2, -62, 1036, L_08a0  ; @0730
+        display_message ""  ; @0743
+        if 2, 62, -62, 1, L_078d  ; @0745
+        add_say_window2 -1, -1000, -1000, "CLR Nicht nötig. Da sind so viele Viren drauf, daß der Rechner quasi klinisch tot ist."  ; @0750
+        return_found  ; @078c
+L_078d:
+        if 2, 63, -62, 1, L_0845  ; @078d
+        var_add_const 151, 1  ; @0798
+        add_say_window2 -1, -1000, -1000, "CLR Der Computer akzeptiert die Diskette nicht. NW Scheint als wäre sie voller Lesefehler."  ; @079d
+        if2 10, 151, -64, 3, 0, 151, -65, 5, L_080f  ; @07dc
+        add_say_window2 -1, -1000, -1000, "Vielleicht ist sie in ein Magnetfeld geraten."  ; @07ef
+L_080f:
+        if 2, 151, -64, 6, L_083f  ; @080f
+        add_say_window2 -1, -1000, -1000, "Vielleicht bin ich damit durch ein Magnetfeld gelaufen."  ; @081a
+L_083f:
+        set_object 1036, -54  ; @083f
+        return_found  ; @0844
+L_0845:
+        if_wasnt_here 152, L_089f  ; @0845
+        var_add_const 8, 2  ; @084a
+        add_say_window2 999, 160, 199, "____(2_Punkte)____"  ; @084f
+        wait 20  ; @0861
+        adress -1, 10004  ; @0864
+        set_object 1036, -54  ; @0869
+        add_say_window2 -1, -1000, -1000, "CLR Haha, jetzt ist der voller Viren. NW Da läuft nichts mehr."  ; @086e
+        var_set_const 62, 1  ; @0899
+        return_found  ; @089e
+L_089f:
+        return_found  ; @089f
+L_08a0:
+        if 2, 1, -62, 2026, L_0963  ; @08a0
+        iwalk -1, 208, 152  ; @08ab
+        adress -1, 10000  ; @08b2
+        say_if_found 0, 4, -1, "CLR Was für ein altes Teil. NW Der haut einem ja das Amalgan aus den Plomben!"  ; @08b7
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0922  ; @08e6
+        add_say_window2 -1, -1000, -1000, "CLR Der Monitor hat nur einen Knopf und der ist kaputt."  ; @08f9
+        return_found  ; @0921
+L_0922:
+        if2 10, 0, -62, 9, 0, 2, -62, 1029, L_0963  ; @0922
+        add_say_window2 -1, -1000, -1000, "CLR Nette Idee. NW Aber der Computer ist Idiotensicher und Wasserdicht."  ; @0935
+        return_found  ; @0962
+L_0963:
+        return_not_found  ; @0963
+        blend_out 2  ; @0964
+        remove_statists  ; @0967
+        set_person -1, 135, 46, 135, 52, 0, -1, 0  ; @0968
+        set_person_z -1, 85  ; @0978
+        call_proc 6  ; @097d
+        blend_out 2  ; @0980
+        remove_statists  ; @0983
+        set_person -1, 87, 153, 107, 147, 0, -1, 0  ; @0984
+        call_proc 16  ; @0994

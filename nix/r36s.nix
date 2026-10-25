@@ -18,6 +18,7 @@
 
 { pkgs
 , version
+, gamedata   # packed GAME.* (nix/gamedata.nix)
 }:
 
 let
@@ -179,12 +180,7 @@ let
       cp ${../COPYING} $out/moas/LICENSE.txt
       cp ${../data/icons/hicolor/256x256/apps/moas.png} $out/moas/cover.png
       # Game data (skip original DOS binaries)
-      for f in ${../manick}/GAME.* ${../manick}/LICENCE.DAT; do
-        case "$f" in
-          *.EXE|*.exe) continue ;;
-        esac
-        [ -f "$f" ] && cp "$f" $out/moas/data/
-      done
+      cp ${gamedata}/* $out/moas/data/
       mkdir -p $out/moas/data/lang
       cp ${../lang}/*.po $out/moas/data/lang/
       # per-language pictures: lang/<code>/<kind>/*.png

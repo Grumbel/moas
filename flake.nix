@@ -54,6 +54,8 @@
           else
             versionBase;
 
+        gamedata = import ./nix/gamedata.nix { inherit pkgs; };
+
         moas = pkgs.stdenv.mkDerivation {
           pname = "moas";
           inherit version;
@@ -68,6 +70,7 @@
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
             "-DMOAS_DATADIR=${placeholder "out"}/share/moas"
+            "-DMOAS_GAMEDATA_DIR=${gamedata}"
             "-DPROJECT_VERSION_FULL=${version}"
           ];
 
@@ -79,9 +82,9 @@
           };
         };
 
-        r36s = import ./nix/r36s.nix { inherit pkgs version; };
+        r36s = import ./nix/r36s.nix { inherit pkgs version gamedata; };
 
-        dos = import ./nix/dos.nix { pkgs = dosPkgs; inherit version; };
+        dos = import ./nix/dos.nix { pkgs = dosPkgs; inherit version gamedata; };
 
         androidPkgs = import nixpkgs {
           inherit system;
@@ -104,18 +107,18 @@
             includeEmulator = false;
             includeSources = false;
           }).androidsdk;
-          inherit version;
+          inherit version gamedata;
           versionCode = self.revCount or 1;
         };
 
         windows = import ./nix/windows.nix {
-          inherit pkgs version;
+          inherit pkgs version gamedata;
           sdl2Win64 = SDL2-win32.packages.${system}.SDL2-win64;
           sdl2Win32 = SDL2-win32.packages.${system}.SDL2-win32;
         };
 
         wasm = import ./nix/wasm.nix {
-          inherit pkgs version;
+          inherit pkgs version gamedata;
           sdlSrc = sdl2-src;
           sdlVersion = "2.30.3";
         };
@@ -136,7 +139,7 @@
           cmake -S "$MOAS_SOURCE" -B "$MOAS_BUILD_DIR" \
             -DCMAKE_BUILD_TYPE="''${CMAKE_BUILD_TYPE:-Debug}" \
             -DMOAS_SANITIZE="''${MOAS_SANITIZE-address,undefined}" \
-            -DMOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
+            -DMOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}"
           echo "moas-configure: $MOAS_BUILD_DIR (CMAKE_BUILD_TYPE=''${CMAKE_BUILD_TYPE:-Debug}, MOAS_SANITIZE=''${MOAS_SANITIZE-address,undefined})"
         '';
 
@@ -171,7 +174,7 @@
           ${moasPreamble}
           moas-build
           exec "$MOAS_BUILD_DIR/moas" \
-            --datadir="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            --datadir="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}" \
             "$@"
         '';
 
@@ -192,7 +195,7 @@ except Exception:
   pass
 ' \
             --args "$MOAS_BUILD_DIR/moas" \
-            --datadir="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}" \
+            --datadir="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}" \
             "$@"
         '';
 
@@ -200,6 +203,7 @@ except Exception:
         packages = {
           default = moas;
           moas = moas;
+          moas-gamedata = gamedata;
 
           moas-win64 = windows.win64;
           moas-win64-zip = windows.win64Zip;
@@ -267,7 +271,7 @@ except Exception:
           shellHook = ''
             export MOAS_SOURCE="$PWD"
             export MOAS_BUILD_DIR="''${MOAS_BUILD_DIR:-/tmp/moas-build}"
-            export MOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_SOURCE/manick}"
+            export MOAS_DATADIR="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}"
             # The engine never frees its resource buffers; leak reports at
             # exit would bury real ASan errors. UBSan: print a stack trace.
             export ASAN_OPTIONS="''${ASAN_OPTIONS:-detect_leaks=0}"

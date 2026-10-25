@@ -8,7 +8,7 @@
 #
 # Env: ANDROID_HOME, BUILD_TOOLS_VERSION, PACKAGE_PLATFORM, TARGET_ABIS,
 #      APP_NAME, APP_DIR (manifest, res/, jni/Android.mk), GAME_SRC_DIR (the
-#      repository: src/ and include/), APPLICATION_MK, TOP_ANDROID_MK,
+#      repository: src/ and lang/), GAME_DATA_DIR (packed GAME.*), APPLICATION_MK, TOP_ANDROID_MK,
 #      SDL_PREBUILT_MK, SDL_ANDROID_LIBS, KEYSTORE, GAME_VERSION,
 #      VERSION_CODE
 set -euo pipefail
@@ -33,23 +33,13 @@ cp "$GAME_SRC_DIR"/src/*.c src/jni/src/
 cp "$GAME_SRC_DIR"/src/*.h src/jni/src/
 
 # Game data into APK assets/ (extracted at runtime to internal storage).
+# GAME_DATA_DIR holds the packed GAME.* (nix/gamedata.nix).
 # Keep in sync with android_data_files[] in platform_sdl.c.
 mkdir -p src/assets
-for f in GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX \
-         LICENCE.DAT Licence.Dat licence.dat; do
-  if [ -f "$GAME_SRC_DIR/manick/$f" ]; then
-    cp "$GAME_SRC_DIR/manick/$f" "src/assets/$f"
-  fi
+for f in GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX LICENCE.DAT; do
+  cp "$GAME_DATA_DIR/$f" "src/assets/$f"
 done
-# Any extra GAME.* data (skip DOS executables)
-for f in "$GAME_SRC_DIR"/manick/GAME.*; do
-  [ -f "$f" ] || continue
-  base=$(basename "$f")
-  case "$base" in
-    *.EXE|*.exe) continue ;;
-  esac
-  cp -n "$f" "src/assets/$base" 2>/dev/null || cp "$f" "src/assets/$base"
-done
+chmod u+w src/assets/*
 # Optional language packs
 if [ -d "$GAME_SRC_DIR/lang" ]; then
   mkdir -p src/assets/lang

@@ -1,0 +1,572 @@
+; MOAS script, program 12 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 51, L_02b5  ; @0000
+        get_person_x 21, 31  ; @000b
+        if 2, 31, -62, 120, L_003a  ; @0010
+        unmark_area2 4384  ; @001b
+        add_area_jumper 0, 0, 130, 200, 4384  ; @001e
+        set_person 21, 0, 0, 130, 178, 0, -1, 48  ; @0029
+        return_found  ; @0039
+L_003a:
+        if 2, 31, -62, 130, L_0064  ; @003a
+        unmark_area2 4384  ; @0045
+        add_area_jumper 0, 0, 140, 200, 4384  ; @0048
+        set_person 21, 0, 0, 140, 178, 0, -1, 48  ; @0053
+        return_found  ; @0063
+L_0064:
+        if 2, 31, -62, 140, L_008e  ; @0064
+        unmark_area2 4384  ; @006f
+        add_area_jumper 0, 0, 150, 200, 4384  ; @0072
+        set_person 21, 0, 0, 150, 178, 0, -1, 48  ; @007d
+        return_found  ; @008d
+L_008e:
+        if 2, 31, -62, 150, L_00b8  ; @008e
+        unmark_area2 4384  ; @0099
+        add_area_jumper 0, 0, 160, 200, 4384  ; @009c
+        set_person 21, 0, 0, 160, 178, 0, -1, 48  ; @00a7
+        return_found  ; @00b7
+L_00b8:
+        if 2, 31, -62, 160, L_00e2  ; @00b8
+        unmark_area2 4384  ; @00c3
+        add_area_jumper 0, 0, 170, 200, 4384  ; @00c6
+        set_person 21, 0, 0, 170, 178, 0, -1, 48  ; @00d1
+        return_found  ; @00e1
+L_00e2:
+        if 2, 31, -62, 170, L_010c  ; @00e2
+        unmark_area2 4384  ; @00ed
+        add_area_jumper 0, 0, 180, 200, 4384  ; @00f0
+        set_person 21, 0, 0, 180, 178, 0, -1, 48  ; @00fb
+        return_found  ; @010b
+L_010c:
+        if 2, 31, -62, 180, L_0136  ; @010c
+        unmark_area2 4384  ; @0117
+        add_area_jumper 0, 0, 190, 200, 4384  ; @011a
+        set_person 21, 0, 0, 190, 178, 0, -1, 48  ; @0125
+        return_found  ; @0135
+L_0136:
+        if 2, 31, -62, 190, L_0160  ; @0136
+        unmark_area2 4384  ; @0141
+        add_area_jumper 0, 0, 200, 200, 4384  ; @0144
+        set_person 21, 0, 0, 200, 178, 0, -1, 48  ; @014f
+        return_found  ; @015f
+L_0160:
+        if 2, 31, -62, 200, L_018a  ; @0160
+        unmark_area2 4384  ; @016b
+        add_area_jumper 0, 0, 210, 200, 4384  ; @016e
+        set_person 21, 0, 0, 210, 178, 0, -1, 48  ; @0179
+        return_found  ; @0189
+L_018a:
+        if 2, 31, -62, 210, L_01b4  ; @018a
+        unmark_area2 4384  ; @0195
+        add_area_jumper 0, 0, 220, 200, 4384  ; @0198
+        set_person 21, 0, 0, 220, 178, 0, -1, 48  ; @01a3
+        return_found  ; @01b3
+L_01b4:
+        if 2, 31, -62, 220, L_01de  ; @01b4
+        unmark_area2 4384  ; @01bf
+        add_area_jumper 0, 0, 230, 200, 4384  ; @01c2
+        set_person 21, 0, 0, 230, 178, 0, -1, 48  ; @01cd
+        return_found  ; @01dd
+L_01de:
+        if 2, 31, -62, 230, L_0208  ; @01de
+        unmark_area2 4384  ; @01e9
+        add_area_jumper 0, 0, 240, 200, 4384  ; @01ec
+        set_person 21, 0, 0, 240, 178, 0, -1, 48  ; @01f7
+        return_found  ; @0207
+L_0208:
+        if 2, 31, -62, 240, L_0232  ; @0208
+        unmark_area2 4384  ; @0213
+        add_area_jumper 0, 0, 250, 200, 4384  ; @0216
+        set_person 21, 0, 0, 250, 178, 0, -1, 48  ; @0221
+        return_found  ; @0231
+L_0232:
+        if 2, 31, -62, 250, L_025c  ; @0232
+        unmark_area2 4384  ; @023d
+        add_area_jumper 0, 0, 260, 200, 4384  ; @0240
+        set_person 21, 0, 0, 260, 178, 0, -1, 48  ; @024b
+        return_found  ; @025b
+L_025c:
+        if 2, 31, -62, 260, L_0286  ; @025c
+        unmark_area2 4384  ; @0267
+        add_area_jumper 0, 0, 270, 200, 4384  ; @026a
+        set_person 21, 0, 0, 270, 178, 0, -1, 48  ; @0275
+        return_found  ; @0285
+L_0286:
+        if 2, 31, -62, 270, L_02b0  ; @0286
+        unmark_area2 4384  ; @0291
+        add_area_jumper 0, 0, 280, 200, 4384  ; @0294
+        set_person 21, 0, 0, 280, 178, 0, -1, 48  ; @029f
+        return_found  ; @02af
+L_02b0:
+        goto_proc 12, L_1120  ; @02b0
+L_02b5:
+        if 2, 0, -62, 999, L_0463  ; @02b5
+        clear_screen_init  ; @02c0
+        set_room_name "Im Raum des Butler"  ; @02c1
+        load_bild 22, 23, 24  ; @02ce
+        if 3, 1015, -62, -55, L_02f0  ; @02d5
+        add_person 33, 126, 48, 0, 0, 0, 0, 10  ; @02e0
+L_02f0:
+        if 3, 1007, -62, -55, L_0310  ; @02f0
+        add_person 35, 88, 152, 0, 0, 0, 0, 10  ; @02fb
+        set_person_z 35, 24  ; @030b
+L_0310:
+        add_person 21, 110, 178, 0, 0, 0, 0, 10  ; @0310
+        add_person 34, 156, 48, 0, 0, 0, 0, 10  ; @0320
+        if 3, 1035, -62, -54, L_0389  ; @0330
+        add_person 55, 302, 73, 0, 0, 8, 0, 10  ; @033b
+        add_person 54, 226, 71, 0, 0, 8, 0, 10  ; @034b
+        add_person 56, 156, 48, 0, 0, 0, 0, 10  ; @035b
+        set_person_z 54, 15  ; @036b
+        if2 15, 1028, -62, -50, 1, 1029, -62, -50, L_0386  ; @0370
+        remove_person 56  ; @0383
+L_0386:
+        remove_person 34  ; @0386
+L_0389:
+        adress 21, 10000  ; @0389
+        blend 100, 100, 100  ; @038e
+        blend_in 8  ; @0395
+        wait_while_walking  ; @0398
+        add_area_label 131, 37, 146, 48, 2010  ; @0399
+        add_area_label 300, 52, 306, 56, 2015  ; @03a4
+        add_area_label 41, 51, 75, 166, 2041  ; @03af
+        add_area_jumper 310, 0, 320, 200, 2905  ; @03ba
+        add_area_jumper 44, 165, 72, 171, 2967  ; @03c5
+        ontime_jump 3, 12, L_101d  ; @03d0
+        if 2, 33, -62, 0, L_0420  ; @03d7
+        wait 5  ; @03e2
+        adress 21, 10002  ; @03e5
+        add_say_window2 21, -1000, -1000, "Ah! Böser Eindringling"  ; @03ea
+        set_person 21, 0, 0, 120, 178, 8, 0, 48  ; @0402
+        add_area_jumper 0, 0, 120, 200, 4384  ; @0412
+        wait 5  ; @041d
+L_0420:
+        if 2, 33, -62, 1, L_0462  ; @0420
+        wait 5  ; @042b
+        adress 21, 10002  ; @042e
+        add_say_window 21, -1000, -1000, "Ah! Verdummter Eindringling."  ; @0433
+        add_say_window -1, -1000, -1000, "Grunz!"  ; @0450
+        adress 21, 10000  ; @045d
+L_0462:
+        return_found  ; @0462
+L_0463:
+        if3 42, 1, -62, 21, 1, 2, -62, 21, 1, 1, -62, 35, L_04c9  ; @0463
+        get_person_y -1, 31  ; @047e
+        if 2, 31, -61, 120, L_04c9  ; @0483
+        if 2, 33, -62, 1, L_04ab  ; @048e
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @0499
+        return_found  ; @04aa
+L_04ab:
+        add_say_window2 -1, -1000, -1000, "CLR Da muß ich erst runter gehen."  ; @04ab
+        return_found  ; @04c8
+L_04c9:
+        if 2, 1, -62, 2041, L_04f4  ; @04c9
+        get_person_y -1, 31  ; @04d4
+        if 2, 31, -61, 120, L_04ec  ; @04d9
+        iwalk -1, 85, 81  ; @04e4
+        return_found  ; @04eb
+L_04ec:
+        iwalk -1, 58, 170  ; @04ec
+        return_found  ; @04f3
+L_04f4:
+        if 2, 1, -62, 33, L_0559  ; @04f4
+        iwalk -1, 126, 88  ; @04ff
+        adress -1, 10000  ; @0506
+        say_if_found 0, 4, -1, "CLR Eine alte Sofortbildkamera."  ; @050b
+        if 2, 0, -62, 9, L_0559  ; @052a
+        set_object 1015, -50  ; @0535
+        remove_person 33  ; @053a
+        var_add_const 8, 4  ; @053d
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @0542
+        return_found  ; @0558
+L_0559:
+        if 2, 1, -62, 34, L_05a9  ; @0559
+        iwalk -1, 156, 88  ; @0564
+        adress -1, 10000  ; @056b
+        say_if_found 0, 4, -1, "CLR Es schaut mich an!"  ; @0570
+        say_if_found 0, 9, -1, "CLR Nein!"  ; @0585
+        say_if_found 0, 7, -1, "CLR Das fasse ich nicht an."  ; @0594
+L_05a9:
+        if 2, 1, -62, 56, L_061f  ; @05a9
+        iwalk -1, 156, 88  ; @05b4
+        adress -1, 10000  ; @05bb
+        say_if_found 0, 4, -1, "CLR Ein Glas Wasser."  ; @05c0
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_061f  ; @05d6
+        var_add_const 8, 5  ; @05e9
+        add_say_window2 999, 160, 199, "____(1_Punkt)____"  ; @05ee
+        add_say_window2 -1, -1000, -1000, "CLR Okay. NW ____Ok.____"  ; @0600
+        set_object 1029, -50  ; @0616
+        remove_person 56  ; @061b
+        return_found  ; @061e
+L_061f:
+        if 2, 1, -62, 35, L_068c  ; @061f
+        walk_person -1, 88, 181  ; @062a
+        adress -1, 10000  ; @0631
+        say_if_found 0, 4, -1, "CLR Ein Puzzleteil"  ; @0636
+        if 2, 0, -62, 9, L_068c  ; @064c
+        set_object 1007, -50  ; @0657
+        remove_person 35  ; @065c
+        var_add_const 8, 1  ; @065f
+        add_say_window2 999, 160, 199, "CLR ____(1_Punkt)____ NW ___(Immerhin!)___"  ; @0664
+        return_found  ; @068b
+L_068c:
+        if 2, 1, -62, 2010, L_06ec  ; @068c
+        iwalk -1, 138, 88  ; @0697
+        adress -1, 10000  ; @069e
+        say_if_found 0, 4, -1, "CLR Da liegt das Skelett einer Ratte drin!"  ; @06a3
+        say_if_found 0, 9, -1, "CLR Nein! NW Da liegt das Skelett einer Ratte drin!"  ; @06c5
+L_06ec:
+        if 2, 1, -62, 2015, L_0813  ; @06ec
+        iwalk -1, 286, 82  ; @06f7
+        adress -1, 10002  ; @06fe
+        if2 10, 0, -62, 9, 0, 2, -62, 1035, L_07c6  ; @0703
+        var_add_const 8, 2  ; @0716
+        add_say_window2 999, 160, 199, "____(2_Punkte)____"  ; @071b
+        add_say_window2 -1, -1000, -1000, "CLR Okay."  ; @072d
+        set_object 1035, -54  ; @073e
+        add_person 55, 302, 73, 0, 0, 16384, 0, 10  ; @0743
+        adress 34, 10002  ; @0753
+        wait 8  ; @0758
+        adress 34, 10004  ; @075b
+        wait 8  ; @0760
+        adress 34, 10002  ; @0763
+        wait 8  ; @0768
+        adress 34, 10004  ; @076b
+        wait 8  ; @0770
+        add_person 54, 156, 46, 0, 0, 16384, 0, 10  ; @0773
+        set_person_z 54, 15  ; @0783
+        add_person 56, 156, 48, 0, 0, 16384, 0, 10  ; @0788
+        remove_person 34  ; @0798
+        walk_person 54, 156, 40  ; @079b
+        walk_person 54, 176, 30  ; @07a2
+        walk_person 54, 186, 30  ; @07a9
+        walk_person 54, 206, 40  ; @07b0
+        walk_person 54, 226, 60  ; @07b7
+        walk_person 54, 226, 71  ; @07be
+        return_found  ; @07c5
+L_07c6:
+        say_if_found 0, 4, -1, "CLR In der Wand steckt ein Nagel."  ; @07c6
+        say_if_found 0, 9, -1, "CLR Der Nagel ist zu fest. NW Den bekomme ich mit bloßen Händen nie herraus."  ; @07e1
+L_0813:
+        if3 42, 0, -62, 9, 0, 1, -62, 1006, 0, 2, -62, 1007, L_0b58  ; @0813
+        if 2, 33, -62, 1, L_0a3d  ; @082e
+        arm_key_abort  ; @0839
+        var_set_const 33, 0  ; @083a
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @083f
+        adress -1, 10000  ; @084f
+        var_set_const 14, 0  ; @0854
+        var_set_const 20, 0  ; @0859
+        display_message ""  ; @085e
+        var_set_const 15, 1  ; @0860
+        add_person 32, 160, 200, 0, 0, 16384, 0, 10  ; @0865
+        add_person 31, 160, 0, 0, 0, 16384, 0, 10  ; @0875
+        set_person_z 31, 21000  ; @0885
+        var_set_const 15, 0  ; @088a
+        set_person_z 32, 20000  ; @088f
+        walk_person 31, 160, 130  ; @0894
+        click_or_enter 5  ; @089b
+        walk_person 31, 160, 300  ; @089e
+        remove_person 32  ; @08a5
+        remove_person 31  ; @08a8
+        var_set_const 15, 1  ; @08ab
+        get_person_x -1, 34  ; @08b0
+        get_person_y -1, 35  ; @08b5
+        remove_person 1  ; @08ba
+        add_person 0, 160, 100, 0, 0, 1056, 0, 10  ; @08bd
+L_08cd:
+        get_person_x -1, 31  ; @08cd
+        if 0, 31, -61, 34, L_08f2  ; @08d2
+        set_person 0, 10, 0, 0, 0, 0, -1, 58  ; @08dd
+        goto_proc 12, L_08cd  ; @08ed
+L_08f2:
+        get_person_x -1, 31  ; @08f2
+        if 0, 31, -60, 34, L_0917  ; @08f7
+        set_person 0, -10, 0, 0, 0, 0, -1, 58  ; @0902
+        goto_proc 12, L_08f2  ; @0912
+L_0917:
+        get_person_y -1, 31  ; @0917
+        if 0, 31, -61, 35, L_093c  ; @091c
+        set_person 0, 0, 10, 0, 0, 0, -1, 58  ; @0927
+        goto_proc 12, L_0917  ; @0937
+L_093c:
+        get_person_y -1, 31  ; @093c
+        if 0, 31, -60, 35, L_0961  ; @0941
+        set_person 0, 0, -10, 0, 0, 0, -1, 58  ; @094c
+        goto_proc 12, L_093c  ; @095c
+L_0961:
+        get_person_x -1, 31  ; @0961
+        if 0, 31, -61, 34, L_0986  ; @0966
+        set_person 0, 1, 0, 0, 0, 0, -1, 58  ; @0971
+        goto_proc 12, L_0961  ; @0981
+L_0986:
+        get_person_x -1, 31  ; @0986
+        if 0, 31, -60, 34, L_09ab  ; @098b
+        set_person 0, -1, 0, 0, 0, 0, -1, 58  ; @0996
+        goto_proc 12, L_0986  ; @09a6
+L_09ab:
+        get_person_y -1, 31  ; @09ab
+        if 0, 31, -61, 35, L_09d0  ; @09b0
+        set_person 0, 0, 1, 0, 0, 0, -1, 58  ; @09bb
+        goto_proc 12, L_09ab  ; @09cb
+L_09d0:
+        get_person_y -1, 31  ; @09d0
+        if 0, 31, -60, 35, L_09f5  ; @09d5
+        set_person 0, 0, -1, 0, 0, 0, -1, 58  ; @09e0
+        goto_proc 12, L_09d0  ; @09f0
+L_09f5:
+        var_set_const 15, 0  ; @09f5
+        set_object 1006, -54  ; @09fa
+        set_object 1007, -54  ; @09ff
+        set_object 1008, -50  ; @0a04
+        var_set_const 14, 1  ; @0a09
+        var_set_const 20, 1  ; @0a0e
+        say_properties 0, 0, 27, 2  ; @0a13
+        if_wasnt_here 79, L_0a3c  ; @0a1c
+        var_add_const 8, 3  ; @0a21
+        add_say_window2 999, 160, 199, "CLR ____(3_Punkte)____"  ; @0a26
+L_0a3c:
+        abort_redraw  ; @0a3c
+L_0a3d:
+        set_object 1006, -54  ; @0a3d
+        set_object 1007, -54  ; @0a42
+        set_object 1008, -50  ; @0a47
+        add_say_window -1, -1000, -1000, "CLR Ich bin ja so genial!"  ; @0a4c
+        get_person_y -1, 31  ; @0a63
+        if 2, 31, -60, 120, L_0b57  ; @0a68
+        get_person_x -1, 31  ; @0a73
+        if 2, 31, -61, 110, L_0b0f  ; @0a78
+        adress 21, 10006  ; @0a83
+        add_say_window 21, -1000, -1000, "Ah! Böser Eindringling nicht mehr duum!"  ; @0a88
+        adress -1, 10002  ; @0aaa
+        add_say_window2 -1, -1000, -1000, "Ahhh!"  ; @0aaf
+        get_person_x -1, 31  ; @0abc
+        if 2, 31, -61, 100, L_0ad3  ; @0ac1
+        iwalk 21, 100, 178  ; @0acc
+L_0ad3:
+        if 2, 31, -61, 90, L_0ae5  ; @0ad3
+        iwalk 21, 90, 178  ; @0ade
+L_0ae5:
+        if 2, 31, -61, 80, L_0af7  ; @0ae5
+        iwalk 21, 80, 178  ; @0af0
+L_0af7:
+        if 2, 31, -61, 70, L_0b09  ; @0af7
+        iwalk 21, 70, 178  ; @0b02
+L_0b09:
+        goto_proc 12, L_1120  ; @0b09
+        return_found  ; @0b0e
+L_0b0f:
+        wait 5  ; @0b0f
+        adress 21, 10002  ; @0b12
+        add_say_window2 21, -1000, -1000, "Ah! Böser Eindringling nicht mehr duum!"  ; @0b17
+        set_person 21, 0, 0, 120, 178, 8, 0, 48  ; @0b39
+        add_area_jumper 0, 0, 120, 200, 4384  ; @0b49
+        wait 5  ; @0b54
+L_0b57:
+        return_found  ; @0b57
+L_0b58:
+        return_not_found  ; @0b58
+        blend_out 2  ; @0b59
+        if 3, 1046, -62, -54, L_0b7c  ; @0b5c
+        var_rand_const 31, 6  ; @0b67
+        if 2, 31, -62, 1, L_0b7c  ; @0b6c
+        set_object 1046, -50  ; @0b77
+L_0b7c:
+        remove_statists  ; @0b7c
+        set_person -1, 168, 65, 168, 70, 0, -1, 0  ; @0b7d
+        ontime_jump 0, 12, L_101d  ; @0b8d
+        call_proc 11  ; @0b94
+        unmark_area2 2967  ; @0b97
+        set_person -1, 0, 0, 0, 0, 16384, -16385, 53  ; @0b9a
+        set_person_z -1, -70  ; @0baa
+        walk_person -1, 58, 168  ; @0baf
+        walk_person -1, 58, 82  ; @0bb6
+        set_person_z -1, 0  ; @0bbd
+        walk_person -1, 86, 82  ; @0bc2
+        walk_person -1, 86, 88  ; @0bc9
+        set_person -1, 0, 0, 0, 0, 0, -16385, 53  ; @0bd0
+        add_area_jumper 72, 78, 103, 83, 3890  ; @0be0
+        if_wasnt_here 130, L_0f31  ; @0beb
+        blend_out 2  ; @0bf0
+        clear_screen_init  ; @0bf3
+        var_set_var 31, 14  ; @0bf4
+        var_set_const 14, 0  ; @0bf9
+        ontime_jump 0, 12, L_101d  ; @0bfe
+        remove_statists  ; @0c05
+        set_person -1, 320, 0, 0, 0, 0, -1, 58  ; @0c06
+        arm_key_abort  ; @0c16
+        load_bild 11, 9, 9  ; @0c17
+        blend 100, 100, 100  ; @0c1e
+        blend_in 2  ; @0c25
+        click_or_enter 6  ; @0c28
+        blend_out 2  ; @0c2b
+        load_bild 29, 30, 31  ; @0c2e
+        blend 100, 100, 100  ; @0c35
+        say_properties 3, 49, 15, 2  ; @0c3c
+        say_properties 4, 50, 15, 2  ; @0c45
+        say_properties 5, 114, 61, 3  ; @0c4e
+        if 3, 1034, -62, -55, L_0c77  ; @0c57
+        add_person 58, 108, 171, 0, 0, 16384, 0, 10  ; @0c62
+        set_person_z 58, 100  ; @0c72
+L_0c77:
+        if 2, 40, -62, 1, L_0c97  ; @0c77
+        add_person 59, 54, 150, 54, 150, 16384, 0, 0  ; @0c82
+        set_person_z 59, 100  ; @0c92
+L_0c97:
+        add_person 49, 174, 165, 174, 165, 0, 0, 0  ; @0c97
+        adress 49, 10006  ; @0ca7
+        add_person 114, 310, 159, 260, 167, 0, 0, 0  ; @0cac
+        blend_in 8  ; @0cbc
+        wait_while_walking  ; @0cbf
+        adress 114, 10006  ; @0cc0
+        add_say_window 114, -1000, -1000, "__Ed!__"  ; @0cc5
+        adress 49, 10002  ; @0cd4
+        add_say_window 114, -1000, -1000, "Mishandelst du etwa wieder unsere Gäste?"  ; @0cd9
+        add_say_window 49, -1000, -1000, "Aber meine Liebe! NW Ich doch nicht!"  ; @0cf8
+        add_say_window 114, -1000, -1000, "Dann tu bitte endlich etwas gegen die Ratten! NW Ich hasse Ratten. NW Die Biester sind eine echte Plage."  ; @0d12
+        add_say_window 49, -1000, -1000, "Aber das sind Mäuse."  ; @0d48
+        add_say_window 114, -1000, -1000, "Egal, ich bin flexibel. Ich hasse Ratten UND Mäuse. NW Und das Hornissennest unter dem Dach!"  ; @0d5a
+        add_say_window 49, -1000, -1000, "(grummel)"  ; @0d93
+        add_say_window 114, -1000, -1000, "Und die Haustür muß auch wieder gestrichen werden! NW Und... NW ..tapeziert.. NW ..repariert.. NW ..defekt.."  ; @0da3
+        add_say_window2 114, -1000, -1000, "..Gartenzaun.."  ; @0dea
+        wait 6  ; @0dfd
+        blend_out 2  ; @0e00
+        abort_redraw  ; @0e03
+        clear_screen_init  ; @0e04
+        remove_statists  ; @0e05
+        set_room_name "Im Raum des Butler"  ; @0e06
+        load_bild 22, 23, 24  ; @0e13
+        if 3, 1015, -62, -55, L_0e35  ; @0e1a
+        add_person 33, 126, 48, 0, 0, 0, 0, 10  ; @0e25
+L_0e35:
+        if 3, 1007, -62, -55, L_0e55  ; @0e35
+        add_person 35, 88, 152, 0, 0, 0, 0, 10  ; @0e40
+        set_person_z 35, 24  ; @0e50
+L_0e55:
+        add_person 21, 110, 178, 0, 0, 0, 0, 10  ; @0e55
+        add_person 34, 156, 48, 0, 0, 0, 0, 10  ; @0e65
+        if 3, 1035, -62, -54, L_0ece  ; @0e75
+        add_person 55, 302, 73, 0, 0, 8, 0, 10  ; @0e80
+        add_person 54, 226, 71, 0, 0, 8, 0, 10  ; @0e90
+        add_person 56, 156, 48, 0, 0, 0, 0, 10  ; @0ea0
+        set_person_z 54, 15  ; @0eb0
+        if2 15, 1028, -62, -50, 1, 1029, -62, -50, L_0ecb  ; @0eb5
+        remove_person 56  ; @0ec8
+L_0ecb:
+        remove_person 34  ; @0ecb
+L_0ece:
+        adress 21, 10000  ; @0ece
+        blend 100, 100, 100  ; @0ed3
+        set_person -1, -320, 0, 0, 0, 0, -1, 58  ; @0eda
+        var_set_var 14, 31  ; @0eea
+        blend_in 8  ; @0eef
+        wait_while_walking  ; @0ef2
+        add_area_label 131, 37, 146, 48, 2010  ; @0ef3
+        add_area_label 300, 52, 306, 56, 2015  ; @0efe
+        add_area_label 41, 51, 75, 166, 2041  ; @0f09
+        add_area_jumper 310, 0, 320, 200, 2905  ; @0f14
+        add_area_jumper 72, 78, 103, 83, 3890  ; @0f1f
+        ontime_jump 3, 12, L_101d  ; @0f2a
+L_0f31:
+        return_found  ; @0f31
+        unmark_area2 3890  ; @0f32
+        set_person -1, 0, 0, 0, 0, 16384, -16385, 53  ; @0f35
+        walk_person -1, 86, 82  ; @0f45
+        walk_person -1, 58, 82  ; @0f4c
+        set_person_z -1, -70  ; @0f53
+        walk_person -1, 58, 168  ; @0f58
+        walk_person -1, 58, 173  ; @0f5f
+        set_person -1, 0, 0, 0, 0, 0, -16385, 53  ; @0f66
+        set_person_z -1, 0  ; @0f76
+        add_area_jumper 44, 165, 72, 171, 2967  ; @0f7b
+        if 2, 33, -62, 0, 65535  ; @0f86
+        adress 21, 10006  ; @0f91
+        add_say_window 21, -1000, -1000, "Ah! Böser Eindringling nicht mehr duum!"  ; @0f96
+        adress -1, 10002  ; @0fb8
+        add_say_window2 -1, -1000, -1000, "Hilfe!"  ; @0fbd
+        get_person_x -1, 31  ; @0fcb
+        if 2, 31, -61, 100, L_0fe2  ; @0fd0
+        iwalk 21, 100, 178  ; @0fdb
+L_0fe2:
+        if 2, 31, -61, 90, L_0ff4  ; @0fe2
+        iwalk 21, 90, 178  ; @0fed
+L_0ff4:
+        if 2, 31, -61, 80, L_1006  ; @0ff4
+        iwalk 21, 80, 178  ; @0fff
+L_1006:
+        if 2, 31, -61, 70, L_1018  ; @1006
+        iwalk 21, 70, 178  ; @1011
+L_1018:
+        goto_proc 12, L_1120  ; @1018
+L_101d:
+        if 3, 1035, -62, -54, L_1029  ; @101d
+        return_found  ; @1028
+L_1029:
+        var_rand_const 131, 3  ; @1029
+        if 2, 131, -62, 1, L_1040  ; @102e
+        ontime_jump 1, 12, L_101d  ; @1039
+L_1040:
+        if 2, 131, -62, 2, L_1052  ; @1040
+        ontime_jump 2, 12, L_101d  ; @104b
+L_1052:
+        if 2, 131, -62, 3, L_1064  ; @1052
+        ontime_jump 3, 12, L_101d  ; @105d
+L_1064:
+        get_person_y -1, 131  ; @1064
+        if 2, 131, -60, 120, L_10fa  ; @1069
+        var_rand_const 131, 2  ; @1074
+        if 2, 131, -62, 1, L_1099  ; @1079
+        var_add_const 132, 1  ; @1084
+        if 2, 132, -60, 4, L_1099  ; @1089
+        var_set_const 132, 1  ; @1094
+L_1099:
+        if 2, 131, -62, 2, L_10b9  ; @1099
+        var_add_const 132, -1  ; @10a4
+        if 2, 132, -61, 1, L_10b9  ; @10a9
+        var_set_const 132, 4  ; @10b4
+L_10b9:
+        if 2, 132, -62, 1, L_10c9  ; @10b9
+        adress 34, 10000  ; @10c4
+L_10c9:
+        if 2, 132, -62, 2, L_10d9  ; @10c9
+        adress 34, 10002  ; @10d4
+L_10d9:
+        if 2, 132, -62, 3, L_10e9  ; @10d9
+        adress 34, 10004  ; @10e4
+L_10e9:
+        if 2, 132, -62, 4, L_10f9  ; @10e9
+        adress 34, 10006  ; @10f4
+L_10f9:
+        return_found  ; @10f9
+L_10fa:
+        get_person_x -1, 131  ; @10fa
+        if 2, 131, -61, 156, L_1115  ; @10ff
+        var_set_const 132, 3  ; @110a
+        adress 34, 10004  ; @110f
+        return_found  ; @1114
+L_1115:
+        var_set_const 132, 2  ; @1115
+        adress 34, 10002  ; @111a
+        return_found  ; @111f
+L_1120:
+        unmark_area2 4384  ; @1120
+        ontime_jump 0, 12, L_101d  ; @1123
+        set_person 21, 0, 0, 0, 0, 0, 0, 56  ; @112a
+        stop_all_walking  ; @113a
+        add_say_window 21, -1000, -1000, "CLR Hab' ich dich!"  ; @113b
+        wait 5  ; @114f
+        blend_out 8  ; @1152
+        remove_person 32000  ; @1155
+        clear_screen_init  ; @1158
+        call_proc 14  ; @1159
+        blend_in 8  ; @115c
+        click_close 32000  ; @115f
+        blend_out 8  ; @1162
+        add_person 1, 73, 190, 73, 190, 1056, 0, 0  ; @1165
+        adress 1, 10004  ; @1175
+        var_set_const 33, 1  ; @117a
+        say_properties 0, 1, 27, 2  ; @117f
+        call_proc 11  ; @1188

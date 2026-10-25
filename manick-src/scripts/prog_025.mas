@@ -1,0 +1,154 @@
+; MOAS script, program 25 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_085a  ; @0000
+        clear_screen_init  ; @000b
+        arm_key_abort  ; @000c
+        var_set_var 131, 14  ; @000d
+        var_set_const 14, 0  ; @0012
+        remove_statists  ; @0017
+        set_room_name "Im Garten"  ; @0018
+        load_bild 16, 17, 18  ; @0020
+        add_person 108, 141, 105, 0, 0, 16384, 0, 10  ; @0027
+        adress 108, 10006  ; @0037
+        set_person_z 108, -50  ; @003c
+        if 3, 1045, -62, -55, L_004f  ; @0041
+        remove_person 108  ; @004c
+L_004f:
+        set_person -1, 321, 162, 231, 162, 0, -1, 0  ; @004f
+        adress -1, 10006  ; @005f
+        add_person 93, 156, 175, 1, 0, 16384, 0, 10  ; @0064
+        blend_in 2  ; @0074
+        wait_while_walking  ; @0077
+        wait 20  ; @0078
+        add_person 94, 156, 0, 156, 155, 16384, 0, 0  ; @007b
+        set_person_z 94, 500  ; @008b
+        set_person_z -1, 400  ; @0090
+        wait_while_walking  ; @0095
+        wait 7  ; @0096
+        walk_person -1, 156, 150  ; @0099
+        wait_while_walking  ; @00a0
+        wait 7  ; @00a1
+        set_person -1, 800, 0, 0, 0, 0, -1, 58  ; @00a4
+        set_person_z -1, 0  ; @00b4
+        walk_person 94, 156, 100  ; @00b9
+        remove_person 93  ; @00c0
+        walk_person 94, 256, 0  ; @00c3
+        blend_out 2  ; @00ca
+        clear_screen_init  ; @00cd
+        remove_statists  ; @00ce
+        set_room_name "In der Gameshow"  ; @00cf
+        load_bild 36, 9, 9  ; @00db
+        add_person 115, 130, 160, 130, 160, 16384, 0, 0  ; @00e2
+        adress 115, 10006  ; @00f2
+        set_person 0, 190, 160, 190, 160, 16384, -16385, 0  ; @00f7
+        adress 0, 10004  ; @0107
+        say_properties 2, 115, 19, 2  ; @010c
+        say_properties 3, 117, 19, 2  ; @0115
+        say_properties 4, 116, 27, 2  ; @011e
+        blend 100, 100, 100  ; @0127
+        blend_in 2  ; @012e
+        wait 3  ; @0131
+        add_say_window 115, -1000, -1000, "Und sag der Schlampe von der Maske, sie soll.."  ; @0134
+        adress 115, 10004  ; @015a
+        add_say_window 115, -1000, -1000, "Oh (Räusper) NW Willkommen bei \"Win or Win\". NW Bei der Gameshow die nur Gewinner kennt. NW Gesponsort von \"Wild\", der tollen Zeitung."  ; @015f
+        add_say_window 115, -1000, -1000, "Schicken aus Sie Ihre Beiträge an die \"Wild\". NW Denn nur die \"Wild\" veröffentlicht auch wirklich ALLES!"  ; @01be
+        add_say_window 115, -1000, -1000, "So, wir begrüßen nun unseren ersten Kandidaten, äh.."  ; @0205
+        add_say_window 0, -1000, -1000, "___Jack___"  ; @022d
+        add_say_window 115, -1000, -1000, "Die Antwort ist richtig. NW Damit haben Sie schon die Reise nach Timbuktu gewonnen. NW Aber Jack kann noch viel mehr gewinnen. NW Gleich nach der Werbung."  ; @023e
+        adress 115, 10006  ; @0294
+        add_say_window 115, -1000, -1000, "Wo bleibt die Maske. NW Mein Toupet ist verrutscht. NW Die dumme Pute ist gefeuert."  ; @0299
+        adress 115, 10004  ; @02d0
+        add_say_window 115, -1000, -1000, "Ja und da sind wir wieder bei \"Win or Win\". NW Jetzt geht es um den Superpreis. NW Genau! DM 100.000 in Bar. NW Gleich zum mitnehmen."  ; @02d5
+        blend_out 2  ; @0327
+        set_person -1, 800, 0, 0, 0, 0, -1, 58  ; @032a
+        clear_screen_init  ; @033a
+        remove_statists  ; @033b
+        load_bild 35, 9, 9  ; @033c
+        add_person 117, 154, 76, 154, 76, 16384, 0, 0  ; @0343
+        adress 117, 10004  ; @0353
+        add_person 116, 166, 76, 166, 76, 16384, 0, 0  ; @0358
+        adress 116, 10004  ; @0368
+        blend_in 2  ; @036d
+        wait 3  ; @0370
+        add_say_window 117, -1000, -1000, "Entspannen Sie sich, Jack. NW Wir sind hier unter uns."  ; @0373
+        wait 3  ; @0397
+        blend_out 2  ; @039a
+        abort_redraw  ; @039d
+        clear_screen_init  ; @039e
+        remove_statists  ; @039f
+        set_room_name "In der Gameshow"  ; @03a0
+        load_bild 36, 9, 9  ; @03ac
+        add_person 115, 130, 160, 130, 160, 16384, 0, 0  ; @03b3
+        adress 115, 10004  ; @03c3
+        set_person 0, 190, 160, 190, 160, 0, -1, 0  ; @03c8
+        adress 0, 10004  ; @03d8
+        blend 100, 100, 100  ; @03dd
+        blend_in 2  ; @03e4
+        wait 3  ; @03e7
+        add_say_window 115, -1000, -1000, "Frage Nr. 1: Wieviele Köpfe hat der Sage nach die dreiköpfige Hydra?"  ; @03ea
+        add_dialog 11  ; @041e
+        add_option 11, 10, 1, -1, "Einen."  ; @0421
+        add_option 11, 11, 1, -1, "Zwei. Einen für jedes Auge, wovon sie vier hat."  ; @042f
+        add_option 11, 12, 1, -1, "Zweiundvierzig."  ; @0455
+        add_option 11, 13, 1, -1, "Das ist eine Fangfrage. Hydren sind keine Tieren, sondern Pflanzen die sich nur für Tiere halten."  ; @0469
+        add_option 11, 14, 1, -1, "Rembrandt?"  ; @04a2
+        select_from_dialog 31, 11  ; @04b5
+        remove_dialog 11  ; @04ba
+        var_add_const 8, 3  ; @04bd
+        add_say_window2 999, 160, 199, "____(3_Punkte)____"  ; @04c2
+        add_say_window 115, -1000, -1000, "Ich denke, das können wir gelten lassen."  ; @04d4
+        say_wait 32000  ; @04ef
+        wait 7  ; @04f2
+        add_say_window 115, -1000, -1000, "Frage Nr. 2: Wenn Sie eine Tasse Tee umrühren und dabei beobachten, wo sich die Teeblätter sammeln. NW Welche Farbe hat dann der Tee?"  ; @04f5
+        add_dialog 12  ; @054e
+        add_option 12, 10, 1, -1, "Er ist klar. Ansonsten könnte man die Teeblätter nicht sehen."  ; @0551
+        add_option 12, 11, 1, -1, "Roter Tee. Alle anderen Teesorten gehören, wie sicherlich jederman weiß, zu der Gattung der Nachtschattengewächse, deren Blätter man so fein zermalen kann, daß man sie nicht sieht."  ; @057e
+        add_option 12, 12, 1, -1, "Grüner Tee. Ich kann den Flecken auf Ihrer Hose sehen, den Sie beim Ausprobieren gemacht haben."  ; @05e7
+        add_option 12, 13, 1, -1, "Kann ich die Frage noch einmal hören?"  ; @0625
+        add_option 12, 14, 1, -1, "Rembrandt?"  ; @063f
+        select_from_dialog 31, 12  ; @0652
+        remove_dialog 12  ; @0657
+        var_add_const 8, 6  ; @065a
+        add_say_window2 999, 160, 199, "____(6_Punkte)____"  ; @065f
+        add_say_window 115, -1000, -1000, "Ja, das ist fast perfekt. NW Tadellos!"  ; @0671
+        say_wait 32000  ; @068f
+        wait 7  ; @0692
+        add_say_window 115, -1000, -1000, "Und nun zur dritten und entscheidenen Frage! NW Bewahren Sie die Nerven, wir kommen zu einem komplexen, physikalischen Thema: NW Wie heißt der Entdecker von Einsteins Relativitätstheorie?"  ; @0695
+        add_dialog 13  ; @0706
+        add_option 13, 10, 1, -1, "Einstein."  ; @0709
+        add_option 13, 11, 1, -1, "Zweistein."  ; @0718
+        add_option 13, 12, 1, -1, "Dreistein."  ; @0728
+        add_option 13, 13, 1, -1, "Zahnstein."  ; @0738
+        add_option 13, 14, 1, -1, "Rembrandt?"  ; @0749
+        select_from_dialog 31, 13  ; @075c
+        remove_dialog 13  ; @0761
+        var_add_const 8, 9  ; @0764
+        add_say_window2 999, 160, 199, "____(9_Punkte)____"  ; @0769
+        add_say_window 115, -1000, -1000, "___Korrekt!___ NW Sie haben einen Koffer voller Geld gewonnen!"  ; @077b
+        set_object 1040, -50  ; @07a4
+        say_wait 32000  ; @07a9
+        wait 7  ; @07ac
+        blend_out 2  ; @07af
+        set_person -1, 800, 0, 0, 0, 0, -1, 58  ; @07b2
+        clear_screen_init  ; @07c2
+        remove_statists  ; @07c3
+        load_bild 35, 9, 9  ; @07c4
+        add_person 117, 154, 76, 154, 76, 16384, 0, 0  ; @07cb
+        adress 117, 10004  ; @07db
+        add_person 116, 166, 76, 166, 76, 16384, 0, 0  ; @07e0
+        adress 116, 10004  ; @07f0
+        blend_in 2  ; @07f5
+        wait 3  ; @07f8
+        add_say_window 117, -1000, -1000, "Was sagen Sie nun, Jack!"  ; @07fb
+        add_say_window 116, -1000, -1000, "Eigentlich bräuchte ich ja nur den Koffer. NW Ich meine, wenn das ginge..."  ; @0810
+        wait 8  ; @083b
+        blend_out 2  ; @083e
+        remove_statists  ; @0841
+        set_person 0, 319, 187, 285, 177, 0, -16385, 0  ; @0842
+        var_set_var 14, 131  ; @0852
+        call_proc 5  ; @0857
+L_085a:

@@ -1,0 +1,837 @@
+; MOAS script, program 6 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_01cd  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Vor dem Haus"  ; @000c
+        load_bild 4, 5, 6  ; @0015
+        blend 100, 100, 100  ; @001c
+        add_person 2, 121, 133, 121, 133, 0, 0, 0  ; @0023
+        add_person 3, 152, 133, 152, 133, 0, 0, 0  ; @0033
+        add_person 4, 135, 139, 135, 139, 16384, 0, 0  ; @0043
+        add_person 22, 233, 155, 0, 0, 16384, 0, 10  ; @0053
+        add_person 23, 240, 154, 0, 0, 16384, 0, 10  ; @0063
+        add_person 24, 247, 153, 0, 0, 16384, 0, 10  ; @0073
+        add_person 25, 254, 153, 0, 0, 16384, 0, 10  ; @0083
+        add_person 26, 261, 152, 0, 0, 16384, 0, 10  ; @0093
+        set_person_z 4, -100  ; @00a3
+        get_person_y -1, 31  ; @00a8
+        if 2, 31, -61, 100, L_00d8  ; @00ad
+        set_person 2, 0, 0, 0, 0, 16384, -16385, 53  ; @00b8
+        set_person 3, 0, 0, 0, 0, 16384, -16385, 53  ; @00c8
+L_00d8:
+        if2 10, 57, -62, 1, 1, 57, -62, 4, L_00fb  ; @00d8
+        add_person 60, 202, 148, 0, 0, 16384, 0, 10  ; @00eb
+L_00fb:
+        if2 14, 57, -62, 3, 0, 1038, -62, -55, L_011e  ; @00fb
+        add_person 67, 186, 169, 0, 0, 16384, 0, 10  ; @010e
+L_011e:
+        if 2, 72, -62, 1, L_013e  ; @011e
+        add_person 102, 24, 50, 0, 0, 16384, 0, 10  ; @0129
+        set_person_z 102, 88  ; @0139
+L_013e:
+        blend_in 8  ; @013e
+        wait_while_walking  ; @0141
+        add_area_jumper 319, 0, 340, 200, 6855  ; @0142
+        add_area_jumper 0, 0, 319, 46, 6878  ; @014d
+        add_area_label 190, 137, 213, 149, 2000  ; @0158
+        add_area_label 214, 63, 280, 111, 2003  ; @0163
+        add_area_label 0, 63, 60, 111, 2003  ; @016e
+        add_area_label 51, 121, 88, 183, 2009  ; @0179
+        add_area_label 223, 2, 272, 53, 2023  ; @0184
+        if_wasnt_here 92, L_01cc  ; @018f
+        open_window 25  ; @0194
+        print_sentence_plus "Das Haus ist unheimlich! Du hörst einen Schrei und bist dir nicht sicher, ob das eine Katze oder ein Mensch war.."  ; @0197
+L_01cc:
+        return_found  ; @01cc
+L_01cd:
+        if2 10, 1, -64, 22, 0, 1, -65, 26, L_022d  ; @01cd
+        get_person_y -1, 31  ; @01e0
+        if 2, 31, -61, 100, L_022d  ; @01e5
+        if 2, 33, -62, 1, L_020d  ; @01f0
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @01fb
+        return_found  ; @020c
+L_020d:
+        add_say_window2 -1, -1000, -1000, "CLR Soll ich den Balkon runterspringen?"  ; @020d
+        return_found  ; @022c
+L_022d:
+        parse_if 1, 2000, 2003, 2009, 4, L_0287  ; @022d
+        get_person_y -1, 31  ; @023a
+        if 2, 31, -61, 100, L_0287  ; @023f
+        if 2, 33, -62, 1, L_0267  ; @024a
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @0255
+        return_found  ; @0266
+L_0267:
+        add_say_window2 -1, -1000, -1000, "CLR Soll ich den Balkon runterspringen?"  ; @0267
+        return_found  ; @0286
+L_0287:
+        parse_if 1, 2, 3, -999, -999, L_02e1  ; @0287
+        get_person_y -1, 31  ; @0294
+        if 2, 31, -61, 100, L_02e1  ; @0299
+        if 2, 33, -62, 1, L_02c1  ; @02a4
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @02af
+        return_found  ; @02c0
+L_02c1:
+        add_say_window2 -1, -1000, -1000, "CLR Soll ich den Balkon runterspringen?"  ; @02c1
+        return_found  ; @02e0
+L_02e1:
+        if2 10, 1, -62, 2023, 1, 1, -62, 102, L_0337  ; @02e1
+        get_person_y -1, 31  ; @02f4
+        if 2, 31, -60, 100, L_0337  ; @02f9
+        if 2, 33, -62, 1, L_0321  ; @0304
+        add_say_window2 -1, -1000, -1000, "CLR Grunz?"  ; @030f
+        return_found  ; @0320
+L_0321:
+        add_say_window2 -1, -1000, -1000, "CLR Ich kann nicht fliegen."  ; @0321
+        return_found  ; @0336
+L_0337:
+        if 2, 1, -62, 2023, L_0547  ; @0337
+        iwalk -1, 239, 52  ; @0342
+        adress -1, 10002  ; @0349
+        say_if_found 0, 4, -1, "CLR Ein Teleskop. NW Schlauer Kommentar, ich weiß."  ; @034e
+        say_if_found 0, 7, -1, "CLR Besser nicht. NW Sonst mache ich noch was kaputt."  ; @0375
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_042e  ; @0398
+        if_wasnt_here 93, L_03cb  ; @03ab
+        var_add_const 8, 1  ; @03b0
+        add_say_window 999, 160, 199, "CLR ____(1_Punkt)____"  ; @03b5
+L_03cb:
+        blend_out 2  ; @03cb
+        clear_screen_init  ; @03ce
+        remove_statists  ; @03cf
+        var_set_var 31, 14  ; @03d0
+        var_set_const 14, 0  ; @03d5
+        load_bild 52, 9, 9  ; @03da
+        set_person -1, 300, 0, 0, 0, 0, -1, 53  ; @03e1
+        if 2, 66, -62, 1, L_040c  ; @03f1
+        add_person 105, 157, 187, 0, 0, 16384, 0, 10  ; @03fc
+L_040c:
+        blend_in 2  ; @040c
+        click_or_enter 5  ; @040f
+        blend_out 2  ; @0412
+        remove_statists  ; @0415
+        var_set_var 14, 31  ; @0416
+        set_person -1, -300, 0, 0, 0, 0, -1, 53  ; @041b
+        call_proc 6  ; @042b
+L_042e:
+        if2 10, 0, -62, 9, 0, 2, -62, 1015, L_0547  ; @042e
+        if 2, 83, -62, 1, L_0467  ; @0441
+        add_say_window -1, -1000, -1000, "CLR Ich werf' das alte erst mal weg!"  ; @044c
+L_0467:
+        if 2, 83, -62, 0, L_0487  ; @0467
+        add_say_window -1, -1000, -1000, "CLR O.K."  ; @0472
+        var_set_const 83, 1  ; @0482
+L_0487:
+        blend 200, 200, 200  ; @0487
+        set_object 1016, -55  ; @048e
+        set_object 1017, -55  ; @0493
+        set_object 1018, -55  ; @0498
+        set_object 1019, -55  ; @049d
+        set_object 1020, -55  ; @04a2
+        set_object 1021, -55  ; @04a7
+        set_object 1022, -55  ; @04ac
+        set_object 1023, -55  ; @04b1
+        set_object 1024, -55  ; @04b6
+        set_object 1025, -55  ; @04bb
+        set_object 1043, -55  ; @04c0
+        set_object 1044, -55  ; @04c5
+        if 2, 36, -62, 1, L_052c  ; @04ca
+        if 2, 66, -62, 0, L_04e5  ; @04d5
+        set_object 1043, -50  ; @04e0
+L_04e5:
+        if 2, 66, -62, 1, L_052c  ; @04e5
+        set_object 1044, -50  ; @04f0
+        if_wasnt_here 94, L_052c  ; @04f5
+        var_add_const 8, 10  ; @04fa
+        add_say_window2 999, 160, 199, "____(10_Punkte)____ NW Hans Rosenthal meint: Das war spitze!"  ; @04ff
+L_052c:
+        if 2, 36, -62, 0, L_053c  ; @052c
+        set_object 1017, -50  ; @0537
+L_053c:
+        wait 3  ; @053c
+        blend 100, 100, 100  ; @053f
+        return_found  ; @0546
+L_0547:
+        parse_if 1, 2, 3, 4, 5, L_0576  ; @0547
+        conditional_walk -1, 1, 280, 169, 319, 199, 279, 175  ; @0554
+        conditional_walk -1, 1, 221, 170, 319, 199, 221, 187  ; @0565
+L_0576:
+        if2 10, 1, -64, 22, 0, 1, -65, 26, L_05ab  ; @0576
+        conditional_walk -1, 1, 0, 0, 182, 165, 135, 166  ; @0589
+        conditional_walk -1, 1, 0, 0, 220, 200, 221, 186  ; @059a
+L_05ab:
+        if 2, 1, -62, 2000, L_0c17  ; @05ab
+        iwalk -1, 184, 178  ; @05b6
+        adress -1, 10000  ; @05bd
+        if2 10, 29, -62, 1, 0, 57, -62, 1, L_05e3  ; @05c2
+        set_object 1003, -50  ; @05d5
+        var_set_const 57, 0  ; @05da
+        remove_person 60  ; @05df
+        return_found  ; @05e2
+L_05e3:
+        if2 10, 29, -62, 1, 0, 57, -62, 4, L_0604  ; @05e3
+        set_object 1042, -50  ; @05f6
+        var_set_const 57, 0  ; @05fb
+        remove_person 60  ; @0600
+        return_found  ; @0603
+L_0604:
+        if2 10, 29, -62, 1, 0, 49, -62, 0, L_0631  ; @0604
+        add_say_window2 -1, -1000, -1000, "CLR Der Briefkasten ist leer."  ; @0617
+        return_found  ; @0630
+L_0631:
+        if2 10, 29, -62, 1, 0, 49, -63, 0, L_081a  ; @0631
+        var_set_const 49, 0  ; @0644
+        if 3, 1003, -62, 7, L_0659  ; @0649
+        set_object 1003, -50  ; @0654
+L_0659:
+        if 3, 1004, -62, 7, L_0669  ; @0659
+        set_object 1004, -50  ; @0664
+L_0669:
+        if 3, 1005, -62, 7, L_0679  ; @0669
+        set_object 1005, -50  ; @0674
+L_0679:
+        if 3, 1006, -62, 7, L_0689  ; @0679
+        set_object 1006, -50  ; @0684
+L_0689:
+        if 3, 1007, -62, 7, L_0699  ; @0689
+        set_object 1007, -50  ; @0694
+L_0699:
+        if 3, 1008, -62, 7, L_06a9  ; @0699
+        set_object 1008, -50  ; @06a4
+L_06a9:
+        if 3, 1009, -62, 7, L_06b9  ; @06a9
+        set_object 1009, -50  ; @06b4
+L_06b9:
+        if 3, 1010, -62, 7, L_06c9  ; @06b9
+        set_object 1010, -50  ; @06c4
+L_06c9:
+        if 3, 1011, -62, 7, L_06d9  ; @06c9
+        set_object 1011, -50  ; @06d4
+L_06d9:
+        if 3, 1012, -62, 7, L_06e9  ; @06d9
+        set_object 1012, -50  ; @06e4
+L_06e9:
+        if 3, 1013, -62, 7, L_06f9  ; @06e9
+        set_object 1013, -50  ; @06f4
+L_06f9:
+        if 3, 1014, -62, 7, L_0709  ; @06f9
+        set_object 1014, -50  ; @0704
+L_0709:
+        if 3, 1015, -62, 7, L_0719  ; @0709
+        set_object 1015, -50  ; @0714
+L_0719:
+        if 3, 1016, -62, 7, L_0729  ; @0719
+        set_object 1016, -50  ; @0724
+L_0729:
+        if 3, 1018, -62, 7, L_0739  ; @0729
+        set_object 1018, -50  ; @0734
+L_0739:
+        if 3, 1019, -62, 7, L_0749  ; @0739
+        set_object 1019, -50  ; @0744
+L_0749:
+        if 3, 1020, -62, 7, L_0759  ; @0749
+        set_object 1020, -50  ; @0754
+L_0759:
+        if 3, 1021, -62, 7, L_0769  ; @0759
+        set_object 1021, -50  ; @0764
+L_0769:
+        if 3, 1022, -62, 7, L_0779  ; @0769
+        set_object 1022, -50  ; @0774
+L_0779:
+        if 3, 1023, -62, 7, L_0789  ; @0779
+        set_object 1023, -50  ; @0784
+L_0789:
+        if 3, 1024, -62, 7, L_0799  ; @0789
+        set_object 1024, -50  ; @0794
+L_0799:
+        if 3, 1025, -62, 7, L_07a9  ; @0799
+        set_object 1025, -50  ; @07a4
+L_07a9:
+        if 3, 1026, -62, 7, L_07b9  ; @07a9
+        set_object 1026, -50  ; @07b4
+L_07b9:
+        if 3, 1001, -62, 7, L_07c9  ; @07b9
+        set_object 1001, -50  ; @07c4
+L_07c9:
+        if 3, 1027, -62, 7, L_07d9  ; @07c9
+        set_object 1027, -50  ; @07d4
+L_07d9:
+        if 3, 1028, -62, 7, L_07e9  ; @07d9
+        set_object 1028, -50  ; @07e4
+L_07e9:
+        if 3, 1029, -62, 7, L_07f9  ; @07e9
+        set_object 1029, -50  ; @07f4
+L_07f9:
+        if 3, 1046, -62, 7, L_0809  ; @07f9
+        set_object 1046, -50  ; @0804
+L_0809:
+        if 3, 1045, -62, 7, L_0819  ; @0809
+        set_object 1045, -50  ; @0814
+L_0819:
+        return_found  ; @0819
+L_081a:
+        if 2, 2, -62, 1015, L_08d9  ; @081a
+        if 2, 83, -62, 1, L_084b  ; @0825
+        add_say_window -1, -1000, -1000, "CLR Ich werf' das alte erst mal weg!"  ; @0830
+L_084b:
+        if 2, 83, -62, 0, L_086b  ; @084b
+        add_say_window -1, -1000, -1000, "CLR O.K."  ; @0856
+        var_set_const 83, 1  ; @0866
+L_086b:
+        blend 200, 200, 200  ; @086b
+        set_object 1016, -55  ; @0872
+        set_object 1017, -55  ; @0877
+        set_object 1018, -55  ; @087c
+        set_object 1019, -55  ; @0881
+        set_object 1020, -55  ; @0886
+        set_object 1021, -55  ; @088b
+        set_object 1022, -55  ; @0890
+        set_object 1023, -55  ; @0895
+        set_object 1024, -55  ; @089a
+        set_object 1025, -55  ; @089f
+        set_object 1043, -55  ; @08a4
+        set_object 1044, -55  ; @08a9
+        if 2, 36, -62, 1, L_08be  ; @08ae
+        set_object 1020, -50  ; @08b9
+L_08be:
+        if 2, 36, -62, 0, L_08ce  ; @08be
+        set_object 1017, -50  ; @08c9
+L_08ce:
+        wait 3  ; @08ce
+        blend 100, 100, 100  ; @08d1
+        return_found  ; @08d8
+L_08d9:
+        say_if_found 0, 4, -1, "CLR Ein Briefkasten. NW Das Fähnchen ist unten, also ist keine Post drin."  ; @08d9
+        say_if_found 0, 7, -1, "CLR Der Briefkasten ist festgeschweißt."  ; @0908
+        if 2, 30, -62, 1, L_0c17  ; @0928
+        say_if_found 2, 1000, -1, "CLR Ich kann das Spiel doch nicht ohne System angehen."  ; @0933
+        say_if_found 49, 3, -1, "Der Briefkasten ist voll."  ; @0957
+        if 2, 2, -62, 1003, L_0983  ; @096d
+        var_add_const 49, 1  ; @0978
+        set_object 1003, 7  ; @097d
+        return_found  ; @0982
+L_0983:
+        if 2, 2, -62, 1004, L_0999  ; @0983
+        var_add_const 49, 1  ; @098e
+        set_object 1004, 7  ; @0993
+        return_found  ; @0998
+L_0999:
+        if 2, 2, -62, 1005, L_09af  ; @0999
+        var_add_const 49, 1  ; @09a4
+        set_object 1005, 7  ; @09a9
+        return_found  ; @09ae
+L_09af:
+        if 2, 2, -62, 1006, L_09c5  ; @09af
+        var_add_const 49, 1  ; @09ba
+        set_object 1006, 7  ; @09bf
+        return_found  ; @09c4
+L_09c5:
+        if 2, 2, -62, 1007, L_09db  ; @09c5
+        var_add_const 49, 1  ; @09d0
+        set_object 1007, 7  ; @09d5
+        return_found  ; @09da
+L_09db:
+        if 2, 2, -62, 1008, L_09f1  ; @09db
+        var_add_const 49, 1  ; @09e6
+        set_object 1008, 7  ; @09eb
+        return_found  ; @09f0
+L_09f1:
+        if 2, 2, -62, 1009, L_0a07  ; @09f1
+        var_add_const 49, 1  ; @09fc
+        set_object 1009, 7  ; @0a01
+        return_found  ; @0a06
+L_0a07:
+        if 2, 2, -62, 1010, L_0a1d  ; @0a07
+        var_add_const 49, 1  ; @0a12
+        set_object 1010, 7  ; @0a17
+        return_found  ; @0a1c
+L_0a1d:
+        if 2, 2, -62, 1011, L_0a33  ; @0a1d
+        var_add_const 49, 1  ; @0a28
+        set_object 1011, 7  ; @0a2d
+        return_found  ; @0a32
+L_0a33:
+        if 2, 2, -62, 1012, L_0a49  ; @0a33
+        var_add_const 49, 1  ; @0a3e
+        set_object 1012, 7  ; @0a43
+        return_found  ; @0a48
+L_0a49:
+        if 2, 2, -62, 1013, L_0a5f  ; @0a49
+        var_add_const 49, 1  ; @0a54
+        set_object 1013, 7  ; @0a59
+        return_found  ; @0a5e
+L_0a5f:
+        if 2, 2, -62, 1014, L_0a75  ; @0a5f
+        var_add_const 49, 1  ; @0a6a
+        set_object 1014, 7  ; @0a6f
+        return_found  ; @0a74
+L_0a75:
+        if 2, 2, -62, 1015, L_0a8b  ; @0a75
+        var_add_const 49, 1  ; @0a80
+        set_object 1015, 7  ; @0a85
+        return_found  ; @0a8a
+L_0a8b:
+        if 2, 2, -62, 1016, L_0aa1  ; @0a8b
+        var_add_const 49, 1  ; @0a96
+        set_object 1016, 7  ; @0a9b
+        return_found  ; @0aa0
+L_0aa1:
+        if 2, 2, -62, 1017, L_0ab7  ; @0aa1
+        var_add_const 49, 1  ; @0aac
+        set_object 1017, 7  ; @0ab1
+        return_found  ; @0ab6
+L_0ab7:
+        if 2, 2, -62, 1018, L_0acd  ; @0ab7
+        var_add_const 49, 1  ; @0ac2
+        set_object 1018, 7  ; @0ac7
+        return_found  ; @0acc
+L_0acd:
+        if 2, 2, -62, 1019, L_0ae3  ; @0acd
+        var_add_const 49, 1  ; @0ad8
+        set_object 1019, 7  ; @0add
+        return_found  ; @0ae2
+L_0ae3:
+        if 2, 2, -62, 1020, L_0af9  ; @0ae3
+        var_add_const 49, 1  ; @0aee
+        set_object 1020, 7  ; @0af3
+        return_found  ; @0af8
+L_0af9:
+        if 2, 2, -62, 1021, L_0b0f  ; @0af9
+        var_add_const 49, 1  ; @0b04
+        set_object 1021, 7  ; @0b09
+        return_found  ; @0b0e
+L_0b0f:
+        if 2, 2, -62, 1022, L_0b25  ; @0b0f
+        var_add_const 49, 1  ; @0b1a
+        set_object 1022, 7  ; @0b1f
+        return_found  ; @0b24
+L_0b25:
+        if 2, 2, -62, 1023, L_0b3b  ; @0b25
+        var_add_const 49, 1  ; @0b30
+        set_object 1023, 7  ; @0b35
+        return_found  ; @0b3a
+L_0b3b:
+        if 2, 2, -62, 1024, L_0b51  ; @0b3b
+        var_add_const 49, 1  ; @0b46
+        set_object 1024, 7  ; @0b4b
+        return_found  ; @0b50
+L_0b51:
+        if 2, 2, -62, 1025, L_0b67  ; @0b51
+        var_add_const 49, 1  ; @0b5c
+        set_object 1025, 7  ; @0b61
+        return_found  ; @0b66
+L_0b67:
+        if 2, 2, -62, 1043, L_0b7d  ; @0b67
+        var_add_const 49, 1  ; @0b72
+        set_object 1043, 7  ; @0b77
+        return_found  ; @0b7c
+L_0b7d:
+        if 2, 2, -62, 1044, L_0b93  ; @0b7d
+        var_add_const 49, 1  ; @0b88
+        set_object 1044, 7  ; @0b8d
+        return_found  ; @0b92
+L_0b93:
+        if 2, 2, -62, 1026, L_0ba9  ; @0b93
+        var_add_const 49, 1  ; @0b9e
+        set_object 1026, 7  ; @0ba3
+        return_found  ; @0ba8
+L_0ba9:
+        if 2, 2, -62, 1001, L_0bbf  ; @0ba9
+        var_add_const 49, 1  ; @0bb4
+        set_object 1001, 7  ; @0bb9
+        return_found  ; @0bbe
+L_0bbf:
+        if 2, 2, -62, 1027, L_0bd5  ; @0bbf
+        var_add_const 49, 1  ; @0bca
+        set_object 1027, 7  ; @0bcf
+        return_found  ; @0bd4
+L_0bd5:
+        if 2, 2, -62, 1028, L_0beb  ; @0bd5
+        var_add_const 49, 1  ; @0be0
+        set_object 1028, 7  ; @0be5
+        return_found  ; @0bea
+L_0beb:
+        if 2, 2, -62, 1029, L_0c01  ; @0beb
+        var_add_const 49, 1  ; @0bf6
+        set_object 1029, 7  ; @0bfb
+        return_found  ; @0c00
+L_0c01:
+        if 2, 2, -62, 1045, L_0c17  ; @0c01
+        var_add_const 49, 1  ; @0c0c
+        set_object 1045, 7  ; @0c11
+        return_found  ; @0c16
+L_0c17:
+        if 2, 1, -62, 2003, L_0c70  ; @0c17
+        iwalk -1, 136, 172  ; @0c22
+        adress -1, 10000  ; @0c29
+        say_if_found 0, 4, -1, "CLR Die Fenster sehen wie große Augen aus."  ; @0c2e
+        say_if_found 0, 9, -1, "CLR An die Fenster kommt man schlecht dran."  ; @0c4f
+L_0c70:
+        if 2, 1, -62, 102, L_0cc3  ; @0c70
+        iwalk -1, 34, 52  ; @0c7b
+        adress -1, 10006  ; @0c82
+        say_if_found 0, 4, -1, "CLR Mein guter Alu-Koffer!"  ; @0c87
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0cc3  ; @0ca2
+        var_set_const 72, 0  ; @0cb5
+        set_object 1040, -50  ; @0cba
+        remove_person 102  ; @0cbf
+        return_found  ; @0cc2
+L_0cc3:
+        if 2, 1, -62, 67, L_0d15  ; @0cc3
+        iwalk -1, 185, 179  ; @0cce
+        adress -1, 10000  ; @0cd5
+        say_if_found 0, 4, -1, "CLR Das nenne ich Luftpost!"  ; @0cda
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0d15  ; @0cf4
+        var_set_const 63, 1  ; @0d07
+        set_object 1038, -50  ; @0d0c
+        remove_person 67  ; @0d11
+        return_found  ; @0d14
+L_0d15:
+        if2 10, 1, -62, 2, 1, 1, -62, 3, L_11b9  ; @0d15
+        if2 10, 0, -62, 9, 0, 2, -62, 1048, L_0d4f  ; @0d28
+        add_say_window2 -1, -1000, -1000, "Der Schlüssel passt nicht."  ; @0d3b
+        return_found  ; @0d4e
+L_0d4f:
+        if2 10, 0, -62, 9, 0, 2, -62, 1005, L_0da7  ; @0d4f
+        iwalk -1, 152, 136  ; @0d62
+        adress -1, 10000  ; @0d69
+        wait 5  ; @0d6e
+        adress 3, 10006  ; @0d71
+        set_person 3, 0, 0, 0, 0, 16384, 0, 53  ; @0d76
+        wait 3  ; @0d86
+        walk_person -1, 145, 130  ; @0d89
+        blend_out 2  ; @0d90
+        remove_statists  ; @0d93
+        set_person -1, 194, 148, 194, 148, 0, -1, 0  ; @0d94
+        call_proc 9  ; @0da4
+L_0da7:
+        iwalk -1, 139, 136  ; @0da7
+        adress -1, 10000  ; @0dae
+        if 2, 29, -62, 1, L_119e  ; @0db3
+        add_say_window2 999, 139, 100, "Tock. Tock."  ; @0dbe
+        say_wait 32000  ; @0dce
+        iwalk -1, 130, 150  ; @0dd1
+        adress -1, 10000  ; @0dd8
+        wait 4  ; @0ddd
+        add_person 21, 142, 129, 142, 129, 16384, 0, 0  ; @0de0
+        adress 3, 10006  ; @0df0
+        set_person_z 3, -50  ; @0df5
+        if_wasnt_here 96, L_0fdb  ; @0dfa
+        add_dialog 6  ; @0dff
+        add_option 6, 1, 1, 2, "Hallo, ich suche meine Freundin."  ; @0e02
+        add_option 6, 2, 0, 3, "Ich suche meine Freundin. Ist sie hier?"  ; @0e1d
+        add_option 6, 3, 0, 4, "Dürfte ich mal reinkommen und mich umsehen?"  ; @0e3a
+        add_option 6, 4, 0, 5, "Ich verkaufe diese Lederjacken."  ; @0e5a
+        add_option 6, 5, 0, 6, "Ich will Pirat werden."  ; @0e77
+        add_option 6, 6, 0, 7, "Ich will Feuerwehrmann werden."  ; @0e8d
+        add_option 6, 7, 0, 8, "Ich suche ein Hotel. Können Sie mit sagen, ob hier eins in der Nähe ist?"  ; @0ea9
+        add_option 6, 8, 0, 1, "Stirb."  ; @0ed8
+        add_option 6, 20, 0, -1, "Ich habe diesen Zettel unter der Matte gefunden."  ; @0ee8
+        add_option 6, 30, 0, 31, "Zur Seite du Klotz!"  ; @0f0d
+        add_option 6, 31, 0, 32, "Zur Seite du Zombie!"  ; @0f25
+        add_option 6, 32, 0, 30, "Laß mich vorbei!"  ; @0f3d
+        add_option 6, 40, 1, 41, "Ist das hier das Zentrum für angewandte theoretische Physik?"  ; @0f52
+        add_option 6, 41, 0, 42, "Ist das hier das Zentrum für angewandte theoretische Informatik?"  ; @0f7e
+        add_option 6, 42, 0, 40, "Ist das hier das Zentrum für angewandte theoretische Mathematik?"  ; @0fad
+L_0fdb:
+        toggle_dialog_point 6, 20, 0  ; @0fdb
+        if 3, 1004, -62, -50, L_0ff4  ; @0fe2
+        toggle_dialog_point 6, 20, 1  ; @0fed
+L_0ff4:
+        select_from_dialog 31, 6  ; @0ff4
+        var_set_var 76, 75  ; @0ff9
+        var_set_var 75, 74  ; @0ffe
+        var_set_var 74, 31  ; @1003
+        parse_if 31, 1, 5, 6, -999, L_1024  ; @1008
+        add_say_window2 21, -1000, -1000, "Aber nicht hier."  ; @1015
+L_1024:
+        parse_if 31, 2, 3, -999, -999, L_103c  ; @1024
+        add_say_window2 21, -1000, -1000, "Nein."  ; @1031
+L_103c:
+        parse_if 31, 30, 31, 32, -999, L_1054  ; @103c
+        add_say_window2 21, -1000, -1000, "Nein."  ; @1049
+L_1054:
+        parse_if 31, 40, 41, 42, 43, L_106c  ; @1054
+        add_say_window2 21, -1000, -1000, "Nein."  ; @1061
+L_106c:
+        parse_if 31, 4, -999, -999, -999, L_108f  ; @106c
+        add_say_window2 21, -1000, -1000, "Danke, kein Interesse."  ; @1079
+L_108f:
+        if 2, 31, -62, 7, L_10c1  ; @108f
+        add_say_window2 21, -1000, -1000, "Cousin Bain hat ein Motel, 2 Meilen die Straße runter."  ; @109a
+L_10c1:
+        if 2, 31, -62, 20, L_10eb  ; @10c1
+        set_object 1004, -54  ; @10cc
+        add_say_window2 21, -1000, -1000, "Danke, den habe ich schon gesucht."  ; @10d1
+L_10eb:
+        say_wait 21  ; @10eb
+        adress 3, 10000  ; @10ee
+        set_person_z 3, 0  ; @10f3
+        remove_person 21  ; @10f8
+        if_wasnt_here 98, L_1101  ; @10fb
+        return_found  ; @1100
+L_1101:
+        if_wasnt_here 99, L_1150  ; @1101
+        if 3, 1005, -62, -55, L_114f  ; @1106
+        adress -1, 10004  ; @1111
+        add_say_window2 -1, -1000, -1000, "CLR Der läßt mich bestimmt nicht rein. NW Ich muß versuchen, unbemerkt ins Haus zu kommen."  ; @1116
+L_114f:
+        return_found  ; @114f
+L_1150:
+        if2 14, 105, -62, 1, 0, 1005, -62, -55, L_119d  ; @1150
+        if_wasnt_here 100, L_119d  ; @1163
+        adress -1, 10004  ; @1168
+        add_say_window2 -1, -1000, -1000, "CLR Vielleicht sollte ich mir die vertrockneten Pflanzen noch einmal genauer ansehen..."  ; @116d
+L_119d:
+        return_found  ; @119d
+L_119e:
+        say_if_found 0, 4, -1, "CLR Da ist ein Klopfer an der Tür"  ; @119e
+L_11b9:
+        if 2, 1, -62, 4, L_12cb  ; @11b9
+        if 2, 0, -62, 4, L_11f4  ; @11c4
+        iwalk -1, 158, 136  ; @11cf
+        adress -1, 10006  ; @11d6
+        add_say_window2 -1, -1000, -1000, "CLR \"Nicht willkommen!\""  ; @11db
+        return_found  ; @11f3
+L_11f4:
+        if2 10, 0, -62, 7, 0, 101, -62, 0, L_123e  ; @11f4
+        iwalk -1, 158, 136  ; @1207
+        adress -1, 10006  ; @120e
+        var_set_const 101, 1  ; @1213
+        adress 4, 10006  ; @1218
+        if 3, 1004, -62, -55, L_123d  ; @121d
+        add_person 5, 145, 138, 145, 138, 16384, 0, 0  ; @1228
+        set_person_z 5, -100  ; @1238
+L_123d:
+        return_found  ; @123d
+L_123e:
+        if3 42, 0, -62, 7, 1, 29, -62, 1, 0, 101, -62, 1, L_127e  ; @123e
+        iwalk -1, 158, 136  ; @1259
+        adress -1, 10006  ; @1260
+        var_set_const 101, 0  ; @1265
+        adress 4, 10000  ; @126a
+        if 3, 1004, -62, -55, L_127d  ; @126f
+        remove_person 5  ; @127a
+L_127d:
+        return_found  ; @127d
+L_127e:
+        if 2, 29, -62, 1, L_12cb  ; @127e
+        iwalk -1, 135, 138  ; @1289
+        adress -1, 10000  ; @1290
+        add_say_window2 999, 135, 138, "Wisch - Wisch"  ; @1295
+        say_wait 32000  ; @12a6
+        adress -1, 10004  ; @12a9
+        if_wasnt_here 102, L_12ca  ; @12ae
+        var_add_const 8, 1  ; @12b3
+        add_say_window2 999, 160, 199, "____(1_Punkt)____"  ; @12b8
+L_12ca:
+        return_found  ; @12ca
+L_12cb:
+        if 2, 1, -62, 5, L_1336  ; @12cb
+        iwalk -1, 158, 136  ; @12d6
+        adress -1, 10006  ; @12dd
+        if 2, 29, -62, 1, L_1311  ; @12e2
+        set_object 1004, -50  ; @12ed
+        remove_person 5  ; @12f2
+        var_add_const 8, 2  ; @12f5
+        add_say_window2 999, 160, 199, "CLR ____(2_Punkte)____"  ; @12fa
+        return_found  ; @1310
+L_1311:
+        if 2, 0, -62, 4, L_1336  ; @1311
+        add_say_window2 -1, -1000, -1000, "CLR Da liegt ein Zettel."  ; @131c
+        return_found  ; @1335
+L_1336:
+        if 2, 1, -62, 22, L_141f  ; @1336
+        iwalk -1, 234, 184  ; @1341
+        adress -1, 10000  ; @1348
+        if_wasnt_here 103, L_1357  ; @134d
+        var_add_const 104, 1  ; @1352
+L_1357:
+        if2 10, 29, -62, 1, 1, 0, -62, 7, L_141f  ; @1357
+        set_person 22, 0, -10, 0, 0, 0, -1, 58  ; @136a
+        if2 14, 104, -62, 5, 0, 1005, -62, -55, L_13d3  ; @137a
+        add_say_window -1, -1000, -1000, "CLR Da liegt ein Schlüssel!"  ; @138d
+        set_object 1005, -50  ; @13a2
+        var_add_const 8, 4  ; @13a7
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @13ac
+        set_person 22, 0, 10, 0, 0, 0, -1, 58  ; @13c2
+        return_found  ; @13d2
+L_13d3:
+        add_say_window -1, -1000, -1000, "Da ist nichts."  ; @13d3
+        set_person 22, 0, 10, 0, 0, 0, -1, 58  ; @13e2
+        if_wasnt_here 105, L_141e  ; @13f2
+        adress -1, 10004  ; @13f7
+        add_say_window2 -1, -1000, -1000, "Aber vielleicht ist etwas unter einer der anderen Pflanzen."  ; @13fc
+L_141e:
+        return_found  ; @141e
+L_141f:
+        if 2, 1, -62, 23, L_1508  ; @141f
+        iwalk -1, 240, 183  ; @142a
+        adress -1, 10000  ; @1431
+        if_wasnt_here 106, L_1440  ; @1436
+        var_add_const 104, 1  ; @143b
+L_1440:
+        if2 10, 29, -62, 1, 1, 0, -62, 7, L_1508  ; @1440
+        set_person 23, 0, -10, 0, 0, 0, -1, 58  ; @1453
+        if2 14, 104, -62, 5, 0, 1005, -62, -55, L_14bc  ; @1463
+        add_say_window -1, -1000, -1000, "CLR Da liegt ein Schlüssel!"  ; @1476
+        set_object 1005, -50  ; @148b
+        var_add_const 8, 4  ; @1490
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @1495
+        set_person 23, 0, 10, 0, 0, 0, -1, 58  ; @14ab
+        return_found  ; @14bb
+L_14bc:
+        add_say_window -1, -1000, -1000, "Da ist nichts."  ; @14bc
+        set_person 23, 0, 10, 0, 0, 0, -1, 58  ; @14cb
+        if_wasnt_here 105, L_1507  ; @14db
+        adress -1, 10004  ; @14e0
+        add_say_window2 -1, -1000, -1000, "Aber vielleicht ist etwas unter einer der anderen Pflanzen."  ; @14e5
+L_1507:
+        return_found  ; @1507
+L_1508:
+        if 2, 1, -62, 24, L_15f1  ; @1508
+        iwalk -1, 247, 182  ; @1513
+        adress -1, 10000  ; @151a
+        if_wasnt_here 107, L_1529  ; @151f
+        var_add_const 104, 1  ; @1524
+L_1529:
+        if2 10, 29, -62, 1, 1, 0, -62, 7, L_15f1  ; @1529
+        set_person 24, 0, -10, 0, 0, 0, -1, 58  ; @153c
+        if2 14, 104, -62, 5, 0, 1005, -62, -55, L_15a5  ; @154c
+        add_say_window -1, -1000, -1000, "CLR Da liegt ein Schlüssel!"  ; @155f
+        set_object 1005, -50  ; @1574
+        var_add_const 8, 4  ; @1579
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @157e
+        set_person 24, 0, 10, 0, 0, 0, -1, 58  ; @1594
+        return_found  ; @15a4
+L_15a5:
+        add_say_window -1, -1000, -1000, "Da ist nichts."  ; @15a5
+        set_person 24, 0, 10, 0, 0, 0, -1, 58  ; @15b4
+        if_wasnt_here 105, L_15f0  ; @15c4
+        adress -1, 10004  ; @15c9
+        add_say_window2 -1, -1000, -1000, "Aber vielleicht ist etwas unter einer der anderen Pflanzen."  ; @15ce
+L_15f0:
+        return_found  ; @15f0
+L_15f1:
+        if 2, 1, -62, 25, L_16da  ; @15f1
+        iwalk -1, 254, 181  ; @15fc
+        adress -1, 10000  ; @1603
+        if_wasnt_here 108, L_1612  ; @1608
+        var_add_const 104, 1  ; @160d
+L_1612:
+        if2 10, 29, -62, 1, 1, 0, -62, 7, L_16da  ; @1612
+        set_person 25, 0, -10, 0, 0, 0, -1, 58  ; @1625
+        if2 14, 104, -62, 5, 0, 1005, -62, -55, L_168e  ; @1635
+        add_say_window -1, -1000, -1000, "CLR Da liegt ein Schlüssel!"  ; @1648
+        set_object 1005, -50  ; @165d
+        var_add_const 8, 4  ; @1662
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @1667
+        set_person 25, 0, 10, 0, 0, 0, -1, 58  ; @167d
+        return_found  ; @168d
+L_168e:
+        add_say_window -1, -1000, -1000, "Da ist nichts."  ; @168e
+        set_person 25, 0, 10, 0, 0, 0, -1, 58  ; @169d
+        if_wasnt_here 105, L_16d9  ; @16ad
+        adress -1, 10004  ; @16b2
+        add_say_window2 -1, -1000, -1000, "Aber vielleicht ist etwas unter einer der anderen Pflanzen."  ; @16b7
+L_16d9:
+        return_found  ; @16d9
+L_16da:
+        if 2, 1, -62, 26, L_17c3  ; @16da
+        iwalk -1, 261, 180  ; @16e5
+        adress -1, 10000  ; @16ec
+        if_wasnt_here 109, L_16fb  ; @16f1
+        var_add_const 104, 1  ; @16f6
+L_16fb:
+        if2 10, 29, -62, 1, 1, 0, -62, 7, L_17c3  ; @16fb
+        set_person 26, 0, -10, 0, 0, 0, -1, 58  ; @170e
+        if2 14, 104, -62, 5, 0, 1005, -62, -55, L_1777  ; @171e
+        add_say_window -1, -1000, -1000, "CLR Da liegt ein Schlüssel!"  ; @1731
+        set_object 1005, -50  ; @1746
+        var_add_const 8, 4  ; @174b
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @1750
+        set_person 26, 0, 10, 0, 0, 0, -1, 58  ; @1766
+        return_found  ; @1776
+L_1777:
+        add_say_window -1, -1000, -1000, "Da ist nichts."  ; @1777
+        set_person 26, 0, 10, 0, 0, 0, -1, 58  ; @1786
+        if_wasnt_here 105, L_17c2  ; @1796
+        adress -1, 10004  ; @179b
+        add_say_window2 -1, -1000, -1000, "Aber vielleicht ist etwas unter einer der anderen Pflanzen."  ; @17a0
+L_17c2:
+        return_found  ; @17c2
+L_17c3:
+        if2 10, 1, -64, 22, 0, 1, -65, 26, L_17fe  ; @17c3
+        if 2, 0, -62, 4, L_17fe  ; @17d6
+        add_say_window2 -1, -1000, -1000, "CLR Eine vertrocknete Pflanze."  ; @17e1
+        return_found  ; @17fd
+L_17fe:
+        if 2, 1, -62, 2009, L_1a09  ; @17fe
+        iwalk -1, 138, 170  ; @1809
+        adress -1, 10006  ; @1810
+        say_if_found 0, 4, -1, "CLR Ein Kaktee im Vorgarten. NW Auf was für Ideen die Leute doch kommen."  ; @1815
+        if2 10, 0, -62, 9, 0, 2, -62, 1015, L_191f  ; @1847
+        if 2, 83, -62, 1, L_1880  ; @185a
+        add_say_window -1, -1000, -1000, "CLR Ich werf' das alte erst mal weg!"  ; @1865
+L_1880:
+        if 2, 83, -62, 0, L_18a0  ; @1880
+        add_say_window -1, -1000, -1000, "CLR O.K."  ; @188b
+        var_set_const 83, 1  ; @189b
+L_18a0:
+        blend 200, 200, 200  ; @18a0
+        set_object 1016, -55  ; @18a7
+        set_object 1017, -55  ; @18ac
+        set_object 1018, -55  ; @18b1
+        set_object 1019, -55  ; @18b6
+        set_object 1020, -55  ; @18bb
+        set_object 1021, -55  ; @18c0
+        set_object 1022, -55  ; @18c5
+        set_object 1023, -55  ; @18ca
+        set_object 1024, -55  ; @18cf
+        if 2, 36, -62, 1, L_18e4  ; @18d4
+        set_object 1022, -50  ; @18df
+L_18e4:
+        if 2, 36, -62, 0, L_18f4  ; @18e4
+        set_object 1017, -50  ; @18ef
+L_18f4:
+        if_wasnt_here 110, L_1914  ; @18f4
+        var_add_const 8, 1  ; @18f9
+        add_say_window2 999, 160, 199, "CLR ____(1_Punkt)____"  ; @18fe
+L_1914:
+        wait 3  ; @1914
+        blend 100, 100, 100  ; @1917
+        return_found  ; @191e
+L_191f:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_19bd  ; @191f
+        if2 10, 53, -62, 1, 0, 54, -62, 0, L_1973  ; @1932
+        var_set_const 54, 1  ; @1945
+        add_say_window -1, -1000, -1000, "CLR Hallo! NW _____ NW Du da. NW Kaktee. NW __Eh?__ NW Hallo?"  ; @194a
+        return_found  ; @1972
+L_1973:
+        if2 10, 53, -62, 1, 0, 54, -63, 0, L_19a2  ; @1973
+        add_say_window -1, -1000, -1000, "CLR Die anwortet sowieso nicht."  ; @1986
+        return_found  ; @19a1
+L_19a2:
+        add_say_window2 -1, -1000, -1000, "CLR Die hat aber Stacheln!"  ; @19a2
+        return_found  ; @19bc
+L_19bd:
+        if2 10, 0, -62, 9, 0, 2, -62, 1047, L_19f3  ; @19bd
+        adress -1, 10004  ; @19d0
+        add_say_window -1, -1000, -1000, "CLR Ich grab' doch keine Kaktee an."  ; @19d5
+        return_found  ; @19f2
+L_19f3:
+        say_if_found 0, 7, -1, "CLR Die fasse ich nicht an."  ; @19f3
+L_1a09:
+        if3 42, 0, -62, 9, 0, 1, -62, 1005, 0, 2, -62, 1005, 6854  ; @1a09
+        open_window 1080  ; @1a24
+        print_sentence "Hinweis: NW ---------------- NW Um die Haustür aufzuschließen, mußt du zu erst mit dem linken Mausknopf auf den Schlüssel klicken und dabei den Mausknopf gedrückt halten."  ; @1a27
+        print_sentence "Dann bewegst du den Mauscursor auf die Haustür und läßt erst dort den Mausknopf los."  ; @1a92
+        menu_return  ; @1ac2
+        var_add_const 12925, 13616  ; @1ac3
+        ; 50 bytes that don't decode as instructions
+        .db 0x08, 0x00, 0x39, 0xff, 0xff, 0x00, 0x00, 0xa7, 0x00, 0x0f, 0x00, 0xaa, 0x00, 0x00, 0x00, 0xff
+        .db 0xff, 0x00, 0x53, 0x11, 0x05, 0x00, 0x35, 0x08, 0x00, 0x22, 0xff, 0xff, 0x00, 0x00, 0x39, 0xff
+        .db 0xff, 0x35, 0x01, 0xa2, 0x00, 0x18, 0x01, 0xa2, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x53, 0x11
+        .db 0x11, 0x00

@@ -1,0 +1,241 @@
+; MOAS script, program 8 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 51, L_0168  ; @0000
+        if_person_in 28, 319, 187, 319, 187, L_0028  ; @000b
+        set_person 28, 0, 0, 276, 177, 0, -1, 48  ; @0018
+L_0028:
+        if_person_in 28, 276, 177, 276, 177, L_0045  ; @0028
+        set_person 28, 0, 0, 226, 186, 0, -1, 48  ; @0035
+L_0045:
+        if_person_in 28, 226, 186, 226, 186, L_0062  ; @0045
+        set_person 28, 0, 0, 180, 179, 0, -1, 48  ; @0052
+L_0062:
+        if_person_in 28, 180, 179, 180, 179, L_007f  ; @0062
+        set_person 28, 0, 0, 138, 171, 0, -1, 48  ; @006f
+L_007f:
+        if_person_in 28, 138, 171, 138, 171, L_009c  ; @007f
+        set_person 28, 0, 0, 82, 169, 0, -1, 48  ; @008c
+L_009c:
+        if_person_in 28, 82, 169, 82, 169, L_00b9  ; @009c
+        set_person 28, 0, 0, 0, 0, 1024, 0, 53  ; @00a9
+L_00b9:
+        if_person_in 27, 319, 187, 319, 187, L_00d6  ; @00b9
+        set_person 27, 0, 0, 276, 177, 0, -1, 48  ; @00c6
+L_00d6:
+        if_person_in 27, 276, 177, 276, 177, L_00f3  ; @00d6
+        set_person 27, 0, 0, 226, 186, 0, -1, 48  ; @00e3
+L_00f3:
+        if_person_in 27, 226, 186, 226, 186, L_0110  ; @00f3
+        set_person 27, 0, 0, 180, 179, 0, -1, 48  ; @0100
+L_0110:
+        if_person_in 27, 180, 179, 180, 179, L_012d  ; @0110
+        set_person 27, 0, 0, 138, 171, 0, -1, 48  ; @011d
+L_012d:
+        if_person_in 27, 138, 171, 138, 171, L_014a  ; @012d
+        set_person 27, 0, 0, 102, 169, 0, -1, 48  ; @013a
+L_014a:
+        if_person_in 27, 102, 169, 102, 169, L_0167  ; @014a
+        set_person 27, 0, 0, 0, 0, 1024, 0, 53  ; @0157
+L_0167:
+        return_found  ; @0167
+L_0168:
+        if 2, 0, -62, 50, L_018d  ; @0168
+        add_say_window2 6, -1000, -1000, "Wähle deine Mitspieler NW __________"  ; @0173
+        return_found  ; @018c
+L_018d:
+        if 2, 0, -62, 999, L_02a3  ; @018d
+        if 2, 26, -62, 1, L_01a8  ; @0198
+        goto_proc 8, L_069d  ; @01a3
+L_01a8:
+        clear_screen_init  ; @01a8
+        set_room_name "Die Auswahl der Mitspieler"  ; @01a9
+        blend 100, 100, 100  ; @01bb
+        add_person 9, 60, 71, 60, 71, 16384, 0, 0  ; @01c2
+        add_person 10, 162, 71, 162, 71, 16384, 0, 0  ; @01d2
+        add_person 11, 260, 71, 260, 71, 16384, 0, 0  ; @01e2
+        add_person 12, 60, 171, 60, 171, 16384, 0, 0  ; @01f2
+        add_person 13, 162, 171, 162, 171, 16384, 0, 0  ; @0202
+        add_person 14, 260, 171, 260, 171, 16384, 0, 0  ; @0212
+        add_person 6, 160, 110, 160, 110, 16400, 0, 0  ; @0222
+        add_person 7, 160, 195, 160, 195, 16384, 0, 0  ; @0232
+        load_bild 10, 9, 9  ; @0242
+        blend_in 2  ; @0249
+        var_set_const 111, 0  ; @024c
+        say_properties 1, 9, 34, 2  ; @0251
+        say_properties 2, 10, 26, 2  ; @025a
+        say_properties 3, 11, 29, 2  ; @0263
+        say_properties 4, 12, 19, 2  ; @026c
+        say_properties 5, 13, 6, 2  ; @0275
+        say_properties 6, 14, 26, 2  ; @027e
+        say_properties 7, 6, 15, 2  ; @0287
+        say_properties 8, 7, 27, 2  ; @0290
+        add_say_window2 6, -1000, -1000, "_"  ; @0299
+        return_found  ; @02a2
+L_02a3:
+        close_say 9  ; @02a3
+        close_say 10  ; @02a6
+        close_say 11  ; @02a9
+        close_say 12  ; @02ac
+        close_say 13  ; @02af
+        close_say 14  ; @02b2
+        close_say 7  ; @02b5
+        if 2, 1, -62, 9, L_0373  ; @02b8
+        if 0, 31, -63, 1, L_0317  ; @02c3
+        var_set_var 31, 1  ; @02ce
+        add_say_window2 7, -1000, -1000, "CLR Das ist Matt, von seinen Freunden auch 'Schrank' genannt. Er ist stark und, ehm. Na ja stark eben."  ; @02d3
+        return_found  ; @0316
+L_0317:
+        add_say_window2 9, -1000, -1000, "Wie? Was? Klar. Ich komm' mit. Auch wenn ich nicht weiß, wohin.."  ; @0317
+        say_wait 9  ; @0347
+        add_person 15, 60, 74, 60, 74, 16384, 0, 0  ; @034a
+        remove_person 9  ; @035a
+        var_add_const 111, 1  ; @035d
+        if 2, 111, -62, 2, L_0372  ; @0362
+        goto_proc 8, L_069d  ; @036d
+L_0372:
+        return_found  ; @0372
+L_0373:
+        if 2, 1, -62, 10, L_0411  ; @0373
+        if 0, 31, -63, 1, L_03c9  ; @037e
+        var_set_var 31, 1  ; @0389
+        add_say_window2 7, -1000, -1000, "CLR Das ist Terry. Er studiert Elektrotechnik, Elektronik und Teilchen-Physik."  ; @038e
+        return_found  ; @03c8
+L_03c9:
+        add_say_window2 10, -1000, -1000, "Heute nicht, Jack. Mir ist gerade mein eigene Freundin Mandy weggelaufen.."  ; @03c9
+        say_wait 10  ; @03fa
+        add_person 16, 162, 74, 162, 74, 16384, 0, 0  ; @03fd
+        remove_person 10  ; @040d
+        return_found  ; @0410
+L_0411:
+        if 2, 1, -62, 11, L_04b7  ; @0411
+        if 0, 31, -63, 1, L_0467  ; @041c
+        var_set_var 31, 1  ; @0427
+        add_say_window2 7, -1000, -1000, "CLR Das ist Ron. Ron mixt die besten Drinks in der Stadt und ist auf jeder Party zu finden."  ; @042c
+        return_found  ; @0466
+L_0467:
+        add_say_window2 11, -1000, -1000, "Da ist heute noch diese Fete bei Alice, sonst würde ich gerne mitkommen, ist doch klar."  ; @0467
+        say_wait 11  ; @04a0
+        add_person 17, 260, 74, 260, 74, 16384, 0, 0  ; @04a3
+        remove_person 11  ; @04b3
+        return_found  ; @04b6
+L_04b7:
+        if 2, 1, -62, 12, L_0544  ; @04b7
+        if 0, 31, -63, 1, L_0507  ; @04c2
+        var_set_var 31, 1  ; @04cd
+        add_say_window2 7, -1000, -1000, "CLR Das ist Amanda. Sie ist ein wenig ängstlich und schüchtern, aber dafür auch sehr unauffällig."  ; @04d2
+        return_found  ; @0506
+L_0507:
+        add_say_window2 12, -1000, -1000, "Danke für dein Vertrauen Jack, aber das ist mir zu gefährlich."  ; @0507
+        say_wait 12  ; @052d
+        add_person 18, 60, 174, 60, 174, 16384, 0, 0  ; @0530
+        remove_person 12  ; @0540
+        return_found  ; @0543
+L_0544:
+        if 2, 1, -62, 13, L_05f0  ; @0544
+        if 0, 31, -63, 1, L_05ab  ; @054f
+        var_set_var 31, 1  ; @055a
+        add_say_window2 7, -1000, -1000, "CLR Das ist Drive. Wenn er nicht gerade sein Motorrad repariert, fährt er es zu Schrott. NW Er ist stark und hat vor nichts Angst."  ; @055f
+        return_found  ; @05aa
+L_05ab:
+        add_say_window2 13, -1000, -1000, "Sorry, Jack, aber ich will erst mal meinen Vergaser wieder ganz hämmern."  ; @05ab
+        say_wait 13  ; @05d9
+        add_person 19, 160, 174, 160, 174, 16384, 0, 0  ; @05dc
+        remove_person 13  ; @05ec
+        return_found  ; @05ef
+L_05f0:
+        if 2, 1, -62, 14, L_069c  ; @05f0
+        if 0, 31, -63, 1, L_0647  ; @05fb
+        var_set_var 31, 1  ; @0606
+        add_say_window2 7, -1000, -1000, "CLR Das ist Ronda. Sie will Ärtztin, Schriftstellerin, Schauspielerin und Fotomodell werden."  ; @060b
+        return_found  ; @0646
+L_0647:
+        add_say_window2 14, -1000, -1000, "Klar komme ich mit Jack. Aber nur Sandy zu liebe, ist das klar?"  ; @0647
+        say_wait 14  ; @0670
+        add_person 20, 260, 174, 260, 174, 16384, 0, 0  ; @0673
+        remove_person 14  ; @0683
+        var_add_const 111, 1  ; @0686
+        if 2, 111, -62, 2, L_069b  ; @068b
+        goto_proc 8, L_069d  ; @0696
+L_069b:
+        return_found  ; @069b
+L_069c:
+        return_found  ; @069c
+L_069d:
+        if 2, 26, -62, 0, L_094d  ; @069d
+        blend_out 2  ; @06a8
+        remove_person 32000  ; @06ab
+        close_say 32000  ; @06ae
+        var_set_const 20, 0  ; @06b1
+        arm_key_abort  ; @06b6
+        clear_screen_init  ; @06b7
+        load_bild 1, 2, 3  ; @06b8
+        blend 100, 100, 100  ; @06bf
+        blend_in 8  ; @06c6
+        add_person 0, 319, 187, 330, 187, 1024, 0, 0  ; @06c9
+        add_person 28, 360, 187, 319, 187, 1032, 0, 0  ; @06d9
+        add_person 27, 400, 187, 319, 187, 1032, 0, 0  ; @06e9
+        say_properties 0, 0, 27, 2  ; @06f9
+        say_properties 1, 28, 26, 2  ; @0702
+        say_properties 2, 27, 34, 2  ; @070b
+        iwalk 0, 60, 172  ; @0714
+        adress 0, 10002  ; @071b
+        add_say_window 0, -1000, -1000, "Also. Ihr wisst, warum ihr hier seit!"  ; @0720
+        add_say_window 27, -1000, -1000, "___Nö.___"  ; @0740
+        adress 28, 10002  ; @0751
+        add_say_window 28, -1000, -1000, "Aber Matt, wir wollen Sandy retten!"  ; @0756
+        add_say_window 27, -1000, -1000, "Ich dachte wir wollten zum Strand..."  ; @0773
+        add_say_window 28, -1000, -1000, "Später, Matt. Erst kommt Ronda."  ; @078e
+        add_say_window 27, -1000, -1000, "Aber ich wollte mich dort mit Ron treffen..."  ; @07a9
+        add_say_window 0, -1000, -1000, "__ÄHEM.__"  ; @07c8
+        adress 28, 10006  ; @07d9
+        add_say_window 0, -1000, -1000, "Also, Ich habe gesehen wie Dr.Ed Sandy ins Haus gebracht hat, und daher.."  ; @07de
+        add_say_window 27, -1000, -1000, "Was steht da auf dem Schild, Ronda?"  ; @080e
+        add_say_window 28, -1000, -1000, "Da steht: NW Warnung! NW Das Haus ist baufällig, radioaktiv verseucht und von Zombies belagert. NW Und giftig. NW Und Privatbesitz. NW Eltern zahlen die Beerdigungskosten für ihre Kinder."  ; @082a
+        set_person 28, 0, 0, 350, 187, 17416, 0, 48  ; @089d
+        set_person 27, 0, 0, 350, 187, 17416, 0, 48  ; @08ad
+        add_say_window2 27, -1000, -1000, "Ich muß jetzt gehen!"  ; @08bd
+        add_say_window2 28, -1000, -1000, "__Ich auch.__"  ; @08d0
+        wait_while_walking  ; @08e0
+        close_say 32000  ; @08e1
+        add_say_window 0, -1000, -1000, "Schöne Freunde seit Ihr!"  ; @08e4
+        add_say_window2 27, -1000, -1000, "__Danke."  ; @08fd
+        add_say_window2 28, -1000, -1000, "__Danke."  ; @090c
+        say_wait 32000  ; @091b
+        wait 10  ; @091e
+        add_say_window 0, -1000, -1000, "Dann werde ich Sandy eben alleine retten!"  ; @0921
+        iwalk 0, -10, 167  ; @093f
+        wait 10  ; @0946
+        blend_out 2  ; @0949
+        abort_redraw  ; @094c
+L_094d:
+        blend 0, 0, 0  ; @094d
+        remove_person 32000  ; @0954
+        clear_screen_init  ; @0957
+        var_set_const 14, 1  ; @0958
+        var_set_const 20, 1  ; @095d
+        var_set_const 33, 0  ; @0962
+        var_set_const 36, 0  ; @0967
+        var_set_const 37, 0  ; @096c
+        var_set_const 38, 1  ; @0971
+        var_set_const 51, 0  ; @0976
+        var_set_const 53, 0  ; @097b
+        var_set_const 54, 0  ; @0980
+        var_set_const 55, 1  ; @0985
+        if 2, 25, -62, 0, L_099a  ; @098a
+        set_object 1002, -50  ; @0995
+L_099a:
+        add_person 0, 320, 186, 284, 176, 1056, 0, 0  ; @099a
+        say_properties 0, 0, 27, 2  ; @09aa
+        say_properties 1, 21, 12, 2  ; @09b3
+        say_properties 2, 45, 36, 2  ; @09bc
+        say_properties 9, 999, 6, 2  ; @09c5
+        var_set_const 20, 1  ; @09ce
+        if 2, 26, -62, 1, L_09f1  ; @09d3
+        set_person -1, 176, 159, 176, 159, 0, -1, 0  ; @09de
+        call_proc 11  ; @09ee
+L_09f1:
+        call_proc 6  ; @09f1

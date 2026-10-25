@@ -1,0 +1,277 @@
+; GAME.2 resource catalog, written by moas-util unpack.
+;
+; layout N KINDS: GAME.N holds these kinds, in this order, each in index
+;   order. Positions and lengths are computed by moas-util pack.
+; KIND INDEX: catalog entry. file is the GAME.N file, x/y/anz the size
+;   (bild: x is the width, +16384 if a palette follows the pixels;
+;   phase: anz frames of x*y stacked vertically; inv: x is the place,
+;   pictures are 32x24). check is the stored checksum; pack recomputes it
+;   for anything it encodes. data and inuse are unused by the engine.
+;   Graphics checksums in the original data don't match their bytes;
+;   the engine ignores them.
+
+layout 3 prog
+layout 4 phase inv bild
+
+prog 0 file=3 x=185 y=956301312 anz=-1711276030 inuse=0 data=0x00000000 check=0xf7e6306e
+prog 1 file=3 x=311556096 y=311118848 anz=311556096 inuse=0 data=0x00000000 check=0x341a59d1
+prog 2 file=3 x=-134212981 y=1275073169 anz=-1946152309 inuse=0 data=0x00000000 check=0xf44f1e5a
+prog 3 file=3 x=311457792 y=256 anz=8448 inuse=0 data=0x00000000 check=0x8e38680e
+prog 4 file=3 x=0 y=1342177280 anz=50331648 inuse=0 data=0x00000000 check=0x63ee408c
+prog 5 file=3 x=311556096 y=311467008 anz=311556096 inuse=0 data=0x00000000 check=0x32ff865e
+prog 6 file=3 x=-301989888 y=520093696 anz=4608 inuse=0 data=0x00000000 check=0xdefa335b
+prog 7 file=3 x=345838592 y=302187264 anz=512 inuse=0 data=0x00000000 check=0x33013232
+prog 8 file=3 x=402653184 y=1275073175 anz=402657931 inuse=0 data=0x00000000 check=0x45f407fd
+prog 9 file=3 x=311118848 y=311891968 anz=311118848 inuse=0 data=0x00000000 check=0xad244963
+prog 10 file=3 x=1275073176 y=805311115 anz=150999752 inuse=0 data=0x00000000 check=0x3d200f5b
+prog 11 file=3 x=6144 y=311587840 anz=310391808 inuse=0 data=0x00000000 check=0xccc9c92d
+prog 12 file=3 x=1543508626 y=16781970 anz=-1872886784 inuse=0 data=0x00000000 check=0x7f8bb165
+prog 13 file=3 x=67109120 y=311750751 anz=311596032 inuse=0 data=0x00000000 check=0x3400e04c
+prog 14 file=3 x=0 y=671088640 anz=83886081 inuse=0 data=0x00000000 check=0x137980bc
+prog 15 file=3 x=311687168 y=311528448 anz=311891968 inuse=0 data=0x00000000 check=0x5fa78f0d
+prog 16 file=3 x=-738192757 y=33559186 anz=-259455744 inuse=0 data=0x00000000 check=0x200c92fc
+prog 17 file=3 x=100663296 y=301996544 anz=314679296 inuse=0 data=0x00000000 check=0x4797db81
+prog 18 file=3 x=-1207959552 y=402657843 anz=-1543503872 inuse=0 data=0x00000000 check=0xde4c486c
+prog 19 file=3 x=38912 y=1024 anz=311687168 inuse=0 data=0x00000000 check=0x49e7f52b
+prog 20 file=3 x=402657937 y=-134212969 anz=402657937 inuse=0 data=0x00000000 check=0x494879ff
+prog 21 file=3 x=311605248 y=311891968 anz=311556096 inuse=0 data=0x00000000 check=0x33013232
+prog 22 file=3 x=-134214656 y=201332807 anz=872415232 inuse=0 data=0x00000000 check=0x33013232
+prog 23 file=3 x=311605248 y=311687168 anz=311605248 inuse=0 data=0x00000000 check=0x3f4260d4
+prog 24 file=3 x=402657939 y=805306368 anz=-939519340 inuse=0 data=0x00000000 check=0x059d9ec2
+prog 25 file=3 x=512 y=311706624 anz=311528448 inuse=0 data=0x00000000 check=0x425abf7d
+prog 26 file=3 x=-1006628204 y=4755 anz=-335544320 inuse=0 data=0x00000000 check=0xcd440f41
+bild 0 file=4 x=115 y=78 anz=1 inuse=0 data=0x00000000 check=0x12ea4bf7
+bild 1 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x832b3b6b
+bild 2 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x2ffe821c  ; depth map of bild 1
+bild 3 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x42c2dd4b  ; walk map of bild 1
+bild 4 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x802f3a28
+bild 5 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xe594ff7f  ; depth map of bild 4
+bild 6 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x118b0519  ; walk map of bild 4
+bild 7 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xbad17523
+bild 8 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x6c196d99
+bild 9 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x2ffe821c  ; walk map of bild 35
+bild 10 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x26aa0bd1
+bild 11 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x10dcd626
+bild 12 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xc227907c
+bild 13 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xc6568113
+bild 14 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x3c75e759  ; depth map of bild 13
+bild 15 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xc6cd7f13  ; walk map of bild 13
+bild 16 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x24282cea
+bild 17 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x2bfc6533  ; depth map of bild 16
+bild 18 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xa0e7226e  ; walk map of bild 16
+bild 19 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xe8b462ce
+bild 20 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xb955f4f0  ; depth map of bild 19
+bild 21 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xb33c2f09  ; walk map of bild 19
+bild 22 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x49d0a7ab
+bild 23 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x387affe1  ; depth map of bild 22
+bild 24 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x068dddcf  ; walk map of bild 22
+bild 25 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xd0b1576d
+bild 26 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x0ca505e5
+bild 27 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x2ffe821c  ; depth map of bild 26
+bild 28 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xb1697c40  ; walk map of bild 26
+bild 29 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x915d32fc
+bild 30 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x70006088  ; depth map of bild 29
+bild 31 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x9f5b9775  ; walk map of bild 29
+bild 32 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x55902753
+bild 33 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x93783783  ; depth map of bild 32
+bild 34 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xd5dd820e  ; walk map of bild 32
+bild 35 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x29e9bce2
+bild 36 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x670b2bb9
+bild 37 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xe45a55b1
+bild 38 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x0338678f
+bild 39 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xe1aa6ad2
+bild 40 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xff525014
+bild 41 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x49f0bf8d
+bild 42 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xe1a6900c  ; depth map of bild 41
+bild 43 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x9beff983  ; walk map of bild 41
+bild 44 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x83152ccc
+bild 45 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xe1029c3a  ; depth map of bild 44
+bild 46 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x8d43b991  ; walk map of bild 44
+bild 47 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x5be24680
+bild 48 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xc1268ade
+bild 49 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x8f1c8d61  ; depth map of bild 47
+bild 50 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x92aae7e3  ; walk map of bild 47
+bild 51 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x388c7a1c
+bild 52 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x18c2990f
+bild 53 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x4e2211d3
+bild 54 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xfdee8e0c  ; depth map of bild 53
+bild 55 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xa7ddea72  ; walk map of bild 53
+bild 56 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xe72f798f
+bild 57 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x631e3a18  ; depth map of bild 56
+bild 58 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xfdee8e0c  ; walk map of bild 56
+bild 59 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x61cec222
+bild 60 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0xa8d9f721
+bild 61 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x8e0d4baf  ; depth map of bild 60
+bild 62 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x135c593d  ; walk map of bild 60
+bild 63 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x0addebf1
+bild 64 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xd25e859f  ; depth map of bild 63
+bild 65 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x971a1ea2  ; walk map of bild 63
+bild 66 file=4 x=16704 y=200 anz=1 inuse=0 data=0x00000000 check=0x4021a73f
+bild 67 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x329ff4d4  ; depth map of bild 66
+bild 68 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xd76ddeea  ; walk map of bild 66
+inv 0 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xec084894
+inv 1 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xfaf478ba
+inv 2 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x1da59ebe
+inv 3 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x946b9c38
+inv 4 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xfa67c29a
+inv 5 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xa378dfed
+inv 6 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x45ac3d01
+inv 7 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x3fb8e551
+inv 8 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x2e1aafb7
+inv 9 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x93da4ec0
+inv 10 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x48a36e62
+inv 11 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x2f8f3ba9
+inv 12 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x26a6a929
+inv 13 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xeba78f4f
+inv 14 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xf9ef3d67
+inv 15 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x3ee37a90
+inv 16 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x5304e7e5
+inv 17 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xdc1d796b
+inv 18 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xc99b6d81
+inv 19 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x80a5a929
+inv 20 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x2ff284bc
+inv 21 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x3992422e
+inv 22 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xb4e1fd09
+inv 23 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xf4b06eb0
+inv 24 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xeba78f4f
+inv 25 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x26b4e626
+inv 26 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xed65c890
+inv 27 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xc9d3bf95
+inv 28 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x6f493220
+inv 29 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x2f7aa26a
+inv 30 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x0ba2cec2
+inv 31 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xaea1cdbf
+inv 32 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xaea1cdbf
+inv 33 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xaea1cdbf
+inv 34 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xaea1cdbf
+inv 35 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x5cb6013d
+inv 36 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x6d9c6589
+inv 37 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x8fcc0be7
+inv 38 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x468b6c52
+inv 39 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x8f6d9642
+inv 40 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x1f6eb464
+inv 41 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x0084a864
+inv 42 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x6701d4b2
+inv 43 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x0084a864
+inv 44 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xd98a783e
+inv 45 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0x887cc2ca
+inv 46 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xaccf5a94
+inv 47 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xc8996d81
+inv 48 file=4 x=-1 y=0 anz=1 inuse=0 data=0x00000000 check=0xf36fc9e1
+phase 0 file=4 x=44 y=40 anz=3 inuse=0 data=0x00000000 check=0x05e30f89
+phase 1 file=4 x=30 y=30 anz=16 inuse=0 data=0x00000000 check=0x073d0e80
+phase 2 file=4 x=19 y=50 anz=21 inuse=0 data=0x00000000 check=0xf27d133b
+phase 3 file=4 x=19 y=50 anz=21 inuse=0 data=0x00000000 check=0x3356c024
+phase 4 file=4 x=31 y=61 anz=2 inuse=0 data=0x00000000 check=0xf9e417a1
+phase 5 file=4 x=34 y=8 anz=2 inuse=0 data=0x00000000 check=0x8e636aee
+phase 6 file=4 x=14 y=8 anz=1 inuse=0 data=0x00000000 check=0x0322700c
+phase 7 file=4 x=3 y=3 anz=1 inuse=0 data=0x00000000 check=0xdd06d2d6
+phase 8 file=4 x=42 y=30 anz=2 inuse=0 data=0x00000000 check=0x1a75b7a3
+phase 9 file=4 x=30 y=28 anz=2 inuse=0 data=0x00000000 check=0x3c639e8a
+phase 10 file=4 x=38 y=28 anz=2 inuse=0 data=0x00000000 check=0x329ff4d4
+phase 11 file=4 x=64 y=34 anz=2 inuse=0 data=0x00000000 check=0x13605b7d
+phase 12 file=4 x=48 y=32 anz=2 inuse=0 data=0x00000000 check=0xa9b4c9c7
+phase 13 file=4 x=32 y=30 anz=2 inuse=0 data=0x00000000 check=0xe543ed29
+phase 14 file=4 x=67 y=48 anz=1 inuse=0 data=0x00000000 check=0xb0d219ef
+phase 15 file=4 x=19 y=50 anz=17 inuse=0 data=0x00000000 check=0x1174874d
+phase 16 file=4 x=16 y=43 anz=13 inuse=0 data=0x00000000 check=0xe9c85715
+phase 17 file=4 x=35 y=68 anz=7 inuse=0 data=0x00000000 check=0x15da94c2
+phase 18 file=4 x=28 y=49 anz=11 inuse=0 data=0x00000000 check=0xda8fe0e0
+phase 19 file=4 x=28 y=49 anz=11 inuse=0 data=0x00000000 check=0x695a9a1a
+phase 20 file=4 x=11 y=19 anz=1 inuse=0 data=0x00000000 check=0x8a72c3eb
+phase 21 file=4 x=79 y=82 anz=2 inuse=0 data=0x00000000 check=0x82084800
+phase 22 file=4 x=44 y=45 anz=2 inuse=0 data=0x00000000 check=0x5dbb8b2f
+phase 23 file=4 x=250 y=93 anz=1 inuse=0 data=0x00000000 check=0x5c0c04e8
+phase 24 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xb40ecbef
+phase 25 file=4 x=10 y=7 anz=1 inuse=0 data=0x00000000 check=0xbf3859bd
+phase 26 file=4 x=9 y=11 anz=5 inuse=0 data=0x00000000 check=0x05945949
+phase 27 file=4 x=5 y=3 anz=1 inuse=0 data=0x00000000 check=0x4311a476
+phase 28 file=4 x=63 y=31 anz=6 inuse=0 data=0x00000000 check=0xe0abc45c
+phase 29 file=4 x=13 y=8 anz=2 inuse=0 data=0x00000000 check=0xdb7e9422
+phase 30 file=4 x=9 y=28 anz=2 inuse=0 data=0x00000000 check=0x26b4e626
+phase 31 file=4 x=36 y=65 anz=1 inuse=0 data=0x00000000 check=0xf8953dc3
+phase 32 file=4 x=5 y=112 anz=1 inuse=0 data=0x00000000 check=0x3408cabc
+phase 33 file=4 x=20 y=26 anz=2 inuse=0 data=0x00000000 check=0xa192f6b0
+phase 34 file=4 x=30 y=13 anz=1 inuse=0 data=0x00000000 check=0xca8c6c52
+phase 35 file=4 x=54 y=16 anz=1 inuse=0 data=0x00000000 check=0xf9eb3d3f
+phase 36 file=4 x=240 y=16 anz=1 inuse=0 data=0x00000000 check=0xac06595f
+phase 37 file=4 x=5 y=5 anz=1 inuse=0 data=0x00000000 check=0x031b1f19
+phase 38 file=4 x=9 y=23 anz=1 inuse=0 data=0x00000000 check=0xd98a783e
+phase 39 file=4 x=9 y=11 anz=1 inuse=0 data=0x00000000 check=0x6940071b
+phase 40 file=4 x=32 y=17 anz=1 inuse=0 data=0x00000000 check=0x2ff284bc
+phase 41 file=4 x=7 y=7 anz=1 inuse=0 data=0x00000000 check=0x082794f4
+phase 42 file=4 x=17 y=5 anz=1 inuse=0 data=0x00000000 check=0xe42b0890
+phase 43 file=4 x=20 y=12 anz=1 inuse=0 data=0x00000000 check=0x8585a864
+phase 44 file=4 x=22 y=25 anz=5 inuse=0 data=0x00000000 check=0x8585a864
+phase 45 file=4 x=12 y=12 anz=11 inuse=0 data=0x00000000 check=0x405f20a4
+phase 46 file=4 x=12 y=12 anz=9 inuse=0 data=0x00000000 check=0xc047ac82
+phase 47 file=4 x=17 y=12 anz=1 inuse=0 data=0x00000000 check=0x9c3440dc
+phase 48 file=4 x=25 y=13 anz=2 inuse=0 data=0x00000000 check=0xdee758d8
+phase 49 file=4 x=92 y=40 anz=1 inuse=0 data=0x00000000 check=0x012ce701
+phase 50 file=4 x=17 y=8 anz=1 inuse=0 data=0x00000000 check=0xcb2e0890
+phase 51 file=4 x=21 y=15 anz=1 inuse=0 data=0x00000000 check=0x5f76ccda
+phase 52 file=4 x=21 y=7 anz=1 inuse=0 data=0x00000000 check=0x415d20a4
+phase 53 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x12f16d9f
+phase 54 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xdd3e1252
+phase 55 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xcb32a624
+phase 56 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x3936dc7a
+phase 57 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x69f0a32f
+phase 58 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x698a6eec
+phase 59 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x08c26d27
+phase 60 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xb6734cf6
+phase 61 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x94bfc68e
+phase 62 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x8d6ad030
+phase 63 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x05a753cb
+phase 64 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x03d1dc18
+phase 65 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x49817432
+phase 66 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0xd4a86c94
+phase 67 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x4aacfc28
+phase 68 file=4 x=320 y=200 anz=1 inuse=0 data=0x00000000 check=0x396b0763
+phase 69 file=4 x=6 y=8 anz=1 inuse=0 data=0x00000000 check=0x082794f4
+phase 70 file=4 x=18 y=8 anz=1 inuse=0 data=0x00000000 check=0xcb2e0890
+phase 71 file=4 x=7 y=6 anz=8 inuse=0 data=0x00000000 check=0xe36260e4
+phase 72 file=4 x=14 y=8 anz=1 inuse=0 data=0x00000000 check=0x693fc75b
+phase 73 file=4 x=29 y=14 anz=1 inuse=0 data=0x00000000 check=0x1f6eb464
+phase 74 file=4 x=22 y=23 anz=1 inuse=0 data=0x00000000 check=0xf36fc9e1
+phase 75 file=4 x=23 y=41 anz=2 inuse=0 data=0x00000000 check=0x76feb99b
+phase 76 file=4 x=42 y=90 anz=3 inuse=0 data=0x00000000 check=0x150c93e9
+phase 77 file=4 x=32 y=26 anz=3 inuse=0 data=0x00000000 check=0x5aceb1e1
+phase 78 file=4 x=87 y=38 anz=2 inuse=0 data=0x00000000 check=0x29211cec
+phase 79 file=4 x=24 y=165 anz=2 inuse=0 data=0x00000000 check=0x6e147026
+phase 80 file=4 x=29 y=11 anz=2 inuse=0 data=0x00000000 check=0x45ac3d01
+phase 81 file=4 x=20 y=40 anz=1 inuse=0 data=0x00000000 check=0x2e4db9e7
+phase 82 file=4 x=5 y=12 anz=4 inuse=0 data=0x00000000 check=0x23b148d6
+phase 83 file=4 x=5 y=12 anz=4 inuse=0 data=0x00000000 check=0x99ae4082
+phase 84 file=4 x=27 y=31 anz=2 inuse=0 data=0x00000000 check=0xefb7fd39
+phase 85 file=4 x=16 y=9 anz=1 inuse=0 data=0x00000000 check=0x254a3220
+phase 86 file=4 x=53 y=44 anz=3 inuse=0 data=0x00000000 check=0xb40aeb87
+phase 87 file=4 x=19 y=50 anz=2 inuse=0 data=0x00000000 check=0xb2a7ee40
+phase 88 file=4 x=15 y=11 anz=4 inuse=0 data=0x00000000 check=0x6600d4b2
+phase 89 file=4 x=14 y=11 anz=1 inuse=0 data=0x00000000 check=0x6f4d3220
+phase 90 file=4 x=11 y=16 anz=1 inuse=0 data=0x00000000 check=0x1969e0bc
+phase 91 file=4 x=19 y=50 anz=2 inuse=0 data=0x00000000 check=0x6dae467e
+phase 92 file=4 x=18 y=21 anz=1 inuse=0 data=0x00000000 check=0x1969e0bc
+phase 93 file=4 x=34 y=61 anz=2 inuse=0 data=0x00000000 check=0xdc1d796b
+phase 94 file=4 x=28 y=17 anz=1 inuse=0 data=0x00000000 check=0xfc74ac7a
+phase 95 file=4 x=236 y=114 anz=1 inuse=0 data=0x00000000 check=0xf82a7f4b
+phase 96 file=4 x=197 y=50 anz=1 inuse=0 data=0x00000000 check=0x84149c60
+phase 97 file=4 x=17 y=47 anz=6 inuse=0 data=0x00000000 check=0x25f9e23a
+phase 98 file=4 x=3 y=4 anz=1 inuse=0 data=0x00000000 check=0x5f0eaa68
+phase 99 file=4 x=3 y=4 anz=1 inuse=0 data=0x00000000 check=0x5f0eaa68
+phase 100 file=4 x=14 y=11 anz=1 inuse=0 data=0x00000000 check=0x6839c75b
+phase 101 file=4 x=6 y=18 anz=1 inuse=0 data=0x00000000 check=0x973248d0
+phase 102 file=4 x=29 y=53 anz=11 inuse=0 data=0x00000000 check=0x29325eaa
+phase 103 file=4 x=29 y=53 anz=1 inuse=0 data=0x00000000 check=0xbf4deca2
+phase 104 file=4 x=36 y=65 anz=10 inuse=0 data=0x00000000 check=0x1efe1153
+phase 105 file=4 x=70 y=106 anz=1 inuse=0 data=0x00000000 check=0x655a8abc
+phase 106 file=4 x=70 y=106 anz=1 inuse=0 data=0x00000000 check=0x0b644d5d
+phase 107 file=4 x=15 y=7 anz=1 inuse=0 data=0x00000000 check=0x7d52f2e0
+phase 108 file=4 x=98 y=62 anz=4 inuse=0 data=0x00000000 check=0x130d7e8c
+phase 109 file=4 x=22 y=100 anz=1 inuse=0 data=0x00000000 check=0x8b49b4fe
+phase 110 file=4 x=28 y=49 anz=2 inuse=0 data=0x00000000 check=0xb76e7ef4
+phase 111 file=4 x=27 y=18 anz=6 inuse=0 data=0x00000000 check=0xed65c890
+phase 112 file=4 x=21 y=12 anz=1 inuse=0 data=0x00000000 check=0x887cc2ca
+phase 113 file=4 x=227 y=32 anz=1 inuse=0 data=0x00000000 check=0x6490d60a
+phase 114 file=4 x=122 y=34 anz=1 inuse=0 data=0x00000000 check=0xccffd8a0
+phase 115 file=4 x=122 y=34 anz=1 inuse=0 data=0x00000000 check=0x0c3b3216
+phase 116 file=4 x=132 y=35 anz=1 inuse=0 data=0x00000000 check=0x1a6ca81e

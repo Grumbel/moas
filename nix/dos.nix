@@ -13,6 +13,7 @@
 
 { pkgs
 , version
+, gamedata
 }:
 
 let
@@ -55,13 +56,7 @@ let
       runHook preInstall
       mkdir -p $out/dos
       cp build-dos/moas.exe $out/dos/
-      for f in manick/GAME.* manick/LICENCE.DAT manick/Licence.Dat manick/licence.dat; do
-        [ -f "$f" ] || continue
-        case "$f" in
-          *.EXE|*.exe) continue ;;
-        esac
-        cp "$f" $out/dos/
-      done
+      cp ${gamedata}/* $out/dos/
       if [ -f manick/DOS4GW.EXE ]; then
         cp manick/DOS4GW.EXE $out/dos/
       fi

@@ -1,0 +1,99 @@
+; MOAS script, program 15 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0095  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "In der Diele"  ; @000c
+        load_bild 32, 33, 34  ; @0014
+        add_person 30, 238, 182, 0, 0, 0, 0, 10  ; @001b
+        add_person 87, 150, 123, 0, 0, 16384, 0, 10  ; @002b
+        adress 87, 10000  ; @003b
+        blend 100, 100, 100  ; @0040
+        blend_in 8  ; @0047
+        wait_while_walking  ; @004a
+        add_area_jumper 77, 69, 86, 77, 791  ; @004b
+        add_area_jumper 9, 64, 51, 77, 815  ; @0056
+        add_area_jumper 13, 62, 37, 82, 815  ; @0061
+        add_area_jumper 131, 114, 165, 123, 840  ; @006c
+        add_area_label 174, 75, 213, 98, 2008  ; @0077
+        add_area_label 138, 28, 163, 70, 2018  ; @0082
+        ontime_jump 2, 15, L_0360  ; @008d
+        return_found  ; @0094
+L_0095:
+        if 2, 1, -62, 2008, L_013b  ; @0095
+        iwalk -1, 192, 134  ; @00a0
+        adress -1, 10000  ; @00a7
+        if 2, 0, -62, 4, L_00de  ; @00ac
+        say_properties 0, 0, 27, 6  ; @00b7
+        add_say_window -1, -1000, -1000, "CLR Pyramiden."  ; @00c0
+        say_properties 0, 0, 27, 2  ; @00d4
+        return_found  ; @00dd
+L_00de:
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 1, 0, -62, 7, L_013b  ; @00de
+        add_say_window -1, -1000, -1000, "CLR Moderne Kunst."  ; @00f9
+        adress -1, 10004  ; @010f
+        add_say_window2 -1, -1000, -1000, "Oder hier ist jemand zu dumm ein Bild aufzuhängen."  ; @0114
+        return_found  ; @013a
+L_013b:
+        if 2, 1, -62, 2018, L_0241  ; @013b
+        conditional_walk -1, 1, 5, 55, 60, 122, 65, 86  ; @0146
+        conditional_walk -1, 1, 32, 159, 272, 199, 147, 156  ; @0157
+        conditional_walk -1, 1, 78, 110, 168, 164, 172, 145  ; @0168
+        conditional_walk -1, 1, 50, 115, 319, 199, 227, 95  ; @0179
+        iwalk -1, 150, 71  ; @018a
+        adress -1, 10000  ; @0191
+        say_if_found 0, 4, -1, "CLR Die Tür scheint lange nicht mehr benutzt worden zu sein."  ; @0196
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 1, 0, -62, 7, L_0241  ; @01bc
+        add_say_window -1, -1000, -1000, "CLR Ich kann sie nicht bewegen. NW Da blockiert etwas die Tür von der anderen Seite."  ; @01d7
+        adress -1, 10004  ; @0204
+        add_say_window -1, -1000, -1000, "Oder Jemand. NW Oder der Jemand ist auch ein 'Etwas'."  ; @0209
+        add_say_window2 -1, -1000, -1000, "___Schluck.___"  ; @022c
+        return_found  ; @0240
+L_0241:
+        if 2, 1, -62, 30, L_0316  ; @0241
+        conditional_walk -1, 1, 5, 55, 60, 122, 65, 86  ; @024c
+        conditional_walk -1, 1, 0, 0, 201, 101, 216, 72  ; @025d
+        conditional_walk -1, 1, 167, 51, 270, 121, 238, 121  ; @026e
+        conditional_walk -1, 1, 167, 121, 270, 155, 145, 158  ; @027f
+        iwalk -1, 242, 191  ; @0290
+        adress -1, 10000  ; @0297
+        say_if_found 0, 4, -1, "CLR Die Tür ist zugenagelt. NW Es klingt, als würden von innen Krallen am Holz kratzen..."  ; @029c
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 1, 0, -62, 7, L_0316  ; @02da
+        add_say_window -1, -1000, -1000, "CLR Ich kann sie nicht bewegen. NW Sie ist zugenagelt."  ; @02f5
+        return_found  ; @0315
+L_0316:
+        return_not_found  ; @0316
+        init_ontimes  ; @0317
+        blend_out 2  ; @0318
+        remove_statists  ; @031b
+        set_person -1, 340, 160, 300, 160, 0, -1, 0  ; @031c
+        call_proc 9  ; @032c
+        init_ontimes  ; @032f
+        blend_out 2  ; @0330
+        remove_statists  ; @0333
+        stop_all_walking  ; @0334
+        set_person -1, 270, 184, 234, 170, 16384, -16385, 0  ; @0335
+        call_proc 16  ; @0345
+        init_ontimes  ; @0348
+        blend_out 2  ; @0349
+        remove_statists  ; @034c
+        set_person -1, 0, 170, 40, 170, 0, -1, 0  ; @034d
+        call_proc 19  ; @035d
+L_0360:
+        var_rand_const 131, 3  ; @0360
+        if 2, 131, -62, 3, L_037d  ; @0365
+        adress 87, 10006  ; @0370
+        wait 2  ; @0375
+        adress 87, 10000  ; @0378
+L_037d:
+        var_rand_const 131, 2  ; @037d
+        if 2, 131, -62, 1, L_0394  ; @0382
+        ontime_jump 1, 15, L_0360  ; @038d
+L_0394:
+        if 2, 131, -62, 2, L_03a6  ; @0394
+        ontime_jump 2, 15, L_0360  ; @039f
+L_03a6:
+        return_found  ; @03a6

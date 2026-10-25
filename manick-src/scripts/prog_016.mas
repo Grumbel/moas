@@ -1,0 +1,191 @@
+; MOAS script, program 16 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0288  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Auf dem Dachboden"  ; @000c
+        load_bild 41, 42, 43  ; @001a
+        add_person 84, 119, 145, 0, 0, 16385, 0, 10  ; @0021
+        set_person_z 84, 22  ; @0031
+        if 2, 59, -62, 0, L_0046  ; @0036
+        adress 84, 10006  ; @0041
+L_0046:
+        if 2, 42, -62, 1, L_0120  ; @0046
+        add_person 61, 145, 96, 0, 0, 16385, 0, 10  ; @0051
+        add_person 61, 125, 156, 0, 0, 16385, 0, 10  ; @0061
+        add_person 61, 155, 182, 0, 0, 16385, 0, 10  ; @0071
+        add_person 61, 155, 132, 0, 0, 16385, 0, 10  ; @0081
+        add_person 62, 154, 155, 0, 0, 16385, 0, 10  ; @0091
+        add_person 62, 150, 188, 0, 0, 16385, 0, 10  ; @00a1
+        add_person 62, 154, 182, 0, 0, 16385, 0, 10  ; @00b1
+        add_person 62, 147, 100, 0, 0, 24577, 0, 10  ; @00c1
+        add_person 63, 157, 162, 0, 0, 24577, 0, 10  ; @00d1
+        add_person 63, 169, 124, 0, 0, 24577, 0, 10  ; @00e1
+        add_person 63, 145, 168, 0, 0, 24577, 0, 10  ; @00f1
+        add_person 63, 117, 86, 0, 0, 24577, 0, 10  ; @0101
+        set_person_z 61, 60  ; @0111
+        set_person_z 62, 30  ; @0116
+        set_person_z 63, 20  ; @011b
+L_0120:
+        if2 10, 61, -62, 2, 0, 56, -62, 1, L_0148  ; @0120
+        add_person 91, 156, 136, 0, 0, 16385, 0, 10  ; @0133
+        set_person_z 91, 18  ; @0143
+L_0148:
+        if 2, 56, -62, 1, L_0168  ; @0148
+        add_person 64, 174, 138, 0, 0, 16448, 0, 10  ; @0153
+        set_person_z 64, 15  ; @0163
+L_0168:
+        blend 100, 100, 100  ; @0168
+        blend_in 8  ; @016f
+        wait_while_walking  ; @0172
+        set_person -1, 0, 0, 0, 0, 0, -16385, 53  ; @0173
+        add_area_jumper 240, 164, 249, 174, 1903  ; @0183
+        add_area_jumper 75, 142, 97, 156, 1958  ; @018e
+        add_area_jumper 89, 133, 170, 198, 2016  ; @0199
+        if 2, 42, -62, 1, L_01c5  ; @01a4
+        add_area_jumper 150, 139, 164, 151, 1981  ; @01af
+        add_area_jumper 150, 147, 165, 196, 1981  ; @01ba
+L_01c5:
+        add_area_label 166, 126, 182, 137, 2019  ; @01c5
+        add_area_label 144, 67, 156, 90, 2020  ; @01d0
+        add_area_label 103, 131, 136, 146, 2007  ; @01db
+        add_area_label 182, 167, 221, 199, 2021  ; @01e6
+        if_wasnt_here 148, L_025f  ; @01f1
+        open_window 25  ; @01f6
+        print_sentence_plus "Der alte Dachboden ist voller altem Gerümpel. Irgendwo zwischen den Kisten huschen Ratten hin und her. Ab und zu erlegt eine der faustgroßen Hornissen einen der Nager und schleppt ihn ins Nest."  ; @01f9
+L_025f:
+        if 2, 61, -62, 2, L_0287  ; @025f
+        if_wasnt_here 149, L_0287  ; @026a
+        open_window 5141  ; @026f
+        print_sentence_plus "Puh! Und Geld stinkt doch!"  ; @0272
+L_0287:
+        return_found  ; @0287
+L_0288:
+        if 2, 1, -62, 2019, L_0373  ; @0288
+        iwalk -1, 182, 168  ; @0293
+        adress -1, 10000  ; @029a
+        if 2, 0, -62, 4, L_02f8  ; @029f
+        if 2, 56, -62, 1, L_02d1  ; @02aa
+        add_say_window2 -1, -1000, -1000, "CLR Da drin ist es stockduster."  ; @02b5
+        return_found  ; @02d0
+L_02d1:
+        add_say_window -1, -1000, -1000, "CLR Im Kamin ist eine Klappe für den Schornsteinfeger."  ; @02d1
+        return_found  ; @02f7
+L_02f8:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0373  ; @02f8
+        add_say_window2 -1, -1000, -1000, "Ok."  ; @030b
+        if 2, 56, -62, 1, L_0338  ; @0316
+        var_set_const 56, 0  ; @0321
+        remove_person 64  ; @0326
+        if 2, 61, -62, 2, L_0337  ; @0329
+        remove_person 91  ; @0334
+L_0337:
+        return_found  ; @0337
+L_0338:
+        var_set_const 56, 1  ; @0338
+        add_person 64, 174, 138, 0, 0, 16448, 0, 10  ; @033d
+        set_person_z 64, 15  ; @034d
+        if 2, 61, -62, 2, L_0372  ; @0352
+        add_person 91, 156, 136, 0, 0, 16385, 0, 10  ; @035d
+        set_person_z 91, 18  ; @036d
+L_0372:
+        return_found  ; @0372
+L_0373:
+        if 2, 1, -62, 2007, L_05a3  ; @0373
+        iwalk -1, 118, 152  ; @037e
+        if2 15, 1039, -62, -55, 1, 1039, -62, -50, L_0537  ; @0385
+        if 2, 42, -62, 1, L_03f7  ; @0398
+        say_if_found 0, 4, -1, "CLR Der Aufzugmotor ist definitiv kaputt. NW Aber ich kann nicht herran."  ; @03a3
+        say_if_found 0, 9, -1, "CLR Zu erst einmal müssen die Hornissen weg."  ; @03d6
+L_03f7:
+        if 2, 42, -62, 0, L_0439  ; @03f7
+        adress -1, 10004  ; @0402
+        say_if_found 0, 4, -1, "CLR Der Aufzugmotor ist ausgebrannt. NW An reparieren ist nicht zu denken."  ; @0407
+L_0439:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0466  ; @0439
+        add_say_window2 -1, -1000, -1000, "Soll ich es mit Handauflegen versuchen?"  ; @044c
+        return_found  ; @0465
+L_0466:
+        if2 10, 0, -62, 9, 0, 2, -62, 1039, L_0537  ; @0466
+        add_say_window -1, -1000, -1000, "Jetzt kommt der Reparatur-Expresservice."  ; @0479
+        iwalk -1, 118, 168  ; @0499
+        adress -1, 10000  ; @04a0
+        wait 10  ; @04a5
+        set_object 1039, -54  ; @04a8
+        wait 10  ; @04ad
+        adress 84, 10006  ; @04b0
+        iwalk -1, 118, 152  ; @04b5
+        adress -1, 10004  ; @04bc
+        wait 10  ; @04c1
+        iwalk -1, 118, 168  ; @04c4
+        adress -1, 10000  ; @04cb
+        wait 10  ; @04d0
+        adress -1, 10004  ; @04d3
+        add_say_window -1, -1000, -1000, "Ich hoffe mir bezahlt jemand den Nachtzuschlag."  ; @04d8
+        var_add_const 8, 9  ; @04fe
+        add_say_window2 999, 160, 199, "CLR ____(6_Punkte)____ NW (Plus 50 Prozent Nachtzuschlag)"  ; @0503
+        var_set_const 59, 0  ; @0531
+        return_found  ; @0536
+L_0537:
+        if 3, 1039, -62, -54, L_05a3  ; @0537
+        say_if_found 0, 4, -1, "CLR Der Aufzugmotor funktioniert. NW Aber er ist stark magnetisch."  ; @0542
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_05a3  ; @0574
+        add_say_window2 -1, -1000, -1000, "Der Motor funktioniert prima."  ; @0587
+        return_found  ; @05a2
+L_05a3:
+        if 2, 1, -62, 2020, L_0688  ; @05a3
+        iwalk -1, 170, 173  ; @05ae
+        adress -1, 10000  ; @05b5
+        if 2, 42, -62, 0, L_0634  ; @05ba
+        say_if_found 0, 4, -1, "CLR Ein Hornissennest. NW Zum Glück sind die Hornissen weg."  ; @05c5
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0634  ; @05ee
+        add_say_window -1, -1000, -1000, "Besser nicht. Denn.."  ; @0601
+        adress -1, 10004  ; @0615
+        add_say_window2 -1, -1000, -1000, "..manchmal kommen sie wieder!"  ; @061a
+        return_found  ; @0633
+L_0634:
+        if 2, 42, -62, 1, L_0688  ; @0634
+        say_if_found 0, 4, -1, "CLR Hornissen. NW Die sind faustdick!"  ; @063f
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0688  ; @065a
+        add_say_window2 -1, -1000, -1000, "Dafür hänge ich zu sehr am Leben."  ; @066d
+        return_found  ; @0687
+L_0688:
+        if 2, 1, -62, 2021, L_076e  ; @0688
+        iwalk -1, 195, 183  ; @0693
+        adress -1, 10004  ; @069a
+        say_if_found 0, 4, -1, "CLR Da glitzert was drin."  ; @069f
+        if 2, 0, -62, 9, L_076e  ; @06b9
+        say_if_found 2, 2021, -1, "CLR Ich krieg sie nicht auf!"  ; @06c4
+        say_if_found 2, 1045, -1, "CLR Die Kiste ist zugenagelt. NW Mit einem Messer habe ich keine Chance!"  ; @06dc
+        say_if_found 2, 1047, -1, "CLR Jau, damit könnte es gehen. NW Könnte es, falls der Programmierer an diese Möglichkeit gedacht hätte. NW Hat er aber nicht. NW Und deshalb geht's auch nicht."  ; @070c
+L_076e:
+        return_not_found  ; @076e
+        blend_out 2  ; @076f
+        if 3, 1046, -62, -54, L_0792  ; @0772
+        var_rand_const 31, 6  ; @077d
+        if 2, 31, -62, 1, L_0792  ; @0782
+        set_object 1046, -50  ; @078d
+L_0792:
+        remove_statists  ; @0792
+        set_person -1, 27, 71, 52, 88, 0, -1, 0  ; @0793
+        call_proc 15  ; @07a3
+        blend_out 2  ; @07a6
+        remove_statists  ; @07a9
+        set_person -1, 0, 87, 100, 145, 0, -1, 0  ; @07aa
+        call_proc 17  ; @07ba
+        stop_all_walking  ; @07bd
+        add_say_window2 -1, -1000, -1000, "CLR Autsch!"  ; @07be
+        set_person -1, 0, 0, 30, 0, 0, -1, 58  ; @07ce
+        wait_while_walking  ; @07de
+        return_found  ; @07df
+        unmark_area2 2016  ; @07e0
+        if 3, 1036, -62, -50, L_07f3  ; @07e3
+        var_set_const 63, 1  ; @07ee
+L_07f3:
+        if2 15, 1036, -62, 22, 0, 1040, -62, -50, L_080b  ; @07f3
+        var_set_const 63, 1  ; @0806
+L_080b:
+        return_found  ; @080b

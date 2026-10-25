@@ -4,7 +4,7 @@
 # The Android build, after Pingus's ndk-build pipeline (mk/android/): SDL2's
 # native library and Java side are built once from its release tarball, the
 # game into libmain.so against it, and both packaged into a signed APK.
-# Game data (manick/) is staged into APK assets/ and extracted at runtime.
+# Game data (moas-gamedata, packed from manick-src/) is staged into APK assets/ and extracted at runtime.
 #
 #   nix build .#moas-android        the APK
 #   nix run .#install-android-moas  install it with adb
@@ -19,6 +19,7 @@
 , targetAbis
 , version
 , versionCode
+, gamedata          # packed GAME.* (nix/gamedata.nix)
 }:
 
 let
@@ -70,10 +71,10 @@ let
     include $(PREBUILT_SHARED_LIBRARY)
   '';
 
-  # Sources + game data for the APK (manick/ and lang/ become assets/).
+  # Sources + language packs for the APK (lang/ and gamedata become assets/).
   gameSrc = pkgs.lib.fileset.toSource {
     root = ../.;
-    fileset = pkgs.lib.fileset.unions [ ../src ../manick ../lang ];
+    fileset = pkgs.lib.fileset.unions [ ../src ../lang ];
   };
 
   apkName = "moas-${version}.apk";
@@ -90,6 +91,7 @@ let
       APP_NAME = "moas";
       APP_DIR = "${../mk/android/app}";
       GAME_SRC_DIR = "${gameSrc}";
+      GAME_DATA_DIR = "${gamedata}";
       APPLICATION_MK = applicationMk;
       TOP_ANDROID_MK = topAndroidMk;
       SDL_PREBUILT_MK = sdlPrebuiltMk;

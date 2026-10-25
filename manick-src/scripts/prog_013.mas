@@ -1,0 +1,589 @@
+; MOAS script, program 13 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 50, L_0034  ; @0000
+        add_say_window2 6, -1000, -1000, "--KREIIIISCH!-- NW --KREIIIISCH!--"  ; @000b
+        return_found  ; @0033
+L_0034:
+        if 2, 0, -62, 999, L_01fb  ; @0034
+        clear_screen_init  ; @003f
+        set_room_name "Im Gang"  ; @0040
+        if 2, 37, -62, 0, L_0059  ; @0047
+        load_bild 25, 27, 28  ; @0052
+L_0059:
+        if 2, 37, -62, 1, L_006b  ; @0059
+        load_bild 26, 27, 28  ; @0064
+L_006b:
+        get_person_x -1, 31  ; @006b
+        if 2, 31, -61, 160, L_00a5  ; @0070
+        add_person 48, 190, 169, 0, 0, 0, 0, 10  ; @007b
+        adress 48, 10002  ; @008b
+        add_person 45, 135, 170, 0, 0, 0, 0, 10  ; @0090
+        var_set_const 133, 1  ; @00a0
+L_00a5:
+        if 2, 31, -64, 160, L_00da  ; @00a5
+        add_person 48, 135, 169, 0, 0, 0, 0, 10  ; @00b0
+        adress 48, 10006  ; @00c0
+        add_person 45, 190, 170, 0, 0, 0, 0, 10  ; @00c5
+        var_set_const 133, 0  ; @00d5
+L_00da:
+        add_person 37, 53, 44, 0, 0, 0, 0, 10  ; @00da
+        add_person 38, 82, 73, 0, 0, 0, 0, 10  ; @00ea
+        add_person 39, 266, 44, 0, 0, 0, 0, 10  ; @00fa
+        add_person 40, 237, 73, 0, 0, 0, 0, 10  ; @010a
+        add_person 41, 103, 166, 0, 0, 0, 0, 10  ; @011a
+        add_person 42, 214, 166, 0, 0, 0, 0, 10  ; @012a
+        add_person 43, 93, 188, 0, 0, 0, 0, 10  ; @013a
+        add_person 44, 224, 188, 0, 0, 0, 0, 10  ; @014a
+        add_person 36, 161, 71, 0, 0, 0, 0, 10  ; @015a
+        if 2, 37, -62, 1, L_01a2  ; @016a
+        adress 37, 10004  ; @0175
+        adress 38, 10004  ; @017a
+        adress 39, 10004  ; @017f
+        adress 40, 10004  ; @0184
+        adress 41, 10004  ; @0189
+        adress 42, 10004  ; @018e
+        adress 43, 10004  ; @0193
+        adress 44, 10004  ; @0198
+        adress 36, 10005  ; @019d
+L_01a2:
+        blend 100, 100, 100  ; @01a2
+        blend_in 8  ; @01a9
+        wait_while_walking  ; @01ac
+        if 2, 38, -62, 1, L_01c3  ; @01ad
+        add_area_jumper 115, 0, 210, 199, 7863  ; @01b8
+L_01c3:
+        add_area_jumper 0, 0, 10, 199, 7103  ; @01c3
+        add_area_jumper 310, 0, 319, 199, 7482  ; @01ce
+        add_area_jumper 0, 195, 319, 199, 7521  ; @01d9
+        add_area_label 154, 24, 180, 46, 2011  ; @01e4
+        add_area_label 124, 45, 199, 73, 2012  ; @01ef
+        return_found  ; @01fa
+L_01fb:
+        if 2, 1, -62, 48, L_05cc  ; @01fb
+        if 2, 133, -62, 0, L_0218  ; @0206
+        iwalk -1, 135, 180  ; @0211
+L_0218:
+        if 2, 133, -62, 1, L_022a  ; @0218
+        iwalk -1, 190, 180  ; @0223
+L_022a:
+        adress -1, 10000  ; @022a
+        say_if_found 38, 1, -1, "CLR Der Kaktus läßt mich nicht dahin."  ; @022f
+        say_if_found 0, 4, -1, "CLR Ein lila Telefon mit gelben Kabel und grünem Stecker auf einem türkisen Tisch. NW Schick."  ; @024e
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_05cc  ; @028f
+        if 2, 70, -62, 1, L_0378  ; @02a2
+        if2 15, 1041, -62, -55, 0, 1040, -62, -55, L_0378  ; @02ad
+        add_say_window -1, -1000, -1000, "CLR 0190-92743762183547 NW ____Hallo?____ NW Ja, ich warte. NW ______ NW Hallo, ich.. NW Ja, ich warte. NW ______ NW Also, ich.. NW Ja, ich warte. NW _______ NW Nun, ich.. NW ___Was??___ NW Ja, ich denke im Garten geht das."  ; @02c0
+        adress -1, 10004  ; @0340
+        add_say_window -1, -1000, -1000, "CLR ___Cool!___ NW Die holen mich sogar ab!"  ; @0345
+        wait 7  ; @036a
+        blend_out 2  ; @036d
+        var_set_const 115, 1  ; @0370
+        call_proc 25  ; @0375
+L_0378:
+        adress -1, 10004  ; @0378
+        if3 62, 57, -64, 2, 1, 1038, -62, -54, 1, 1038, -62, -50, L_03b0  ; @037d
+        add_say_window -1, -1000, -1000, "CLR Wen soll ich anrufen?"  ; @0398
+        return_found  ; @03af
+L_03b0:
+        add_say_window -1, -1000, -1000, "CLR Ich drücke mal die Wahlwiederholung.."  ; @03b0
+        adress -1, 10000  ; @03d2
+        if 2, 41, -62, 0, L_046c  ; @03d7
+        add_say_window -1, -1000, -1000, "Hallo? NW ___Ähhh___ NW Was? NW Nein, die einmalige CD-Sammlung der 60er wollte ich nicht bestellen. NW Nein, ehrlich. NW Muß mich verwählt haben!"  ; @03e2
+        adress -1, 10004  ; @0439
+        add_say_window -1, -1000, -1000, "Verkäufer!"  ; @043e
+        add_say_window2 45, -1000, -1000, "CLR Pass auf was du sagst!"  ; @044e
+        return_found  ; @046b
+L_046c:
+        if 2, 41, -62, 1, L_05cc  ; @046c
+        add_say_window -1, -1000, -1000, "Hallo? NW Aufzugfirma Gebrüder Hungrig? NW Prima! NW Hier ist Dr. Ed. NW Ich möchte einen neuen Motor für meinen Speiseaufzug bestellen. NW ____Bitte?____"  ; @0477
+        if 3, 1030, -62, -55, L_054e  ; @04d4
+        add_say_window -1, -1000, -1000, "Tut mir leid, meine Kreditkarte habe ich gerade verlegt. NW Ich rufe an, sobald ich sie wieder gefunden habe. NW Danke!"  ; @04df
+        adress -1, 10004  ; @0525
+        add_say_window -1, -1000, -1000, "Tss! NW Wo bekomme ich jetzt eine Kreditkarte her?"  ; @052a
+        return_found  ; @054d
+L_054e:
+        add_say_window -1, -1000, -1000, "____Ja.____ NW Die Kreditkartennummer ist 02-290253-234272. NW ___Danke.___"  ; @054e
+        adress -1, 10004  ; @0589
+        add_say_window -1, -1000, -1000, "Die wollen sofort liefern."  ; @058e
+        var_set_const 57, 2  ; @05a6
+        var_add_const 8, 4  ; @05ab
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @05b0
+        set_object 1030, -54  ; @05c6
+        return_found  ; @05cb
+L_05cc:
+        if 2, 1, -62, 45, L_1613  ; @05cc
+        say_properties 2, 45, 36, 2  ; @05d7
+        if2 10, 2, -62, 1029, 0, 38, -62, 1, L_0622  ; @05e0
+        unmark_area2 7863  ; @05f3
+        add_say_window2 45, -1000, -1000, "CLR Hey, ist das etwa Wasser!!!? NW Bitte gib es mir!"  ; @05f6
+L_0622:
+        if 2, 133, -62, 1, L_0639  ; @0622
+        iwalk -1, 120, 180  ; @062d
+        adress -1, 10002  ; @0634
+L_0639:
+        if 2, 133, -62, 0, L_0650  ; @0639
+        iwalk -1, 205, 180  ; @0644
+        adress -1, 10006  ; @064b
+L_0650:
+        say_if_found 2, 1028, -1, "CLR Das Glas ist leer. Damit kann ich ihn nicht gießen."  ; @0650
+        say_if_found 2, 1041, -1, "CLR Warum sollte ich ihn bestechen? NW ER ist es der hier besticht."  ; @0673
+        if2 10, 2, -62, 1029, 0, 38, -62, 1, L_0761  ; @069d
+        var_set_const 38, 0  ; @06b0
+        set_object 1028, -50  ; @06b5
+        set_object 1029, -54  ; @06ba
+        var_add_const 8, 2  ; @06bf
+        add_say_window2 999, 160, 199, "CLR ____(2_Punkte)____ NW (Plus je einen Gummipunkte von der Bürgeraktionen \"Freundlichkeit für Flanzen\" und \"Nieder mit der Rächtschreibung\")"  ; @06c4
+        add_say_window2 45, -1000, -1000, "CLR Hey, danke! NW Ich hab' seit 3 Jahren nichts mehr zu trinken bekommen! NW Du bist echt ok!"  ; @071d
+        return_found  ; @0760
+L_0761:
+        if2 10, 2, -62, 1028, 0, 38, -62, 0, L_07ab  ; @0761
+        add_say_window2 45, -1000, -1000, "CLR Danke! NW Man weiß hier nie, wann man wieder etwas zu trinken bekommt.."  ; @0774
+        return_found  ; @07aa
+L_07ab:
+        if2 10, 2, -62, 1025, 0, 38, -62, 0, L_07e0  ; @07ab
+        add_say_window2 45, -1000, -1000, "CLR Nein danke, ich weiß wie ich aussehen."  ; @07be
+        return_found  ; @07df
+L_07e0:
+        if3 42, 2, -62, 1022, 0, 38, -62, 0, 0, 44, -62, 0, L_0a25  ; @07e0
+        add_say_window2 45, -1000, -1000, "CLR Hey, geil ein Photo von der kleinen Kaktee vorm Haus. NW Uh, was die für Stacheln hat! NW ___DANKE!___"  ; @07fb
+        set_object 1022, -54  ; @0846
+        var_set_const 83, 0  ; @084b
+        var_set_const 52, 1  ; @0850
+        var_set_const 44, 1  ; @0855
+        say_wait 32000  ; @085a
+        add_say_window -1, -1000, -1000, "CLR Und wie ist jetzt die Kombination für den Tresor?"  ; @085d
+        add_say_window 45, -1000, -1000, "CLR Ach ja, genau, aber du meinst den Kühlschrank."  ; @0881
+        add_say_window -1, -1000, -1000, "CLR Quatsch, den dusseligen Kühlschrank in der Küche habe ich auch so aufbekommen. NW Sonst wäre ich nicht hier."  ; @08a5
+        add_say_window 45, -1000, -1000, "CLR Nein nein, ich meine den Kühlschrank im Keller. NW Er ist durch ein Zahlenschloß gesichert!"  ; @08e9
+        add_say_window -1, -1000, -1000, "CLR Hat der Doc Angst, daß ihm der Joghurt wegläuft, oder was soll das?"  ; @0923
+        add_say_window 45, -1000, -1000, "CLR Ich sag dir, der ist verrückt! NW Und die Safekombination ist (tuschel tuschel tuschel)."  ; @0956
+        add_say_window -1, -1000, -1000, "CLR Was ein Genie! Wie kommt man auf solche Zahlen? NW _____Unglaublich!_____"  ; @0999
+        add_say_window2 45, -1000, -1000, "CLR Tja, der Doc hat ein Händchen für Mathematik, das muß man ihm lassen. NW Aber behalt die Zahlen bitte für dich. NW Sonst bekomme ich noch Ärger."  ; @09cd
+        return_found  ; @0a24
+L_0a25:
+        if 2, 0, -62, 4, L_0a45  ; @0a25
+        say_wait 32000  ; @0a30
+        add_say_window2 -1, -1000, -1000, "Ein Kaktus!"  ; @0a33
+        return_found  ; @0a44
+L_0a45:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_1613  ; @0a45
+        say_wait 32000  ; @0a58
+        if 2, 38, -62, 0, L_1446  ; @0a5b
+        if 2, 51, -62, 1, L_0c3a  ; @0a66
+        var_set_const 51, 0  ; @0a71
+        add_say_window -1, -1000, -1000, "Ich wollte nur sagen, daß es mir leid tut. NW Was ich gesagt habe, war micht nett."  ; @0a76
+        add_say_window 45, -1000, -1000, "Ich war auch nicht gerade nett."  ; @0aa8
+        add_say_window -1, -1000, -1000, "Aber ich war noch viel gemeiner."  ; @0abe
+        add_say_window 45, -1000, -1000, "Nein, nein es war alles meine Schuld."  ; @0ad5
+        add_say_window -1, -1000, -1000, "Ist schon ok."  ; @0af1
+        add_say_window 45, -1000, -1000, "Danke. NW (Schluchz)"  ; @0b01
+        add_say_window -1, -1000, -1000, "(Heul!)"  ; @0b15
+        add_say_window 45, -1000, -1000, "(Flenn!)"  ; @0b24
+        add_say_window -1, -1000, -1000, "(Schnief!)"  ; @0b33
+        add_say_window 45, -1000, -1000, "Es ist so schon, wieder mit einen Freund zu haben. NW Umarme mich."  ; @0b43
+        add_say_window -1, -1000, -1000, "Vergiß es."  ; @0b68
+        add_say_window 45, -1000, -1000, "Memme."  ; @0b79
+        add_say_window -1, -1000, -1000, "Arsch!"  ; @0b86
+        add_say_window 45, -1000, -1000, "Feigling!"  ; @0b92
+        add_say_window -1, -1000, -1000, "Arrogantes Schädlingsnest!"  ; @0ba1
+        add_say_window 45, -1000, -1000, "Verweichlichter Fleischklumpen!"  ; @0bbb
+        add_say_window -1, -1000, -1000, "(Heul!)"  ; @0bd6
+        add_say_window 45, -1000, -1000, "(Flenn!)"  ; @0be5
+        add_say_window -1, -1000, -1000, "(Schnief!)"  ; @0bf4
+        add_say_window 45, -1000, -1000, "Tut mir leid, ich wollte nicht schon wieder gemein sein."  ; @0c04
+        add_say_window -1, -1000, -1000, "Schon ok."  ; @0c28
+        wait 5  ; @0c37
+L_0c3a:
+        if_wasnt_here 134, L_0e3b  ; @0c3a
+        add_dialog 7  ; @0c3f
+        add_option 7, 10, 1, -1, "Ehm, hallo, Kaktus."  ; @0c42
+        add_option 7, 11, 1, -1, "Ich will nicht unhöflich sein, aber wieso kannst du sprechen?"  ; @0c5b
+        add_option 7, 12, 1, -1, "Du soltest dich mal wieder rasieren."  ; @0c7e
+        add_option 7, 13, 1, -1, "So, jetzt bist plötzlich freundlich, du stinkendes Botanik-Objekt!"  ; @0c98
+        add_option 7, 20, 0, 21, "Kennst du diesen Dr. Ed? Wie ist der so?"  ; @0ccc
+        add_option 7, 21, 0, 22, "Wußtest du, daß der Doc meine Freundin entführt hat? Warum tut der sowas?"  ; @0ceb
+        add_option 7, 22, 0, 23, "So, dieser Doktor ist also etwas verrückt.."  ; @0d20
+        add_option 7, 23, 0, -1, "Was heißt, \"er kann telepathisch mit Gemüse reden\"?"  ; @0d43
+        add_option 7, 30, 0, 31, "Wieso kannst du eigentlich sprechen?"  ; @0d6c
+        add_option 7, 31, 0, 32, "Kennst du die Kaktee vor dem Haus?"  ; @0d87
+        add_option 7, 32, 0, 33, "Wie die Kaktee vor dem Haus aussieht? Sie ist etwas kleiner als du, hellgrün und hat eine rote Blüte."  ; @0da3
+        add_option 7, 33, 0, -1, "Was gibst du mir für ein Bild von der Kaktee?"  ; @0de0
+        add_option 7, 40, 0, -1, "Wieso kann die Kaktee vor dem Haus eigentlich nicht reden?"  ; @0e03
+        add_option 7, 99, 3, -1, "Bis dann mal!"  ; @0e29
+L_0e3b:
+        if 2, 54, -62, 1, L_0e52  ; @0e3b
+        var_set_const 54, 2  ; @0e46
+        toggle_dialog_point 7, 40, 1  ; @0e4b
+L_0e52:
+        if 2, 52, -62, 1, L_0e72  ; @0e52
+        toggle_dialog_point 7, 31, 0  ; @0e5d
+        toggle_dialog_point 7, 32, 0  ; @0e64
+        toggle_dialog_point 7, 33, 0  ; @0e6b
+L_0e72:
+        if 2, 50, -62, 1, L_0ea9  ; @0e72
+        if_wasnt_here 135, L_0ea9  ; @0e7d
+        add_option 7, 50, 0, -1, "Was hat es mit dieser Verdummungsmaschiene auf sich?"  ; @0e82
+L_0ea9:
+        select_from_dialog 31, 7  ; @0ea9
+        var_set_const 53, 1  ; @0eae
+        parse_if 31, 10, 11, 13, -999, L_0eea  ; @0eb3
+        toggle_dialog_point 7, 10, 0  ; @0ec0
+        toggle_dialog_point 7, 11, 0  ; @0ec7
+        toggle_dialog_point 7, 12, 0  ; @0ece
+        toggle_dialog_point 7, 13, 0  ; @0ed5
+        toggle_dialog_point 7, 20, 1  ; @0edc
+        toggle_dialog_point 7, 30, 1  ; @0ee3
+L_0eea:
+        if 2, 31, -62, 12, L_0f2d  ; @0eea
+        toggle_dialog_point 7, 10, 0  ; @0ef5
+        add_say_window2 45, -1000, -1000, "Für 3 Jahre ohne rasieren sehe ich noch verdammt gut aus, finde ich."  ; @0efc
+L_0f2d:
+        say_if 31, 10, 45, "____Hi!____ NW Und noch einmal danke fürs Wasser.."  ; @0f2d
+        if2 10, 31, -62, 11, 1, 31, -62, 30, L_1061  ; @0f50
+        add_say_window 45, -1000, -1000, "Tja, das ist alles nur dieser Dr. Ed schuld. NW Ich bin ehrlich gesagt gar kein normaler Kaktus"  ; @0f63
+        add_say_window -1, -1000, -1000, "Na das ist eine Überaschung."  ; @0fa1
+        add_say_window 45, -1000, -1000, "Ich war damals Versicherungsvertreter. NW Ich hatte den Kerl keine 4 Stunden bearbeitet, schon schien er weich zu werden. NW Er bat mich ins Labor,.. NW ..und dann.. NW ..und dann.."  ; @0fb4
+        add_say_window 45, -1000, -1000, "(schluchz!) NW ..dann hat er.. NW (schluchz!) NW Ich kann einfach nicht darüber sprechen. NW Aber du siehst das Ergebnis!"  ; @1012
+        toggle_dialog_point 7, 30, 0  ; @105a
+L_1061:
+        if 2, 31, -62, 13, L_1092  ; @1061
+        add_say_window 45, -1000, -1000, "Hey, noch lange kein Grund mich zu beschimpfen!"  ; @106c
+        var_set_const 51, 1  ; @108c
+        return_found  ; @1091
+L_1092:
+        if 2, 31, -62, 20, L_1144  ; @1092
+        add_say_window 45, -1000, -1000, "Der (zensiert) ist für meine jetzige Lage verantwortlich. NW Diesem (zensiert) (zensiert) sollte man (zensiert) in den (zensiert) und dann (sehr zensiert)."  ; @109d
+        add_say_window 45, -1000, -1000, "Dieser (zensiert) (zensiert) (zensiert) (zensiert) (zensiert) (zensiert) (zensiert)!"  ; @1100
+L_1144:
+        if 2, 31, -62, 21, L_11ee  ; @1144
+        add_say_window 45, -1000, -1000, "Der ist völlig geistesgestört! NW Er arbeitet im Keller an einer furchtbaren Erfindung. NW Und er entführt Menschen. NW An denen probiert er das Ding aus."  ; @114f
+        add_say_window -1, -1000, -1000, "Und die Weltherrschaft will er nicht übernehmen?"  ; @11ab
+        add_say_window 45, -1000, -1000, "Doch, daß natürlich auch. NW Du mußt ihn stoppen!"  ; @11cc
+L_11ee:
+        say_if 31, 22, 45, "Etwas verrückt? NW Er es völlig abgedreht! NW Total ding dong! NW Bei dem weiß die linke Gehirnhälfte nicht, was die Rechte von ihr will! NW"  ; @11ee
+        say_if 31, 22, 45, "Der Mann kann telepathisch mit jeglichen Lebensmitteln in seinem Kühlschrank aufnehmen.. NW ..um diese ansschließend.. NW ..bestialisch.. NW ..in Ketchup zu ertränken!"  ; @124e
+        say_if 31, 23, 45, "Er hat im Keller einen Kühlschrank... NW Und er WEISS wenn etwas drin ist... NW ____Immer!____"  ; @12b7
+        say_if 31, 31, 45, "Nein. Ich komm' nicht viel rum.. NW Aber erzähl mal! NW Wie sieht sie aus?"  ; @12ee
+        say_if 31, 32, 45, "Mmmm, genau mein Typ. NW Meinst du, du könntest mir ein Bild von ihr besorgen?"  ; @1321
+        say_if 31, 33, 45, "Ich kenne die Kombination vom Kellerkühlschrank. NW Besorg mir ein Bild und ich sag sie Dir."  ; @1359
+        say_if 31, 40, 45, "Natürlich kann sie nicht reden! NW Es ist eine Kaktee. NW Kakteen können nicht reden!"  ; @1399
+        say_if 31, 50, 45, "Die Verdummungsmaschiene! NW Er hat sie das erste Mal an seinem Sohn ausprobiert, aber der ist dadurch schlauer geworden. NW Es ist ein Gerät direkt aus der Hölle."  ; @13c9
+        if 2, 31, -63, 99, L_1437  ; @1424
+        say_wait 32000  ; @142f
+        goto_proc 13, L_0ea9  ; @1432
+L_1437:
+        add_say_window 45, -1000, -1000, "Bis dann!"  ; @1437
+        return_found  ; @1445
+L_1446:
+        if 2, 38, -62, 1, L_1613  ; @1446
+        if_wasnt_here 136, L_14f7  ; @1451
+        add_dialog 8  ; @1456
+        add_option 8, 10, 1, 12, "Wer bist du?"  ; @1459
+        add_option 8, 11, 1, 12, "Was bist du ?"  ; @146a
+        add_option 8, 12, 0, -1, "Ich meine, wieso kannst du sprechen."  ; @147c
+        add_option 8, 20, 1, -1, "Warum läßt du mich nicht vorbei?"  ; @1497
+        add_option 8, 30, 1, -1, "Warum rede ich mit einem Kaktus?"  ; @14b3
+        add_option 8, 99, 3, -1, "Bleib doch da stehen, bis du grün wirst. Ich gehe!"  ; @14cf
+L_14f7:
+        select_from_dialog 31, 8  ; @14f7
+        var_set_const 53, 1  ; @14fc
+        toggle_dialog_point 8, 30, 0  ; @1501
+        if2 10, 31, -62, 10, 1, 31, -62, 11, L_156d  ; @1508
+        toggle_dialog_point 8, 10, 0  ; @151b
+        toggle_dialog_point 8, 11, 0  ; @1522
+        add_say_window 45, -1000, -1000, "Bist du blind? NW Ich bin ein Kaktus!"  ; @1529
+        add_say_window -1, -1000, -1000, "Das sehe ich selbst."  ; @1548
+        add_say_window 45, -1000, -1000, "Was fragst du dann?!"  ; @155a
+L_156d:
+        say_if 31, 12, 45, "Ach, laß mich in Ruhe!"  ; @156d
+        say_if 31, 20, 45, "Weil ich schlecht gelaunt bin! NW Ich bin heute echt übel drauf!"  ; @1582
+        say_if 31, 30, 45, "Genauso gut könnte ich dich fragen, warum ich mit einem MENSCHEN rede!"  ; @15ae
+        if 2, 31, -63, 99, L_15f1  ; @15de
+        say_wait 32000  ; @15e9
+        goto_proc 13, L_14f7  ; @15ec
+L_15f1:
+        add_say_window 45, -1000, -1000, "Werd' nicht frech!"  ; @15f1
+        add_say_window -1, -1000, -1000, "__Au!__"  ; @1603
+        return_found  ; @1612
+L_1613:
+        if2 10, 1, -62, 2011, 1, 1, -62, 2012, L_1663  ; @1613
+        get_person_x -1, 31  ; @1626
+        if 2, 31, -60, 220, L_163b  ; @162b
+        adress -1, 10006  ; @1636
+L_163b:
+        if 2, 31, -61, 100, L_164b  ; @163b
+        adress -1, 10002  ; @1646
+L_164b:
+        if2 10, 31, -64, 100, 0, 31, -65, 220, L_1663  ; @164b
+        adress -1, 10000  ; @165e
+L_1663:
+        if 2, 1, -62, 2011, L_16a9  ; @1663
+        say_if_found 0, 4, -1, "CLR Da hängt ein Schlüssel am Kronleuchter"  ; @166e
+        say_if_found 0, 9, -1, "CLR Wie soll ich da bitte drankommen?"  ; @168b
+L_16a9:
+        if 2, 1, -62, 2012, L_16ef  ; @16a9
+        say_if_found 0, 4, -1, "CLR Da hängt ein Schlüssel am Kronleuchter"  ; @16b4
+        say_if_found 0, 9, -1, "CLR Wie soll ich da bitte drankommen?"  ; @16d1
+L_16ef:
+        if3 10, 0, -62, 9, 0, 1, -62, 1001, 0, 1, -62, 2, L_1bbe  ; @16ef
+        if 2, 71, -62, 1, L_182b  ; @170a
+        if 3, 1048, -62, -55, L_180c  ; @1715
+        say_properties 3, 6, 12, 2  ; @1720
+        say_properties 2, 45, 36, 2  ; @1729
+        add_person 6, 80, 30, 0, 0, 16384, 0, 10  ; @1732
+        add_say_window 6, -1000, -1000, "--KREIIIISCH!-- NW --KREIIIISCH!-"  ; @1742
+        wait 8  ; @1769
+        adress -1, 10006  ; @176c
+        wait 10  ; @1771
+        adress -1, 10002  ; @1774
+        wait 10  ; @1779
+        adress -1, 45  ; @177c
+        add_say_window 45, -1000, -1000, "Sag mal, was bezweckst du eigentlich damit?"  ; @1781
+        add_say_window -1, -1000, -1000, "Ich will den Schlüssel, der dort oben hängt."  ; @179f
+        add_say_window 45, -1000, -1000, "Den kannst du nicht haben. NW Aber nimm doch den hier!"  ; @17b9
+        set_object 1048, -50  ; @17d8
+        add_say_window -1, -1000, -1000, "___Danke.___"  ; @17dd
+        var_add_const 8, 5  ; @17f0
+        add_say_window2 999, 160, 199, "CLR ____(5_Punkte)____"  ; @17f5
+        return_found  ; @180b
+L_180c:
+        add_say_window2 -1, -1000, -1000, "Meine Ohren haben schon genug gelitten."  ; @180c
+        return_found  ; @182a
+L_182b:
+        if 2, 37, -62, 0, L_1bab  ; @182b
+        var_set_const 15, 1  ; @1836
+        get_person_x -1, 34  ; @183b
+        add_person 46, 160, 199, 160, 199, 16384, 0, 0  ; @1840
+        add_person 47, 160, 199, 160, 199, 16384, 0, 0  ; @1850
+L_1860:
+        get_person_x 46, 31  ; @1860
+        if 0, 31, -61, 34, L_1895  ; @1865
+        set_person 46, 10, 0, 0, 0, 0, -1, 58  ; @1870
+        set_person 47, 10, 0, 0, 0, 0, -1, 58  ; @1880
+        goto_proc 13, L_1860  ; @1890
+L_1895:
+        get_person_x 46, 31  ; @1895
+        if 0, 31, -60, 34, L_18ca  ; @189a
+        set_person 46, -10, 0, 0, 0, 0, -1, 58  ; @18a5
+        set_person 47, -10, 0, 0, 0, 0, -1, 58  ; @18b5
+        goto_proc 13, L_1895  ; @18c5
+L_18ca:
+        get_person_x 46, 31  ; @18ca
+        if 0, 31, -61, 34, L_18ff  ; @18cf
+        set_person 46, 1, 0, 0, 0, 0, -1, 58  ; @18da
+        set_person 47, 1, 0, 0, 0, 0, -1, 58  ; @18ea
+        goto_proc 13, L_18ca  ; @18fa
+L_18ff:
+        get_person_x 46, 31  ; @18ff
+        if 0, 31, -60, 34, L_1934  ; @1904
+        set_person 46, -1, 0, 0, 0, 0, -1, 58  ; @190f
+        set_person 47, -1, 0, 0, 0, 0, -1, 58  ; @191f
+        goto_proc 13, L_18ff  ; @192f
+L_1934:
+        var_set_const 15, 0  ; @1934
+        var_set_const 20, 0  ; @1939
+        close_say 32000  ; @193e
+        say_properties 0, 6, 12, 2  ; @1941
+        say_properties 2, 45, 36, 2  ; @194a
+        add_person 6, 80, 30, 0, 0, 16384, 0, 10  ; @1953
+        add_say_window2 6, -1000, -1000, "--Pieep!-- NW Yeahyeah_Twing! NW Jaul."  ; @1963
+        wait 8  ; @1989
+        adress 38, 10004  ; @198c
+        var_set_const 15, 1  ; @1991
+        load_bild 26, 27, 28  ; @1996
+        var_set_const 15, 0  ; @199d
+        set_person 46, 0, 0, 0, 0, 0, -1, 50  ; @19a2
+        set_person 47, 0, 0, 320, 0, 0, -1, 50  ; @19b2
+        wait_while_walking  ; @19c2
+        wait 8  ; @19c3
+        add_say_window2 45, 224, 168, "CLR ___KLIRR!___"  ; @19c6
+        adress 44, 10004  ; @19de
+        wait 10  ; @19e3
+        add_say_window2 45, 161, 71, "CLR ___KLIRR!___"  ; @19e6
+        adress 36, 10001  ; @19fe
+        wait 8  ; @1a03
+        add_say_window2 45, 103, 146, "CLR ___KLIRR!___"  ; @1a06
+        adress 41, 10004  ; @1a1e
+        wait 8  ; @1a23
+        add_say_window2 45, 237, 73, "CLR ___KLIRR!___"  ; @1a26
+        adress 40, 10004  ; @1a3e
+        wait 10  ; @1a43
+        add_say_window2 45, 161, 71, "CLR ___KLIRR!___"  ; @1a46
+        adress 36, 10002  ; @1a5e
+        wait 8  ; @1a63
+        add_say_window2 45, 93, 168, "CLR ___KLIRR!___"  ; @1a66
+        adress 43, 10004  ; @1a7e
+        wait 8  ; @1a83
+        add_say_window2 45, 161, 71, "CLR ___KLIRR!___"  ; @1a86
+        adress 36, 10003  ; @1a9e
+        wait 10  ; @1aa3
+        add_say_window2 45, 266, 44, "CLR ___KLIRR!___"  ; @1aa6
+        adress 39, 10004  ; @1abe
+        wait 8  ; @1ac3
+        add_say_window2 45, 161, 71, "CLR ___KLIRR!___"  ; @1ac6
+        adress 36, 10004  ; @1ade
+        wait 8  ; @1ae3
+        add_say_window2 45, 53, 44, "CLR ___KLIRR!___"  ; @1ae6
+        adress 37, 10004  ; @1afe
+        wait 10  ; @1b03
+        add_say_window2 45, 216, 146, "CLR ___KLIRR!___"  ; @1b06
+        adress 42, 10004  ; @1b1e
+        wait 8  ; @1b23
+        add_say_window2 45, 161, 71, "CLR ___KLIRR!___"  ; @1b26
+        adress 36, 10005  ; @1b3e
+        wait 8  ; @1b43
+        remove_person 6  ; @1b46
+        remove_person 46  ; @1b49
+        remove_person 47  ; @1b4c
+        set_person 36, 0, 0, 0, 0, 0, -17, 58  ; @1b4f
+        close_say 32000  ; @1b5f
+        say_properties 0, 0, 27, 2  ; @1b62
+        say_properties 2, 45, 36, 2  ; @1b6b
+        wait 10  ; @1b74
+        adress 0, 10006  ; @1b77
+        wait 20  ; @1b7c
+        adress 0, 10002  ; @1b7f
+        wait 20  ; @1b84
+        adress 0, 10004  ; @1b87
+        wait 10  ; @1b8c
+        add_say_window2 -1, -1000, -1000, "Oooooops!"  ; @1b8f
+        var_set_const 37, 1  ; @1ba0
+        var_set_const 20, 1  ; @1ba5
+        return_found  ; @1baa
+L_1bab:
+        say_if_found 37, 1, -1, "Ich glaube, einmal reicht."  ; @1bab
+L_1bbe:
+        return_not_found  ; @1bbe
+        blend_out 2  ; @1bbf
+        remove_statists  ; @1bc2
+        if2 11, 1003, -62, -55, 0, 57, -63, 1, L_1d17  ; @1bc3
+        set_person -1, 600, 74, 600, 74, 0, -1, 0  ; @1bd6
+        clear_screen_init  ; @1be6
+        var_set_var 31, 14  ; @1be7
+        var_set_const 14, 0  ; @1bec
+        arm_key_abort  ; @1bf1
+        load_bild 11, 9, 9  ; @1bf2
+        blend 100, 100, 100  ; @1bf9
+        blend_in 2  ; @1c00
+        click_or_enter 6  ; @1c03
+        blend_out 2  ; @1c06
+        load_bild 4, 5, 6  ; @1c09
+        blend 100, 100, 100  ; @1c10
+        add_person 2, 121, 133, 121, 133, 0, 0, 0  ; @1c17
+        add_person 3, 152, 133, 152, 133, 0, 0, 0  ; @1c27
+        add_person 4, 135, 139, 135, 139, 16384, 0, 0  ; @1c37
+        add_person 22, 233, 155, 0, 0, 16384, 0, 10  ; @1c47
+        add_person 23, 240, 154, 0, 0, 16384, 0, 10  ; @1c57
+        add_person 24, 247, 153, 0, 0, 16384, 0, 10  ; @1c67
+        add_person 25, 254, 153, 0, 0, 16384, 0, 10  ; @1c77
+        add_person 26, 261, 152, 0, 0, 16384, 0, 10  ; @1c87
+        add_person 65, 0, 40, 53, 0, 16384, 0, 2  ; @1c97
+        set_person 65, -99, 40, 53, 0, 16384, 0, 34  ; @1ca7
+        set_person_z 4, -100  ; @1cb7
+        set_person_z 65, 400  ; @1cbc
+        blend_in 8  ; @1cc1
+        wait_while_walking  ; @1cc4
+        add_person 66, 73, 20, 196, 143, 16384, 0, 0  ; @1cc5
+        set_person 65, 0, 0, 370, 0, 0, -1, 50  ; @1cd5
+        set_person_z 66, 300  ; @1ce5
+        walk_person 66, 196, 143  ; @1cea
+        add_person 60, 202, 148, 0, 0, 16384, 0, 10  ; @1cf1
+        remove_person 66  ; @1d01
+        wait_while_walking  ; @1d04
+        click_or_enter 4  ; @1d05
+        abort_redraw  ; @1d08
+        blend_out 2  ; @1d09
+        remove_statists  ; @1d0c
+        var_set_var 14, 31  ; @1d0d
+        var_set_const 57, 1  ; @1d12
+L_1d17:
+        if 2, 57, -62, 2, L_1d27  ; @1d17
+        execute 13, L_1d88  ; @1d22
+L_1d27:
+        set_person -1, 235, 74, 211, 74, 0, -1, 0  ; @1d27
+        call_proc 11  ; @1d37
+        blend_out 2  ; @1d3a
+        remove_statists  ; @1d3d
+        if 2, 57, -62, 2, L_1d4e  ; @1d3e
+        execute 13, L_1d88  ; @1d49
+L_1d4e:
+        set_person -1, 309, 85, 257, 85, 0, -1, 0  ; @1d4e
+        call_proc 11  ; @1d5e
+        blend_out 2  ; @1d61
+        remove_statists  ; @1d64
+        if 2, 57, -62, 2, L_1d75  ; @1d65
+        execute 13, L_1d88  ; @1d70
+L_1d75:
+        set_person -1, 320, 166, 215, 166, 0, -1, 0  ; @1d75
+        call_proc 10  ; @1d85
+L_1d88:
+        set_person -1, 600, 74, 600, 74, 0, -1, 0  ; @1d88
+        clear_screen_init  ; @1d98
+        var_set_var 31, 14  ; @1d99
+        var_set_const 14, 0  ; @1d9e
+        arm_key_abort  ; @1da3
+        load_bild 11, 9, 9  ; @1da4
+        blend 100, 100, 100  ; @1dab
+        blend_in 2  ; @1db2
+        click_or_enter 6  ; @1db5
+        blend_out 2  ; @1db8
+        load_bild 4, 5, 6  ; @1dbb
+        blend 100, 100, 100  ; @1dc2
+        add_person 2, 121, 133, 121, 133, 0, 0, 0  ; @1dc9
+        add_person 3, 152, 133, 152, 133, 0, 0, 0  ; @1dd9
+        add_person 4, 135, 139, 135, 139, 16384, 0, 0  ; @1de9
+        add_person 22, 233, 155, 0, 0, 16384, 0, 10  ; @1df9
+        add_person 23, 240, 154, 0, 0, 16384, 0, 10  ; @1e09
+        add_person 24, 247, 153, 0, 0, 16384, 0, 10  ; @1e19
+        add_person 25, 254, 153, 0, 0, 16384, 0, 10  ; @1e29
+        add_person 26, 261, 152, 0, 0, 16384, 0, 10  ; @1e39
+        add_person 65, 0, 40, 53, 0, 16384, 0, 2  ; @1e49
+        set_person 65, -99, 40, 40, 0, 16384, 0, 34  ; @1e59
+        set_person_z 4, -100  ; @1e69
+        set_person_z 65, 400  ; @1e6e
+        blend_in 8  ; @1e73
+        wait_while_walking  ; @1e76
+        add_person 67, 50, 33, 186, 169, 16384, 0, 0  ; @1e77
+        set_person_z 67, 300  ; @1e87
+        set_person 65, 0, 0, 370, 0, 0, -1, 50  ; @1e8c
+        walk_person 67, 186, 169  ; @1e9c
+        wait_while_walking  ; @1ea3
+        click_or_enter 4  ; @1ea4
+        abort_redraw  ; @1ea7
+        blend_out 2  ; @1ea8
+        remove_statists  ; @1eab
+        var_set_var 14, 31  ; @1eac
+        var_set_const 57, 3  ; @1eb1
+        return_found  ; @1eb6
+        stop_all_walking  ; @1eb7
+        if 2, 133, -62, 1, L_1ed8  ; @1eb8
+        set_person -1, 95, 174, 0, 0, 0, -1, 10  ; @1ec3
+        adress -1, 10002  ; @1ed3
+L_1ed8:
+        if 2, 133, -62, 0, L_1ef8  ; @1ed8
+        set_person -1, 223, 174, 0, 0, 0, -1, 10  ; @1ee3
+        adress -1, 10006  ; @1ef3
+L_1ef8:
+        close_say 32000  ; @1ef8
+        if 2, 33, -62, 0, L_1fc8  ; @1efb
+        add_say_window -1, -1000, -1000, "___Au!___"  ; @1f06
+        add_say_window2 45, -1000, -1000, "__Zurück!__ NW Oder ich piekse!"  ; @1f17
+        if_wasnt_here 139, L_1fc8  ; @1f30
+        say_wait 32000  ; @1f35
+        add_say_window -1, -1000, -1000, "Das hast du schon getan!"  ; @1f38
+        add_say_window 45, -1000, -1000, "Stimmt! NW Und ich tu es noch einmal!"  ; @1f4a
+        add_say_window -1, -1000, -1000, "___Au!___"  ; @1f68
+        add_say_window 45, -1000, -1000, "___Haha!___"  ; @1f79
+        add_say_window -1, -1000, -1000, "Wer bist du?"  ; @1f8b
+        add_say_window 45, -1000, -1000, "Bist du blind? NW Ich bin ein Kaktus!"  ; @1f9a
+        add_say_window -1, -1000, -1000, "Ähh. NW Ja."  ; @1fb9
+L_1fc8:
+        if 2, 33, -62, 1, L_1fff  ; @1fc8
+        add_say_window -1, -1000, -1000, "___Grunz!___"  ; @1fd3
+        add_say_window2 45, -1000, -1000, "__Zurück!__ NW Oder ich piekse!"  ; @1fe6
+L_1fff:
+        return_found  ; @1fff

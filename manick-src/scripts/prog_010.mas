@@ -1,0 +1,109 @@
+; MOAS script, program 10 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0074  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Im Garten"  ; @000c
+        load_bild 16, 17, 18  ; @0014
+        add_person 108, 141, 105, 0, 0, 16384, 0, 10  ; @001b
+        adress 108, 10006  ; @002b
+        set_person_z 108, -50  ; @0030
+        if 3, 1045, -62, -55, L_0043  ; @0035
+        remove_person 108  ; @0040
+L_0043:
+        blend_in 2  ; @0043
+        wait_while_walking  ; @0046
+        add_area_jumper 315, 0, 325, 199, 754  ; @0047
+        add_area_jumper 0, 0, 95, 96, 777  ; @0052
+        add_area_label 119, 78, 158, 99, 2014  ; @005d
+        add_area_label 63, 56, 116, 97, 2034  ; @0068
+        return_found  ; @0073
+L_0074:
+        if 2, 1, -62, 2014, L_027a  ; @0074
+        iwalk -1, 130, 102  ; @007f
+        adress -1, 10002  ; @0086
+        say_if_found 0, 4, -1, "CLR Da wachsen Zuchini."  ; @008b
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_00fd  ; @00a2
+        add_say_window2 -1, -1000, -1000, "CLR Da wachsen Zuchini."  ; @00b5
+        if 3, 1012, -62, -52, L_00fc  ; @00cc
+        set_object 1012, -50  ; @00d7
+        if_wasnt_here 124, L_00fc  ; @00dc
+        var_add_const 8, 2  ; @00e1
+        add_say_window2 999, 160, 199, "CLR ____(2_Punkte)____"  ; @00e6
+L_00fc:
+        return_found  ; @00fc
+L_00fd:
+        if2 10, 0, -62, 9, 0, 2, -62, 1047, L_027a  ; @00fd
+        if 3, 1045, -62, -55, L_025a  ; @0110
+        add_say_window -1, -1000, -1000, "CLR Wenn's sein muß..."  ; @011b
+        wait 5  ; @0132
+        var_set_var 31, 14  ; @0135
+        var_set_const 14, 0  ; @013a
+        blend_out 2  ; @013f
+        remove_person 32000  ; @0142
+        clear_screen_init  ; @0145
+        load_bild 59, 9, 9  ; @0146
+        blend_in 2  ; @014d
+        click_or_enter 5  ; @0150
+        blend_out 2  ; @0153
+        clear_screen_init  ; @0156
+        load_bild 16, 17, 18  ; @0157
+        add_person 109, 120, 102, 0, 0, 17440, 0, 10  ; @015e
+        add_person 108, 141, 105, 0, 0, 16384, 0, 10  ; @016e
+        adress 108, 10000  ; @017e
+        var_set_const 14, 1  ; @0183
+        blend_in 2  ; @0188
+        wait 8  ; @018b
+        set_object 1045, -50  ; @018e
+        wait 8  ; @0193
+        say_properties 0, 109, 27, 2  ; @0196
+        add_say_window -1, -1000, -1000, "Es steckte noch."  ; @019f
+        wait 5  ; @01b0
+        blend_out 2  ; @01b3
+        var_set_const 14, 0  ; @01b6
+        remove_person 32000  ; @01bb
+        clear_screen_init  ; @01be
+        load_bild 59, 9, 9  ; @01bf
+        blend_in 2  ; @01c6
+        click_or_enter 5  ; @01c9
+        blend_out 2  ; @01cc
+        clear_screen_init  ; @01cf
+        load_bild 16, 17, 18  ; @01d0
+        add_person 0, 120, 102, 0, 0, 1056, 0, 10  ; @01d7
+        add_person 108, 141, 105, 0, 0, 16384, 0, 10  ; @01e7
+        adress 108, 10006  ; @01f7
+        set_person_z 108, -50  ; @01fc
+        say_properties 0, 0, 27, 2  ; @0201
+        var_set_var 14, 31  ; @020a
+        blend_in 2  ; @020f
+        add_area_jumper 315, 0, 325, 199, 754  ; @0212
+        add_area_jumper 0, 0, 95, 96, 777  ; @021d
+        add_area_label 119, 78, 158, 99, 2014  ; @0228
+        add_area_label 63, 56, 116, 97, 2034  ; @0233
+        var_add_const 8, 4  ; @023e
+        add_say_window2 999, 160, 199, "CLR ____(4_Punkte)____"  ; @0243
+        return_found  ; @0259
+L_025a:
+        add_say_window2 -1, -1000, -1000, "CLR Noch einmal buddel ich da nicht rum!"  ; @025a
+        return_found  ; @0279
+L_027a:
+        if 2, 1, -62, 2034, L_02f1  ; @027a
+        iwalk -1, 92, 97  ; @0285
+        adress -1, 10000  ; @028c
+        say_if_found 0, 4, -1, "CLR Die Familienkrypta. NW ___Unheimlich!___"  ; @0291
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_02f1  ; @02ba
+        add_say_window2 -1, -1000, -1000, "CLR Die Tür in die Krypta ist bereits offen!"  ; @02cd
+        return_found  ; @02f0
+L_02f1:
+        return_not_found  ; @02f1
+        blend_out 2  ; @02f2
+        remove_statists  ; @02f5
+        set_person -1, 160, 270, 160, 190, 0, -1, 0  ; @02f6
+        call_proc 13  ; @0306
+        blend_out 2  ; @0309
+        remove_statists  ; @030c
+        set_person -1, 247, 134, 248, 158, 0, -1, 0  ; @030d
+        call_proc 24  ; @031d

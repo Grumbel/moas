@@ -10,6 +10,7 @@
 
 { pkgs
 , version
+, gamedata
 , sdlSrc
 , sdlVersion ? "2.30.3"
 }:
@@ -67,7 +68,8 @@ let
         -DCMAKE_INSTALL_PREFIX=$out \
         -DSDL2_ROOT=${sdl2Wasm} \
         -DPROJECT_VERSION_FULL=${version} \
-        -DMOAS_DATADIR=/data
+        -DMOAS_DATADIR=/data \
+        -DMOAS_GAMEDATA_DIR=${gamedata}
       cmake --build build --parallel ''${NIX_BUILD_CORES:-1}
       runHook postBuild
     '';

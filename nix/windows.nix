@@ -13,6 +13,7 @@
 , sdl2Win64
 , sdl2Win32
 , version
+, gamedata
 }:
 
 let
@@ -41,12 +42,7 @@ let
       cp ${game}/bin/moas.exe $out/
       cp ${sdl2}/bin/SDL2.dll $out/
       # Game data beside the binary
-      for f in ${../manick}/GAME.* ${../manick}/LICENCE.DAT; do
-        case "$f" in
-          *.EXE|*.exe|DOS4GW*) continue ;;
-        esac
-        [ -f "$f" ] && cp "$f" $out/
-      done
+      cp ${gamedata}/* $out/
       mkdir -p $out/lang
       cp ${../lang}/*.po $out/lang/
       # per-language pictures: lang/<code>/<kind>/*.png

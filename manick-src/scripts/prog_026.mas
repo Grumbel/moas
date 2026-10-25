@@ -1,0 +1,412 @@
+; MOAS script, program 26 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0c43  ; @0000
+        arm_key_abort  ; @000b
+        clear_screen_init  ; @000c
+        var_set_const 14, 0  ; @000d
+        remove_statists  ; @0012
+        set_room_name "Showdown"  ; @0013
+        load_bild 66, 67, 68  ; @001c
+        add_person 128, 102, 156, 0, 0, 16384, 0, 10  ; @0023
+        add_person 124, 101, 158, 0, 0, -16384, 0, 10  ; @0033
+        add_person 125, 222, 158, 0, 0, -16384, 0, 10  ; @0043
+        add_person 126, 203, 111, 0, 0, 16384, 0, 10  ; @0053
+        set_person_z 128, 10  ; @0063
+        set_person_z 124, 10  ; @0068
+        set_person_z 125, 10  ; @006d
+        set_ghost_level 124, 96  ; @0072
+        set_ghost_level 125, 96  ; @0077
+        say_properties 3, 49, 15, 2  ; @007c
+        say_properties 5, 128, 20, 2  ; @0085
+        say_properties 6, 127, 27, 2  ; @008e
+        blend_in 2  ; @0097
+        var_add_const 8, 13  ; @009a
+        add_say_window 999, 160, 199, "____(13_Punkte)____"  ; @009f
+        add_say_window2 -1, -1000, -1000, "____Sandy!____ NW Halt durch, ich komme und rette dich!"  ; @00b2
+        wait_while_walking  ; @00d4
+        walk_person -1, 158, 134  ; @00d5
+        walk_person -1, 109, 135  ; @00dc
+        adress -1, 10004  ; @00e3
+        add_say_window -1, -1000, -1000, "CLR Du bist ja gar nicht Sandy!"  ; @00e8
+        add_person 49, 160, 270, 160, 185, 1024, 0, 0  ; @0101
+        add_say_window2 49, -1000, -1000, "Was geht hier vor?"  ; @0111
+        say_wait 32000  ; @0124
+        wait_while_walking  ; @0127
+        walk_person -1, 124, 135  ; @0128
+        adress -1, 10004  ; @012f
+        add_say_window -1, -1000, -1000, "CLR Ich bin gekommen um meine Freundin zu retten!"  ; @0134
+        add_say_window 128, 102, 110, "CLR Würde mich bitte hier jemand losbinden?"  ; @0158
+        add_say_window -1, -1000, -1000, "CLR Wo ist meine Freundin!?"  ; @017d
+        add_say_window 128, 102, 110, "CLR Würdest du mich bitte losbinden!"  ; @0197
+        add_say_window -1, -1000, -1000, "CLR Ruhe!"  ; @01b4
+        add_say_window 49, -1000, -1000, "CLR Willst du sie jetzt retten oder nicht?"  ; @01c4
+        add_say_window -1, -1000, -1000, "CLR Ich suche Sandy! NW Was haben Sie mit Sandy gemacht!?"  ; @01e0
+        add_say_window 49, -1000, -1000, "CLR ___Sandy?___ NW Die habe ich in eine Kaktee verwandelt!"  ; @0205
+        add_say_window -1, -1000, -1000, "CLR SIE HABEN WAS....!?"  ; @022f
+        add_say_window 49, -1000, -1000, "CLR Ganz richtig, mit der Maschine dort rechts. NW Deine Freundin steht jetzt im Vorgarten. NW Und DICH werde ich jetzt entgültig zerstrahlen!"  ; @024c
+        set_person 49, 0, 0, 158, 134, 0, -1, 48  ; @02a2
+        set_person -1, 0, 0, 206, 134, 0, -1, 48  ; @02b2
+        wait_while_walking  ; @02c2
+        adress 49, 10002  ; @02c3
+        add_person 127, 180, 134, 180, 134, 17440, 0, 0  ; @02c8
+        adress 127, 10000  ; @02d8
+        remove_person 126  ; @02dd
+        remove_person 0  ; @02e0
+        add_say_window -1, -1000, -1000, "____Halt!____"  ; @02e3
+        add_say_window 49, -1000, -1000, "Leg die Waffe weg! NW Du weißt nicht, was du da in der Hand hast!"  ; @02f1
+        add_say_window -1, -1000, -1000, "Das ist für Sandy!"  ; @031f
+        close_say 32000  ; @032e
+        set_person 127, 180, 134, 0, 0, 17441, 0, 10  ; @0331
+        adress 127, 10004  ; @0341
+        adress 127, 10004  ; @0346
+        add_say_window2 49, -1000, -1000, "____Ahhh!____"  ; @034b
+        wait 30  ; @035a
+        say_wait 32000  ; @035d
+        add_person 0, 206, 134, 206, 134, 1056, 0, 0  ; @0360
+        adress 0, 10006  ; @0370
+        remove_person 127  ; @0375
+        add_say_window 49, -1000, -1000, "Was hast du getan? NW _____OH_NEIN!_____"  ; @0378
+        say_properties 3, 49, 15, 2  ; @0394
+        add_say_window2 49, -1000, -1000, "CLR _______5_______ NW _______5_______ NW _______5_______ NW _______5_______ NW _______5_______ NW _______5_______ NW _______5_______"  ; @039d
+        walk_person 49, 158, 147  ; @03e8
+        add_say_window2 49, -1000, -1000, "CLR _______4_______ NW _______4_______ NW _______4_______ NW _______4_______ NW _______4_______ NW _______4_______ NW _______4_______"  ; @03ef
+        walk_person 49, 158, 160  ; @043a
+        add_say_window2 49, -1000, -1000, "CLR _______3_______ NW _______3_______ NW _______3_______ NW _______3_______ NW _______3_______ NW _______3_______ NW _______3_______"  ; @0441
+        walk_person 49, 158, 173  ; @048c
+        add_say_window2 49, -1000, -1000, "CLR _______2_______ NW _______2_______ NW _______2_______ NW _______2_______ NW _______2_______ NW _______2_______ NW _______2_______"  ; @0493
+        walk_person 49, 158, 186  ; @04de
+        add_say_window2 49, -1000, -1000, "CLR _______1_______ NW _______1_______ NW _______1_______ NW _______1_______ NW _______1_______ NW _______1_______ NW _______1_______"  ; @04e5
+        walk_person 49, 158, 199  ; @0530
+        add_person 129, 158, 199, 158, 199, 1024, 0, 0  ; @0537
+        close_say 49  ; @0547
+        remove_person 49  ; @054a
+        say_properties 3, 129, 15, 2  ; @054d
+        add_say_window2 129, -1000, -1000, "CLR _____OH_NO!_____ NW _____OH_NO!_____ NW _____OH_NO!_____ NW _____OH_NO!_____"  ; @0556
+        walk_person 129, 158, 250  ; @058a
+        close_say 129  ; @0591
+        remove_person 129  ; @0594
+        add_person 130, 158, 199, 158, 199, 16384, 0, 0  ; @0597
+        wait 2  ; @05a7
+        adress 130, 10001  ; @05aa
+        wait 2  ; @05af
+        adress 130, 10002  ; @05b2
+        wait 2  ; @05b7
+        adress 130, 10003  ; @05ba
+        wait 2  ; @05bf
+        adress 130, 10004  ; @05c2
+        wait 2  ; @05c7
+        remove_person 130  ; @05ca
+        wait_while_walking  ; @05cd
+        wait 7  ; @05ce
+        add_say_window -1, -1000, -1000, "Ich schätze, von diesem Spiel wird es keinen zweiten Teil geben..."  ; @05d1
+        wait 20  ; @05fc
+        add_say_window2 -1, -1000, -1000, "Wenn Sandy jetzt eine Kaktee ist,.. NW ..dann gibt es nur eines!"  ; @05ff
+        walk_person -1, 154, 135  ; @062a
+        adress -1, 10000  ; @0631
+        wait 7  ; @0636
+        walk_person -1, 219, 135  ; @0639
+        adress -1, 10000  ; @0640
+        wait 10  ; @0645
+        walk_person -1, 180, 135  ; @0648
+        adress -1, 10000  ; @064f
+        wait 3  ; @0654
+        walk_person -1, 206, 135  ; @0657
+        adress -1, 10000  ; @065e
+        wait 12  ; @0663
+        walk_person -1, 270, 135  ; @0666
+        adress -1, 10000  ; @066d
+        wait 9  ; @0672
+        say_wait 32000  ; @0675
+        walk_person -1, 206, 135  ; @0678
+        set_person_z -1, 15  ; @067f
+        walk_person -1, 220, 153  ; @0684
+        add_say_window -1, -1000, -1000, "Sandy, ich komme!"  ; @068b
+        wait 13  ; @069c
+        add_person 122, 220, 153, 220, 153, 17408, 0, 0  ; @069f
+        set_person_z 122, 15  ; @06af
+        remove_person 0  ; @06b4
+        wait 3  ; @06b7
+        adress 122, 10001  ; @06ba
+        wait 3  ; @06bf
+        adress 122, 10002  ; @06c2
+        wait 3  ; @06c7
+        adress 122, 10003  ; @06ca
+        wait 3  ; @06cf
+        adress 122, 10004  ; @06d2
+        wait 3  ; @06d7
+        adress 122, 10005  ; @06da
+        wait 3  ; @06df
+        adress 122, 10006  ; @06e2
+        wait 3  ; @06e7
+        adress 122, 10007  ; @06ea
+        wait 3  ; @06ef
+        add_person 123, 220, 153, 220, 153, 17408, 0, 0  ; @06f2
+        set_person_z 123, 15  ; @0702
+        remove_person 122  ; @0707
+        wait 3  ; @070a
+        adress 123, 10001  ; @070d
+        wait 30  ; @0712
+        blend_out 1  ; @0715
+        abort_redraw  ; @0718
+        clear_screen_init  ; @0719
+        remove_person 32000  ; @071a
+        arm_key_abort  ; @071d
+        load_bild 1, 2, 3  ; @071e
+        add_person 131, 108, 109, 0, 0, 16384, 0, 10  ; @0725
+        add_person 132, 118, 177, 0, 0, 17408, 0, 10  ; @0735
+        add_person 133, 139, 177, 0, 0, 17408, 0, 10  ; @0745
+        add_person 107, 106, 176, 0, 0, 16384, 0, 10  ; @0755
+        blend 100, 100, 100  ; @0765
+        blend_in 1  ; @076c
+        say_properties 1, 133, 26, 2  ; @076f
+        say_properties 2, 132, 34, 2  ; @0778
+        wait 20  ; @0781
+        add_say_window 132, 118, 132, "Naja, zumindest leben die Beiden lange!"  ; @0784
+        wait 20  ; @07a2
+        add_say_window 132, 118, 132, "Was meinst du, ob die Fete bei Alice schon vorbei ist?"  ; @07a5
+        add_say_window 133, -1000, -1000, "Schauen wir mal nach."  ; @07ce
+        set_person 133, 0, 0, 350, 187, 17408, 0, 48  ; @07e1
+        set_person 132, 0, 0, 350, 187, 17408, 0, 48  ; @07f1
+        remove_person 107  ; @0801
+        wait_while_walking  ; @0804
+        add_person 110, 160, 300, 160, 70, 16384, 0, 0  ; @0805
+        wait_while_walking  ; @0815
+        wait 50  ; @0816
+        var_set_const 15, 1  ; @0819
+        add_person 134, 160, 180, 160, 180, -16384, 0, 0  ; @081e
+        var_set_const 15, 0  ; @082e
+        set_ghost_level 134, 120  ; @0833
+        wait 2  ; @0838
+        set_ghost_level 134, 110  ; @083b
+        wait 2  ; @0840
+        set_ghost_level 134, 100  ; @0843
+        wait 2  ; @0848
+        set_ghost_level 134, 90  ; @084b
+        wait 2  ; @0850
+        set_ghost_level 134, 80  ; @0853
+        wait 2  ; @0858
+        set_ghost_level 134, 70  ; @085b
+        wait 2  ; @0860
+        set_ghost_level 134, 60  ; @0863
+        wait 2  ; @0868
+        set_ghost_level 134, 50  ; @086b
+        wait 2  ; @0870
+        set_ghost_level 134, 40  ; @0873
+        wait 2  ; @0878
+        set_ghost_level 134, 30  ; @087b
+        wait 2  ; @0880
+        set_ghost_level 134, 20  ; @0883
+        wait 2  ; @0888
+        set_ghost_level 134, 10  ; @088b
+        wait 2  ; @0890
+        set_ghost_level 134, 0  ; @0893
+        wait 2  ; @0898
+        set_person 134, 160, 180, 160, 180, 16384, 0, 0  ; @089b
+        click_or_enter 10  ; @08ab
+        set_person 134, 160, 180, 160, 180, -16384, 0, 0  ; @08ae
+        set_ghost_level 134, 0  ; @08be
+        wait 2  ; @08c3
+        set_ghost_level 134, 10  ; @08c6
+        wait 2  ; @08cb
+        set_ghost_level 134, 20  ; @08ce
+        wait 2  ; @08d3
+        set_ghost_level 134, 30  ; @08d6
+        wait 2  ; @08db
+        set_ghost_level 134, 40  ; @08de
+        wait 2  ; @08e3
+        set_ghost_level 134, 50  ; @08e6
+        wait 2  ; @08eb
+        set_ghost_level 134, 60  ; @08ee
+        wait 2  ; @08f3
+        set_ghost_level 134, 70  ; @08f6
+        wait 2  ; @08fb
+        set_ghost_level 134, 80  ; @08fe
+        wait 2  ; @0903
+        set_ghost_level 134, 90  ; @0906
+        wait 2  ; @090b
+        set_ghost_level 134, 100  ; @090e
+        wait 2  ; @0913
+        set_ghost_level 134, 110  ; @0916
+        wait 2  ; @091b
+        remove_person 134  ; @091e
+        var_set_const 15, 1  ; @0921
+        add_person 135, 160, 180, 160, 180, -16384, 0, 0  ; @0926
+        var_set_const 15, 0  ; @0936
+        set_ghost_level 135, 120  ; @093b
+        wait 2  ; @0940
+        set_ghost_level 135, 110  ; @0943
+        wait 2  ; @0948
+        set_ghost_level 135, 100  ; @094b
+        wait 2  ; @0950
+        set_ghost_level 135, 90  ; @0953
+        wait 2  ; @0958
+        set_ghost_level 135, 80  ; @095b
+        wait 2  ; @0960
+        set_ghost_level 135, 70  ; @0963
+        wait 2  ; @0968
+        set_ghost_level 135, 60  ; @096b
+        wait 2  ; @0970
+        set_ghost_level 135, 50  ; @0973
+        wait 2  ; @0978
+        set_ghost_level 135, 40  ; @097b
+        wait 2  ; @0980
+        set_ghost_level 135, 30  ; @0983
+        wait 2  ; @0988
+        set_ghost_level 135, 20  ; @098b
+        wait 2  ; @0990
+        set_ghost_level 135, 10  ; @0993
+        wait 2  ; @0998
+        set_ghost_level 135, 0  ; @099b
+        wait 2  ; @09a0
+        set_person 135, 160, 180, 160, 180, 16384, 0, 0  ; @09a3
+        click_or_enter 5  ; @09b3
+        set_person 135, 160, 180, 160, 180, -16384, 0, 0  ; @09b6
+        set_ghost_level 135, 0  ; @09c6
+        wait 2  ; @09cb
+        set_ghost_level 135, 10  ; @09ce
+        wait 2  ; @09d3
+        set_ghost_level 135, 20  ; @09d6
+        wait 2  ; @09db
+        set_ghost_level 135, 30  ; @09de
+        wait 2  ; @09e3
+        set_ghost_level 135, 40  ; @09e6
+        wait 2  ; @09eb
+        set_ghost_level 135, 50  ; @09ee
+        wait 2  ; @09f3
+        set_ghost_level 135, 60  ; @09f6
+        wait 2  ; @09fb
+        set_ghost_level 135, 70  ; @09fe
+        wait 2  ; @0a03
+        set_ghost_level 135, 80  ; @0a06
+        wait 2  ; @0a0b
+        set_ghost_level 135, 90  ; @0a0e
+        wait 2  ; @0a13
+        set_ghost_level 135, 100  ; @0a16
+        wait 2  ; @0a1b
+        set_ghost_level 135, 110  ; @0a1e
+        wait 2  ; @0a23
+        remove_person 135  ; @0a26
+        var_set_const 15, 1  ; @0a29
+        add_person 136, 160, 180, 160, 180, -16384, 0, 0  ; @0a2e
+        var_set_const 15, 0  ; @0a3e
+        set_ghost_level 136, 120  ; @0a43
+        wait 2  ; @0a48
+        set_ghost_level 136, 110  ; @0a4b
+        wait 2  ; @0a50
+        set_ghost_level 136, 100  ; @0a53
+        wait 2  ; @0a58
+        set_ghost_level 136, 90  ; @0a5b
+        wait 2  ; @0a60
+        set_ghost_level 136, 80  ; @0a63
+        wait 2  ; @0a68
+        set_ghost_level 136, 70  ; @0a6b
+        wait 2  ; @0a70
+        set_ghost_level 136, 60  ; @0a73
+        wait 2  ; @0a78
+        set_ghost_level 136, 50  ; @0a7b
+        wait 2  ; @0a80
+        set_ghost_level 136, 40  ; @0a83
+        wait 2  ; @0a88
+        set_ghost_level 136, 30  ; @0a8b
+        wait 2  ; @0a90
+        set_ghost_level 136, 20  ; @0a93
+        wait 2  ; @0a98
+        set_ghost_level 136, 10  ; @0a9b
+        wait 2  ; @0aa0
+        set_ghost_level 136, 0  ; @0aa3
+        wait 2  ; @0aa8
+        set_person 136, 160, 180, 160, 180, 16384, 0, 0  ; @0aab
+        click_or_enter 5  ; @0abb
+        set_person 136, 160, 180, 160, 180, -16384, 0, 0  ; @0abe
+        set_ghost_level 136, 0  ; @0ace
+        wait 2  ; @0ad3
+        set_ghost_level 136, 10  ; @0ad6
+        wait 2  ; @0adb
+        set_ghost_level 136, 20  ; @0ade
+        wait 2  ; @0ae3
+        set_ghost_level 136, 30  ; @0ae6
+        wait 2  ; @0aeb
+        set_ghost_level 136, 40  ; @0aee
+        wait 2  ; @0af3
+        set_ghost_level 136, 50  ; @0af6
+        wait 2  ; @0afb
+        set_ghost_level 136, 60  ; @0afe
+        wait 2  ; @0b03
+        set_ghost_level 136, 70  ; @0b06
+        wait 2  ; @0b0b
+        set_ghost_level 136, 80  ; @0b0e
+        wait 2  ; @0b13
+        set_ghost_level 136, 90  ; @0b16
+        wait 2  ; @0b1b
+        set_ghost_level 136, 100  ; @0b1e
+        wait 2  ; @0b23
+        set_ghost_level 136, 110  ; @0b26
+        wait 2  ; @0b2b
+        remove_person 136  ; @0b2e
+        var_set_const 15, 1  ; @0b31
+        add_person 137, 160, 180, 160, 180, -16384, 0, 0  ; @0b36
+        var_set_const 15, 0  ; @0b46
+        set_ghost_level 137, 120  ; @0b4b
+        wait 2  ; @0b50
+        set_ghost_level 137, 110  ; @0b53
+        wait 2  ; @0b58
+        set_ghost_level 137, 100  ; @0b5b
+        wait 2  ; @0b60
+        set_ghost_level 137, 90  ; @0b63
+        wait 2  ; @0b68
+        set_ghost_level 137, 80  ; @0b6b
+        wait 2  ; @0b70
+        set_ghost_level 137, 70  ; @0b73
+        wait 2  ; @0b78
+        set_ghost_level 137, 60  ; @0b7b
+        wait 2  ; @0b80
+        set_ghost_level 137, 50  ; @0b83
+        wait 2  ; @0b88
+        set_ghost_level 137, 40  ; @0b8b
+        wait 2  ; @0b90
+        set_ghost_level 137, 30  ; @0b93
+        wait 2  ; @0b98
+        set_ghost_level 137, 20  ; @0b9b
+        wait 2  ; @0ba0
+        set_ghost_level 137, 10  ; @0ba3
+        wait 2  ; @0ba8
+        set_ghost_level 137, 0  ; @0bab
+        wait 2  ; @0bb0
+        set_person 137, 160, 180, 160, 180, 16384, 0, 0  ; @0bb3
+        click_or_enter 5  ; @0bc3
+        set_person 137, 160, 180, 160, 180, -16384, 0, 0  ; @0bc6
+        set_ghost_level 137, 0  ; @0bd6
+        wait 2  ; @0bdb
+        set_ghost_level 137, 10  ; @0bde
+        wait 2  ; @0be3
+        set_ghost_level 137, 20  ; @0be6
+        wait 2  ; @0beb
+        set_ghost_level 137, 30  ; @0bee
+        wait 2  ; @0bf3
+        set_ghost_level 137, 40  ; @0bf6
+        wait 2  ; @0bfb
+        set_ghost_level 137, 50  ; @0bfe
+        wait 2  ; @0c03
+        set_ghost_level 137, 60  ; @0c06
+        wait 2  ; @0c0b
+        set_ghost_level 137, 70  ; @0c0e
+        wait 2  ; @0c13
+        set_ghost_level 137, 80  ; @0c16
+        wait 2  ; @0c1b
+        set_ghost_level 137, 90  ; @0c1e
+        wait 2  ; @0c23
+        set_ghost_level 137, 100  ; @0c26
+        wait 2  ; @0c2b
+        set_ghost_level 137, 110  ; @0c2e
+        wait 2  ; @0c33
+        remove_person 137  ; @0c36
+        click_or_enter 30  ; @0c39
+        blend_out 1  ; @0c3c
+        internal_error 0  ; @0c3f
+        abort_redraw  ; @0c42
+L_0c43:
+        return_not_found  ; @0c43

@@ -167,6 +167,39 @@ if(NOT EMSCRIPTEN)
   endif()
 endif()
 
+# --- Game data ---
+# manick-src/ (moas-util unpack format) is the source; it is packed into
+# GAME.* at build time. manick/ is the untouched original: pack reuses its
+# encoded graphics where the pixels are unchanged, so an unedited tree gives
+# byte-identical files. Cross builds can't run moas-util and take already
+# packed data via -DMOAS_GAMEDATA_DIR (Nix: the moas-gamedata package).
+set(MOAS_GAMEDATA_FILES GAME.1 GAME.2 GAME.3 GAME.4 GAME.PCK GAME.XXX LICENCE.DAT)
+set(MOAS_GAMEDATA_DIR "" CACHE PATH "Already packed game data (empty = pack manick-src/)")
+if(MOAS_GAMEDATA_DIR)
+  set(_gamedata "${MOAS_GAMEDATA_DIR}")
+elseif(TARGET moas-util AND NOT CMAKE_CROSSCOMPILING)
+  set(_gamedata "${CMAKE_CURRENT_BINARY_DIR}/gamedata")
+  file(GLOB_RECURSE _gamedata_src CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/manick-src/*")
+  set(_gamedata_out "")
+  foreach(_f ${MOAS_GAMEDATA_FILES})
+    list(APPEND _gamedata_out "${_gamedata}/${_f}")
+  endforeach()
+  add_custom_command(OUTPUT ${_gamedata_out}
+    COMMAND moas-util --srcdir "${CMAKE_CURRENT_SOURCE_DIR}/manick-src"
+      --outdir "${_gamedata}" --reference "${CMAKE_CURRENT_SOURCE_DIR}/manick" pack
+    DEPENDS moas-util ${_gamedata_src}
+    COMMENT "Packing manick-src/ into ${_gamedata}"
+    VERBATIM)
+  add_custom_target(gamedata ALL DEPENDS ${_gamedata_out})
+else()
+  set(_gamedata "")
+  if(EMSCRIPTEN)
+    message(FATAL_ERROR "The web build needs -DMOAS_GAMEDATA_DIR=<packed data> "
+      "(moas-util pack, or nix build .#moas-gamedata)")
+  endif()
+  message(STATUS "No game data for install (cross build without MOAS_GAMEDATA_DIR)")
+endif()
+
 if(EMSCRIPTEN)
   # Web page: moas.html + .js + .wasm (+ data pack). ASYNCIFY lets the
   # existing blocking Wait/getch loop yield to the browser.
@@ -180,12 +213,8 @@ if(EMSCRIPTEN)
   # Stage only the game data (skip original DOS executables)
   set(_wasm_data ${CMAKE_CURRENT_BINARY_DIR}/wasm-data)
   file(MAKE_DIRECTORY ${_wasm_data})
-  file(GLOB _manick_files "${CMAKE_SOURCE_DIR}/manick/*")
-  foreach(_f ${_manick_files})
-    get_filename_component(_name "${_f}" NAME)
-    if(NOT _name MATCHES "\\.(EXE|exe)$")
-      configure_file("${_f}" "${_wasm_data}/${_name}" COPYONLY)
-    endif()
+  foreach(_f ${MOAS_GAMEDATA_FILES})
+    configure_file("${_gamedata}/${_f}" "${_wasm_data}/${_f}" COPYONLY)
   endforeach()
   # .po files and per-language pictures (lang/<code>/<kind>/*.png)
   file(GLOB_RECURSE _lang_files RELATIVE "${CMAKE_SOURCE_DIR}/lang"
@@ -224,16 +253,11 @@ else()
   install(DIRECTORY lang/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/moas/lang
     OPTIONAL)
-  install(DIRECTORY manick/
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/moas
-    FILES_MATCHING
-      PATTERN "GAME.*"
-      PATTERN "LICENCE.DAT"
-      PATTERN "Licence.Dat"
-      PATTERN "licence.dat"
-    PATTERN "GAME.EXE" EXCLUDE
-    PATTERN "DOS4GW.EXE" EXCLUDE
-  )
+  if(_gamedata)
+    foreach(_f ${MOAS_GAMEDATA_FILES})
+      install(FILES "${_gamedata}/${_f}" DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+    endforeach()
+  endif()
 
   install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
 

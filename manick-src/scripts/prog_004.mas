@@ -1,0 +1,197 @@
+; MOAS script, program 4 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 50, L_00e5  ; @0000
+        var_set_const 15, 1  ; @000b
+        add_say_window2 6, -1000, -1000, "NW Vor 20 Jahren schlug kein Meteor im Garten der Äddisons ein."  ; @0010
+        add_say_window2 7, -1000, -1000, "NW Trotzdem wurde der verrückte Dr.Ed noch verrückter und entführte Jack's Freundin Sandy."  ; @003e
+        add_say_window2 8, -1000, -1000, "NW Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."  ; @0078
+        var_set_const 15, 0  ; @00df
+        return_found  ; @00e4
+L_00e5:
+        if 2, 0, -62, 999, L_03a7  ; @00e5
+        if 2, 27, -62, 1, L_03a4  ; @00f0
+        var_set_const 20, 0  ; @00fb
+        load_bild 7, 9, 9  ; @0100
+        blend 100, 100, 100  ; @0107
+        blend_in 2  ; @010e
+        if_wasnt_here 28, L_036e  ; @0111
+        open_window 1112  ; @0116
+        print_sentence "Mänick Mänschion V1.0 Copyrighthinweis: NW -------------------------------------------- NW"  ; @0119
+        print_sentence "Das Spiel darf unter folgenden Bedingungen kopiert und weitergegeben werden: NW NW"  ; @016b
+        print_sentence "1. Es werden alle Dateien zusammen weitergegeben. Die Daten werden nicht verändert. NW NW"  ; @019a
+        print_sentence_plus "2. Es wird unentgeltlich, d. h. ohne Gebühr, Kopierkostenentschädigung o.ä. weitergegeben."  ; @01ca
+        open_window 1112  ; @0205
+        print_sentence "Mänick Mänschion Copyrighthinweis: (Fortsetzung) NW ------------------------------------------------------ NW"  ; @0208
+        print_sentence "Für die kommerzielle Nutzung, der Weitergabe gegen Entgelt oder als Teil eines kostenpflichtigen Produkts (z.B. Shareware CD) ist das schriftlich Einverständnis des Autors erforderlich. NW NW"  ; @0269
+        print_sentence_plus "Die Verbreitung im Internet und Mailboxen ohne Gebühren ist gestattet. NW NW _______ Thomas Holz"  ; @02d4
+        open_window 3190  ; @030d
+        print_sentence_plus "Hinweis: NW ---------- NW Dies ist keine Shareware, sondern ein vollständiges Spiel. Es ist komplett spielbar und bedarf keiner Registrierung. Viel Spaß!"  ; @0310
+L_036e:
+        add_person 51, 17, 156, 0, 0, 16384, 0, 10  ; @036e
+        add_person 52, 28, 173, 0, 0, 16384, 0, 10  ; @037e
+        add_person 53, 121, 189, 0, 0, 16384, 0, 10  ; @038e
+        var_set_const 20, 1  ; @039e
+        return_found  ; @03a3
+L_03a4:
+        call_proc 8  ; @03a4
+L_03a7:
+        if 2, 1, -62, 51, L_05ba  ; @03a7
+        blend_out 2  ; @03b2
+        remove_person 32000  ; @03b5
+        arm_key_abort  ; @03b8
+        var_set_const 21, 0  ; @03b9
+        clear_screen_init  ; @03be
+        load_bild 8, 9, 9  ; @03bf
+        blend_in 2  ; @03c6
+        say_properties 0, 6, 44, 2  ; @03c9
+        say_properties 1, 7, 43, 2  ; @03d2
+        say_properties 2, 8, 42, 2  ; @03db
+        add_person 6, 160, 230, 160, 0, 16400, 0, 0  ; @03e4
+        add_person 7, 160, 290, 160, 59, 16400, 0, 0  ; @03f4
+        add_person 8, 160, 340, 160, 102, 16400, 0, 0  ; @0404
+        add_say_window2 6, -1000, -1000, "CLR Vor 20 Jahren schlug kein Meteor im Garten der Äddisons ein. NW Vor 20 Jahren schlug kein Meteor im Garten der Äddisons ein."  ; @0414
+        add_say_window2 7, -1000, -1000, "CLR Trotzdem wurde der verrückte Dr.Ed noch verrückter und entführte Jack's Freundin Sandy. NW Trotzdem wurde der verrückte Dr.Ed noch verrückter und entführte Jack's Freundin Sandy."  ; @046a
+        add_say_window2 8, -1000, -1000, "CLR Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."  ; @04d8
+        add_say_window2 8, -1000, -1000, "CLR Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."  ; @0542
+        wait_while_walking  ; @05ac
+        click_or_enter 10  ; @05ad
+        remove_person 32000  ; @05b0
+        abort_redraw  ; @05b3
+        blend_out 2  ; @05b4
+        call_proc 8  ; @05b7
+L_05ba:
+        if 2, 1, -62, 52, L_0859  ; @05ba
+        blend_out 2  ; @05c5
+        remove_person 32000  ; @05c8
+        arm_key_abort  ; @05cb
+        var_set_const 21, 0  ; @05cc
+        clear_screen_init  ; @05d1
+        load_bild 37, 9, 9  ; @05d2
+        blend_in 2  ; @05d9
+        add_person 68, 480, 200, 160, 200, 16384, 0, 0  ; @05dc
+        wait_while_walking  ; @05ec
+        click_or_enter 60  ; @05ed
+        walk_person 68, -160, 200  ; @05f0
+        remove_person 68  ; @05f7
+        blend_out 2  ; @05fa
+        clear_screen_init  ; @05fd
+        load_bild 38, 9, 9  ; @05fe
+        blend_in 2  ; @0605
+        add_person 69, 480, 200, 160, 200, 16384, 0, 0  ; @0608
+        wait_while_walking  ; @0618
+        click_or_enter 60  ; @0619
+        set_person 69, 0, 0, 480, 200, 0, -1, 48  ; @061c
+        add_person 70, 480, 200, 160, 200, 16384, 0, 0  ; @062c
+        wait_while_walking  ; @063c
+        remove_person 69  ; @063d
+        click_or_enter 60  ; @0640
+        set_person 70, 0, 0, 480, 200, 0, -1, 48  ; @0643
+        add_person 71, 480, 200, 160, 200, 16384, 0, 0  ; @0653
+        wait_while_walking  ; @0663
+        remove_person 70  ; @0664
+        click_or_enter 60  ; @0667
+        set_person 71, 0, 0, 480, 200, 0, -1, 48  ; @066a
+        add_person 72, 480, 200, 160, 200, 16384, 0, 0  ; @067a
+        wait_while_walking  ; @068a
+        remove_person 71  ; @068b
+        click_or_enter 60  ; @068e
+        set_person 72, 0, 0, 480, 200, 0, -1, 48  ; @0691
+        add_person 73, 480, 200, 160, 200, 16384, 0, 0  ; @06a1
+        wait_while_walking  ; @06b1
+        remove_person 72  ; @06b2
+        click_or_enter 60  ; @06b5
+        walk_person 73, -160, 200  ; @06b8
+        remove_person 73  ; @06bf
+        blend_out 2  ; @06c2
+        clear_screen_init  ; @06c5
+        load_bild 39, 9, 9  ; @06c6
+        blend_in 2  ; @06cd
+        add_person 74, 480, 200, 160, 200, 16384, 0, 0  ; @06d0
+        wait_while_walking  ; @06e0
+        click_or_enter 60  ; @06e1
+        set_person 74, 0, 0, 480, 200, 0, -1, 48  ; @06e4
+        add_person 75, 480, 200, 160, 200, 16384, 0, 0  ; @06f4
+        wait_while_walking  ; @0704
+        remove_person 74  ; @0705
+        click_or_enter 60  ; @0708
+        set_person 75, 0, 0, 480, 200, 0, -1, 48  ; @070b
+        add_person 76, 480, 200, 160, 200, 16384, 0, 0  ; @071b
+        wait_while_walking  ; @072b
+        remove_person 75  ; @072c
+        click_or_enter 60  ; @072f
+        set_person 76, 0, 0, 480, 200, 0, -1, 48  ; @0732
+        add_person 77, 480, 200, 160, 200, 16384, 0, 0  ; @0742
+        wait_while_walking  ; @0752
+        remove_person 76  ; @0753
+        click_or_enter 60  ; @0756
+        set_person 77, 0, 0, 480, 200, 0, -1, 48  ; @0759
+        add_person 78, 480, 200, 160, 200, 16384, 0, 0  ; @0769
+        wait_while_walking  ; @0779
+        remove_person 77  ; @077a
+        click_or_enter 60  ; @077d
+        set_person 78, 0, 0, 480, 200, 0, -1, 48  ; @0780
+        add_person 79, 480, 200, 160, 200, 16384, 0, 0  ; @0790
+        wait_while_walking  ; @07a0
+        remove_person 78  ; @07a1
+        click_or_enter 60  ; @07a4
+        set_person 79, 0, 0, 480, 200, 0, -1, 48  ; @07a7
+        add_person 80, 480, 200, 160, 200, 16384, 0, 0  ; @07b7
+        wait_while_walking  ; @07c7
+        remove_person 79  ; @07c8
+        click_or_enter 60  ; @07cb
+        walk_person 80, -160, 200  ; @07ce
+        remove_person 80  ; @07d5
+        blend_out 2  ; @07d8
+        clear_screen_init  ; @07db
+        load_bild 40, 9, 9  ; @07dc
+        blend_in 2  ; @07e3
+        add_person 81, 480, 200, 160, 200, 16384, 0, 0  ; @07e6
+        wait_while_walking  ; @07f6
+        click_or_enter 60  ; @07f7
+        set_person 81, 0, 0, 480, 200, 0, -1, 48  ; @07fa
+        add_person 82, 480, 200, 160, 200, 16384, 0, 0  ; @080a
+        wait_while_walking  ; @081a
+        remove_person 81  ; @081b
+        click_or_enter 60  ; @081e
+        set_person 82, 0, 0, 480, 200, 0, -1, 48  ; @0821
+        add_person 83, 480, 200, 160, 200, 16384, 0, 0  ; @0831
+        wait_while_walking  ; @0841
+        remove_person 82  ; @0842
+        click_or_enter 60  ; @0845
+        walk_person 83, -160, 200  ; @0848
+        remove_person 83  ; @084f
+        blend_out 2  ; @0852
+        abort_redraw  ; @0855
+        call_proc 4  ; @0856
+L_0859:
+        if 2, 1, -62, 53, L_08ee  ; @0859
+        blend_out 2  ; @0864
+        remove_person 32000  ; @0867
+        arm_key_abort  ; @086a
+        var_set_const 21, 0  ; @086b
+        clear_screen_init  ; @0870
+        load_bild 40, 9, 9  ; @0871
+        blend_in 2  ; @0878
+        add_person 81, 480, 200, 160, 200, 16384, 0, 0  ; @087b
+        wait_while_walking  ; @088b
+        click_or_enter 60  ; @088c
+        set_person 81, 0, 0, 480, 200, 0, -1, 48  ; @088f
+        add_person 82, 480, 200, 160, 200, 16384, 0, 0  ; @089f
+        wait_while_walking  ; @08af
+        remove_person 81  ; @08b0
+        click_or_enter 60  ; @08b3
+        set_person 82, 0, 0, 480, 200, 0, -1, 48  ; @08b6
+        add_person 83, 480, 200, 160, 200, 16384, 0, 0  ; @08c6
+        wait_while_walking  ; @08d6
+        remove_person 82  ; @08d7
+        click_or_enter 60  ; @08da
+        walk_person 83, -160, 200  ; @08dd
+        remove_person 83  ; @08e4
+        blend_out 2  ; @08e7
+        abort_redraw  ; @08ea
+        call_proc 4  ; @08eb
+L_08ee:

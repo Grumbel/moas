@@ -1,0 +1,297 @@
+; MOAS script, program 14 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 50, L_02a4  ; @0000
+        if 2, 74, -63, 0, L_024f  ; @000b
+        add_say_window2 21, -1000, -1000, "_"  ; @0016
+        if 2, 141, -62, 1, L_003b  ; @001f
+        add_say_window2 21, -1000, -1000, "Also, erst einmal"  ; @002a
+L_003b:
+        if 2, 141, -62, 2, L_0051  ; @003b
+        add_say_window2 21, -1000, -1000, "Dann"  ; @0046
+L_0051:
+        if 2, 141, -62, 3, L_006f  ; @0051
+        add_say_window2 21, -1000, -1000, "Und dann"  ; @005c
+        var_set_const 140, 1  ; @006a
+L_006f:
+        var_add_const 141, 1  ; @006f
+        parse_if 74, 1, 2, -999, -999, L_0107  ; @0074
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @0081
+        add_say_window 21, -1000, -1000, "wollte jemand etwas wegen einer Freundin..."  ; @0091
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @00ad
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @00bd
+        adress 50, 0  ; @00cd
+        remove_person 49  ; @00d2
+        close_say 32000  ; @00d5
+        add_say_window 50, -1000, -1000, "Aha! Das warst bestimmt du! NW Du suchst also deine Freundin!"  ; @00d8
+        goto_proc 14, L_0901  ; @0102
+L_0107:
+        parse_if 74, 3, 4, 7, 8, L_0136  ; @0107
+        add_say_window2 21, -1000, -1000, "war da irgendjemand, so ein aufdringlicher... NW _"  ; @0114
+L_0136:
+        if 2, 74, -62, 20, L_015f  ; @0136
+        add_say_window2 21, -1000, -1000, "war da jemand wegen eines Zettels.. NW _"  ; @0141
+L_015f:
+        parse_if 74, 5, 6, -999, -999, L_01d9  ; @015f
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @016c
+        add_say_window 21, -1000, -1000, "war da ein Irrer.."  ; @017c
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @018f
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @019f
+        adress 50, 0  ; @01af
+        remove_person 49  ; @01b4
+        close_say 32000  ; @01b7
+        add_say_window 50, -1000, -1000, "Aha! Das kannst nur du sein!"  ; @01ba
+        goto_proc 14, L_0901  ; @01d4
+L_01d9:
+        parse_if 74, 30, 31, 32, -999, L_0202  ; @01d9
+        add_say_window2 21, -1000, -1000, "wollte jemand unbedingt herrein... NW _"  ; @01e6
+L_0202:
+        parse_if 74, 40, 41, 42, -999, L_022b  ; @0202
+        add_say_window2 21, -1000, -1000, "hatte sich ein Wissenschaftler verlaufen... NW _"  ; @020f
+L_022b:
+        var_set_var 74, 75  ; @022b
+        var_set_var 75, 76  ; @0230
+        var_set_const 76, 0  ; @0235
+        if 2, 74, -62, 0, L_024e  ; @023a
+        add_say_window2 21, -1000, -1000, "_"  ; @0245
+L_024e:
+        return_found  ; @024e
+L_024f:
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @024f
+        add_say_window 21, -1000, -1000, "Ja. Und das war's."  ; @025f
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @0273
+        adress 50, 0  ; @0283
+        remove_person 49  ; @0288
+        close_say 32000  ; @028b
+        add_say_window 50, -1000, -1000, "Und jetzt zu dir!"  ; @028e
+        goto_proc 14, L_0901  ; @029f
+L_02a4:
+        if 2, 0, -62, 999, L_04dd  ; @02a4
+        clear_screen_init  ; @02af
+        set_room_name "In einem Labor"  ; @02b0
+        load_bild 29, 30, 31  ; @02b9
+        blend 100, 100, 100  ; @02c0
+        say_properties 3, 49, 15, 2  ; @02c7
+        say_properties 4, 50, 15, 2  ; @02d0
+        if 3, 1034, -62, -55, L_02f9  ; @02d9
+        add_person 58, 108, 171, 0, 0, 16384, 0, 10  ; @02e4
+        set_person_z 58, 100  ; @02f4
+L_02f9:
+        if 2, 55, -62, 1, L_0370  ; @02f9
+        add_person 49, 174, 160, 174, 160, 1024, 0, 0  ; @0304
+        adress 49, 10000  ; @0314
+        add_person 0, 320, 159, 254, 159, 1056, 0, 0  ; @0319
+        add_person 21, 360, 159, 270, 159, 1024, 0, 0  ; @0329
+        add_area_jumper 216, 169, 319, 199, 1852  ; @0339
+        add_area_jumper 205, 119, 268, 143, 1975  ; @0344
+        add_area_jumper 148, 119, 159, 148, 2049  ; @034f
+        add_area_jumper 147, 151, 161, 199, 2138  ; @035a
+        add_area_jumper 46, 157, 149, 147, 2216  ; @0365
+L_0370:
+        if 2, 40, -62, 1, L_0390  ; @0370
+        add_person 59, 54, 150, 54, 150, 16384, 0, 0  ; @037b
+        set_person_z 59, 100  ; @038b
+L_0390:
+        add_area_label 42, 140, 67, 151, 2016  ; @0390
+        add_area_label 69, 147, 77, 163, 2017  ; @039b
+        blend_in 8  ; @03a6
+        wait_while_walking  ; @03a9
+        add_area_jumper 280, 0, 320, 199, 1773  ; @03aa
+        var_set_const 140, 0  ; @03b5
+        if 2, 55, -62, 1, L_04dc  ; @03ba
+        arm_key_abort  ; @03c5
+        wait_while_walking  ; @03c6
+        add_say_window2 21, -1000, -1000, "Hallo, Doc!"  ; @03c7
+        adress 49, 10002  ; @03d7
+        say_wait 32000  ; @03dc
+        add_say_window 49, -1000, -1000, "Na wen haben wir denn da?"  ; @03df
+        add_say_window 21, -1000, -1000, "Ich bin es, Boss. NW Ihr Zombie-Butler!"  ; @03f5
+        adress 49, 10004  ; @0414
+        add_say_window 49, -1000, -1000, "-seufz- NW Wie soll man mit solchem Personal wirklich böse sein?"  ; @0419
+        if 2, 74, -63, 0, L_0494  ; @0446
+        adress 49, 10002  ; @0451
+        add_say_window 49, -1000, -1000, "Wer war da vorhin an der Tür?"  ; @0456
+        adress 49, 10004  ; @046f
+        abort_redraw  ; @0474
+        set_person 21, 0, 0, 0, 0, 16, -17, 53  ; @0475
+        var_set_const 141, 1  ; @0485
+        add_say_window2 21, -1000, -1000, "_"  ; @048a
+        return_found  ; @0493
+L_0494:
+        if 2, 74, -62, 0, L_04dc  ; @0494
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @049f
+        adress 50, 0  ; @04af
+        remove_person 49  ; @04b4
+        close_say 32000  ; @04b7
+        add_say_window 50, -1000, -1000, "Vielleicht.. NW ..indem ich dich vernichte..?"  ; @04ba
+        abort_redraw  ; @04d6
+        goto_proc 14, L_0901  ; @04d7
+L_04dc:
+        return_found  ; @04dc
+L_04dd:
+        if 2, 1, -62, 58, L_0545  ; @04dd
+        iwalk -1, 108, 175  ; @04e8
+        adress -1, 10004  ; @04ef
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_052b  ; @04f4
+        set_object 1034, -50  ; @0507
+        remove_person 58  ; @050c
+        var_add_const 8, 5  ; @050f
+        add_say_window2 999, 160, 199, "CLR ____(5_Punkte)____"  ; @0514
+        return_found  ; @052a
+L_052b:
+        say_if_found 0, 4, -1, "CLR Da steht ein Ölkännchen."  ; @052b
+L_0545:
+        if 2, 1, -62, 2016, L_061f  ; @0545
+        iwalk -1, 89, 164  ; @0550
+        if 2, 140, -62, 0, L_0572  ; @0557
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @0562
+L_0572:
+        adress -1, 10006  ; @0572
+        say_if_found 0, 4, -1, "CLR Ein Korb für die Post."  ; @0577
+        if2 10, 0, -62, 9, 0, 2, -62, 1003, L_05e3  ; @058f
+        set_object 1003, -54  ; @05a2
+        add_person 59, 54, 150, 54, 150, 16384, 0, 0  ; @05a7
+        set_person_z 59, 100  ; @05b7
+        if_wasnt_here 142, L_05dd  ; @05bc
+        var_add_const 8, 10  ; @05c1
+        add_say_window2 999, 160, 199, "CLR ____(10_Punkte)____"  ; @05c6
+L_05dd:
+        var_set_const 40, 1  ; @05dd
+        return_found  ; @05e2
+L_05e3:
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 0, 40, -62, 1, L_061f  ; @05e3
+        add_say_window2 -1, -1000, -1000, "CLR Ein Brief."  ; @05fe
+        set_object 1003, -50  ; @0611
+        var_set_const 40, 0  ; @0616
+        remove_person 59  ; @061b
+        return_found  ; @061e
+L_061f:
+        if 2, 1, -62, 2017, L_06ec  ; @061f
+        iwalk -1, 89, 164  ; @062a
+        if 2, 140, -62, 0, L_064c  ; @0631
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @063c
+L_064c:
+        adress -1, 10006  ; @064c
+        if 2, 0, -62, 9, L_06d2  ; @0651
+        if 0, 1, -62, 2, L_06a7  ; @065c
+        if 2, 40, -62, 2, L_0690  ; @0667
+        add_say_window2 -1, -1000, -1000, "CLR Ein Brief."  ; @0672
+        set_object 1003, -50  ; @0685
+        var_set_const 40, 0  ; @068a
+        return_found  ; @068f
+L_0690:
+        add_say_window2 -1, -1000, -1000, "CLR Da ist nichts drin."  ; @0690
+        return_found  ; @06a6
+L_06a7:
+        if2 10, 2, -64, 1000, 0, 2, -65, 1999, L_06d2  ; @06a7
+        add_say_window2 -1, -1000, -1000, "CLR Das will ich noch behalten."  ; @06ba
+        return_found  ; @06d1
+L_06d2:
+        say_if_found 0, 4, -1, "CLR Der Papierkorb ist leer."  ; @06d2
+L_06ec:
+        return_not_found  ; @06ec
+        unmark_area2 1773  ; @06ed
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @06f0
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @0700
+        adress 50, -1  ; @0710
+        close_say 32000  ; @0715
+        remove_person 49  ; @0718
+        add_say_window 50, -1000, -1000, "Halt! NW Du entkommst mir nicht!"  ; @071b
+        goto_proc 14, L_0901  ; @0736
+        return_found  ; @073b
+        unmark_area2 1852  ; @073c
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @073f
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @074f
+        adress 50, -1  ; @075f
+        close_say 32000  ; @0764
+        remove_person 49  ; @0767
+        add_say_window 50, -1000, -1000, "Halt! NW So nicht, Freundchen. NW Du glaubst doch nicht, daß du so vor meiner Nase hier rumschnüffeln kannst!"  ; @076a
+        goto_proc 14, L_0901  ; @07b1
+        return_found  ; @07b6
+        unmark_area2 1975  ; @07b7
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @07ba
+        adress 49, 10000  ; @07ca
+        stop_all_walking  ; @07cf
+        add_say_window 49, -1000, -1000, "Keine Tricks!"  ; @07d0
+        adress 49, 10002  ; @07df
+        say_wait 21  ; @07e4
+        set_person 21, 0, 0, 0, 0, 16, -17, 53  ; @07e7
+        add_say_window2 21, -1000, -1000, "_"  ; @07f7
+        return_found  ; @0800
+        unmark_area2 2049  ; @0801
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @0804
+        adress 49, 10000  ; @0814
+        stop_all_walking  ; @0819
+        add_say_window 49, -1000, -1000, "Warte gefälligst, bis du dran bist!"  ; @081a
+        adress 49, 10002  ; @0838
+        say_wait 21  ; @083d
+        set_person 21, 0, 0, 0, 0, 16, -17, 53  ; @0840
+        add_say_window2 21, -1000, -1000, "_"  ; @0850
+        return_found  ; @0859
+        unmark_area2 2138  ; @085a
+        set_person -1, 0, 0, 0, 0, 0, -1, 58  ; @085d
+        add_person 50, 174, 160, 174, 160, 1024, 0, 0  ; @086d
+        adress 50, 10006  ; @087d
+        remove_person 49  ; @0882
+        close_say 32000  ; @0885
+        add_say_window 50, -1000, -1000, "Halt! NW So nicht, Freundchen."  ; @0888
+        goto_proc 14, L_0901  ; @08a2
+        return_found  ; @08a7
+        unmark_area2 2216  ; @08a8
+        set_person 21, 0, 0, 0, 0, 0, -17, 53  ; @08ab
+        adress 49, 10006  ; @08bb
+        stop_all_walking  ; @08c0
+        add_say_window 49, -1000, -1000, "Warte gefälligst, bis du dran bist!"  ; @08c1
+        adress 49, 10002  ; @08df
+        say_wait 21  ; @08e4
+        set_person 21, 0, 0, 0, 0, 16, -17, 53  ; @08e7
+        add_say_window2 21, -1000, -1000, "_"  ; @08f7
+        return_found  ; @0900
+L_0901:
+        unmark_area2 1852  ; @0901
+        unmark_area2 1975  ; @0904
+        unmark_area2 2049  ; @0907
+        unmark_area2 2138  ; @090a
+        unmark_area2 2216  ; @090d
+        arm_key_abort  ; @0910
+        add_say_window 50, -1000, -1000, "Na los! NW Ab mit dir in den Verdoo- NW äh- NW Verdummungsapparat!"  ; @0911
+        iwalk -1, 93, 132  ; @0942
+        adress 50, 10006  ; @0949
+        add_say_window 50, -1000, -1000, "Du hast Glück, daß ich dich nicht zerstrahle! NW Aber der Zerstrahler ist computergesteuert und mein WannDos59 ist abgestürzt."  ; @094e
+        iwalk 50, 85, 178  ; @0996
+        adress 50, 10004  ; @099d
+        add_say_window 50, -1000, -1000, "Aber das hier ist mindestens genauso gut. NW UND LOS!"  ; @09a2
+        adress 50, 10000  ; @09c7
+        add_say_window2 50, -1000, -1000, "Hahahahar!"  ; @09cc
+        say_properties 8, 6, 12, 2  ; @09db
+        add_say_window 6, 87, 92, "CLR Kawumm!"  ; @09e4
+        add_say_window 6, 67, 132, "CLR Uaaa!"  ; @09f7
+        add_say_window 6, 77, 112, "CLR Bumm bumm bumm!"  ; @0a08
+        add_say_window 6, 87, 92, "CLR Schrei"  ; @0a21
+        add_say_window 6, 67, 132, "CLR Kreisch!"  ; @0a31
+        add_say_window 6, 87, 112, "CLR (Matsch)"  ; @0a42
+        add_say_window 6, 102, 92, "CLR Kawumm! NW KAAWUMMMMMM!"  ; @0a53
+        add_say_window 6, 102, 92, "CLR __________"  ; @0a74
+        remove_person 0  ; @0a82
+        add_person 1, 93, 132, 0, 0, 1056, 0, 10  ; @0a85
+        say_properties 0, 1, 27, 2  ; @0a95
+        iwalk -1, 120, 132  ; @0a9e
+        add_say_window -1, -1000, -1000, "Grunz?"  ; @0aa5
+        adress -1, 10004  ; @0ab2
+        adress 50, 10002  ; @0ab7
+        add_say_window 50, -1000, -1000, "____Hermann?____ NW Bring ihn ins Haus zurück. NW Der ist jetzt zu dumm um irgendwo Schaden anzurichten. NW Sobald mein WannDos wieder funktioniert werde ich ihn zerstrahlen!"  ; @0abc
+        adress 50, 10004  ; @0b24
+        add_say_window 50, -1000, -1000, "Ja, das sind die kleinen Dinge, die das Leben lebenswert machen..."  ; @0b29
+        wait 30  ; @0b4e
+        abort_redraw  ; @0b51
+        blend_out 2  ; @0b52
+        remove_statists  ; @0b55
+        set_person 1, 72, 191, 0, 0, 1056, 0, 10  ; @0b56
+        adress 1, 10004  ; @0b66
+        var_set_const 33, 1  ; @0b6b
+        var_set_const 73, 1  ; @0b70
+        call_proc 11  ; @0b75
+        return_found  ; @0b78

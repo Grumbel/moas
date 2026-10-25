@@ -1,0 +1,260 @@
+; MOAS script, program 19 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_0180  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "im Kinderzimmer"  ; @000c
+        load_bild 53, 54, 55  ; @0019
+        if 3, 1027, -62, -55, L_003b  ; @0020
+        add_person 86, 79, 131, 0, 0, 16384, 0, 10  ; @002b
+L_003b:
+        if 3, 1035, -62, -55, L_0056  ; @003b
+        add_person 55, 292, 135, 0, 0, 16384, 0, 10  ; @0046
+L_0056:
+        if 3, 1048, -62, -54, L_0071  ; @0056
+        add_person 113, 286, 135, 0, 0, 16384, 0, 10  ; @0061
+L_0071:
+        if 2, 61, -62, 1, L_00a1  ; @0071
+        add_person 89, 227, 154, 227, 154, 16384, 0, 0  ; @007c
+        add_person 88, 230, 147, 0, 0, 16384, 0, 0  ; @008c
+        set_person_z 89, -10  ; @009c
+L_00a1:
+        if 2, 61, -62, 2, L_013a  ; @00a1
+        add_person 90, 224, 155, 224, 155, 16385, 0, 0  ; @00ac
+        add_person 88, 231, 149, 0, 0, 16385, 0, 10  ; @00bc
+        adress 88, 10000  ; @00cc
+        add_person 88, 220, 148, 0, 0, 16385, 0, 10  ; @00d1
+        adress 88, 10006  ; @00e1
+        add_person 88, 227, 144, 0, 0, 16385, 0, 10  ; @00e6
+        adress 88, 10004  ; @00f6
+        add_person 88, 217, 145, 0, 0, 16385, 0, 10  ; @00fb
+        adress 88, 10002  ; @010b
+        add_person 88, 225, 146, 0, 0, 16385, 0, 10  ; @0110
+        adress 88, 10001  ; @0120
+        add_person 92, 227, 146, 0, 0, 16385, 0, 10  ; @0125
+        set_person_z 90, -20  ; @0135
+L_013a:
+        blend_in 8  ; @013a
+        wait_while_walking  ; @013d
+        add_area_label 137, 121, 145, 129, 2024  ; @013e
+        add_area_label 176, 30, 274, 159, 2022  ; @0149
+        add_area_label 286, 111, 297, 135, 2031  ; @0154
+        add_area_jumper 0, 0, 10, 199, 2436  ; @015f
+        if 3, 1035, -62, -55, L_0178  ; @016a
+        unmark_area 2031  ; @0175
+L_0178:
+        ontime_jump 2, 19, L_099c  ; @0178
+        return_found  ; @017f
+L_0180:
+        if 2, 1, -62, 2022, L_04d5  ; @0180
+        iwalk -1, 222, 170  ; @018b
+        adress -1, 10000  ; @0192
+        say_if_found 0, 7, -1, "Aber klar. Wohin soll ich den Kamin tragen?"  ; @0197
+        say_if_found 0, 4, -1, "CLR Ein alter, gemauerter Kamin."  ; @01b6
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0201  ; @01d2
+        add_say_window2 -1, -1000, -1000, "CLR Was soll ich denn anzünden?"  ; @01e5
+        return_found  ; @0200
+L_0201:
+        if2 10, 0, -62, 9, 0, 2, -62, 1041, L_0479  ; @0201
+        add_say_window2 -1, -1000, -1000, "CLR Ich hab's ja."  ; @0214
+        if2 10, 61, -62, 0, 0, 56, -62, 0, L_0266  ; @0228
+        add_person 89, 227, 154, 227, 154, 16384, 0, 0  ; @023b
+        add_person 88, 230, 147, 0, 0, 16384, 0, 0  ; @024b
+        set_person_z 89, -10  ; @025b
+        var_set_const 61, 1  ; @0260
+        return_found  ; @0265
+L_0266:
+        if2 10, 61, -62, 1, 0, 56, -62, 0, L_0290  ; @0266
+        add_say_window2 -1, -1000, -1000, "CLR Und noch mehr rein."  ; @0279
+        return_found  ; @028f
+L_0290:
+        if2 10, 61, -62, 0, 0, 56, -62, 1, L_037e  ; @0290
+        add_say_window2 -1, -1000, -1000, "Alles rein da."  ; @02a3
+        set_object 1041, -54  ; @02b2
+        add_person 90, 224, 155, 224, 155, 16385, 0, 0  ; @02b7
+        add_person 88, 231, 149, 0, 0, 16385, 0, 10  ; @02c7
+        adress 88, 10000  ; @02d7
+        add_person 88, 220, 148, 0, 0, 16385, 0, 10  ; @02dc
+        adress 88, 10006  ; @02ec
+        add_person 88, 227, 144, 0, 0, 16385, 0, 10  ; @02f1
+        adress 88, 10004  ; @0301
+        add_person 88, 217, 145, 0, 0, 16385, 0, 10  ; @0306
+        adress 88, 10002  ; @0316
+        add_person 88, 225, 146, 0, 0, 16385, 0, 10  ; @031b
+        adress 88, 10001  ; @032b
+        add_person 92, 227, 146, 0, 0, 16385, 0, 10  ; @0330
+        set_person_z 90, -20  ; @0340
+        var_set_const 61, 2  ; @0345
+        var_set_const 42, 0  ; @034a
+        say_wait 32000  ; @034f
+        wait 10  ; @0352
+        add_say_window -1, -1000, -1000, "____Oh!____"  ; @0355
+        adress -1, 10004  ; @0362
+        add_say_window2 -1, -1000, -1000, "Jetzt hab ich's nicht mehr..."  ; @0367
+        return_found  ; @037d
+L_037e:
+        if2 10, 61, -62, 1, 0, 56, -62, 1, L_0479  ; @037e
+        add_say_window2 -1, -1000, -1000, "Was soll der Geiz - alles rein da."  ; @0391
+        set_object 1041, -54  ; @03ab
+        add_person 90, 224, 155, 224, 155, 16385, 0, 0  ; @03b0
+        remove_person 89  ; @03c0
+        remove_person 88  ; @03c3
+        add_person 88, 231, 149, 0, 0, 16385, 0, 10  ; @03c6
+        adress 88, 10000  ; @03d6
+        add_person 88, 220, 148, 0, 0, 16385, 0, 10  ; @03db
+        adress 88, 10006  ; @03eb
+        add_person 88, 227, 144, 0, 0, 16385, 0, 10  ; @03f0
+        adress 88, 10004  ; @0400
+        add_person 88, 217, 145, 0, 0, 16385, 0, 10  ; @0405
+        adress 88, 10002  ; @0415
+        add_person 88, 225, 146, 0, 0, 16385, 0, 10  ; @041a
+        adress 88, 10001  ; @042a
+        add_person 92, 227, 146, 0, 0, 16385, 0, 10  ; @042f
+        set_person_z 90, -20  ; @043f
+        var_set_const 61, 2  ; @0444
+        var_set_const 42, 0  ; @0449
+        say_wait 32000  ; @044e
+        wait 10  ; @0451
+        adress -1, 10004  ; @0454
+        add_say_window2 -1, -1000, -1000, "Wie soll ich das dem Finanzamt erklären???"  ; @0459
+        return_found  ; @0478
+L_0479:
+        if2 10, 0, -62, 9, 0, 2, -62, 1010, L_04a6  ; @0479
+        add_say_window2 -1, -1000, -1000, "CLR Ich bin doch nicht lebensmüde!"  ; @048c
+        return_found  ; @04a5
+L_04a6:
+        if2 2, 0, -62, 9, 0, 1, -63, 2, L_04d5  ; @04a6
+        add_say_window2 -1, -1000, -1000, "CLR Das brauche ich vielleicht noch!"  ; @04b9
+        return_found  ; @04d4
+L_04d5:
+        if 2, 1, -62, 86, L_05e8  ; @04d5
+        iwalk -1, 82, 159  ; @04e0
+        adress -1, 10000  ; @04e7
+        if 2, 0, -62, 4, L_056e  ; @04ec
+        add_say_window -1, -1000, -1000, "CLR Eine Computermaus für den seriellen Port. Drei Tasten. Stoßgedämpfe, langlebige Mikroschalter. Umschaltbar für MS und PC Modus."  ; @04f7
+        adress -1, 10004  ; @0550
+        add_say_window2 -1, -1000, -1000, "Mit sowas kenne ich mich aus."  ; @0555
+        return_found  ; @056d
+L_056e:
+        say_if_found 0, 7, -1, "Das hat keinen Sinn. Der Computer ist völlig mit Viren verseucht und zu keiner Reaktion fähig."  ; @056e
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_05e8  ; @05a6
+        set_object 1027, -50  ; @05b9
+        remove_person 86  ; @05be
+        add_say_window2 -1, -1000, -1000, "CLR Ok."  ; @05c1
+        var_add_const 8, 2  ; @05d0
+        add_say_window2 999, 160, 199, "____(2_Punkte)____"  ; @05d5
+        return_found  ; @05e7
+L_05e8:
+        if 2, 1, -62, 55, L_0672  ; @05e8
+        iwalk -1, 275, 176  ; @05f3
+        adress -1, 10002  ; @05fa
+        if 2, 0, -62, 4, L_0625  ; @05ff
+        add_say_window -1, -1000, -1000, "CLR Wow! Was ein Kalender!"  ; @060a
+        return_found  ; @0624
+L_0625:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0672  ; @0625
+        set_object 1035, -50  ; @0638
+        remove_person 55  ; @063d
+        add_say_window2 -1, -1000, -1000, "CLR Ok."  ; @0640
+        var_add_const 8, 2  ; @064f
+        add_say_window2 999, 160, 199, "____(2_Punkte)____"  ; @0654
+        add_area_label 286, 111, 297, 135, 2031  ; @0666
+        return_found  ; @0671
+L_0672:
+        if 2, 1, -62, 2031, L_0826  ; @0672
+        iwalk -1, 275, 176  ; @067d
+        adress -1, 10002  ; @0684
+        if 2, 0, -62, 4, L_06e8  ; @0689
+        if 2, 68, -62, 0, L_06c7  ; @0694
+        add_say_window -1, -1000, -1000, "CLR Der Safe wird offensichtlich mit einem Schlüssel geöffnet."  ; @069f
+L_06c7:
+        if 2, 68, -62, 1, L_06e7  ; @06c7
+        add_say_window -1, -1000, -1000, "CLR Der Safe ist leer"  ; @06d2
+L_06e7:
+        return_found  ; @06e7
+L_06e8:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0755  ; @06e8
+        if 2, 68, -62, 0, L_0733  ; @06fb
+        add_say_window -1, -1000, -1000, "CLR Ich bin nicht der böse Wolf, der eben mal die Wand umpusten kann!"  ; @0706
+L_0733:
+        if 2, 68, -62, 1, L_0754  ; @0733
+        add_say_window -1, -1000, -1000, "CLR Der Safe ist leer."  ; @073e
+L_0754:
+        return_found  ; @0754
+L_0755:
+        if2 10, 0, -62, 9, 0, 2, -62, 1005, L_0780  ; @0755
+        add_say_window -1, -1000, -1000, "CLR Der Schlüssel passt nicht."  ; @0768
+        return_found  ; @077f
+L_0780:
+        if2 10, 0, -62, 9, 0, 2, -62, 1010, L_07af  ; @0780
+        add_say_window -1, -1000, -1000, "CLR Ich bin kein Safeknacker!"  ; @0793
+        return_found  ; @07ae
+L_07af:
+        if2 10, 0, -62, 9, 0, 2, -62, 1048, L_0826  ; @07af
+        set_object 1048, -54  ; @07c2
+        add_person 113, 286, 135, 0, 0, 16384, 0, 10  ; @07c7
+        add_say_window -1, -1000, -1000, "CLR Im Safe liegt eine Kreditkarte und ein Holzkeil!"  ; @07d7
+        set_object 1030, -50  ; @07ff
+        set_object 1009, -50  ; @0804
+        var_add_const 8, 5  ; @0809
+        add_say_window2 999, 160, 199, "____(5_Punkte)____"  ; @080e
+        var_set_const 68, 1  ; @0820
+        return_found  ; @0825
+L_0826:
+        if 2, 1, -62, 2024, L_0983  ; @0826
+        iwalk -1, 122, 159  ; @0831
+        adress -1, 10000  ; @0838
+        if 2, 0, -62, 4, L_08c4  ; @083d
+        if 2, 62, -62, 0, L_0891  ; @0848
+        add_say_window2 -1, -1000, -1000, "CLR Da sind diverse Disketten mit Raubkopieen im Kasten. NW Bestimmt alles mit Viren verseucht."  ; @0853
+        return_found  ; @0890
+L_0891:
+        add_say_window2 -1, -1000, -1000, "CLR Der Computer ist so mit Viren verseucht, daß da nicht mal mehr Tetris läuft."  ; @0891
+        return_found  ; @08c3
+L_08c4:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0922  ; @08c4
+        if 3, 1036, -62, -50, L_08fb  ; @08d7
+        add_say_window2 -1, -1000, -1000, "CLR Danke, ich habe noch eine."  ; @08e2
+        return_found  ; @08fa
+L_08fb:
+        if 3, 1036, -62, 22, L_0922  ; @08fb
+        add_say_window2 -1, -1000, -1000, "CLR Danke, vielleicht später."  ; @0906
+        return_found  ; @0921
+L_0922:
+        if2 2, 0, -62, 9, 0, 1, -62, 2, L_0983  ; @0922
+        set_object 1036, -50  ; @0935
+        var_set_const 63, 0  ; @093a
+        if2 15, 1038, -62, -50, 1, 1039, -62, -50, L_0957  ; @093f
+        var_set_const 63, 1  ; @0952
+L_0957:
+        if_wasnt_here 158, L_0982  ; @0957
+        add_say_window2 -1, -1000, -1000, "CLR Ok."  ; @095c
+        var_add_const 8, 2  ; @096b
+        add_say_window2 999, 160, 199, "____(2_Punkte)____"  ; @0970
+L_0982:
+        return_found  ; @0982
+L_0983:
+        return_not_found  ; @0983
+        init_ontimes  ; @0984
+        blend_out 2  ; @0985
+        remove_statists  ; @0988
+        set_person -1, 150, 119, 150, 130, 0, -1, 0  ; @0989
+        call_proc 15  ; @0999
+L_099c:
+        var_rand_const 131, 3  ; @099c
+        if 2, 131, -62, 3, L_09bd  ; @09a1
+        blend 40, 40, 40  ; @09ac
+        wait 2  ; @09b3
+        blend 100, 100, 100  ; @09b6
+L_09bd:
+        var_rand_const 131, 2  ; @09bd
+        if 2, 131, -62, 1, L_09d4  ; @09c2
+        ontime_jump 1, 19, L_099c  ; @09cd
+L_09d4:
+        if 2, 131, -62, 2, L_09e6  ; @09d4
+        ontime_jump 2, 19, L_099c  ; @09df
+L_09e6:
+        return_found  ; @09e6

@@ -1,0 +1,164 @@
+; MOAS script, program 11 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        if 2, 0, -62, 999, L_010e  ; @0000
+        clear_screen_init  ; @000b
+        set_room_name "Im Flur"  ; @000c
+        load_bild 19, 20, 21  ; @0013
+        add_person 30, 67, 182, 0, 0, 0, 0, 10  ; @001a
+        blend 100, 100, 100  ; @002a
+        if 2, 58, -62, 1, L_004c  ; @0031
+        add_person 49, 96, 193, 0, 0, 17408, 0, 10  ; @003c
+L_004c:
+        if 3, 1009, -62, -54, L_005c  ; @004c
+        adress 30, 10004  ; @0057
+L_005c:
+        blend_in 8  ; @005c
+        if 2, 58, -62, 1, L_0095  ; @005f
+        walk_person 49, 73, 191  ; @006a
+        adress 30, 10004  ; @0071
+        walk_person 49, 73, 184  ; @0076
+        wait 5  ; @007d
+        adress 49, 10004  ; @0080
+        wait 10  ; @0085
+        adress 30, 10000  ; @0088
+        remove_person 49  ; @008d
+        var_set_const 58, 0  ; @0090
+L_0095:
+        wait_while_walking  ; @0095
+        add_area_jumper 156, 118, 182, 124, 803  ; @0096
+        add_area_jumper 0, 0, 182, 68, 826  ; @00a1
+        add_area_jumper 234, 69, 305, 77, 849  ; @00ac
+        add_area_jumper 287, 78, 319, 88, 1435  ; @00b7
+        add_area_label 107, 75, 146, 98, 2008  ; @00c2
+        if 3, 1009, -62, -54, L_00e3  ; @00cd
+        add_area_jumper 52, 178, 95, 187, 1458  ; @00d8
+L_00e3:
+        if_wasnt_here 125, L_010d  ; @00e3
+        open_window 25  ; @00e8
+        print_sentence_plus "Ein seltsammes Haus. M.C.Escher wäre begeistert!"  ; @00eb
+L_010d:
+        return_found  ; @010d
+L_010e:
+        if 2, 1, -62, 2008, L_018c  ; @010e
+        iwalk -1, 128, 134  ; @0119
+        adress -1, 10000  ; @0120
+        say_if_found 0, 4, -1, "CLR Pyramiden."  ; @0125
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 1, 0, -62, 7, L_018c  ; @0139
+        add_say_window -1, -1000, -1000, "CLR Das Bild ist festgenagelt."  ; @0154
+        adress -1, 10004  ; @016f
+        add_say_window2 -1, -1000, -1000, "Man scheint mich zu erwartem."  ; @0174
+        return_found  ; @018b
+L_018c:
+        if 2, 1, -62, 30, L_0322  ; @018c
+        iwalk -1, 74, 192  ; @0197
+        adress -1, 10000  ; @019e
+        say_if_found 0, 4, -1, "CLR Die Tür ist solide und hat weder Schloß noch Türgriff."  ; @01a3
+        if3 34, 0, -62, 9, 0, 1, -62, 2, 1, 0, -62, 7, L_023c  ; @01cd
+        if 3, 1009, -62, -54, L_0217  ; @01e8
+        add_say_window2 -1, -1000, -1000, "CLR Besser nicht. Ich bin froh, daß sie offen ist."  ; @01f3
+        return_found  ; @0216
+L_0217:
+        add_say_window2 -1, -1000, -1000, "CLR Ich kann die Tür nicht öffnen. NW Sie hat keinen Griff."  ; @0217
+        return_found  ; @023b
+L_023c:
+        if2 10, 0, -62, 9, 0, 2, -62, 1009, L_02bc  ; @023c
+        add_say_window2 -1, -1000, -1000, "CLR Ich könnte natürlich die geschlossene Tür verkeilen.. NW ..und damit alle Leute die drin sind einsperren! NW Geniale Idee! NW Leider hat der Programmierer nicht an diese Möglichkeit gedacht..."  ; @024f
+        return_found  ; @02bb
+L_02bc:
+        if2 10, 0, -62, 9, 0, 2, -62, 1005, L_02ef  ; @02bc
+        add_say_window2 -1, -1000, -1000, "CLR Die Tür hat weder Schlüsselloch, noch Griff."  ; @02cf
+        return_found  ; @02ee
+L_02ef:
+        if2 10, 0, -62, 9, 0, 2, -62, 1048, L_0322  ; @02ef
+        add_say_window2 -1, -1000, -1000, "CLR Die Tür hat weder Schlüsselloch, noch Griff."  ; @0302
+        return_found  ; @0321
+L_0322:
+        return_not_found  ; @0322
+        blend_out 2  ; @0323
+        remove_statists  ; @0326
+        set_person -1, 1, 160, 23, 160, 0, -1, 0  ; @0327
+        call_proc 9  ; @0337
+        blend_out 2  ; @033a
+        remove_statists  ; @033d
+        set_person -1, 320, 175, 300, 175, 0, -1, 0  ; @033e
+        call_proc 12  ; @034e
+        blend_out 2  ; @0351
+        remove_statists  ; @0354
+        if 2, 33, -62, 1, L_0588  ; @0355
+        if_wasnt_here 126, L_0588  ; @0360
+        clear_screen_init  ; @0365
+        set_person -1, 800, 97, 0, 0, 0, -1, 10  ; @0366
+        load_bild 4, 5, 6  ; @0376
+        blend 100, 100, 100  ; @037d
+        add_person 2, 121, 133, 121, 133, 0, 0, 0  ; @0384
+        add_person 3, 152, 133, 152, 133, 0, 0, 0  ; @0394
+        add_person 4, 135, 139, 135, 139, 16384, 0, 0  ; @03a4
+        add_person 22, 233, 155, 0, 0, 16384, 0, 10  ; @03b4
+        add_person 23, 240, 154, 0, 0, 16384, 0, 10  ; @03c4
+        add_person 24, 247, 153, 0, 0, 16384, 0, 10  ; @03d4
+        add_person 25, 254, 153, 0, 0, 16384, 0, 10  ; @03e4
+        add_person 26, 261, 152, 0, 0, 16384, 0, 10  ; @03f4
+        set_person_z 4, -100  ; @0404
+        get_person_y -1, 31  ; @0409
+        if 2, 31, -61, 100, L_0439  ; @040e
+        set_person 2, 0, 0, 0, 0, 16384, -16385, 53  ; @0419
+        set_person 3, 0, 0, 0, 0, 16384, -16385, 53  ; @0429
+L_0439:
+        if2 10, 57, -62, 1, 1, 57, -62, 4, L_045c  ; @0439
+        add_person 60, 202, 148, 0, 0, 16384, 0, 10  ; @044c
+L_045c:
+        if2 14, 57, -62, 3, 0, 1038, -62, -55, L_047f  ; @045c
+        add_person 67, 186, 169, 0, 0, 16384, 0, 10  ; @046f
+L_047f:
+        if 2, 72, -62, 1, L_049f  ; @047f
+        add_person 102, 24, 50, 0, 0, 16384, 0, 10  ; @048a
+        set_person_z 102, 88  ; @049a
+L_049f:
+        blend_in 8  ; @049f
+        say_properties 4, 28, 26, 2  ; @04a2
+        add_person 28, 330, 185, 0, 0, 1024, 0, 10  ; @04ab
+        walk_person 28, 319, 185  ; @04bb
+        add_say_window2 28, -1000, -1000, "Ich kann Jack doch nicht so im Stich lassen."  ; @04c2
+        walk_person 28, 282, 176  ; @04de
+        adress 28, 10004  ; @04e5
+        say_wait 32000  ; @04ea
+        walk_person 28, 221, 187  ; @04ed
+        walk_person 28, 139, 136  ; @04f4
+        adress 28, 10000  ; @04fb
+        add_say_window2 999, 139, 100, "Tock. Tock."  ; @0500
+        say_wait 32000  ; @0510
+        iwalk 28, 130, 150  ; @0513
+        adress 28, 10000  ; @051a
+        wait 4  ; @051f
+        add_person 21, 142, 129, 142, 129, 16384, 0, 0  ; @0522
+        adress 3, 10006  ; @0532
+        set_person_z 3, -50  ; @0537
+        wait 6  ; @053c
+        blend_out 2  ; @053f
+        clear_screen_init  ; @0542
+        remove_statists  ; @0543
+        load_bild 1, 2, 3  ; @0544
+        blend 100, 100, 100  ; @054b
+        blend_in 2  ; @0552
+        add_person 28, 0, 168, 0, 0, 1024, 0, 10  ; @0555
+        add_say_window2 28, -1000, -1000, "Doch ich kann."  ; @0565
+        walk_person 28, 160, 175  ; @0575
+        walk_person 28, 320, 184  ; @057c
+        blend_out 2  ; @0583
+        clear_screen_init  ; @0586
+        remove_statists  ; @0587
+L_0588:
+        set_person -1, 0, 97, 20, 97, 0, -1, 0  ; @0588
+        call_proc 13  ; @0598
+        blend_out 2  ; @059b
+        remove_statists  ; @059e
+        set_person -1, 320, 97, 300, 97, 0, -1, 0  ; @059f
+        call_proc 13  ; @05af
+        blend_out 2  ; @05b2
+        remove_statists  ; @05b5
+        set_person -1, 267, 161, 230, 161, 0, -1, 0  ; @05b6
+        call_proc 20  ; @05c6

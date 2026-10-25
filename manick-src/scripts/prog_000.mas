@@ -1,0 +1,274 @@
+; MOAS script, program 0 (GAME.3). Assembled by moas-util pack.
+; Labels L_xxxx are named after their original address. The address
+; operand of goto_proc, execute and ontime_jump is a label in the program
+; given by the operand before it. "; @xxxx" comments are the original
+; addresses, as shown by the engine's script debug log.
+
+        var_set_const 25, 1  ; @0000
+        var_set_const 9, 200  ; @0005
+        add_description 2000, "briefkasten"  ; @000a
+        add_description 2001, "schild"  ; @0015
+        add_description 2002, "zaun"  ; @001d
+        add_description 2003, "fenster"  ; @0024
+        add_description 2004, "schrank"  ; @002c
+        add_description 2005, "schrank"  ; @0034
+        add_description 2006, "schrank"  ; @003c
+        add_description 2007, "speiseaufzug"  ; @0044
+        add_description 2008, "bild"  ; @0051
+        add_description 2009, "kaktee"  ; @0059
+        add_description 2010, "käfig"  ; @0062
+        add_description 2011, "schlüssel"  ; @006a
+        add_description 2012, "kronleuchter"  ; @0074
+        add_description 2013, "wasserhahn"  ; @007e
+        add_description 2014, "grab"  ; @0088
+        add_description 2015, "nagel"  ; @008f
+        add_description 2016, "posteingang"  ; @0097
+        add_description 2017, "papierkorb"  ; @00a2
+        add_description 2018, "verstaubte_tür"  ; @00ad
+        add_description 2019, "klappe"  ; @00ba
+        add_description 2020, "hornissennest"  ; @00c3
+        add_description 2021, "kiste"  ; @00ce
+        add_description 2022, "kamin"  ; @00d5
+        add_description 2023, "teleskop"  ; @00dd
+        add_description 2024, "disketten"  ; @00e7
+        add_description 2025, "computer"  ; @00f2
+        add_description 2026, "monitor"  ; @00fb
+        add_description 2027, "abgrund"  ; @0103
+        add_description 2028, "tür"  ; @010c
+        add_description 2029, "sicherheitskühlschrank"  ; @0113
+        add_description 2030, "faxgerät"  ; @0123
+        add_description 2031, "safe"  ; @012e
+        add_description 2032, "knopf"  ; @0136
+        add_description 2033, "öffnung"  ; @013f
+        add_description 2034, "krypta"  ; @0148
+        add_description 2035, "fernseher"  ; @0152
+        add_description 2036, "spielautomat"  ; @015c
+        add_description 2037, "spielautomat"  ; @0167
+        add_description 2038, "einkommenssteuererklärung"  ; @0172
+        add_description 2039, "blumen"  ; @0185
+        add_description 2040, "blumen"  ; @018e
+        add_description 2041, "leiter"  ; @0197
+        add_power_parse 2000, "Schau nach Post"  ; @019e
+        add_power_parse 12000, "Leg %s in Briefkasten"  ; @01ab
+        add_power_parse 2008, "Nimm Bild"  ; @01bd
+        add_power_parse 2010, "Öffne Käfig"  ; @01c9
+        add_power_parse 2018, "Öffne verstaubte Tür"  ; @01d6
+        add_power_parse 2019, "Öffne Klappe"  ; @01e7
+        add_power_parse 2024, "Nimm Disketten"  ; @01f5
+        add_power_parse 12024, "Verseuche %s"  ; @0205
+        add_power_parse 2028, "Tür"  ; @0210
+        add_power_parse 2029, "Öffne Sicherheitskühlschrank"  ; @0217
+        add_power_parse 12030, "Fax %s"  ; @022f
+        add_power_parse 2031, "Öffne Safe"  ; @0239
+        add_power_parse 2039, "Nimm Blumen"  ; @0246
+        add_power_parse 2040, "Nimm Blumen"  ; @0253
+        add_description 1000, "system"  ; @0260
+        add_description 1001, "ghettoblaster"  ; @0268
+        add_description 1002, "zauberstab"  ; @0275
+        add_description 1003, "brief"  ; @027e
+        add_description 1004, "zettel"  ; @0286
+        add_description 1005, "bronzeschlüssel"  ; @028f
+        add_description 1006, "puzzleteil"  ; @029e
+        add_description 1007, "puzzleteil"  ; @02aa
+        add_description 1008, "puzzleteil"  ; @02b6
+        add_description 1009, "holzkeil"  ; @02c2
+        add_description 1010, "dynamitstangen"  ; @02cd
+        add_description 1011, "dose_mit_frühstücksfleisch"  ; @02da
+        add_description 1012, "zuchini"  ; @02f0
+        add_description 1013, "flasche_ketchup"  ; @02f8
+        add_description 1014, "müslipackung"  ; @0307
+        add_description 1015, "sofortbildkamera"  ; @0314
+        add_description 1016, "foto_eines_fotos"  ; @0324
+        add_description 1017, "unscharfes_foto"  ; @0335
+        add_description 1018, "foto_einer_dose"  ; @0344
+        add_description 1019, "foto_einer_zuchini"  ; @0352
+        add_description 1020, "foto_eines_briefkasten"  ; @0362
+        add_description 1021, "foto_einer_flasche_ketchup"  ; @0375
+        add_description 1022, "foto_einer_kaktee"  ; @038c
+        add_description 1023, "foto_einer_müslipackung"  ; @039d
+        add_description 1025, "foto_eines_kaktus"  ; @03b2
+        add_description 1026, "buch"  ; @03c4
+        add_description 1027, "maus"  ; @03ca
+        add_description 1028, "leeres_glas"  ; @03d1
+        add_description 1029, "glas_mit_wasser"  ; @03dd
+        add_description 1030, "blastercard"  ; @03eb
+        add_description 1034, "schmieroel"  ; @03f6
+        add_description 1035, "pinup kalender"  ; @0400
+        add_description 1036, "diskette"  ; @040e
+        add_description 1037, "packung toastbrot"  ; @0418
+        add_description 1038, "paket"  ; @0427
+        add_description 1039, "aufzugmotor"  ; @0430
+        add_description 1040, "koffer"  ; @043d
+        add_description 1041, "reichlich_geld"  ; @0446
+        add_description 1042, "zeitung"  ; @0452
+        add_description 1043, "foto_vom_mond"  ; @045a
+        add_description 1044, "foto_vom_mond_mit_einer_scheibe_toast"  ; @0469
+        add_description 1045, "messer"  ; @0486
+        add_description 1046, "werbezettel"  ; @048d
+        add_description 1047, "schaufel"  ; @0499
+        add_description 1048, "sicherheitsschlüssel"  ; @04a2
+        set_object 1000, -50  ; @04b0
+        set_object 1001, -55  ; @04b5
+        set_object 1002, -55  ; @04ba
+        set_object 1003, -55  ; @04bf
+        set_object 1004, -55  ; @04c4
+        set_object 1005, -55  ; @04c9
+        set_object 1006, -55  ; @04ce
+        set_object 1007, -55  ; @04d3
+        set_object 1008, -55  ; @04d8
+        set_object 1009, -55  ; @04dd
+        set_object 1010, -55  ; @04e2
+        set_object 1011, -55  ; @04e7
+        set_object 1012, -55  ; @04ec
+        set_object 1013, -55  ; @04f1
+        set_object 1014, -55  ; @04f6
+        set_object 1015, -55  ; @04fb
+        set_object 1016, -55  ; @0500
+        set_object 1017, -55  ; @0505
+        set_object 1018, -55  ; @050a
+        set_object 1019, -55  ; @050f
+        set_object 1020, -55  ; @0514
+        set_object 1021, -55  ; @0519
+        set_object 1022, -55  ; @051e
+        set_object 1023, -55  ; @0523
+        set_object 1024, -55  ; @0528
+        set_object 1025, -55  ; @052d
+        set_object 1026, -55  ; @0532
+        set_object 1027, -55  ; @0537
+        set_object 1028, -55  ; @053c
+        set_object 1029, -55  ; @0541
+        set_object 1030, -55  ; @0546
+        set_object 1031, -55  ; @054b
+        set_object 1032, -55  ; @0550
+        set_object 1033, -55  ; @0555
+        set_object 1034, -55  ; @055a
+        set_object 1035, -55  ; @055f
+        set_object 1036, -55  ; @0564
+        set_object 1037, 21  ; @0569
+        set_object 1038, -55  ; @056e
+        set_object 1039, -55  ; @0573
+        set_object 1040, -55  ; @0578
+        set_object 1041, -55  ; @057d
+        set_object 1042, -55  ; @0582
+        set_object 1043, -55  ; @0587
+        set_object 1044, -55  ; @058c
+        set_object 1045, -55  ; @0591
+        set_object 1046, 7  ; @0596
+        set_object 1047, -55  ; @059b
+        set_object 1048, -55  ; @05a0
+        add_power_parse 1000, "Schau ins System-Menü"  ; @05a5
+        add_power_parse 1024, "Schau ins System-Menü"  ; @05b7
+        add_power_parse 1010, "Zünde Dynamit an"  ; @05c9
+        add_power_parse 1042, "Lies Zeitung"  ; @05d8
+        add_power_parse 11010, "Sprenge %s"  ; @05e3
+        add_power_parse 11015, "Fotografiere %s"  ; @05ee
+        add_power_parse 11030, "Bezahle %s"  ; @05fd
+        add_power_parse 11034, "Schmiere %s"  ; @060a
+        add_power_parse 11005, "Schliesse %s auf"  ; @0615
+        add_power_parse 11048, "Schliesse %s auf"  ; @0623
+        add_description 2, "eingangstür"  ; @0631
+        add_description 3, "eingangstür"  ; @063c
+        add_description 4, "fußmatte"  ; @0647
+        add_description 5, "zettel"  ; @0651
+        add_description 9, "matt"  ; @065a
+        add_description 10, "terry"  ; @0661
+        add_description 11, "ron"  ; @0668
+        add_description 12, "amanda"  ; @066e
+        add_description 13, "drive"  ; @0676
+        add_description 14, "ronda"  ; @067d
+        add_description 22, "vertrocknete_pflanze"  ; @0684
+        add_description 23, "vertrocknete_pflanze"  ; @0695
+        add_description 24, "vertrocknete_pflanze"  ; @06a6
+        add_description 25, "vertrocknete_pflanze"  ; @06b7
+        add_description 26, "vertrocknete_pflanze"  ; @06c8
+        add_description 29, "kühlschrank"  ; @06d9
+        add_description 30, "kellertür"  ; @06e5
+        add_description 21, "zombie-butler"  ; @06f0
+        add_description 33, "sofortbildkamera"  ; @06fd
+        add_description 34, "auge"  ; @070d
+        add_description 35, "puzzleteil"  ; @0713
+        add_description 45, "kaktus"  ; @071f
+        add_description 48, "telefon"  ; @0729
+        add_description 51, "intro"  ; @0731
+        add_description 52, "anleitung"  ; @0738
+        add_description 53, "copyrighthinweise"  ; @0740
+        add_description 55, "kalender"  ; @0750
+        add_description 56, "glas"  ; @0759
+        add_description 57, "ghettoblaster"  ; @0760
+        add_description 59, "ein_brief"  ; @076d
+        add_description 58, "schmieröl"  ; @0777
+        add_description 67, "paket"  ; @0780
+        add_description 85, "buch"  ; @0789
+        add_description 86, "maus"  ; @078f
+        add_description 101, "toaster"  ; @0796
+        add_description 102, "alukoffer"  ; @079e
+        add_description 107, "schaufel"  ; @07a9
+        add_description 112, "tür"  ; @07b2
+        add_description 114, "frau mit lockenwicklern"  ; @07b9
+        add_power_parse 2, "Klopfe an"  ; @07ca
+        add_power_parse 3, "Klopfe an"  ; @07d4
+        add_power_parse 5, "Nimm Zettel"  ; @07de
+        add_power_parse 9, "Nimm Matt mit"  ; @07eb
+        add_power_parse 10, "Nimm Terry mit"  ; @07f8
+        add_power_parse 11, "Nimm Ron mit"  ; @0806
+        add_power_parse 12, "Nimm Amanda mit"  ; @0813
+        add_power_parse 13, "Nimm Drive mit"  ; @0822
+        add_power_parse 14, "Nimm Ronda mit"  ; @0830
+        add_power_parse 30, "Öffne Kellertür"  ; @083e
+        add_power_parse 21, "Rede mit Zombie-Butler"  ; @084e
+        add_power_parse 35, "Nimm Puzzleteil"  ; @0860
+        add_power_parse 33, "Nimm Kamera"  ; @0870
+        add_power_parse 45, "Sprich mit Kaktus"  ; @087c
+        add_power_parse 51, "Schau Intro an"  ; @088b
+        add_power_parse 52, "Lies Anleitung"  ; @0899
+        add_power_parse 53, "Lies Copyrighthinweise"  ; @08a5
+        add_power_parse 67, "Nimm Paket"  ; @08b8
+        add_power_parse 85, "Nimm Buch"  ; @08c5
+        add_power_parse 86, "Nimm Maus"  ; @08cf
+        add_power_parse 107, "Nimm Schaufel"  ; @08da
+        add_power_parse 112, "Öffne Tür"  ; @08e8
+        add_power_parse 114, "Sprich mit Frau"  ; @08f4
+        var_set_const 14, 0  ; @0900
+        var_set_const 20, 1  ; @0905
+        var_set_const 33, 0  ; @090a
+        var_set_const 49, 1  ; @090f
+        var_set_const 39, 1  ; @0914
+        var_set_const 50, 0  ; @0919
+        var_set_const 36, 0  ; @091e
+        var_set_const 37, 0  ; @0923
+        var_set_const 38, 1  ; @0928
+        var_set_const 51, 0  ; @092d
+        var_set_const 52, 0  ; @0932
+        var_set_const 53, 0  ; @0937
+        var_set_const 54, 0  ; @093c
+        var_set_const 55, 1  ; @0941
+        var_set_const 56, 0  ; @0946
+        var_set_const 57, 0  ; @094b
+        var_set_const 40, 0  ; @0950
+        var_set_const 41, 0  ; @0955
+        var_set_const 58, 0  ; @095a
+        var_set_const 42, 1  ; @095f
+        var_set_const 59, 1  ; @0964
+        var_set_const 60, 0  ; @0969
+        var_set_const 61, 0  ; @096e
+        var_set_const 62, 0  ; @0973
+        var_set_const 63, 0  ; @0978
+        var_set_const 64, 0  ; @097d
+        var_set_const 65, 0  ; @0982
+        var_set_const 66, 0  ; @0987
+        var_set_const 44, 0  ; @098c
+        var_set_const 67, 1  ; @0991
+        var_set_const 68, 0  ; @0996
+        var_set_const 43, 0  ; @099b
+        var_set_const 69, 0  ; @09a0
+        var_set_const 70, 0  ; @09a5
+        var_set_const 71, 0  ; @09aa
+        var_set_const 72, 0  ; @09af
+        var_set_const 73, 0  ; @09b4
+        var_set_const 74, 0  ; @09b9
+        var_set_const 75, 0  ; @09be
+        var_set_const 76, 0  ; @09c3
+        say_properties 0, 0, 27, 2  ; @09c8
+        say_properties 2, 45, 25, 2  ; @09d1
+        say_properties 9, 999, 6, 2  ; @09da
+        call_proc 4  ; @09e3

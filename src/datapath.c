@@ -122,11 +122,11 @@ void MoasInitDataPath(const char *argv0)
   const char *env;
   char buf[PATH_MAX];
   char exe_dir[PATH_MAX];
-  char tried[8][PATH_MAX];
+  char tried[9][PATH_MAX];
   int ntried = 0;
 
 #define REMEMBER(p) do { \
-    if (ntried < 8) { \
+    if (ntried < (int)(sizeof(tried) / sizeof(tried[0]))) { \
       const char *_rp = (p); \
       if (_rp != NULL && _rp[0] != '\0') { \
         snprintf(tried[ntried], PATH_MAX, "%s", _rp); \
@@ -159,6 +159,16 @@ void MoasInitDataPath(const char *argv0)
     }
   }
 
+  /* Build tree: manick-src/ packed next to the binary (CMake target gamedata) */
+  dirname_of(argv0, exe_dir, sizeof(exe_dir));
+  snprintf(buf, sizeof(buf), "%s/gamedata", exe_dir);
+  REMEMBER(buf);
+  if (looks_like_data_dir(buf)) {
+    set_data_dir(buf);
+    fprintf(stderr, "moas: data directory ($exe/gamedata): %s\n", data_dir);
+    return;
+  }
+
   REMEMBER("./manick");
   if (looks_like_data_dir("./manick")) {
     set_data_dir("./manick");
@@ -177,8 +187,6 @@ void MoasInitDataPath(const char *argv0)
     fprintf(stderr, "moas: data directory (cwd): %s\n", data_dir);
     return;
   }
-
-  dirname_of(argv0, exe_dir, sizeof(exe_dir));
 
   snprintf(buf, sizeof(buf), "%s/../share/moas", exe_dir);
   REMEMBER(buf);
