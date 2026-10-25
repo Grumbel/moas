@@ -6,6 +6,21 @@
 
 # TODO / Handoff
 
+## Options menu: Save/Load, Settings submenu (2026-10-25)
+- R36S has no other way to reach Save/Load, so the F12 / OPTIONS / pad Back
+  menu now has two pages. Main: RESUME, SAVE, LOAD, SETTINGS, RESTART, QUIT.
+  SETTINGS: LANGUAGE, FULLSCREEN, TOUCH BUTTONS, GAME SPEED, SPEECH SPEED, BACK.
+- SAVE/LOAD close the menu and queue the same command as the overlay
+  buttons (`overlay_pending_cmd`, run by LookKeys). Greyed out and skipped
+  by navigation when `MoasCanOpenSaveMenu()` is false or (LOAD) no save exists;
+  checked once when the menu opens (the game is frozen meanwhile).
+- Esc / Backspace / pad B / right-click: back to the main page from
+  SETTINGS, close from the main page. F12, pad Start/Back, tap outside close.
+- New strings `ui.opt.settings`, `ui.opt.back` (all .po files); SAVE/LOAD
+  reuse `ui.key.save`/`ui.key.load`.
+- Hint line still says "ESC/F12 CLOSES" on the SETTINGS page, where Esc
+  goes back. Tested on desktop under Xvfb; not tested on the R36S yet.
+
 ## Per-language picture overrides (2026-10-22)
 - `lang/<code>/<kind>/<kind>_NNN.png` (kind bild/inv/phase, same names and
   format as `moas-util unpack`: 8-bit indexed, game palette indices)

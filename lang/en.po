@@ -204,6 +204,18 @@ msgid "BEENDEN"
 msgstr "QUIT"
 
 #. source UI
+#: ui.opt.settings
+msgctxt "ui.opt.settings"
+msgid "EINSTELLUNGEN"
+msgstr "SETTINGS"
+
+#. source UI
+#: ui.opt.back
+msgctxt "ui.opt.back"
+msgid "ZURUECK"
+msgstr "BACK"
+
+#. source UI
 #: ui.opt.on
 msgctxt "ui.opt.on"
 msgid "AN"

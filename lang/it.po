@@ -204,6 +204,18 @@ msgid "BEENDEN"
 msgstr "ESCI"
 
 #. source UI
+#: ui.opt.settings
+msgctxt "ui.opt.settings"
+msgid "EINSTELLUNGEN"
+msgstr "IMPOSTAZIONI"
+
+#. source UI
+#: ui.opt.back
+msgctxt "ui.opt.back"
+msgid "ZURUECK"
+msgstr "INDIETRO"
+
+#. source UI
 #: ui.opt.on
 msgctxt "ui.opt.on"
 msgid "AN"

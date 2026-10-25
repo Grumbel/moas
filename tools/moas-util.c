@@ -628,6 +628,8 @@ static void extract_ui_strings(void)
     { "ui.opt.restart", "NEU STARTEN" },
     { "ui.opt.restart_sure", "NEU STARTEN - SICHER?" },
     { "ui.opt.quit", "BEENDEN" },
+    { "ui.opt.settings", "EINSTELLUNGEN" },
+    { "ui.opt.back", "ZURUECK" },
     { "ui.opt.on", "AN" },
     { "ui.opt.off", "AUS" },
     { "ui.key.save", "SPEICHERN" },

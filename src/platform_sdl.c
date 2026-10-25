@@ -1706,9 +1706,17 @@ static void overlay_draw(void)
  */
 static int engine_menu_visible;
 static int restart_armed; /* RESTART clicked once; next click confirms */
+static int eng_page;      /* ENG_PAGE_* */
+static int eng_save_ok, eng_load_ok; /* game is frozen while the menu is open */
 
-enum { ENG_LANG = 0, ENG_FULLSCREEN, ENG_TOUCH, ENG_SPEED, ENG_SPEECH,
-       ENG_RESUME, ENG_RESTART, ENG_QUIT, ENG_COUNT };
+/*
+ * Two pages: the main one (RESUME..QUIT) and SETTINGS (LANG..BACK).
+ * Rows are drawn in enum order; a page shows the rows in its range.
+ */
+enum { ENG_RESUME = 0, ENG_SAVE, ENG_LOAD, ENG_SETTINGS, ENG_RESTART, ENG_QUIT,
+       ENG_LANG, ENG_FULLSCREEN, ENG_TOUCH, ENG_SPEED, ENG_SPEECH, ENG_BACK,
+       ENG_COUNT };
+enum { ENG_PAGE_MAIN = 0, ENG_PAGE_SETTINGS };
 
 typedef struct {
   SDL_Rect panel;
@@ -1789,25 +1797,59 @@ static int is_touch_device(void)
 
 static int eng_row_visible(int i)
 {
+  if ((i >= ENG_LANG) != (eng_page == ENG_PAGE_SETTINGS))
+    return 0;
   if (i == ENG_TOUCH)
     return !(overlay_on && is_touch_device());
   return 1;
 }
 
-/* Next visible row in direction dir (+1/-1); dir 0 keeps sel if visible. */
+/* Visible but greyed out: SAVE/LOAD when LookKeys would not honour them. */
+static int eng_row_enabled(int i)
+{
+  if (i == ENG_SAVE)
+    return eng_save_ok;
+  if (i == ENG_LOAD)
+    return eng_load_ok;
+  return 1;
+}
+
+static int eng_row_selectable(int i)
+{
+  return eng_row_visible(i) && eng_row_enabled(i);
+}
+
+/* Next selectable row in direction dir (+1/-1); dir 0 keeps sel if selectable. */
 static int eng_step(int sel, int dir)
 {
   int n;
   if (dir == 0) {
-    if (eng_row_visible(sel))
+    if (eng_row_selectable(sel))
       return sel;
     dir = 1;
   }
   for (n = 0; n < ENG_COUNT; n++) {
     sel = (sel + dir + ENG_COUNT) % ENG_COUNT;
-    if (eng_row_visible(sel))
+    if (eng_row_selectable(sel))
       break;
   }
+  return sel;
+}
+
+static int eng_open_page(int page)
+{
+  eng_page = page;
+  return eng_step(page == ENG_PAGE_SETTINGS ? ENG_LANG : ENG_RESUME, 0);
+}
+
+/* Esc / B / right-click: SETTINGS goes back to the main page, which closes. */
+static int eng_back(int sel)
+{
+  if (eng_page == ENG_PAGE_SETTINGS) {
+    eng_page = ENG_PAGE_MAIN;
+    return ENG_SETTINGS;
+  }
+  engine_menu_visible = 0;
   return sel;
 }
 
@@ -1844,7 +1886,7 @@ static void eng_layout(EngLayout *L)
     L->item[i].w = L->panel.w - 8 * u;
     L->item[i].h = row_h - u;
     L->value[i] = L->item[i];
-    if (i <= ENG_SPEECH) {
+    if (i >= ENG_LANG && i <= ENG_SPEECH) {
       L->value[i].w = 9 * 6 * u;
       L->value[i].x = L->item[i].x + L->item[i].w - L->value[i].w - 2 * u;
     } else
@@ -1857,7 +1899,8 @@ static int eng_hit(const EngLayout *L, int x, int y)
 {
   int i;
   for (i = 0; i < ENG_COUNT; i++)
-    if (x >= L->item[i].x && x < L->item[i].x + L->item[i].w &&
+    if (eng_row_selectable(i) &&
+        x >= L->item[i].x && x < L->item[i].x + L->item[i].w &&
         y >= L->item[i].y && y < L->item[i].y + L->item[i].h)
       return i;
   return -1;
@@ -1883,7 +1926,7 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
   int out_w = 640, out_h = 400, i, u = L->u;
   SDL_Rect dim, rim, bar;
   char val[16];
-  const char *title = Ui(UI_OPT_TITLE);
+  const char *title = Ui(eng_page == ENG_PAGE_SETTINGS ? UI_OPT_SETTINGS : UI_OPT_TITLE);
   const char *hint = Ui(overlay_on ? UI_OPT_HINT_TOUCH : UI_OPT_HINT_KEYS);
 
   SDL_GetRendererOutputSize(renderer, &out_w, &out_h);
@@ -1941,6 +1984,18 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
       case ENG_RESUME:
         label = Ui(UI_OPT_RESUME);
         break;
+      case ENG_SAVE:
+        label = Ui(UI_KEY_SAVE);
+        break;
+      case ENG_LOAD:
+        label = Ui(UI_KEY_LOAD);
+        break;
+      case ENG_SETTINGS:
+        label = Ui(UI_OPT_SETTINGS);
+        break;
+      case ENG_BACK:
+        label = Ui(UI_OPT_BACK);
+        break;
       case ENG_RESTART:
         label = Ui(restart_armed ? UI_OPT_RESTART_SURE : UI_OPT_RESTART);
         break;
@@ -1954,8 +2009,10 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
       ui_draw_label(v->x, ty, "<", u, 150, 170, 210);
       ui_draw_label(v->x + v->w - 5 * u, ty, ">", u, 150, 170, 210);
       ui_draw_label(v->x + (v->w - ui_text_width(val, u)) / 2, ty, val, u, 255, 230, 140);
-    } else {
+    } else if (eng_row_enabled(i)) {
       ui_draw_label(it->x + (it->w - ui_text_width(label, u)) / 2, ty, label, u, 255, 255, 255);
+    } else {
+      ui_draw_label(it->x + (it->w - ui_text_width(label, u)) / 2, ty, label, u, 100, 100, 120);
     }
   }
   {
@@ -1969,8 +2026,8 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
-/* dir: +1 next / activate, -1 previous. */
-static void eng_menu_change(int sel, int dir)
+/* dir: +1 next / activate, -1 previous. Returns the new selection. */
+static int eng_menu_change(int sel, int dir)
 {
   const char *code;
   switch (sel) {
@@ -2001,12 +2058,28 @@ static void eng_menu_change(int sel, int dir)
       if (dir > 0)
         engine_menu_visible = 0;
       break;
+    case ENG_SAVE:
+    case ENG_LOAD:
+      /* Same path as the overlay buttons: LookKeys opens LoadSaveMenu. */
+      if (dir > 0 && eng_row_enabled(sel)) {
+        overlay_pending_cmd = (sel == ENG_SAVE) ? 1 : 2;
+        engine_menu_visible = 0;
+      }
+      break;
+    case ENG_SETTINGS:
+      if (dir > 0)
+        return eng_open_page(ENG_PAGE_SETTINGS);
+      break;
+    case ENG_BACK:
+      if (dir > 0)
+        return eng_back(sel);
+      break;
     case ENG_RESTART:
       /* Autosave makes this the only way back to the intro; ask twice. */
       if (dir > 0) {
         if (!restart_armed) {
           restart_armed = 1;
-          return;
+          return sel;
         }
         engine_menu_visible = 0;
         PlatformRequestRestart();
@@ -2019,6 +2092,7 @@ static void eng_menu_change(int sel, int dir)
       }
       break;
   }
+  return sel;
 }
 
 /* ---- Key hints (start screen and options menu) -------------------------- */
@@ -2124,6 +2198,9 @@ void PlatformEngineMenu(void)
   in_menu = 1;
   engine_menu_visible = 1;
   restart_armed = 0;
+  eng_save_ok = MoasCanOpenSaveMenu();
+  eng_load_ok = eng_save_ok && MoasAnySaveExists();
+  sel = eng_open_page(ENG_PAGE_MAIN);
   while (engine_menu_visible && running) {
     eng_layout(&L);
     sel = eng_step(sel, 0);
@@ -2159,16 +2236,18 @@ void PlatformEngineMenu(void)
           SDL_Keycode k = ev.key.keysym.sym;
           if (is_fullscreen_key(&ev.key))
             eng_toggle_fullscreen();
-          else if (k == SDLK_ESCAPE || k == SDLK_F12 || k == SDLK_AC_BACK)
+          else if (k == SDLK_F12)
             engine_menu_visible = 0;
+          else if (k == SDLK_ESCAPE || k == SDLK_AC_BACK || k == SDLK_BACKSPACE)
+            sel = eng_back(sel);
           else if (k == SDLK_UP || k == SDLK_w)
             sel = eng_step(sel, -1);
           else if (k == SDLK_DOWN || k == SDLK_s)
             sel = eng_step(sel, 1);
           else if (k == SDLK_LEFT)
-            eng_menu_change(sel, -1);
+            sel = eng_menu_change(sel, -1);
           else if (k == SDLK_RIGHT || k == SDLK_RETURN || k == SDLK_KP_ENTER || k == SDLK_SPACE)
-            eng_menu_change(sel, 1);
+            sel = eng_menu_change(sel, 1);
           break;
         }
         case SDL_CONTROLLERBUTTONDOWN:
@@ -2180,14 +2259,16 @@ void PlatformEngineMenu(void)
               sel = eng_step(sel, 1);
               break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-              eng_menu_change(sel, -1);
+              sel = eng_menu_change(sel, -1);
               break;
             case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
             case SDL_CONTROLLER_BUTTON_A:
             case SDL_CONTROLLER_BUTTON_X:
-              eng_menu_change(sel, 1);
+              sel = eng_menu_change(sel, 1);
               break;
             case SDL_CONTROLLER_BUTTON_B:
+              sel = eng_back(sel);
+              break;
             case SDL_CONTROLLER_BUTTON_START:
             case SDL_CONTROLLER_BUTTON_BACK:
               engine_menu_visible = 0;
@@ -2216,7 +2297,7 @@ void PlatformEngineMenu(void)
             break;
           if (ev.button.button == SDL_BUTTON_RIGHT) {
             if (ev.type == SDL_MOUSEBUTTONUP)
-              engine_menu_visible = 0;
+              sel = eng_back(sel);
             break;
           }
           if (ev.button.button != SDL_BUTTON_LEFT)
@@ -2252,7 +2333,7 @@ void PlatformEngineMenu(void)
       } else if (up) {
         int i = eng_hit(&L, px, py);
         if (i >= 0 && i == pressed)
-          eng_menu_change(i, eng_dir_at(&L, i, px));
+          sel = eng_menu_change(i, eng_dir_at(&L, i, px));
         else if (outside && !eng_in_panel(&L, px, py))
           engine_menu_visible = 0;
         pressed = -1;
