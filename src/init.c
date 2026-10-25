@@ -32,6 +32,7 @@
 #include "datapath.h"
 #endif
 #include "mapfile_disk.h"
+#include "log.h"
 
 #define D32RealSeg(P)   ((((uLong) (P)) >> 4) & 0xFFFF)
 #define D32RealOff(P)   (((uLong) (P)) & 0xF)
@@ -281,7 +282,7 @@ void InitMapData(void)
 #ifdef DOS
     InternalError(1022);
 #else
-    fprintf(stderr, "moas: Phase[0] expected 44x40x3, got %ldx%ldx%ld\n",
+    MoasLog("moas: Phase[0] expected 44x40x3, got %ldx%ldx%ld\n",
             (long)Phase[0].x, (long)Phase[0].y, (long)Phase[0].Anz);
 #endif
   }
@@ -290,7 +291,7 @@ void InitMapData(void)
 #ifdef DOS
     InternalError(1022);
 #else
-    fprintf(stderr, "moas: Phase[1] (Bewege arrows) expected 30x30x16, got %ldx%ldx%ld\n",
+    MoasLog("moas: Phase[1] (Bewege arrows) expected 30x30x16, got %ldx%ldx%ld\n",
             (long)Phase[1].x, (long)Phase[1].y, (long)Phase[1].Anz);
 #endif
   }
@@ -422,14 +423,14 @@ void CoreMakeMegaTable(unsigned char *Table3D)
 }
 void ChkAuthorisation(void)
 {
-  fprintf(stderr, "ChkAuthorisation entered\n");
+  MoasLog("ChkAuthorisation entered\n");
   short ifil;
   CHKSUM File;
 
   /* ifil=ChkOpen("PIZZZA.MAP",READ); */
   ifil=ChkOpen("GAME.MAP",READ);
   if (ifil < 0) {
-    fprintf(stderr, "ChkAuthorisation: no MAP file, skipping\n");
+    MoasLog("ChkAuthorisation: no MAP file, skipping\n");
     return;
   }
   ChkRead(ifil,(char*)&File,4);

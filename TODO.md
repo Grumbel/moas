@@ -6,6 +6,20 @@
 
 # TODO / Handoff
 
+## Port diagnostics go through MoasLog (2026-10-26)
+- `src/log.{h,c}`: `MoasLog(fmt, ...)`, one line per call. Desktop/wasm →
+  stderr, Android → SDL_Log, DOS → `MOAS.LOG` in the CWD (truncated per run,
+  flushed per line), so nothing draws over the VGA screen.
+- All port-side `fprintf(stderr, ...)` and the local helpers (`data_log`,
+  `MOAS_IO_LOG`, `platform_log`) now use it.
+- Original DOS console output kept where it runs in text mode: licence line
+  at startup, `InternalError` after `_setvideomode(_DEFAULTMODE)`, master-mode
+  dumps (`GetRealPersonNum`, label export). Missing-data-file and
+  unknown-opcode messages printed over the graphics screen and waited for a
+  key; they now go to the log and InternalError reports directly.
+- CLI output (`--help`, `--version`, option errors) stays on stdout/stderr.
+- `MoasDbg` is still a no-op on DOS; could route to MoasLog if needed.
+
 ## Game data built from manick-src/ (2026-10-25)
 - `manick-src/` = `moas-util unpack` of `manick/`, PNGs recompressed with
   `oxipng -o 4 --nx --strip safe` (6.8 MB → 1.7 MB; `--nx` keeps palettes

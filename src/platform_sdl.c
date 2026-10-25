@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "settings.h"
 #include "version.h"
+#include "log.h"
 
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
@@ -261,20 +262,6 @@ static int dos_ext_getch(SDL_Scancode sc)
 
 static void ov_free_icons(void);
 
-static void platform_log(const char *fmt, ...)
-{
-  char buf[512];
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(buf, sizeof(buf), fmt, ap);
-  va_end(ap);
-#ifdef __ANDROID__
-  SDL_Log("%s", buf);
-#else
-  fprintf(stderr, "%s\n", buf);
-#endif
-}
-
 #ifdef __ANDROID__
 
 /* Game data files staged under APK assets/ by mk/android/scripts/build-apk.sh.
@@ -497,7 +484,7 @@ void PlatformAndroidPrepareData(void) { /* no-op on non-Android */ }
 int PlatformInit(void)
 {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER) < 0) {
-    platform_log("SDL_Init failed: %s", SDL_GetError());
+    MoasLog("SDL_Init failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -533,7 +520,7 @@ int PlatformInit(void)
     }
   }
   if (!window) {
-    platform_log("SDL_CreateWindow failed: %s", SDL_GetError());
+    MoasLog("SDL_CreateWindow failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -542,7 +529,7 @@ int PlatformInit(void)
   if (!renderer)
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
   if (!renderer) {
-    platform_log("SDL_CreateRenderer failed: %s", SDL_GetError());
+    MoasLog("SDL_CreateRenderer failed: %s", SDL_GetError());
     return -1;
   }
 
@@ -554,13 +541,13 @@ int PlatformInit(void)
                               SDL_TEXTUREACCESS_STREAMING,
                               LOGICAL_W, LOGICAL_H);
   if (!texture) {
-    platform_log("SDL_CreateTexture failed: %s", SDL_GetError());
+    MoasLog("SDL_CreateTexture failed: %s", SDL_GetError());
     return -1;
   }
 
   pixels = (Uint32 *)malloc(LOGICAL_W * LOGICAL_H * sizeof(Uint32));
   if (!pixels) {
-    platform_log("Out of memory for pixel buffer");
+    MoasLog("Out of memory for pixel buffer");
     return -1;
   }
 
@@ -574,7 +561,7 @@ int PlatformInit(void)
   {
     int w = 0, h = 0;
     SDL_GetWindowSize(window, &w, &h);
-    platform_log("PlatformInit ok: window %dx%d scale=%d fullscreen=%d",
+    MoasLog("PlatformInit ok: window %dx%d scale=%d fullscreen=%d",
                  w, h, SCALE, moas_fullscreen == 1);
   }
   /* Prefer XInput/standard mappings when present. */
@@ -585,13 +572,13 @@ int PlatformInit(void)
       if (SDL_IsGameController(i)) {
         pad = SDL_GameControllerOpen(i);
         if (pad) {
-          platform_log("gamepad: %s", SDL_GameControllerName(pad));
+          MoasLog("gamepad: %s", SDL_GameControllerName(pad));
           break;
         }
       }
     }
     if (!pad)
-      platform_log("gamepad: none at startup (hotplug ok)");
+      MoasLog("gamepad: none at startup (hotplug ok)");
   }
   return 0;
 }
@@ -1516,7 +1503,7 @@ static void overlay_set_enabled(int on)
       SDL_SetWindowSize(window, w, h);
   }
 #endif
-  platform_log("touch controls %s", on ? "on" : "off");
+  MoasLog("touch controls %s", on ? "on" : "off");
 }
 
 static int is_touch_device(void);
@@ -1746,7 +1733,7 @@ const char *PlatformPreferredLanguage(void)
     if (LangFind(code))
       lang = LangFind(code);
   }
-  platform_log("os locale: %s -> %s",
+  MoasLog("os locale: %s -> %s",
                (loc && loc[0].language) ? loc[0].language : "?", lang);
   SDL_free(loc);
 #endif
@@ -2565,14 +2552,14 @@ static void pad_device_event(const SDL_Event *ev)
     if (!pad) {
       pad = SDL_GameControllerOpen(ev->cdevice.which);
       if (pad)
-        platform_log("gamepad connected: %s", SDL_GameControllerName(pad));
+        MoasLog("gamepad connected: %s", SDL_GameControllerName(pad));
     }
   } else if (ev->type == SDL_CONTROLLERDEVICEREMOVED) {
     if (pad && ev->cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad))) {
       SDL_GameControllerClose(pad);
       pad = NULL;
       pad_use = pad_look = 0;
-      platform_log("gamepad disconnected");
+      MoasLog("gamepad disconnected");
     }
   }
 }

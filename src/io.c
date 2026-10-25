@@ -34,17 +34,8 @@
 #include "datapath.h"
 #include "debug.h"
 #include "settings.h"
+#include "log.h"
 #include <errno.h>
-#ifdef __ANDROID__
-#include <android/log.h>
-#include <SDL.h>
-#define MOAS_IO_LOG(...) do { \
-  __android_log_print(ANDROID_LOG_INFO, "MOAS", __VA_ARGS__); \
-  SDL_Log(__VA_ARGS__); \
-} while (0)
-#else
-#define MOAS_IO_LOG(...) fprintf(stderr, __VA_ARGS__)
-#endif
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -332,7 +323,7 @@ short DataOpen(short Num)
 #ifndef DOS
     MoasReportMissingData(Name);
 #else
-    puts(Name); getch();
+    MoasLog("moas: cannot open data file '%s'", Name);
 #endif
     InternalError(1002);
   }
@@ -344,7 +335,7 @@ void LadeProgramm(short Num)
   if (Num < 0)
     return;
   if (Num>=AnzProgramme) {
-    fprintf(stderr, "moas: LadeProgramm(%d) out of range (AnzProgramme=%d)\n",
+    MoasLog("moas: LadeProgramm(%d) out of range (AnzProgramme=%d)\n",
             (int)Num, (int)AnzProgramme);
     InternalError(1025);
   }
@@ -384,13 +375,13 @@ void LadePhase(short Num)
   if (Num < 0)
     return; /* unused person / not yet assigned */
   if (Num>=AnzPhasen) {
-    fprintf(stderr, "moas: LadePhase(%d) out of range (AnzPhasen=%d)\n",
+    MoasLog("moas: LadePhase(%d) out of range (AnzPhasen=%d)\n",
             (int)Num, (int)AnzPhasen);
     InternalError(1022);
   }
   if (Phase[Num].Data) return;
   if (Phase[Num].Length <= 0 || Phase[Num].x <= 0 || Phase[Num].y <= 0) {
-    fprintf(stderr, "moas: LadePhase(%d): empty/invalid (len=%ld x=%ld y=%ld)\n",
+    MoasLog("moas: LadePhase(%d): empty/invalid (len=%ld x=%ld y=%ld)\n",
             (int)Num, (long)Phase[Num].Length, (long)Phase[Num].x, (long)Phase[Num].y);
     Phase[Num].Data = (uChar *)MALLOC(1);
     return;
@@ -550,11 +541,11 @@ void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSu
     return;
   }
   if (FileNum < 1) {
-    fprintf(stderr,
+    MoasLog(
             "moas: LadeBereich: bad FileNum=%d pos=%ld len=%ld (skipping stub)\n",
             (int)FileNum, (long)FilePos, (long)Length);
 #ifndef DOS
-    fprintf(stderr, "  data dir: %s\n", MoasDataDir());
+    MoasLog("  data dir: %s\n", MoasDataDir());
 #endif
     /* Original data never uses FileNum 0 for real resources; treat as empty. */
     if (Length <= 1)
@@ -562,7 +553,7 @@ void LadeBereich(char FileNum,long FilePos,long Length,char *Data,CHKSUM CheckSu
     InternalError(1002);
   }
   if (Data == NULL) {
-    fprintf(stderr, "moas: LadeBereich: NULL buffer FileNum=%d len=%ld\n",
+    MoasLog("moas: LadeBereich: NULL buffer FileNum=%d len=%ld\n",
             (int)FileNum, (long)Length);
     InternalError(1000);
   }
@@ -660,7 +651,7 @@ int SaveGameToFile(const char *path, int quiet)
   unsigned short px, py;
 
   if (!path || !path[0]) {
-    fprintf(stderr, "moas: SaveGameToFile: empty path\n");
+    MoasLog("moas: SaveGameToFile: empty path\n");
     return -1;
   }
 
@@ -676,7 +667,7 @@ int SaveGameToFile(const char *path, int quiet)
 #endif
     );
   if (ofil < 0) {
-    fprintf(stderr, "moas: SaveGameToFile: cannot create '%s' (errno=%d)\n", path, errno);
+    MoasLog("moas: SaveGameToFile: cannot create '%s' (errno=%d)\n", path, errno);
     if (!quiet)
       DisplayMessage((char *)Ui(UI_SAVE_FAIL), 253);
     FREE(MiniPic);
@@ -745,7 +736,7 @@ int SaveGameToFile(const char *path, int quiet)
   {
     CHKSUM Check = GetChk();
     if (write(ofil, (char *)&Check, sizeof(CHKSUM)) != (int)sizeof(CHKSUM)) {
-      fprintf(stderr, "moas: SaveGameToFile: checksum write failed for '%s'\n", path);
+      MoasLog("moas: SaveGameToFile: checksum write failed for '%s'\n", path);
       close(ofil);
       FREE(MiniPic);
       if (!quiet)
@@ -755,7 +746,7 @@ int SaveGameToFile(const char *path, int quiet)
     close(ofil);
   }
   FREE(MiniPic);
-  MOAS_IO_LOG("moas: saved -> %s\n", path);
+  MoasLog("moas: saved -> %s\n", path);
   moas_idbfs_sync();
   return 0;
 }
@@ -766,12 +757,12 @@ int SaveGameSlot(short slot)
   char savpath[512];
 
   if (slot < 0 || slot > 9) {
-    fprintf(stderr, "moas: SaveGameSlot: slot %d out of range 0..9\n", (int)slot);
+    MoasLog("moas: SaveGameSlot: slot %d out of range 0..9\n", (int)slot);
     return -1;
   }
   sprintf(name, "GAME%i.SAV", (int)slot);
   if (MoasStatePath(savpath, sizeof(savpath), name) != 0) {
-    fprintf(stderr, "moas: SaveGameSlot: path too long for %s\n", name);
+    MoasLog("moas: SaveGameSlot: path too long for %s\n", name);
     return -1;
   }
   return SaveGameToFile(savpath, 0);
@@ -794,7 +785,7 @@ void SaveGame(short CallerID)
       }
   if (slot < 0) {
     if (CallerID == 0) {
-      fprintf(stderr, "moas: SaveGame: no slot selected (mouse %d,%d) — click a free slot\n",
+      MoasLog("moas: SaveGame: no slot selected (mouse %d,%d) — click a free slot\n",
               (int)Mouse.x, (int)Mouse.y);
       DisplayMessage((char *)Ui(UI_SLOT_NONE), 253);
     }
@@ -811,7 +802,7 @@ int LoadGameFromFile(const char *path)
   enum PICTYP Typ;
 
   if (!path || !path[0]) {
-    fprintf(stderr, "moas: LoadGameFromFile: empty path\n");
+    MoasLog("moas: LoadGameFromFile: empty path\n");
     return -1;
   }
 
@@ -821,7 +812,7 @@ int LoadGameFromFile(const char *path)
 #endif
     );
   if (ifil < 0) {
-    fprintf(stderr, "moas: LoadGameFromFile: cannot open '%s'\n", path);
+    MoasLog("moas: LoadGameFromFile: cannot open '%s'\n", path);
     return -1;
   }
   close(ifil);
@@ -832,7 +823,7 @@ int LoadGameFromFile(const char *path)
 #endif
     );
   if (ifil < 0) {
-    fprintf(stderr, "moas: LoadGameFromFile: reopen failed '%s'\n", path);
+    MoasLog("moas: LoadGameFromFile: reopen failed '%s'\n", path);
     return -1;
   }
 
@@ -965,7 +956,7 @@ int LoadGameFromFile(const char *path)
   VMouse(3);
   VMouse(1);
 #endif
-  fprintf(stderr, "moas: loaded save '%s'\n", path);
+  MoasLog("moas: loaded save '%s'\n", path);
   return 0;
 }
 
@@ -976,12 +967,12 @@ int LoadGameSlot(short slot)
   char path[512];
 
   if (slot < 0 || slot > 9) {
-    fprintf(stderr, "moas: LoadGameSlot: slot %d out of range 0..9\n", (int)slot);
+    MoasLog("moas: LoadGameSlot: slot %d out of range 0..9\n", (int)slot);
     return -1;
   }
   sprintf(name, "GAME%i.SAV", (int)slot);
   if (MoasStatePath(path, sizeof(path), name) != 0) {
-    fprintf(stderr, "moas: LoadGameSlot: path error\n");
+    MoasLog("moas: LoadGameSlot: path error\n");
     return -1;
   }
   return LoadGameFromFile(path);
@@ -1048,13 +1039,13 @@ static int MoasWriteAutosave(const char *why)
   char tmppath[520];
 
   if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0) {
-    MOAS_IO_LOG("moas: autosave: path too long\n");
+    MoasLog("moas: autosave: path too long\n");
     return -1;
   }
   /* Write a temp file and rename so a kill mid-write keeps the old resume. */
   snprintf(tmppath, sizeof(tmppath), "%s.tmp", savpath);
   if (SaveGameToFile(tmppath, 1) != 0) {
-    MOAS_IO_LOG("moas: autosave (%s) failed (%s)\n", why, tmppath);
+    MoasLog("moas: autosave (%s) failed (%s)\n", why, tmppath);
     remove(tmppath);
     return -1;
   }
@@ -1062,12 +1053,12 @@ static int MoasWriteAutosave(const char *why)
   remove(savpath); /* rename() does not replace on Windows */
 #endif
   if (rename(tmppath, savpath) != 0) {
-    MOAS_IO_LOG("moas: autosave (%s): rename to %s failed (errno=%d)\n",
+    MoasLog("moas: autosave (%s): rename to %s failed (errno=%d)\n",
                 why, savpath, errno);
     remove(tmppath);
     return -1;
   }
-  MOAS_IO_LOG("moas: autosave (%s) ok (%s)\n", why, savpath);
+  MoasLog("moas: autosave (%s) ok (%s)\n", why, savpath);
   moas_idbfs_sync();
   return 0;
 }
@@ -1081,7 +1072,7 @@ void MoasAutosaveOnExit(void)
   if (moas_no_autosave)
     return;
   if (!MoasCanSave()) {
-    MOAS_IO_LOG("moas: autosave on exit skipped (script/dialog running); "
+    MoasLog("moas: autosave on exit skipped (script/dialog running); "
                 "keeping last checkpoint\n");
     return;
   }
@@ -1135,7 +1126,7 @@ void MoasRemoveAutosave(void)
   if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
     return;
   if (remove(savpath) == 0) {
-    MOAS_IO_LOG("moas: removed %s (restart)\n", savpath);
+    MoasLog("moas: removed %s (restart)\n", savpath);
     moas_idbfs_sync();
   }
 }
@@ -1158,9 +1149,9 @@ int MoasTryLoadAutosave(void)
   if (fd < 0)
     return -1;
   close(fd);
-  MOAS_IO_LOG("moas: restoring exit autosave %s\n", savpath);
+  MoasLog("moas: restoring exit autosave %s\n", savpath);
   if (LoadGameFromFile(savpath) != 0) {
-    MOAS_IO_LOG("moas: exit autosave restore failed; starting fresh\n");
+    MoasLog("moas: exit autosave restore failed; starting fresh\n");
     return -1;
   }
 #ifndef DOS
@@ -1185,14 +1176,14 @@ void LoadGame(void)
         short slot = (short)(c + d / 142 * 5);
         sprintf(Name, "GAME%i.SAV", (int)slot);
         if (MoasStatePath(savpath, sizeof(savpath), Name) != 0) {
-          fprintf(stderr, "moas: LoadGame: state path error\n");
+          MoasLog("moas: LoadGame: state path error\n");
           return;
         }
         if (LoadGameFromFile(savpath) != 0)
           DisplayMessage((char *)Ui(UI_LOAD_FAIL), 253);
         return;
       }
-  fprintf(stderr, "moas: LoadGame: no slot selected (mouse %d,%d)\n",
+  MoasLog("moas: LoadGame: no slot selected (mouse %d,%d)\n",
           (int)Mouse.x, (int)Mouse.y);
   DisplayMessage((char *)Ui(UI_SLOT_NONE), 253);
 }

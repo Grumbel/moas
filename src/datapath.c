@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #include "datapath.h"
+#include "log.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -17,24 +18,6 @@
 #if defined(_WIN32) || defined(__WATCOMC__)
 #include <direct.h>
 #endif
-#ifdef __ANDROID__
-#include <SDL.h>
-#endif
-
-static void data_log(const char *fmt, ...)
-{
-  char buf[512];
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(buf, sizeof(buf), fmt, ap);
-  va_end(ap);
-#ifdef __ANDROID__
-  SDL_Log("%s", buf);
-#else
-  fprintf(stderr, "%s\n", buf);
-#endif
-}
-
 #ifndef MOAS_DATADIR
 #define MOAS_DATADIR ""
 #endif
@@ -87,7 +70,7 @@ static void set_data_dir(const char *dir)
       data_dir[--n] = 0;
   }
   data_dir_resolved = 1;
-  data_log("moas: using data directory: %s", data_dir);
+  MoasLog("moas: using data directory: %s", data_dir);
 }
 
 static void dirname_of(const char *path, char *out, size_t outsz)
@@ -140,13 +123,13 @@ void MoasInitDataPath(const char *argv0)
     REMEMBER(env);
     if (looks_like_data_dir(env)) {
       set_data_dir(env);
-      data_log("moas: data directory (env MOAS_DATADIR): %s", data_dir);
+      MoasLog("moas: data directory (env MOAS_DATADIR): %s", data_dir);
       return;
     }
     /* Trust an explicit path even if markers are not found yet (e.g. first
      * extract race); open() will still fail clearly per file. */
     set_data_dir(env);
-    data_log("moas: MOAS_DATADIR set but markers missing, trying anyway: %s", data_dir);
+    MoasLog("moas: MOAS_DATADIR set but markers missing, trying anyway: %s", data_dir);
     return;
   }
 
@@ -154,7 +137,7 @@ void MoasInitDataPath(const char *argv0)
     REMEMBER(MOAS_DATADIR);
     if (looks_like_data_dir(MOAS_DATADIR)) {
       set_data_dir(MOAS_DATADIR);
-      fprintf(stderr, "moas: data directory (built-in): %s\n", data_dir);
+      MoasLog("moas: data directory (built-in): %s\n", data_dir);
       return;
     }
   }
@@ -165,26 +148,26 @@ void MoasInitDataPath(const char *argv0)
   REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
-    fprintf(stderr, "moas: data directory ($exe/gamedata): %s\n", data_dir);
+    MoasLog("moas: data directory ($exe/gamedata): %s\n", data_dir);
     return;
   }
 
   REMEMBER("./manick");
   if (looks_like_data_dir("./manick")) {
     set_data_dir("./manick");
-    fprintf(stderr, "moas: data directory (./manick): %s\n", data_dir);
+    MoasLog("moas: data directory (./manick): %s\n", data_dir);
     return;
   }
   REMEMBER("manick");
   if (looks_like_data_dir("manick")) {
     set_data_dir("manick");
-    fprintf(stderr, "moas: data directory (manick): %s\n", data_dir);
+    MoasLog("moas: data directory (manick): %s\n", data_dir);
     return;
   }
   REMEMBER(".");
   if (looks_like_data_dir(".")) {
     set_data_dir(".");
-    fprintf(stderr, "moas: data directory (cwd): %s\n", data_dir);
+    MoasLog("moas: data directory (cwd): %s\n", data_dir);
     return;
   }
 
@@ -192,36 +175,36 @@ void MoasInitDataPath(const char *argv0)
   REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
-    fprintf(stderr, "moas: data directory ($exe/../share/moas): %s\n", data_dir);
+    MoasLog("moas: data directory ($exe/../share/moas): %s\n", data_dir);
     return;
   }
   snprintf(buf, sizeof(buf), "%s/manick", exe_dir);
   REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
-    fprintf(stderr, "moas: data directory ($exe/manick): %s\n", data_dir);
+    MoasLog("moas: data directory ($exe/manick): %s\n", data_dir);
     return;
   }
   snprintf(buf, sizeof(buf), "%s/../manick", exe_dir);
   REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
-    fprintf(stderr, "moas: data directory ($exe/../manick): %s\n", data_dir);
+    MoasLog("moas: data directory ($exe/../manick): %s\n", data_dir);
     return;
   }
 
   set_data_dir(".");
-  fprintf(stderr,
+  MoasLog(
           "moas: WARNING: could not find game data directory.\n"
           "  Expected files like GAME.1, GAME.PCK, LICENCE.DAT.\n"
           "  Searched:\n");
   {
     int i;
     for (i = 0; i < ntried; i++)
-      fprintf(stderr, "    - %s%s\n", tried[i],
+      MoasLog("    - %s%s\n", tried[i],
               is_dir(tried[i]) ? " (exists, but no game files)" : " (missing)");
   }
-  fprintf(stderr,
+  MoasLog(
           "  Fix: set MOAS_DATADIR to the directory that contains GAME.*\n"
           "       e.g. export MOAS_DATADIR=/path/to/manick\n");
 #undef REMEMBER
@@ -309,8 +292,8 @@ static void resolve_state_dir(void)
       snprintf(state_dir, sizeof(state_dir), "%s/moas-state", base);
     }
     if (moas_mkdir_p(state_dir) != 0)
-      data_log("moas: WARNING: could not create Android state dir '%s'", state_dir);
-    data_log("moas: Android state dir: %s", state_dir);
+      MoasLog("moas: WARNING: could not create Android state dir '%s'", state_dir);
+    MoasLog("moas: Android state dir: %s", state_dir);
   }
 #elif defined(_WIN32)
   {
@@ -340,7 +323,7 @@ static void resolve_state_dir(void)
     }
   }
   if (moas_mkdir_p(state_dir) != 0)
-    data_log("moas: WARNING: could not create state dir '%s'", state_dir);
+    MoasLog("moas: WARNING: could not create state dir '%s'", state_dir);
 #endif
   state_dir_ready = 1;
 }
@@ -394,7 +377,7 @@ static void resolve_config_dir(void)
     }
   }
   if (moas_mkdir_p(config_dir) != 0)
-    data_log("moas: WARNING: could not create config dir '%s'", config_dir);
+    MoasLog("moas: WARNING: could not create config dir '%s'", config_dir);
 #endif
   config_dir_ready = 1;
 }
@@ -417,10 +400,10 @@ void MoasLogDirectories(void)
   const char *state = MoasStateDir();
   const char *config = MoasConfigDir();
 
-  data_log("moas: directories:");
-  data_log("  data   (GAME.*):  %s", data ? data : "(null)");
-  data_log("  state  (saves):   %s", state ? state : "(null)");
-  data_log("  config (settings): %s", config ? config : "(null)");
+  MoasLog("moas: directories:");
+  MoasLog("  data   (GAME.*):  %s", data ? data : "(null)");
+  MoasLog("  state  (saves):   %s", state ? state : "(null)");
+  MoasLog("  config (settings): %s", config ? config : "(null)");
 }
 
 
@@ -459,7 +442,7 @@ int MoasOpenState(const char *name, int flags, int mode)
     fd = open(path, flags);
 #endif
   if (fd < 0)
-    data_log("moas: MoasOpenState('%s') failed path=%s", name, path);
+    MoasLog("moas: MoasOpenState('%s') failed path=%s", name, path);
   return fd;
 }
 
@@ -513,18 +496,18 @@ int MoasOpenData(const char *name)
     if (fd >= 0) return fd;
   }
 
-  data_log("moas: MoasOpenData failed for '%s' (dir=%s)", name, data_dir);
+  MoasLog("moas: MoasOpenData failed for '%s' (dir=%s)", name, data_dir);
   return -1;
 }
 
 void MoasReportMissingData(const char *name)
 {
   char cwd[PATH_MAX];
-  data_log("moas: cannot open data file '%s'", name ? name : "(null)");
-  data_log("  data directory: %s", data_dir);
+  MoasLog("moas: cannot open data file '%s'", name ? name : "(null)");
+  MoasLog("  data directory: %s", data_dir);
   if (getcwd(cwd, sizeof(cwd)))
-    data_log("  cwd: %s", cwd);
+    MoasLog("  cwd: %s", cwd);
   else
-    data_log("  cwd: (unknown)");
-  data_log("  Hint: set MOAS_DATADIR or install game data (Android: APK assets)");
+    MoasLog("  cwd: (unknown)");
+  MoasLog("  Hint: set MOAS_DATADIR or install game data (Android: APK assets)");
 }

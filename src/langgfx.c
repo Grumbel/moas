@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "lang.h"
 #include "pngread.h"
+#include "log.h"
 
 static const char *const kind_names[LANGGFX_KINDS] = { "bild", "inv", "phase" };
 
@@ -78,17 +79,17 @@ int LangGfxApply(int kind, int num, unsigned char *dst, int w, int h, int stride
     return 0;
   file = read_whole(path, &len);
   if (!file) {
-    fprintf(stderr, "moas: cannot read %s\n", path);
+    MoasLog("moas: cannot read %s\n", path);
     return 0;
   }
   err = png_read_indexed(file, len, &pw, &ph, &pix, pal, &npal);
   free(file);
   if (err) {
-    fprintf(stderr, "moas: %s: %s\n", path, err);
+    MoasLog("moas: %s: %s\n", path, err);
     return 0;
   }
   if (pw != w || ph != h) {
-    fprintf(stderr, "moas: %s: is %dx%d, the game's picture is %dx%d; ignored\n",
+    MoasLog("moas: %s: is %dx%d, the game's picture is %dx%d; ignored\n",
             path, pw, ph, w, h);
     free(pix);
     return 0;

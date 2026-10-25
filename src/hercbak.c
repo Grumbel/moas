@@ -27,12 +27,13 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "log.h"
 
 void ShowHercBak(void)
 {
   /*
    * Master debug (key '#'): person / say-window dump.
-   * DOS used VGA text mode at 0xB8000; non-DOS prints to stderr only
+   * DOS used VGA text mode at 0xB8000; non-DOS writes to the log only
    * (never write absolute text-mode addresses).
    */
   static unsigned char Buffer[80],B2[20];
@@ -73,8 +74,8 @@ void ShowHercBak(void)
   getch();
   _setvideomode(_MRES256COLOR);
 #else
-  fprintf(stderr, "\n=== ShowHercBak (Master debug) ===\n");
-  fprintf(stderr, "Prs ### x    y    z    tx   ty   Bits\n");
+  MoasLog("\n=== ShowHercBak (Master debug) ===\n");
+  MoasLog("Prs ### x    y    z    tx   ty   Bits\n");
   for (y=0;y<20;y++)
   {
     ltoa(Person[y].Bits,(char *)B2,2);
@@ -86,9 +87,9 @@ void ShowHercBak(void)
     sprintf((char *)Buffer,"%-3i %-3i %-4i %-4i %-4i %-4i %-4i %s",
             y,Person[y].Num,Person[y].x,Person[y].y,Person[y].z,
             Person[y].TargetX,Person[y].TargetY,B2);
-    fprintf(stderr, "%s\n", Buffer);
+    MoasLog("%s\n", Buffer);
   }
-  fprintf(stderr, "SayWin Prs Time Text\n");
+  MoasLog("SayWin Prs Time Text\n");
   for (y=0;y<5;y++)
   {
     if (SayWindow[y].Text)
@@ -99,11 +100,11 @@ void ShowHercBak(void)
     for (;c<15;c++) B2[c]=32;
     B2[15]=0;
     sprintf((char *)Buffer,"  %i     %-2i %-4i %s",c,SayWindow[y].RefPrs,SayWindow[y].Time,B2);
-    fprintf(stderr, "%s\n", Buffer);
+    MoasLog("%s\n", Buffer);
   }
-  fprintf(stderr, "Mouse:[%i|%i] %c%c\n",
+  MoasLog("Mouse:[%i|%i] %c%c\n",
           Mouse.x,Mouse.y,Mouse.Left ? 'L' : ' ',Mouse.Right ? 'R' : ' ');
-  fprintf(stderr, "(press any key to continue)\n");
+  MoasLog("(press any key to continue)\n");
   getch();
 #endif
   Blend(64,1);

@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "moas.h"
+#include "log.h"
 
 #ifndef DOS
 #include "datapath.h"
@@ -390,7 +391,7 @@ static int same_format(const char *orig, const char *tr, const char *what)
       && format_signature(tr, got, sizeof(got)) == 0
       && strcmp(want, got) == 0)
     return 1;
-  fprintf(stderr, "moas: lang: %s: \"%s\" does not match format of \"%s\"; ignored\n",
+  MoasLog("moas: lang: %s: \"%s\" does not match format of \"%s\"; ignored\n",
           what, tr, orig);
   return 0;
 }
@@ -740,9 +741,9 @@ void LangInit(void)
   /* Runtime language pack: only lang/<code>.po */
   if (open_lang_file(path, sizeof(path), "po") == 0) {
     load_po_file(path);
-    fprintf(stderr, "moas: lang %s (%d translated script lines)\n", path, script_n);
+    MoasLog("moas: lang %s (%d translated script lines)\n", path, script_n);
   } else {
-    fprintf(stderr, "moas: lang: missing lang/%s.po - UI/scripts stay German\n",
+    MoasLog("moas: lang: missing lang/%s.po - UI/scripts stay German\n",
             lang_code);
   }
 

@@ -197,7 +197,7 @@ Last reviewed with tip that includes the Bewege arrow cursor fix (`VMouse` + `Ph
 
 | Lines | What | Status | Notes |
 |------:|------|--------|-------|
-| 36–… | Text-mode video for debug HUD | PORTED | Master key `#`: DOS keeps 0xB8000 HUD; non-DOS dumps person/say-window table to stderr, then waits for a key. |
+| 36–… | Text-mode video for debug HUD | PORTED | Master key `#`: DOS keeps 0xB8000 HUD; non-DOS dumps person/say-window table to the log (MoasLog), then waits for a key. |
 
 ---
 

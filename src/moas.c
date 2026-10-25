@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "log.h"
 #include "lang.h"
 #include "debug.h"
 #include "person_disk.h"
@@ -124,7 +125,7 @@ int main(int argc, char **argv)
     else
       rc = LoadGameSlot((short)moas_load_slot);
     if (rc != 0) {
-      fprintf(stderr, "moas: failed to load save from CLI\n");
+      MoasLog("moas: failed to load save from CLI\n");
 #ifndef DOS
       PlatformShutdown();
 #endif
@@ -507,7 +508,7 @@ short Execute(short ProcNum,unsigned short Adresse)
                 return(1);
               }
               Adresse+=7;                                                break;
-      default:printf("x=%i",Prg[Adresse]); getch();
+      default:MoasLog("moas: unknown opcode %i at %u", (int)Prg[Adresse], (unsigned)Adresse);
               InternalError(1017);
     }
   }
@@ -796,12 +797,12 @@ void MoasRegisterStaticNames(void)
       /* call_proc — story begins */
       break;
     } else {
-      fprintf(stderr, "moas: MoasRegisterStaticNames: stop at op=%u addr=%u\n",
+      MoasLog("moas: MoasRegisterStaticNames: stop at op=%u addr=%u\n",
               (unsigned)op, (unsigned)Adresse);
       break;
     }
   }
-  fprintf(stderr, "moas: static names from prog0: %d descriptions, %d verb strings (AnzDescription=%d)\n",
+  MoasLog("moas: static names from prog0: %d descriptions, %d verb strings (AnzDescription=%d)\n",
           n_desc, n_parse, (int)AnzDescription);
 }
 #endif

@@ -30,6 +30,7 @@
 #include "lang.h"
 #include "platform.h"
 #include "debug.h"
+#include "log.h"
 #ifdef __ANDROID__
 #include <SDL.h>
 #include <android/log.h>
@@ -62,7 +63,7 @@ void InternalError(short num)
   __android_log_print(ANDROID_LOG_ERROR, "MOAS", "InternalError %d: %s", (int)num, msg);
   SDL_Log("InternalError %d: %s", (int)num, msg);
 #else
-  fprintf(stderr, "moas: InternalError %d: %s\n", (int)num, msg);
+  MoasLog("moas: InternalError %d: %s\n", (int)num, msg);
   if (num) printf("\nInterner Fehler %i (%s)\n", num, msg);
 #endif
 #ifdef DOS

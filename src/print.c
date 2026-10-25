@@ -30,6 +30,7 @@
 #include "platform.h"
 #include "debug.h"
 #include "lang.h"
+#include "log.h"
 
 char _SPACE_STRING[]=" ";
 
@@ -149,7 +150,7 @@ void PrintWord(char *Text)
 {
   short c,Length=RealStringLength(Text,1);
 
-  if (Length>(Window.x2-Window.x1-1)) { fprintf(stderr,"PrintWord: text too long (%d > %d)\n",(int)Length,(int)(Window.x2-Window.x1-1)); return; }
+  if (Length>(Window.x2-Window.x1-1)) { MoasLog("PrintWord: text too long (%d > %d)\n",(int)Length,(int)(Window.x2-Window.x1-1)); return; }
   if (Window.XPos==-1 || Length>(Window.x2-Window.XPos-1)) NeueZeile();
 
   for (c=0;Text[c];c++)
@@ -219,7 +220,7 @@ short CharNum(unsigned char Char)
     if (Char==CharAvail[c]) return(c);
 
   /* Unknown glyph: do not abort the whole game (data may use rare bytes). */
-  fprintf(stderr, "CharNum: unknown byte %u\n", (unsigned)Char);
+  MoasLog("CharNum: unknown byte %u\n", (unsigned)Char);
   /* Prefer space if present, else first glyph. */
   for (c=0;c<CharAvailL;c++)
     if (CharAvail[c]==' ') return(c);

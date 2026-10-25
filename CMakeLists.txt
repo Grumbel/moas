@@ -69,6 +69,7 @@ set(MOAS_SOURCES
   src/init.c
   src/lang.c
   src/langgfx.c
+  src/log.c
   src/io.c
   src/misc.c
   src/moas.c

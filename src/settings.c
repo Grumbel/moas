@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "lang.h"
 #include "platform.h"
+#include "log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -144,7 +145,7 @@ void MoasSettingsSave(void)
     return;
   f = fopen(tmp, "w");
   if (!f) {
-    fprintf(stderr, "moas: cannot write %s\n", tmp);
+    MoasLog("moas: cannot write %s\n", tmp);
     return;
   }
   if (fputs(text, f) < 0) {
@@ -160,7 +161,7 @@ void MoasSettingsSave(void)
   remove(path); /* rename does not replace on Windows */
 #endif
   if (rename(tmp, path) != 0) {
-    fprintf(stderr, "moas: cannot replace %s\n", path);
+    MoasLog("moas: cannot replace %s\n", path);
     remove(tmp);
     return;
   }

@@ -27,6 +27,7 @@
 // daran verzweifeln. Da ist Java oder Visual Basic besser.
 //--------------------------------------------------------------------------------------------
 #include "moas.h"
+#include "log.h"
 #include <stdint.h>
 #include <string.h>
 #ifndef DOS
@@ -54,7 +55,7 @@ void DigiStartSdlAudio(void)
   SDL_AudioSpec want, have;
   if (SDL_WasInit(SDL_INIT_AUDIO) == 0) {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
-      fprintf(stderr, "moas: SDL audio init failed: %s\n", SDL_GetError());
+      MoasLog("moas: SDL audio init failed: %s\n", SDL_GetError());
       return;
     }
   }
@@ -66,7 +67,7 @@ void DigiStartSdlAudio(void)
   want.callback = digi_audio_callback;
   digi_audio_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
   if (!digi_audio_dev) {
-    fprintf(stderr, "moas: SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
+    MoasLog("moas: SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
     return;
   }
   SDL_PauseAudioDevice(digi_audio_dev, 0);
@@ -343,7 +344,7 @@ void LoadMusic(short Num)
   close(ifil);
   V_Play=1;
 #ifndef DOS
-  fprintf(stderr, "moas: LoadMusic(%d) SongBegin=%d SongEnd=%d\n",
+  MoasLog("moas: LoadMusic(%d) SongBegin=%d SongEnd=%d\n",
           (int)Num, (int)SongBegin, (int)SongEnd);
 #endif
 }
