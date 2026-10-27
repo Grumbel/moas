@@ -72,6 +72,13 @@
   palette indices identical in all rooms (0-79, 160-175, 240-245) plus those
   the original used (phases), or the room palette minus the entries LadeBild
   changes (bild); transparent pixels became index 0.
+- EN phases 35 ("Anleitung" -> "Help") and 36 ("... bei Thomas Holz" ->
+  "... by Thomas Holz"), 2026-10-27. Composed from glyphs cut out of phase
+  36 (red = index 19); the black shadow (index 1) is a fixed dilation of the
+  red pixels, offsets (0,-1) (-1,0) (1,0) (-1,1) (0,1) (1,1) (2,1) (0,2)
+  (1,2), which reproduces phases 34-36 exactly. So more title words can be
+  built from red glyph masks alone. Glyphs available in 34-36: A C H I T
+  a b e g h i l m n o p r s t u y z 1 5 6 9 -. Missing e.g. M, G, d, c, f.
 - Next: EN versions of phases 53-68 (help and copyright pages, persons
   68-83). A first set was too low quality and was left out; replacements
   are needed. For RGB sources, the white background connected to the border
