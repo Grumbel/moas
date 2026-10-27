@@ -1,0 +1,199 @@
+# German text of the phase pictures, by line index as printed by
+# `phasefont.py lines`. Lines not listed are graphics (leader lines,
+# slashes between key pictures) and stay untouched.
+
+== phase_034.png
+0: Intro
+
+== phase_035.png
+0: Anleitung
+
+== phase_036.png
+0: Copyright 1995-1996 bei Thomas Holz
+
+== phase_053.png
+0: Inventar
+1: Systemmenü
+2: Mauscursor
+3: gesprochener Text
+4: Kommandozeile
+5: Spieler
+
+== phase_054.png
+0: Der Mauscursor
+1: Mit der Maus neben ihrem Computer
+2: bewegen Sie den Mauscursor.
+3: Der goldene Mauscursor zeigt, dass hier
+4: etwas interessantes ist.
+5: Ist der Mauscursor grau, dann ist hier
+6: nichts los.
+7: Ist der Mauscursor schraffiert, dann
+8: können Sie nichts eingeben.
+
+== phase_055.png
+0: Das Systemmenü
+1: Mit einem Klick auf die Ikone,
+2: wird das Menü geöffnet.
+3: Hier können Sie die Hilfe verwen-
+4: den, das Projekttagebuch lesen
+5: oder das Spiel verlassen.
+
+== phase_056.png
+0: Das Inventar
+1: Am oberen Bildschirmrand sind
+2: alle Sachen eingeblendet, die sie
+3: dabei haben.
+4: Oft müssen Sie Sachen nehmen,
+5: bevor Sie sie benutzen können.
+
+== phase_057.png
+0: Die Kommandozeile
+1: Oft zeigt sie gar nichts an.
+2: Zeigt der Mauscursor auf ein Objekt
+3: oder eine Person so, wird der Name
+4: angezeigt.
+5: Geben Sie einen Befehl ein,
+6: dann wird er hier angezeigt.
+
+== phase_058.png
+0: Laufen & Ansehen
+1: Klicken Sie mit der rechten Maus-
+2: taste auf den Boden, so bewegt sich
+3: die Spielfigur dorthin.
+4: Oder benutzen Sie die Cursortasten
+6: um den Spieler zu steuern.
+7: Klicken Sie mit der rechten Maus-
+8: taste auf ein Objekt, dann schaut
+9: der Spieler es sich an.
+
+== phase_059.png
+0: Benutzen von Gegenständen
+1: Das Benutzen, Nehmen, Lesen von
+2: Gegenständen und das Sprechen
+3: mit Person geht mit einem Klick.
+4: Um eine dieser Aktionen auszu-
+5: führen, klicken Sie mit der linken
+6: Maustaste auf ein Objekt oder
+7: einer Person.
+
+== phase_060.png
+0: Kombinieren von Gegenständen
+1: Mindestens einer der beiden Dinge
+2: muss man besitzen.
+3: Man klickt im Inventar auf den
+4: ersten und hält den Knopf gedrückt.
+5: Dann zieht man den Mauscursor
+6: zum zweiten Gegenstand.
+7: Dort lässt man den Mausknopf los.
+
+== phase_061.png
+0: Sachen bewegen
+1: Dinge, die man nicht mitnehmen
+2: kann, lassen sich manchmal
+3: bewegen.
+4: Man klickt auf das Objekt und
+5: hält die Taste gedrückt.
+6: Dann zieht man die Maus in die
+7: entsprechende Richtung.
+8: Erst jetzt lässt man die Maus los.
+
+== phase_062.png
+0: Das Systemmenü
+1: Durch drücken auf die Taste
+2: F10 wird das Systemmenü ge-
+3: öffnet.
+4: Es enthält die Einstellungen für
+5: die Musiklautstärke, die Anima-
+6: tionsgeschwindigkeit und die
+7: Sprechgeschwindigkeit.
+8: Mit den Tasten 'Rauf' und 'Runter'
+9: wird das Kriterium gewählt. Mit
+11: 'Links' und 'Rechts' wird es einge-
+12: stellt.
+
+== phase_063.png
+0: Laden & Speichern
+1: Mit F5 wird das Speicher-Menü, mit
+2: F7 das Lade-Menu geöffnet.
+3: Für jeden Spielstand existiert ein
+4: Schnappschuss und eine Kurzbe-
+5: schreibung.
+6: Rechts unten ist ein automatisch
+7: abgespeicherter Spielstand.
+
+== phase_064.png
+0: gesprochener Text
+1: Wenn eine Person etwas sagt, er-
+2: scheint das über ihr und ver-
+3: schwindet nach einger Zeit.
+4: Solange man die Umschalttaste
+5: drückt, wird der Text nicht ver-
+6: schwinden. Man kann in Ruhe lesen.
+7: Lässt man die Umschalttaste los,
+8: dann verschwindet der Text sofort.
+9: Man braucht nicht zu warten.
+
+== phase_065.png
+0: Textfenster
+1: Textfenster zeigen Sachen an,
+2: die (noch) nicht gesagt werden.
+3: Textfenster halten das Spiel an.
+4: Mit einem Klick auf die linke
+5: Maustaste werden sie geschlossen.
+6: Manchmal, z.B. bei Dialogen,
+7: kann man in Textfenstern etwas
+8: auswählen.
+
+== phase_066.png
+0: Copyright & Co.
+1: 1/2
+2: Mänick Mänschion ist Copyright ©
+3: 1995, 1996 bei Thomas Holz,
+4: 45473 Mülheim an der Ruhr.
+5: Das Spiel darf unter folgenden Bedingungen
+6: kopiert und weitergegeben werden:
+7: 1. Es werden alle Dateien zusammen weiterge-
+8: geben. Die Daten werden nicht verändert.
+9: 2. Es wird unentgeltlich, d.h. ohne Gebühr,
+10: Kopierkostenentschädigung, o.ä. weitergegeben.
+
+== phase_067.png
+0: Copyright & Co.
+1: 2/2
+2: Für die kommerzielle Nutzung, der Weiter-
+3: gabe gegen Entgelt oder als Teil eines kosten-
+4: pflichtigen Produkts (z.B. Shareware CD) ist
+5: das schriftliche Einverständnis des Autors
+6: erforderlich.
+7: Die Verbreitung im Internet und Mailboxen
+8: ohne Gebühren ist gestattet.
+9: Thomas Holz
+
+== phase_068.png
+0: Kommentare & Infos
+1: Wer gern einen Kommentar loswer-
+2: den möchte, kann dies mit einer
+3: E-Mail tun:
+4: Thomas.Holz@Uni-Essen.De
+5: Übrigens suche ich auch noch
+6: Grafiker. Wer also gut zeichnen
+7: kann...
+8: Und wer über zukünftige Projekte informiert wer-
+9: den möchte, schickt eine leere E-Mail mit dem
+10: Betreff 'mailing-list' an mich.
+
+== phase_113.png
+0: Idee, Rätsel, Programmierung, Grafik:
+1: Thomas Holz
+
+== phase_114.png
+0: Beta-Testing:
+1: Maik Esser
+
+== phase_115.png
+0: Beta-Testing:
+1: Robert Kleinert
+
+== phase_116.png
+0: Beta-Testing:
+1: Wolfgang Büning

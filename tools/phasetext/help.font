@@ -1,0 +1,896 @@
+# Font of the help pages, credits and red titles (phases 34-36, 53-68,
+# 113-116). Cut out of the German originals with `phasefont.py extract`
+# and fixed by hand: / 2 j. Drawn by hand, not in the originals:
+# 8 J Q X Y q ! ? ;
+# Missing: Ä Ö ß " and most accented letters.
+
+glyph space advance 7
+
+glyph & advance 11
+-10 ..YYYY
+ -9 .YYYYYY
+ -8 .YY..YY
+ -7 .YY..YY
+ -6 ..YYYYY
+ -5 .YYYYY
+ -4 YYY..YY.YY
+ -3 YY...YYYYY
+ -2 YY...YYYY
+ -1 YYYYYYYYYY
+  0 .YYYYY..YY
+
+glyph ' advance 4
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 Y
+
+glyph ( advance 5
+ -9 ..Y
+ -8 .YY
+ -7 YY
+ -6 YY
+ -5 YY
+ -4 YY
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+  1 .YY
+  2 ..Y
+
+glyph ) advance 4
+ -9 Y
+ -8 YY
+ -7 .YY
+ -6 .YY
+ -5 .YY
+ -4 .YY
+ -3 .YY
+ -2 .YY
+ -1 .YY
+  0 .YY
+  1 YY
+  2 Y
+
+glyph , advance 3
+ -1 .Y
+  0 YY
+  1 YY
+  2 Y
+
+glyph - advance 7
+ -5 .YYYYYY
+ -4 YYYYYY
+
+glyph . advance 4
+ -1 YY
+  0 YY
+
+glyph / advance 7
+-10 .....YY
+ -9 .....YY
+ -8 ....YY
+ -7 ....YY
+ -6 ...YY
+ -5 ...YY
+ -4 ..YY
+ -3 ..YY
+ -2 .YY
+ -1 .YY
+  0 YY
+  1 YY
+
+glyph 0 advance 7
+ -8 ..YY
+ -7 .YYYY
+ -6 YY..YY
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 .YYYY
+  0 ..YY
+
+glyph 1 advance 7
+ -8 ..YY
+ -7 .YYY
+ -6 YYYY
+ -5 ..YY
+ -4 ..YY
+ -3 ..YY
+ -2 ..YY
+ -1 .YYYYY
+  0 YYYYY
+
+glyph 2 advance 8
+ -8 ..YYY
+ -7 .YYYYY
+ -6 YY..YY
+ -5 ....YY
+ -4 ....YY
+ -3 ...YY
+ -2 ..YY
+ -1 .YYYYYY
+  0 YYYYYY
+
+glyph 3 advance 8
+ -8 ..YYYYY
+ -7 .YYYYYY
+ -6 ....YY
+ -5 ...YY
+ -4 ..YYY
+ -3 ...YYY
+ -2 ....YY
+ -1 .YYYYY
+  0 YYYYY
+
+glyph 4 advance 7
+ -8 ....YY
+ -7 ...YYY
+ -6 ..YYYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YYYYYY
+ -2 YYYYYY
+ -1 ....YY
+  0 ....YY
+
+glyph 5 advance 7
+ -8 ..YYYYY
+ -7 ..YYYY
+ -6 .YY
+ -5 .YYYY
+ -4 .YYYYY
+ -3 ....YY
+ -2 ...YYY
+ -1 .YYYY
+  0 YYYY
+
+glyph 6 advance 7
+ -8 ...YYY
+ -7 ..YYY
+ -6 .YY
+ -5 .YYYY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY.YYY
+ -1 YYYYY
+  0 .YYY
+
+glyph 7 advance 6
+ -8 YYYYY
+ -7 YYYYY
+ -6 ...YY
+ -5 ..YY
+ -4 .YY
+ -3 YY
+ -2 YY
+ -1 Y
+  0 Y
+
+glyph 9 advance 8
+ -8 ..YYY
+ -7 .YY.YY
+ -6 YY..YY
+ -5 YY..YY
+ -4 YYYYYY
+ -3 .YYYY
+ -2 ...YY
+ -1 .YYY
+  0 YYY
+
+glyph : advance 3
+ -5 YY
+ -4 YY
+ -3 
+ -2 
+ -1 YY
+  0 YY
+
+glyph @ advance 11
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY..YY
+ -6 .YY.YY.Y
+ -5 YY.YYYYY
+ -4 YY.Y.YYY
+ -3 YY..YYY
+ -2 YYY
+ -1 .YYYYYY
+  0 ..YYYY
+
+glyph A advance 7
+ -9 ...YY
+ -8 ..YYYY
+ -7 .YY.YY
+ -6 .Y..YY
+ -5 YY..YY
+ -4 YYYYYY
+ -3 YYYYYY
+ -2 YY..YY
+ -1 YY..YY
+  0 YY..YY
+
+glyph B advance 8
+ -9 ..YYYY
+ -8 .YYYYYY
+ -7 YYY..YY
+ -6 YY..YYY
+ -5 YYYYYY
+ -4 YYYYYYY
+ -3 YY...YY
+ -2 YY..YYY
+ -1 YYYYYY
+  0 YYYYY
+
+glyph C advance 8
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY.YY
+ -6 .YY
+ -5 YYY
+ -4 YY
+ -3 YY...YY
+ -2 YY..YYY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph D advance 8
+ -9 ..YYY
+ -8 .YYYYY
+ -7 YYY.YYY
+ -6 YY...YY
+ -5 YY...YY
+ -4 YY...YY
+ -3 YY..YYY
+ -2 YY.YYY
+ -1 YYYYY
+  0 YYYY
+
+glyph E advance 6
+ -9 ..YYYY
+ -8 .YYYY
+ -7 YYY
+ -6 YY
+ -5 YYYYY
+ -4 YYYY
+ -3 YY
+ -2 YY
+ -1 YYYYYY
+  0 YYYYY
+
+glyph F advance 6
+ -9 ..YYYY
+ -8 .YYYY
+ -7 YYY
+ -6 YY
+ -5 YYYYY
+ -4 YYYY
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph G advance 8
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY.YY
+ -6 .YY
+ -5 YYY
+ -4 YY..YYY
+ -3 YY...YY
+ -2 YY..YYY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph H advance 8
+ -9 ......Y
+ -8 .Y...YY
+ -7 YY...YY
+ -6 YY...YY
+ -5 YYYYYYY
+ -4 YYYYYYY
+ -3 YY...YY
+ -2 YY...YY
+ -1 YY...YY
+  0 YY...YY
+
+glyph I advance 3
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY
+ -5 YY
+ -4 YY
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph K advance 8
+ -9 .Y....Y
+ -8 YY...YY
+ -7 YY..YYY
+ -6 YY.YYY
+ -5 YYYYY
+ -4 YYYYY
+ -3 YY.YYY
+ -2 YY..YYY
+ -1 YY...YY
+  0 YY...YY
+
+glyph L advance 6
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY
+ -5 YY
+ -4 YY
+ -3 YY
+ -2 YY
+ -1 YYYYYY
+  0 YYYYY
+
+glyph M advance 9
+ -9 .Y.....Y
+ -8 YYY...YY
+ -7 YYYY.YYY
+ -6 YYYYYYYY
+ -5 YY.YY.YY
+ -4 YY....YY
+ -3 YY....YY
+ -2 YY....YY
+ -1 YY....YY
+  0 YY....YY
+
+glyph N advance 8
+ -9 .Y....Y
+ -8 YYY..YY
+ -7 YYY..YY
+ -6 YYYY.YY
+ -5 YYYY.YY
+ -4 YY.YYYY
+ -3 YY.YYYY
+ -2 YY..YYY
+ -1 YY..YYY
+  0 YY...YY
+
+glyph O advance 8
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY.YY
+ -6 .YY..YY
+ -5 YYY..YY
+ -4 YY...YY
+ -3 YY...YY
+ -2 YY..YYY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph P advance 7
+ -9 ..YYY
+ -8 .YYYYY
+ -7 YYY.YY
+ -6 YY..YY
+ -5 YY.YYY
+ -4 YYYYY
+ -3 YYYY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph R advance 7
+ -9 ..YYY
+ -8 .YYYYY
+ -7 YYY.YY
+ -6 YY..YY
+ -5 YY.YYY
+ -4 YYYYY
+ -3 YYYY
+ -2 YY.YY
+ -1 YY.YYY
+  0 YY..YY
+
+glyph S advance 7
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY..Y
+ -6 .YY
+ -5 .YYYY
+ -4 ..YYYY
+ -3 ....YY
+ -2 YY.YYY
+ -1 YYYYY
+  0 .YYY
+
+glyph T advance 8
+ -9 ....YYYY
+ -8 .YYYYYY
+ -7 YYYYY
+ -6 ...YY
+ -5 ...YY
+ -4 ...YY
+ -3 ...YY
+ -2 ...YY
+ -1 ...YY
+  0 ...YY
+
+glyph U advance 7
+ -9 .....Y
+ -8 .Y..YY
+ -7 YY..YY
+ -6 YY..YY
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph V advance 8
+ -9 .Y....Y
+ -8 YY...YY
+ -7 YY...YY
+ -6 YY...YY
+ -5 YY...YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY.YY
+ -1 .YYYY
+  0 ..YY
+
+glyph W advance 11
+ -9 .Y.......Y
+ -8 YY......YY
+ -7 YY...Y..YY
+ -6 YY..YY..YY
+ -5 YY..YY..YY
+ -4 YY..YY..YY
+ -3 YY..YY..YY
+ -2 YY.YYY.YY
+ -1 .YYY.YYY
+  0 .YY..YY
+
+glyph Z advance 9
+ -9 ..YYYYYY
+ -8 .YYYYYYY
+ -7 ......YY
+ -6 .....YY
+ -5 ....YY
+ -4 ...YY
+ -3 ..YY
+ -2 .YY
+ -1 YYYYYYYY
+  0 YYYYYYY
+
+glyph a advance 7
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YYY
+  0 .YYY.YY
+
+glyph b advance 7
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY.YY
+ -5 YYY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph c advance 7
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY
+ -3 YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph d advance 7
+ -9 .....Y
+ -8 ....YY
+ -7 ....YY
+ -6 ..YYYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph e advance 6
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY.YY
+ -3 YYYY
+ -2 YY..Y
+ -1 YY.YY
+  0 .YYY
+
+glyph f advance 5
+ -9 ..YY
+ -8 .YY
+ -7 .YY
+ -6 .YYY
+ -5 YYYY
+ -4 YYY
+ -3 .YY
+ -2 .YY
+ -1 .YY
+  0 .YY
+  1 .YY
+
+glyph g advance 7
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YYY
+  0 .YYYYY
+  1 ....YY
+  2 ...YY
+  3 ..YY
+
+glyph h advance 7
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY.YY
+ -5 YYY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY..YY
+  0 YY..YY
+
+glyph i advance 3
+ -9 .Y
+ -8 YY
+ -7 Y
+ -6 .Y
+ -5 YY
+ -4 YY
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph j advance 5
+ -9 ...Y
+ -8 ..YY
+ -7 ..Y
+ -6 ...Y
+ -5 ..YY
+ -4 ..YY
+ -3 ..YY
+ -2 ..YY
+ -1 ..YY
+  0 ..YY
+  1 ..YY
+  2 .YY
+  3 YY
+
+glyph k advance 7
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY..YY
+ -5 YY.YY
+ -4 YYYY
+ -3 YYYY
+ -2 YY.YY
+ -1 YY..YY
+  0 YY..YY
+
+glyph l advance 3
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY
+ -5 YY
+ -4 YY
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph m advance 11
+ -6 ...YY..YY
+ -5 .YY.YYY.YY
+ -4 YY..YY..YY
+ -3 YY..YY..YY
+ -2 YY..YY..YY
+ -1 YY..YY..YY
+  0 YY..YY..YY
+
+glyph n advance 7
+ -6 ...YY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY..YY
+  0 YY..YY
+
+glyph o advance 7
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph p advance 7
+ -6 ..YYY
+ -5 YYY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 YYYY
+  1 YY
+  2 YY
+  3 Y
+
+glyph r advance 6
+ -6 ..YY
+ -5 .YYYY
+ -4 YY..Y
+ -3 YY
+ -2 YY
+ -1 YY
+  0 YY
+
+glyph s advance 5
+ -6 .YYY
+ -5 YYY
+ -4 YY
+ -3 .YY
+ -2 ..YY
+ -1 .YYY
+  0 YYY
+
+glyph t advance 5
+ -8 ..Y
+ -7 .YYYY
+ -6 .YYY
+ -5 YYY
+ -4 .YY
+ -3 .YY
+ -2 .YY
+ -1 .YY
+  0 .YY
+
+glyph u advance 7
+ -6 .Y...Y
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph v advance 7
+ -6 .Y...Y
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY.YY
+ -2 YY.YY
+ -1 .YYY
+  0 .YY
+
+glyph w advance 10
+ -6 .Y......Y
+ -5 YY.....YY
+ -4 YY..Y..YY
+ -3 YY.YY.YY
+ -2 YY.YY.YY
+ -1 .YYYYYY
+  0 .YY.YY
+
+glyph x advance 7
+ -6 .....Y
+ -5 Y...YY
+ -4 YY.YY
+ -3 .YYYY
+ -2 ..YY
+ -1 .YYYY
+  0 YY..YY
+
+glyph y advance 7
+ -6 .Y...Y
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY.YYY
+ -1 YYYYYY
+  0 .YY.YY
+  1 ...YY
+  2 ..YY
+
+glyph z advance 6
+ -6 .YYYY
+ -5 .YYYY
+ -4 ...YY
+ -3 ..YY
+ -2 .YY
+ -1 YYYYY
+  0 YYYYY
+
+glyph © advance 14
+ -9 ....YYYYY
+ -8 ...Y.....Y
+ -7 ..Y.......Y
+ -6 .Y...YYY...Y
+ -5 Y...YY.YY...Y
+ -4 Y..YY.......Y
+ -3 Y..YY.......Y
+ -2 Y..YY..YY...Y
+ -1 Y..YY.YY....Y
+  0 .Y..YYY....Y
+  1 ..Y.......Y
+  2 ...Y.....Y
+  3 ....YYYYY
+
+glyph Ü advance 7
+-12 .....Y
+-11 .Y..YY
+-10 YY..Y
+ -9 Y....Y
+ -8 .Y..YY
+ -7 YY..YY
+ -6 YY..YY
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph ä advance 7
+ -9 .YY..YY
+ -8 .YY..YY
+ -7 
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YYY
+  0 .YYY.YY
+
+glyph ö advance 7
+-10 .YY..YY
+ -9 .YY..YY
+ -6 ..YYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph ü advance 7
+ -9 .Y...Y
+ -8 YY..YY
+ -7 Y...Y
+ -6 .Y...Y
+ -5 YY..YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YY
+  0 .YYY
+
+glyph Y advance 8
+ -9 .Y....Y
+ -8 YY...YY
+ -7 YY...YY
+ -6 YY..YY
+ -5 .YYYY
+ -4 ..YY
+ -3 ..YY
+ -2 ..YY
+ -1 ..YY
+  0 ..YY
+
+glyph q advance 7
+ -6 ..YYYY
+ -5 .YY.YY
+ -4 YY..YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YY.YYY
+  0 .YYYYY
+  1 ....YY
+  2 ....YY
+  3 .....Y
+
+glyph 8 advance 7
+ -8 ..YYY
+ -7 .YY.YY
+ -6 .YY.YY
+ -5 ..YYY
+ -4 .YYYYY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph J advance 7
+ -9 .....Y
+ -8 ....YY
+ -7 ....YY
+ -6 ....YY
+ -5 ....YY
+ -4 ....YY
+ -3 YY..YY
+ -2 YY..YY
+ -1 YYYYYY
+  0 .YYYY
+
+glyph Q advance 8
+ -9 ...YYY
+ -8 ..YYYYY
+ -7 .YYY.YY
+ -6 .YY..YY
+ -5 YYY..YY
+ -4 YY...YY
+ -3 YY...YY
+ -2 YY.YYYY
+ -1 YYYYYY
+  0 .YYYYY
+  1 .....YY
+
+glyph X advance 8
+ -9 .Y....Y
+ -8 YY...YY
+ -7 YYY.YYY
+ -6 .YYYYY
+ -5 ..YYY
+ -4 ..YYY
+ -3 .YYYYY
+ -2 YYY.YYY
+ -1 YY...YY
+  0 YY...YY
+
+glyph ! advance 4
+ -9 .Y
+ -8 YY
+ -7 YY
+ -6 YY
+ -5 YY
+ -4 YY
+ -3 YY
+ -1 YY
+  0 YY
+
+glyph ? advance 7
+ -9 ..YYY
+ -8 .YYYYY
+ -7 YY..YY
+ -6 ....YY
+ -5 ...YY
+ -4 ..YY
+ -3 ..YY
+ -1 ..YY
+  0 ..YY
+
+glyph ; advance 4
+ -5 YY
+ -4 YY
+ -1 .Y
+  0 YY
+  1 YY
+  2 Y
+

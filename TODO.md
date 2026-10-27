@@ -72,17 +72,24 @@
   palette indices identical in all rooms (0-79, 160-175, 240-245) plus those
   the original used (phases), or the room palette minus the entries LadeBild
   changes (bild); transparent pixels became index 0.
-- EN phases 35 ("Anleitung" -> "Help") and 36 ("... bei Thomas Holz" ->
-  "... by Thomas Holz"), 2026-10-27. Composed from glyphs cut out of phase
-  36 (red = index 19); the black shadow (index 1) is a fixed dilation of the
-  red pixels, offsets (0,-1) (-1,0) (1,0) (-1,1) (0,1) (1,1) (2,1) (0,2)
-  (1,2), which reproduces phases 34-36 exactly. So more title words can be
-  built from red glyph masks alone. Glyphs available in 34-36: A C H I T
-  a b e g h i l m n o p r s t u y z 1 5 6 9 -. Missing e.g. M, G, d, c, f.
-- Next: EN versions of phases 53-68 (help and copyright pages, persons
-  68-83). A first set was too low quality and was left out; replacements
-  are needed. For RGB sources, the white background connected to the border
-  and white holes enclosed by yellow text should become index 0.
+- Phase text tool (2026-10-27): `tools/phasefont.py` + `tools/phasetext/`.
+  The red titles (34-36), help/copyright pages (53-68) and credits
+  (113-116) all use one font: text in one colour (yellow 51, red 19) and a
+  shadow (index 1) that is a fixed dilation of the text pixels, with five
+  styles (thick, thin, heavy, heavier, red; detected per line).
+  `help.font` holds the glyphs as ASCII art (cut from the originals via
+  de.txt, the German transcript; / 2 j fixed and 8 J Q X Y q ! ? ; drawn
+  by hand). `en.txt` gives the English per original line index;
+  `phasefont.py render` erases those lines (text, shadow, heading
+  underline) and draws the new text in the same place and style, keeping
+  the picture size. Rendering de.txt reproduces 34-36 exactly and the help
+  pages up to hand-tuned spacing.
+- EN phases 35, 36, 53-68 and 113 rendered with it (114-116 are already
+  English). The graphics inside the help pages (system menu, command line
+  bars, save slots, text windows) still show German.
+- Other languages: write tools/phasetext/<code>.txt and render into
+  lang/<code>/phase. Missing glyphs: Ä Ö ß " and accented letters; add
+  them to help.font by hand.
 - Not tested in game yet.
 
 ## Later: more translations, accented glyphs (2026-10-22, not started)

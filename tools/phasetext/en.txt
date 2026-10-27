@@ -1,0 +1,177 @@
+# English text for the phase pictures. Line numbers refer to the German
+# original (see de.txt and `phasefont.py lines`); 'N+' adds a line below N.
+# Lines that stay as in the original (names, address, "Copyright & Co.")
+# are not listed.
+
+== phase_035.png
+0: Help
+
+== phase_036.png
+0: Copyright 1995-1996 by Thomas Holz
+
+== phase_053.png
+0: Inventory
+1: System menu
+2: Mouse cursor
+3: Spoken text
+4: Command line
+5: Player
+
+== phase_054.png
+0: The Mouse Cursor
+1: The mouse next to your computer
+2: moves the mouse cursor.
+3: A golden mouse cursor shows that
+4: there is something interesting here.
+5: If the mouse cursor is grey, there
+6: is nothing here.
+7: If the mouse cursor is hatched,
+8: you cannot enter anything.
+
+== phase_055.png
+0: The System Menu
+1: Click on the icon to open
+2: the menu.
+3: Here you can read the help or
+4: the project diary, or quit
+5: the game.
+
+== phase_056.png
+0: The Inventory
+1: The top edge of the screen shows
+2: all the things you are carrying.
+3: -
+4: Often you have to take things
+5: before you can use them.
+
+== phase_057.png
+0: The Command Line
+1: Often it shows nothing at all.
+2: If the mouse cursor points at an
+3: object or a person, its name is
+4: shown.
+5: When you give a command,
+6: it is shown here.
+
+== phase_058.png
+0: Walking & Looking
+1: Click the right mouse button on
+2: the floor and the player walks
+3: there.
+4: Or use the cursor keys to
+6: steer the player.
+7: Click the right mouse button on
+8: an object and the player looks
+9: at it.
+
+== phase_059.png
+0: Using Objects
+1: Using, taking and reading objects
+2: and talking to people is all done
+3: with a single click.
+4: To do one of these things, click
+5: the left mouse button on an
+6: object or a person.
+7: -
+
+== phase_060.png
+0: Combining Objects
+1: You must own at least one of
+2: the two things.
+3: Click on the first one in the
+4: inventory and hold the button.
+5: Then drag the mouse cursor
+6: to the second object.
+7: Release the mouse button there.
+
+== phase_061.png
+0: Moving Things
+1: Things you cannot take with you
+2: can sometimes be moved.
+3: -
+4: Click on the object and
+5: hold the button down.
+6: Then drag the mouse in the
+7: direction you want.
+8: Only then let go of the mouse.
+
+== phase_062.png
+0: The System Menu
+1: Press the F10 key to open
+2: the system menu.
+3: -
+4: It has the settings for the
+5: music volume, the animation
+6: speed and the speech speed.
+7: -
+8: Pick a setting with the 'Up'
+9: and 'Down' keys. 'Left' and
+11 x=106: 'Right' change it.
+12: -
+
+== phase_063.png
+0: Loading & Saving
+1: F5 opens the save menu, F7
+2: the load menu.
+3: Every saved game has a
+4: snapshot and a short
+5: description.
+6: Bottom right is a game that
+7: was saved automatically.
+
+== phase_064.png
+0: Spoken Text
+1: When a person says something,
+2: it appears above them and
+3: disappears after a while.
+4: As long as you hold down the
+5: shift key, the text stays.
+6: You can read it in peace.
+7: Release the shift key and the
+8: text disappears at once.
+9: You don't have to wait.
+
+== phase_065.png
+0: Text Windows
+1: Text windows show things that
+2: are not (yet) spoken.
+3: Text windows pause the game.
+4: A click with the left mouse
+5: button closes them.
+6: Sometimes, e.g. in dialogues,
+7: you can choose something in
+8: text windows.
+
+== phase_066.png
+2: Mänick Mänschion is copyright ©
+3: 1995, 1996 by Thomas Holz,
+5: The game may be copied and passed on
+6: under the following conditions:
+7: 1. All files are passed on together.
+8: The data is not changed.
+9: 2. It is passed on free of charge, i.e.
+10: with no fee, copying costs etc.
+
+== phase_067.png
+2: Commercial use, passing it on for a
+3: fee or as part of a product that costs
+4: money (e.g. shareware CD) requires
+5: the written permission of the author.
+6: -
+7: Distribution on the Internet and in
+8: BBSes free of charge is allowed.
+
+== phase_068.png
+0: Comments & Info
+1: If you would like to make a
+2: comment, you can do so by
+3: e-mail:
+5: By the way, I am also looking
+6: for artists. So if you can draw
+7: well...
+8: And if you want to hear about future projects,
+9: send an empty e-mail with the subject
+10: 'mailing-list' to me.
+
+== phase_113.png
+0: Idea, Puzzles, Programming, Graphics:
