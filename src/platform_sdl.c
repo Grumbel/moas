@@ -484,7 +484,7 @@ void PlatformAndroidPrepareData(void)
   /* Savegames / AUTOSAVE under internal storage (writable). */
   {
     char state_dir[512];
-    snprintf(state_dir, sizeof(state_dir), "%s/moas-state", dest_dir);
+    snprintf(state_dir, sizeof(state_dir), "%s/manick-state", dest_dir);
     if (mkdir(state_dir, 0755) != 0 && errno != EEXIST)
       SDL_Log("mkdir state %s failed: %s", state_dir, strerror(errno));
     if (setenv("MOAS_STATEDIR", state_dir, 1) != 0)

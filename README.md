@@ -216,11 +216,11 @@ The HTML shell (`mk/wasm/shell.html`) provides:
   explicit pause stays); an overlay on the picture while paused, and a
   "Game stopped" overlay if the WASM module crashes
 - Help text for mouse, touch, and keyboard
-- **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
+- **IndexedDB** persistence for `/manick-state` (IDBFS; requires `-lidbfs.js`)
 - On-canvas touch overlay (Save / Load / USE / LOOK / Options / Hint / Skip Scene / Skip Text), same as Android
 - **Gamepad:** sticks move the cursor (both together: faster), D-pad walk, A/R1 use, B/L1 look, X hint, Y skip text, Back skip scene (Esc), Start options, R2 save, L2 load, R3/L3 game speed up/down
 
-Save files are exported as `moas-saves.json` and can be imported on another browser.
+Save files are exported as `manick-saves.json` and can be imported on another browser.
 
 ### R36S and other PortMaster handhelds (ArkOS)
 

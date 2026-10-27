@@ -275,7 +275,7 @@ static void resolve_state_dir(void)
   strncpy(state_dir, ".", sizeof(state_dir) - 1);
   state_dir[sizeof(state_dir) - 1] = 0;
 #elif defined(__EMSCRIPTEN__)
-  strncpy(state_dir, "/moas-state", sizeof(state_dir) - 1);
+  strncpy(state_dir, "/manick-state", sizeof(state_dir) - 1);
   state_dir[sizeof(state_dir) - 1] = 0;
   moas_mkdir_p(state_dir);
 #elif defined(__ANDROID__)
@@ -289,7 +289,7 @@ static void resolve_state_dir(void)
       /* Ensure data_dir is resolved before using it as the parent. */
       (void)MoasDataDir();
       base = data_dir[0] ? data_dir : ".";
-      snprintf(state_dir, sizeof(state_dir), "%s/moas-state", base);
+      snprintf(state_dir, sizeof(state_dir), "%s/manick-state", base);
     }
     if (moas_mkdir_p(state_dir) != 0)
       MoasLog("moas: WARNING: could not create Android state dir '%s'", state_dir);
@@ -339,7 +339,7 @@ static void resolve_config_dir(void)
   strncpy(config_dir, ".", sizeof(config_dir) - 1);
   config_dir[sizeof(config_dir) - 1] = 0;
 #elif defined(__EMSCRIPTEN__)
-  strncpy(config_dir, "/moas-config", sizeof(config_dir) - 1);
+  strncpy(config_dir, "/manick-config", sizeof(config_dir) - 1);
   config_dir[sizeof(config_dir) - 1] = 0;
   moas_mkdir_p(config_dir);
 #elif defined(__ANDROID__)
@@ -347,7 +347,7 @@ static void resolve_config_dir(void)
     const char *base = getenv("MOAS_CONFIGDIR");
     if (!base || !base[0])
       base = data_dir[0] ? data_dir : ".";
-    snprintf(config_dir, sizeof(config_dir), "%s/moas-config", base);
+    snprintf(config_dir, sizeof(config_dir), "%s/manick-config", base);
     moas_mkdir_p(config_dir);
   }
 #elif defined(_WIN32)

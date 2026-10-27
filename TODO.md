@@ -17,8 +17,10 @@
   `org.grumbel.manick` (APK no longer upgrades the old `org.grumbel.moas`).
 - Save/config dirs `~/.local/state/manick`, `~/.config/manick`,
   `%LOCALAPPDATA%\manick\state`, `%APPDATA%\manick`; no fallback to the old
-  `moas` dirs (move them by hand). Android internal and web IDBFS paths
-  (`moas-state`, `moas-config`, `moas-saves.json`) unchanged on purpose.
+  `moas` dirs (move them by hand). Android internal storage and web IDBFS
+  use `manick-state` / `manick-config` too, web save export is
+  `manick-saves.json` (format `manick-saves`); old browser saves and
+  exports are not read (game not announced yet, so no migration).
 - Artifacts: `manick-<ver>-win64.zip`, `manick-<ver>.apk`,
   `manick-<ver>-dos.zip`, web `manick.html/.js/.wasm/.data`. DOSBox runner
   state moved to `~/.local/state/manick-dos{,-original}`.
