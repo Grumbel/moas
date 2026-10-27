@@ -269,6 +269,18 @@ msgctxt "ui.key.hotspots"
 msgid "HOTSPOTS ZEIGEN"
 msgstr "MOSTRAR HOTSPOTS"
 
+#. source UI
+#: ui.key.use
+msgctxt "ui.key.use"
+msgid "BENUTZEN"
+msgstr "USAR"
+
+#. source UI
+#: ui.key.look
+msgctxt "ui.key.look"
+msgid "ANSEHEN"
+msgstr "MIRAR"
+
 #. GAME.PCK token 0
 #: pck.0
 msgctxt "pck.0"

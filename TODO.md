@@ -6,6 +6,15 @@
 
 # TODO / Handoff
 
+## Mouse button legend (2026-10-27)
+- Second key-hint box, bottom left: LMB use / RMB look, or A / R1 and
+  B / L1 with a pad. Shown wherever the key legend is (start screen,
+  F12 menu), hidden on touch devices. `hintbox_draw` draws both boxes.
+- New UI strings `ui.key.use` / `ui.key.look` (German BENUTZEN /
+  ANSEHEN; the overlay.use/look strings default to English USE/LOOK),
+  translated in all .po files, added to moas-util and manick.pot.
+- Tested: Xvfb screenshots en/de/fr. Pad labels not seen (no pad here).
+
 ## Pad X/Back swap, no idle audio, PortMaster zip modes (2026-10-27)
 - Pad: X = skip scene (Esc), Back/Select held = hotspots (was the other
   way round). Key hints, README, R36S README, web help and website updated.

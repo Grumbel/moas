@@ -639,6 +639,8 @@ static void extract_ui_strings(void)
     { "ui.key.skip_text", "TEXT UEBERSPRINGEN" },
     { "ui.key.skip_scene", "SZENE UEBERSPRINGEN" },
     { "ui.key.hotspots", "HOTSPOTS ZEIGEN" },
+    { "ui.key.use", "BENUTZEN" },
+    { "ui.key.look", "ANSEHEN" },
     { NULL, NULL }
   };
   int i;

@@ -2153,9 +2153,21 @@ static const struct { const char *key; int text; } keyhint_rows[] = {
 static const char *const padhint_keys[] = { "R2", "L2", "START", "Y", "X", "BACK" };
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
 
+/* Left box: the two mouse buttons, or what stands in for them on a pad. */
+static const struct { const char *key; const char *padkey; int text; } clickhint_rows[] = {
+  { "LMB", "A / R1", UI_KEY_USE },
+  { "RMB", "B / L1", UI_KEY_LOOK },
+};
+#define CLICKHINT_ROWS ((int)(sizeof(clickhint_rows) / sizeof(clickhint_rows[0])))
+
 static const char *keyhint_key(int i)
 {
   return pad ? padhint_keys[i] : keyhint_rows[i].key;
+}
+
+static const char *clickhint_key(int i)
+{
+  return pad ? clickhint_rows[i].padkey : clickhint_rows[i].key;
 }
 
 /* The title room (prog 4: "Intro", "Anleitung", copyright notes). */
@@ -2175,34 +2187,34 @@ static void keyhints_note_click(void)
 }
 
 /*
- * Bottom right of the game picture, for keyboard players. Skipped on touch
- * devices. Drawn smaller when it would cover `avoid` (the options panel),
- * skipped if it still does: longer translations make the box wider.
+ * A box of key/text rows in the bottom corner of the game picture (right,
+ * or left with `left`). Drawn smaller when it would cover `avoid` (the
+ * options panel), skipped if it still does: longer translations make the
+ * box wider.
  */
-static void keyhints_draw(const SDL_Rect *avoid)
+static void hintbox_draw(int n, const char *(*key)(int), const char *(*text)(int),
+                         int left, const SDL_Rect *avoid)
 {
   int dx, dy, dw, dh, u, i, kw, tw, pad, line_h;
   SDL_Rect box;
 
-  if (!renderer || is_touch_device())
-    return;
   letterbox_geom(&dx, &dy, &dw, &dh, NULL, NULL);
   u = dh / 300;
   if (u < 1)
     u = 1;
   for (;;) {
     kw = tw = 0;
-    for (i = 0; i < KEYHINT_ROWS; i++) {
-      int w = ui_text_width(keyhint_key(i), u);
+    for (i = 0; i < n; i++) {
+      int w = ui_text_width(key(i), u);
       if (w > kw) kw = w;
-      w = ui_text_width(Ui(keyhint_rows[i].text), u);
+      w = ui_text_width(text(i), u);
       if (w > tw) tw = w;
     }
     pad = 3 * u;
     line_h = 10 * u;
     box.w = pad + kw + 5 * u + tw + pad;
-    box.h = pad + KEYHINT_ROWS * line_h - 3 * u + pad;
-    box.x = dx + dw - box.w - 4 * u;
+    box.h = pad + n * line_h - 3 * u + pad;
+    box.x = left ? dx + 4 * u : dx + dw - box.w - 4 * u;
     box.y = dy + dh - box.h - 4 * u;
     if (!avoid || !SDL_HasIntersection(&box, avoid))
       break;
@@ -2213,12 +2225,34 @@ static void keyhints_draw(const SDL_Rect *avoid)
 
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, 150);
-  for (i = 0; i < KEYHINT_ROWS; i++) {
+  for (i = 0; i < n; i++) {
     int y = box.y + pad + i * line_h;
-    ui_draw_label(box.x + pad, y, keyhint_key(i), u, 255, 206, 72);
-    ui_draw_label(box.x + pad + kw + 5 * u, y, Ui(keyhint_rows[i].text), u, 255, 255, 255);
+    ui_draw_label(box.x + pad, y, key(i), u, 255, 206, 72);
+    ui_draw_label(box.x + pad + kw + 5 * u, y, text(i), u, 255, 255, 255);
   }
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+}
+
+static const char *keyhint_text(int i)
+{
+  return Ui(keyhint_rows[i].text);
+}
+
+static const char *clickhint_text(int i)
+{
+  return Ui(clickhint_rows[i].text);
+}
+
+/*
+ * Keys bottom right, mouse buttons bottom left of the game picture, for
+ * keyboard and pad players. Skipped on touch devices.
+ */
+static void keyhints_draw(const SDL_Rect *avoid)
+{
+  if (!renderer || is_touch_device())
+    return;
+  hintbox_draw(KEYHINT_ROWS, keyhint_key, keyhint_text, 0, avoid);
+  hintbox_draw(CLICKHINT_ROWS, clickhint_key, clickhint_text, 1, avoid);
 }
 
 /*

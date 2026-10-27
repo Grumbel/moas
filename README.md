@@ -517,8 +517,10 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **H** (hold) | Outline everything clickable in the room; stays up briefly after release (SDL port) |
 
 The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc, H)
-in the bottom-right corner. On the start screen it disappears after the first click;
-it is hidden on touch devices.
+in the bottom-right corner and the mouse buttons (LMB use, RMB look) in the
+bottom-left one; with a gamepad connected they show the pad buttons instead.
+On the start screen they disappear after the first click; they are hidden on
+touch devices.
 
 ### Esc vs Shift (skipping)
 

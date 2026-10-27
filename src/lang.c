@@ -63,6 +63,8 @@ static const char *ui_fallback[UI_COUNT] = {
   [UI_KEY_SKIP_TEXT] = "TEXT UEBERSPRINGEN",
   [UI_KEY_SKIP_SCENE]= "SZENE UEBERSPRINGEN",
   [UI_KEY_HOTSPOTS]  = "HOTSPOTS ZEIGEN",
+  [UI_KEY_USE]       = "BENUTZEN",
+  [UI_KEY_LOOK]      = "ANSEHEN",
 };
 
 static const char *ui_names[UI_COUNT] = {
@@ -110,6 +112,8 @@ static const char *ui_names[UI_COUNT] = {
   [UI_KEY_SKIP_TEXT] = "key.skip_text",
   [UI_KEY_SKIP_SCENE]= "key.skip_scene",
   [UI_KEY_HOTSPOTS]  = "key.hotspots",
+  [UI_KEY_USE]       = "key.use",
+  [UI_KEY_LOOK]      = "key.look",
 };
 
 static char *ui_str[UI_COUNT];
