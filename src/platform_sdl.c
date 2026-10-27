@@ -2094,9 +2094,19 @@ static const struct { const char *key; int text; } keyhint_rows[] = {
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
 
 /* The title room (prog 4: "Intro", "Anleitung", copyright notes). */
+static int keyhints_dismissed;
+
 static int keyhints_on_start_screen(void)
 {
-  return CurrentProc == 4;
+  return CurrentProc == 4 && !keyhints_dismissed;
+}
+
+/* The first click on the title room hides the hints for good: its buttons
+ * open the help pages and the intro, whose text would end up under them. */
+static void keyhints_note_click(void)
+{
+  if (CurrentProc == 4)
+    keyhints_dismissed = 1;
 }
 
 /*
@@ -2526,6 +2536,8 @@ static void pad_apply(void)
 
   use = (rt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
   look = (lt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+  if (use && !pad_use)
+    keyhints_note_click();
   pad_use = use ? 1 : 0;
   pad_look = look ? 1 : 0;
   Mouse.Left = phys_left || pad_use;
@@ -2638,6 +2650,7 @@ static void handle_finger(const SDL_Event *ev)
       Mouse.y = my;
       phys_left = 1;
       Mouse.Left = 1;
+      keyhints_note_click();
       Mouse.ClickX = Mouse.x;
       Mouse.ClickY = Mouse.y;
       return;
@@ -2759,6 +2772,7 @@ void PlatformPumpEvents(void)
           phys_left = down ? 1 : 0;
           Mouse.Left = phys_left || pad_use;
           if (down) {
+            keyhints_note_click();
             Mouse.ClickX = Mouse.x;
             Mouse.ClickY = Mouse.y;
           } else {

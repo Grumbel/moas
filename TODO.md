@@ -276,6 +276,10 @@
   would overlap the panel it is drawn at a smaller scale, and skipped only if
   it still overlaps at scale 1. (The German labels made the box wider, so it
   used to vanish in DE but show in EN.) Not drawn on touch devices.
+- (2026-10-27) The first game click on the start screen (mouse, finger or
+  pad trigger) hides the start-screen legend for the rest of the session
+  (`keyhints_note_click`), so it no longer covers the help pages and intro
+  text. It still shows in the F12 menu. Not tested in game yet.
 - Game menu (prog 1, opened with F1): `Execute` injects a host option before
   "Quit" (add_option at prog 1 @ 0x0151, RefNum 5). It uses RefNum 7, which the
   script doesn't use, so its answer chain falls through to the
