@@ -68,16 +68,20 @@ let
   cross = pkgs.pkgsCross.aarch64-multiplatform.stdenv.cc;
   gcc = cross.cc;
   binutils = cross.bintools.bintools;
-  tp = lib.removeSuffix "-" cross.targetPrefix; # aarch64-unknown-linux-gnu
+  # On an aarch64 host the "cross" toolchain is the native one: tools have
+  # no prefix and binutils no <triple>/bin, but GCC's libdir keeps the triple.
+  tp = cross.targetPrefix; # "aarch64-unknown-linux-gnu-", or "" natively
+  triple = pkgs.pkgsCross.aarch64-multiplatform.stdenv.targetPlatform.config;
+  binutilsBin = if tp == "" then "${binutils}/bin" else "${binutils}/${triple}/bin";
   multiarch = "aarch64-linux-gnu";
-  gccLib = "${gcc}/lib/gcc/${tp}/${gcc.version}";
+  gccLib = "${gcc}/lib/gcc/${triple}/${gcc.version}";
 
   # Compiler drivers that see nothing but the sysroot (and GCC's own
   # freestanding headers and builtins).
   cflags = lib.concatStringsSep " " [
     "-nostdinc"
     "--sysroot=${sysroot}"
-    "-B${binutils}/${tp}/bin"
+    "-B${binutilsBin}"
     "-isystem ${gccLib}/include"
     "-isystem ${sysroot}/usr/include/${multiarch}"
     "-isystem ${sysroot}/usr/include"
@@ -90,7 +94,7 @@ let
   cxxflags = lib.concatStringsSep " " [
     "-nostdinc -nostdinc++"
     "--sysroot=${sysroot}"
-    "-B${binutils}/${tp}/bin"
+    "-B${binutilsBin}"
     "-isystem ${sysroot}/usr/include/c++/9"
     "-isystem ${sysroot}/usr/include/${multiarch}/c++/9"
     "-isystem ${sysroot}/usr/include/c++/9/backward"
@@ -116,10 +120,10 @@ let
   driver = name: compiler: flags: linkFlags: libs: pkgs.writeShellScript name ''
     for a in "$@"; do
       case "$a" in
-        -c|-S|-E|-M|-MM) exec ${gcc}/bin/${tp}-${compiler} ${flags} "$@" ;;
+        -c|-S|-E|-M|-MM) exec ${gcc}/bin/${tp}${compiler} ${flags} "$@" ;;
       esac
     done
-    exec ${gcc}/bin/${tp}-${compiler} ${flags} ${linkFlags} "$@" ${libs}
+    exec ${gcc}/bin/${tp}${compiler} ${flags} ${linkFlags} "$@" ${libs}
   '';
   cc = driver "arkos-gcc" "gcc" cflags ldflags "-lm";
   cxx = driver "arkos-g++" "g++" cxxflags "-nostdlib++ ${ldflags}" "-lstdc++ -lm";
@@ -130,7 +134,7 @@ let
   # SDL2 by that name at run time.
   sdlStub = pkgs.runCommand "libSDL2-link-stub" { } ''
     mkdir -p $out/lib
-    ${binutils}/bin/${tp}-nm -D --defined-only ${sysroot}/usr/lib/${multiarch}/libSDL2-2.0.so.0 \
+    ${binutils}/bin/${tp}nm -D --defined-only ${sysroot}/usr/lib/${multiarch}/libSDL2-2.0.so.0 \
       | awk '$2 == "T" { print "void " $3 "(void) {}" }' > stub.c
     ${cc} -shared -fPIC -o $out/lib/libSDL2.so -Wl,-soname,libSDL2-2.0.so.0 stub.c
   '';
@@ -146,9 +150,9 @@ let
       "-DCMAKE_SYSROOT=${sysroot}"
       "-DCMAKE_C_COMPILER=${cc}"
       "-DCMAKE_CXX_COMPILER=${cxx}"
-      "-DCMAKE_AR=${binutils}/bin/${tp}-ar"
-      "-DCMAKE_RANLIB=${binutils}/bin/${tp}-ranlib"
-      "-DCMAKE_STRIP=${binutils}/bin/${tp}-strip"
+      "-DCMAKE_AR=${binutils}/bin/${tp}ar"
+      "-DCMAKE_RANLIB=${binutils}/bin/${tp}ranlib"
+      "-DCMAKE_STRIP=${binutils}/bin/${tp}strip"
       "-DCMAKE_BUILD_TYPE=Release"
       "-DCMAKE_SKIP_RPATH=ON"
       "-DMOAS_DATADIR=data"
@@ -162,7 +166,7 @@ let
     dontPatchELF = true;
     dontPatchShebangs = true;
     postInstall = ''
-      ${binutils}/bin/${tp}-strip $out/bin/manick
+      ${binutils}/bin/${tp}strip $out/bin/manick
     '';
     dontStrip = true;
   };
