@@ -35,7 +35,7 @@ L_011e:
 L_013e:
         blend_in 8  ; @013e
         wait_while_walking  ; @0141
-        add_area_jumper 319, 0, 340, 200, 6855  ; @0142
+        add_area_jumper 310, 0, 340, 200, 6855  ; @0142
         add_area_jumper 0, 0, 319, 46, 6878  ; @014d
         add_area_label 190, 137, 213, 149, 2000  ; @0158
         add_area_label 214, 63, 280, 111, 2003  ; @0163

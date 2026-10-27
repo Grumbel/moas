@@ -11,8 +11,8 @@
         blend 100, 100, 100  ; @0021
         blend_in 8  ; @0028
         wait_while_walking  ; @002b
-        add_area_jumper -20, 0, 0, 200, 561  ; @002c
-        add_area_jumper 319, 0, 340, 200, 941  ; @0037
+        add_area_jumper -20, 0, 10, 200, 561  ; @002c
+        add_area_jumper 310, 0, 340, 200, 941  ; @0037
         add_area_label 17, 125, 48, 157, 2001  ; @0042
         add_area_label 47, 136, 153, 163, 2002  ; @004d
         add_area_label 153, 145, 218, 172, 2002  ; @0058
