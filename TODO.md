@@ -91,6 +91,14 @@
   lines as en.txt, reflowed where the text hit graphics or the edge).
   `phasefont.py accents` composes the accented letters and ¡ ¿ from base
   glyphs plus mark templates. Still missing: ß " « » œ.
+- Title cards bild 11 ("Inzwischen..."), bild 59 / phase 23 ("Stunden
+  später...") for ES/FR/IT/NL via `tools/titlecard.py`: the hand-drawn
+  letters are cut from the DE and EN cards and set again, the shadow is
+  regenerated (exact extrusion: 6 left/2 down on bild 59, 4 left/3 down on
+  bild 11), background from DE/EN where either has no text. Phase 23 is
+  bild 59's text in the window at 34,50 (250x93). Texts: HORAS DESPUÉS /
+  MIENTRAS TANTO, PLUS TARD / PENDANT CE TEMPS, ORE DOPO / INTANTO,
+  UREN LATER / INTUSSEN. Not tested in game yet.
 - Not tested in game yet.
 
 ## Later: more translations, accented glyphs (2026-10-22, not started)
