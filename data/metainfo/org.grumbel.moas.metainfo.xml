@@ -11,6 +11,10 @@
       original game data on a modern SDL2 port of MOAS (Mouse Orientiertes
       Adventure System), the DOS adventure engine by Thomas Holz (1992–2000).
     </p>
+    <p>
+      The game is German; English, Spanish, French, Italian and Dutch
+      translations can be chosen in the options menu.
+    </p>
   </description>
   <launchable type="desktop-id">moas.desktop</launchable>
   <url type="homepage">https://github.com/Grumbel/moas</url>

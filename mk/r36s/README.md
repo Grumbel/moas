@@ -14,13 +14,19 @@ Copy `Moas.sh` and the `moas/` folder to `/roms/ports/`, or put the zip into
 
 ## Controls
 
-| Button / input | Action                          |
-|----------------|---------------------------------|
-| Touch / mouse  | cursor and left click           |
-| D-pad / stick  | move cursor (via gptokeyb map) |
-| A              | left click                      |
-| B / Select     | right click / cancel            |
-| Start + Select | quit (gptokeyb)                 |
+| Button / input     | Action                                       |
+|--------------------|----------------------------------------------|
+| Left stick / D-pad | walk                                         |
+| Right stick        | move the cursor                              |
+| R1 / R2            | use (left click)                             |
+| L1 / L2            | look (right click)                           |
+| A (hold)           | skip text                                    |
+| B / Start          | skip scene (Esc)                             |
+| Select             | options menu: save, load, settings, quit     |
+| Start + Select     | quit (gptokeyb)                              |
+
+In the options menu: D-pad up/down to select, left/right or A to change,
+B goes back, Select or Start closes it.
 
 Save games and logs stay under the port directory on the SD card.
 

@@ -12,10 +12,11 @@ Port to modern Linux using:
 ## Standing rules
 - GPLv2+ (keep existing license; COPYING is GPLv2)
 - Prefer clean abstractions over `#ifdef` soup. Introduce a small platform layer.
-- No parallel histories; deliver cumulative git bundles from the original base.
+- No parallel histories. Agents with repository access commit directly;
+  only Grok Web, which can't, delivers cumulative git bundles instead.
 - Author commits as: Ingo Ruhnke <grumbel@gmail.com>
-- Trailer: Co-authored-by line naming the model that actually did the work,
-  e.g. `Co-authored-by: Claude Opus 5.5 <noreply@anthropic.com>` or
+- Trailer: one Co-authored-by line naming the model that actually did the
+  work, e.g. `Co-authored-by: Claude Opus 5.5 <noreply@anthropic.com>` or
   `Co-authored-by: Grok <grok@x.ai>`.
 - Document progress and next steps in TODO.md after every meaningful change.
 - Always commit when a piece of work is done, without waiting to be asked.

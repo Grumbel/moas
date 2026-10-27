@@ -167,7 +167,7 @@ See `nix/windows.nix`.
 
 Letterbox **touch buttons** (SDL overlay, not the 320×200 buffer). On by
 default on Android and the web build; on desktop builds enable them with
-`--touch-controls` or **F12 → Touch buttons** (the window grows to make room):
+`--touch-controls` or **F12 → Settings → Touch buttons** (the window grows to make room):
 
 - **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
 - **Right:** **Options** and **Hint** (top) — Options opens the options menu, Hint outlines what can be clicked in the room (like **H**); **Skip Scene** and **Skip Text** (bottom) — Skip Scene is **Esc** (aborts armed cutscenes), Skip Text acts like **Shift** (speed up / dismiss speech)
