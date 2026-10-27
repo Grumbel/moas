@@ -469,6 +469,7 @@
   open while a caller still holds it).
 - Game speed stays 1..8 (original F10 menu range; `Walker>=10-TotalSpeed`
   makes 9 and 10 identical, and the original slider is drawn for 1..8).
+  Default is 6 (DOS default 3 feels slow); the config file overrides it.
 
 ### Next
 - Persist language (and touch-buttons toggle) in the config dir; on Android
