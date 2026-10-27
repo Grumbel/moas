@@ -123,7 +123,7 @@ msgstr "OPTIES"
 #: ui.overlay.hint
 msgctxt "ui.overlay.hint"
 msgid "HINT"
-msgstr "HINT"
+msgstr "TIP"
 
 #. source UI
 #: ui.menu.options
@@ -2511,7 +2511,7 @@ msgstr "amanda"
 #: script.p0.0x0676
 msgctxt "script.p0.0x0676"
 msgid "drive"
-msgstr "drive"
+msgstr "schijfstation"
 
 #. prog 0 @ 067d op add_description
 #: script.p0.0x067d
@@ -3039,7 +3039,7 @@ msgstr "NW _________ Thomas Holz"
 #: script.p1.0x079e
 msgctxt "script.p1.0x079e"
 msgid "NW NW Beta Testing:"
-msgstr "NW NW Beta Testing:"
+msgstr "NW NW Bètatests:"
 
 #. prog 1 @ 07ac op print_sentence
 #: script.p1.0x07ac
@@ -3519,7 +3519,7 @@ msgstr "CLR Een foto van een cactus."
 #: script.p2.0x0573
 msgctxt "script.p2.0x0573"
 msgid "CLR Ein Buch. NW \"Fotografieren für Follidioten\""
-msgstr "CLR A book. NW \"Photography for Complete Idiots\""
+msgstr "CLR Een boek. NW \"Fotograferen voor complete idioten\""
 
 #. prog 2 @ 0598 op say_if_found
 #: script.p2.0x0598
@@ -3663,7 +3663,7 @@ msgstr "..menselijke lichaamsdelen.. NW ..duidelijk buiten de technische specifi
 #: script.p2.0x09eb
 msgctxt "script.p2.0x09eb"
 msgid "Garantieanspruch erlischt. NW Mit freundlichen Grüßen: NW Speiseaufzüge Gebrüder Hungrig.\""
-msgstr "warranty is void. NW Yours sincerely, NW Hungry Brothers Dumbwaiters.\""
+msgstr "Garantie vervalt. NW Met vriendelijke groet: NW Eetliften Gebroeders Hongerig.\""
 
 #. prog 2 @ 0a55 op add_say_window2
 #: script.p2.0x0a55
@@ -3891,7 +3891,7 @@ msgstr "CLR Leuk papiersnippertjes!"
 #: script.p2.0x1040
 msgctxt "script.p2.0x1040"
 msgid "CLR Das habe ich schon gelesen."
-msgstr "CLR I've already read that."
+msgstr "CLR Dat heb ik al gelezen."
 
 #. prog 2 @ 1077 op add_say_window
 #: script.p2.0x1077
@@ -3903,7 +3903,7 @@ msgstr "CLR Ahhaaa! NW Zo werkt het dus! NW Oh, ik snap het! NW Zo moet je de ca
 #: script.p2.0x10bb
 msgctxt "script.p2.0x10bb"
 msgid "Jetzt ist alles klar!"
-msgstr "Now everything makes sense!"
+msgstr "Nu is alles duidelijk!"
 
 #. prog 2 @ 10d2 op add_say_window2
 #: script.p2.0x10d2
@@ -3921,7 +3921,7 @@ msgstr "CLR Leuk papiersnippertjes!"
 #: script.p2.0x112f
 msgctxt "script.p2.0x112f"
 msgid "Da ist ein Motor drin."
-msgstr "There's a motor inside."
+msgstr "Er zit een motor in."
 
 #. prog 2 @ 1193 op add_say_window2
 #: script.p2.0x1193
@@ -4035,7 +4035,7 @@ msgstr "CLR Dat krijg ik niet verplaatst."
 #: script.p2.0x153b
 msgctxt "script.p2.0x153b"
 msgid "CLR Besser nicht."
-msgstr "CLR Better not."
+msgstr "CLR Liever niet."
 
 #. prog 4 @ 0010 op add_say_window2
 #: script.p4.0x0010
@@ -4179,7 +4179,7 @@ msgstr "I see..."
 #: script.p5.0x03b7
 msgctxt "script.p5.0x03b7"
 msgid "Moment mal."
-msgstr "Wait a minute."
+msgstr "Wacht eens even."
 
 #. prog 5 @ 03d2 op add_say_window2
 #: script.p5.0x03d2
@@ -4251,13 +4251,13 @@ msgstr "CLR Ik kan niet vliegen."
 #: script.p6.0x034e
 msgctxt "script.p6.0x034e"
 msgid "CLR Ein Teleskop. NW Schlauer Kommentar, ich weiß."
-msgstr "CLR A telescope. NW Clever comment, I know."
+msgstr "CLR Een telescoop. NW Slimme opmerking, ik weet het."
 
 #. prog 6 @ 0375 op say_if_found
 #: script.p6.0x0375
 msgctxt "script.p6.0x0375"
 msgid "CLR Besser nicht. NW Sonst mache ich noch was kaputt."
-msgstr "CLR Better not. NW Otherwise I'll break something."
+msgstr "CLR Beter niet. NW Anders maak ik nog iets kapot."
 
 #. prog 6 @ 03b5 op add_say_window
 #: script.p6.0x03b5
@@ -4341,7 +4341,7 @@ msgstr "CLR Het is moeilijk bij de ramen te komen."
 #: script.p6.0x0c87
 msgctxt "script.p6.0x0c87"
 msgid "CLR Mein guter Alu-Koffer!"
-msgstr "CLR My beloved aluminum suitcase!"
+msgstr "CLR Mijn goede aluminiumkoffer!"
 
 #. prog 6 @ 0cda op say_if_found
 #: script.p6.0x0cda
@@ -4515,7 +4515,7 @@ msgstr "CLR Er zit een klopper aan de deur"
 #: script.p6.0x11db
 msgctxt "script.p6.0x11db"
 msgid "CLR \"Nicht willkommen!\""
-msgstr "CLR \"Not welcome!\""
+msgstr "CLR \"Niet welkom!\""
 
 #. prog 6 @ 1295 op add_say_window2
 #: script.p6.0x1295
@@ -4557,7 +4557,7 @@ msgstr "CLR ____(4 dots)____"
 #: script.p6.0x13d3
 msgctxt "script.p6.0x13d3"
 msgid "Da ist nichts."
-msgstr "There's nothing there.."
+msgstr "Er is niets."
 
 #. prog 6 @ 13fc op add_say_window2
 #: script.p6.0x13fc
@@ -4581,7 +4581,7 @@ msgstr "CLR ____(4 dots)____"
 #: script.p6.0x14bc
 msgctxt "script.p6.0x14bc"
 msgid "Da ist nichts."
-msgstr "There's nothing there.."
+msgstr "Er is niets."
 
 #. prog 6 @ 14e5 op add_say_window2
 #: script.p6.0x14e5
@@ -4605,7 +4605,7 @@ msgstr "CLR ____(4 dots)____"
 #: script.p6.0x15a5
 msgctxt "script.p6.0x15a5"
 msgid "Da ist nichts."
-msgstr "There's nothing there.."
+msgstr "Er is niets."
 
 #. prog 6 @ 15ce op add_say_window2
 #: script.p6.0x15ce
@@ -4629,7 +4629,7 @@ msgstr "CLR ____(4 dots)____"
 #: script.p6.0x168e
 msgctxt "script.p6.0x168e"
 msgid "Da ist nichts."
-msgstr "There's nothing there.."
+msgstr "Er is niets."
 
 #. prog 6 @ 16b7 op add_say_window2
 #: script.p6.0x16b7
@@ -4653,7 +4653,7 @@ msgstr "CLR ____(4 dots)____"
 #: script.p6.0x1777
 msgctxt "script.p6.0x1777"
 msgid "Da ist nichts."
-msgstr "There's nothing there.."
+msgstr "Er is niets."
 
 #. prog 6 @ 17a0 op add_say_window2
 #: script.p6.0x17a0
@@ -4725,7 +4725,7 @@ msgstr "CLR Ik raak dat niet aan."
 #: script.p6.0x1a27
 msgctxt "script.p6.0x1a27"
 msgid "Hinweis: NW ---------------- NW Um die Haustür aufzuschließen, mußt du zu erst mit dem linken Mausknopf auf den Schlüssel klicken und dabei den Mausknopf gedrückt halten."
-msgstr "Hint: NW ---------------- NW Om de voordeur te openen, klik met de linkermuisknop op de sleutel en houd de knop ingedrukt."
+msgstr "Tip: NW ---------------- NW Om de voordeur van het slot te halen, moet je eerst met de linkermuisknop op de sleutel klikken en de muisknop ingedrukt houden."
 
 #. prog 6 @ 1a92 op print_sentence
 #: script.p6.0x1a92
@@ -4839,7 +4839,7 @@ msgstr "___Nope.___"
 #: script.p8.0x0756
 msgctxt "script.p8.0x0756"
 msgid "Aber Matt, wir wollen Sandy retten!"
-msgstr "But Matt, we want to rescue Sandy!"
+msgstr "Maar Matt, we willen Sandy redden!"
 
 #. prog 8 @ 0773 op add_say_window
 #: script.p8.0x0773
@@ -4971,13 +4971,13 @@ msgstr "CLR Bedankt, ik heb geen dorst."
 #: script.p9.0x034f
 msgctxt "script.p9.0x034f"
 msgid "CLR Sofort, Chef!"
-msgstr "CLR Right away, boss!"
+msgstr "CLR Meteen, baas!"
 
 #. prog 9 @ 0383 op add_say_window2
 #: script.p9.0x0383
 msgctxt "script.p9.0x0383"
 msgid "CLR Mit Geldwäsche macht man sich strafbar!"
-msgstr "CLR Money laundering is a criminal offense!"
+msgstr "CLR Witwassen is strafbaar!"
 
 #. prog 9 @ 03ae op add_say_window2
 #: script.p9.0x03ae
@@ -5121,7 +5121,7 @@ msgstr "____(1 punt)____"
 #: script.p9.0x0933
 msgctxt "script.p9.0x0933"
 msgid "CLR So einen wollte ich schon immer haben."
-msgstr "CLR I've always wanted one of these."
+msgstr "CLR Zo eentje heb ik altijd al willen hebben."
 
 #. prog 9 @ 0971 op print_sentence_ret
 #: script.p9.0x0971
@@ -5199,13 +5199,13 @@ msgstr "In de tuin"
 #: script.p10.0x008b
 msgctxt "script.p10.0x008b"
 msgid "CLR Da wachsen Zuchini."
-msgstr "CLR Zucchini are growing there."
+msgstr "CLR Daar groeien courgettes."
 
 #. prog 10 @ 00b5 op add_say_window2
 #: script.p10.0x00b5
 msgctxt "script.p10.0x00b5"
 msgid "CLR Da wachsen Zuchini."
-msgstr "CLR Zucchini are growing there."
+msgstr "CLR Daar groeien courgettes."
 
 #. prog 10 @ 00e6 op add_say_window2
 #: script.p10.0x00e6
@@ -5331,7 +5331,7 @@ msgstr "Knock, knock."
 #: script.p11.0x0565
 msgctxt "script.p11.0x0565"
 msgid "Doch ich kann."
-msgstr "But I can."
+msgstr "Maar dat kan ik wel."
 
 #. prog 12 @ 02c1 op set_room_name
 #: script.p12.0x02c1
@@ -5343,13 +5343,13 @@ msgstr "In de kamer van de butler"
 #: script.p12.0x03ea
 msgctxt "script.p12.0x03ea"
 msgid "Ah! Böser Eindringling"
-msgstr "Ah! Evil intruder!"
+msgstr "Ah! Boze indringer!"
 
 #. prog 12 @ 0433 op add_say_window
 #: script.p12.0x0433
 msgctxt "script.p12.0x0433"
 msgid "Ah! Verdummter Eindringling."
-msgstr "Ah! Stupid intruder."
+msgstr "Ah! Domme indringer."
 
 #. prog 12 @ 0450 op add_say_window
 #: script.p12.0x0450
@@ -5391,7 +5391,7 @@ msgstr "CLR Hij kijkt me aan!"
 #: script.p12.0x0585
 msgctxt "script.p12.0x0585"
 msgid "CLR Nein!"
-msgstr "CLR No!"
+msgstr "CLR Nee!"
 
 #. prog 12 @ 0594 op say_if_found
 #: script.p12.0x0594
@@ -5481,7 +5481,7 @@ msgstr "CLR Ik ben een genie!"
 #: script.p12.0x0a88
 msgctxt "script.p12.0x0a88"
 msgid "Ah! Böser Eindringling nicht mehr duum!"
-msgstr "Ah! Evil intruder no longer stupid!"
+msgstr "Ah! Boze indringer niet meer dom!"
 
 #. prog 12 @ 0aaf op add_say_window2
 #: script.p12.0x0aaf
@@ -5493,7 +5493,7 @@ msgstr "Ahhh!"
 #: script.p12.0x0b17
 msgctxt "script.p12.0x0b17"
 msgid "Ah! Böser Eindringling nicht mehr duum!"
-msgstr "Ah! Evil intruder no longer stupid!"
+msgstr "Ah! Boze indringer niet meer dom!"
 
 #. prog 12 @ 0cc5 op add_say_window
 #: script.p12.0x0cc5
@@ -5523,7 +5523,7 @@ msgstr "Doe dan eindelijk eens iets aan die ratten! NW Ik haat ratten. NW Die be
 #: script.p12.0x0d48
 msgctxt "script.p12.0x0d48"
 msgid "Aber das sind Mäuse."
-msgstr "But those are mice."
+msgstr "Maar dat zijn muizen."
 
 #. prog 12 @ 0d5a op add_say_window
 #: script.p12.0x0d5a
@@ -5667,7 +5667,7 @@ msgstr "____Ja.____ NW Het creditcardnummer is 02-290253-234272. NW ___Dank u.__
 #: script.p13.0x058e
 msgctxt "script.p13.0x058e"
 msgid "Die wollen sofort liefern."
-msgstr "They want to deliver immediately."
+msgstr "Ze willen meteen leveren."
 
 #. prog 13 @ 05b0 op add_say_window2
 #: script.p13.0x05b0
@@ -5805,7 +5805,7 @@ msgstr "Nee, nee, het was allemaal mijn schuld."
 #: script.p13.0x0af1
 msgctxt "script.p13.0x0af1"
 msgid "Ist schon ok."
-msgstr "Is already ok."
+msgstr "Geeft niet."
 
 #. prog 13 @ 0b01 op add_say_window
 #: script.p13.0x0b01
@@ -6045,7 +6045,7 @@ msgstr "Die (gecensureerd) is verantwoordelijk voor mijn huidige situatie. NW Di
 #: script.p13.0x1100
 msgctxt "script.p13.0x1100"
 msgid "Dieser (zensiert) (zensiert) (zensiert) (zensiert) (zensiert) (zensiert) (zensiert)!"
-msgstr "This (censored) (censored) (censored) (censored) (censored) (censored) (censored)!"
+msgstr "Deze (gecensureerd) (gecensureerd) (gecensureerd) (gecensureerd) (gecensureerd) (gecensureerd) (gecensureerd)!"
 
 #. prog 13 @ 114f op add_say_window
 #: script.p13.0x114f
@@ -6171,7 +6171,7 @@ msgstr "Dat zie ik zelf ook wel."
 #: script.p13.0x155a
 msgctxt "script.p13.0x155a"
 msgid "Was fragst du dann?!"
-msgstr "Then why ask?!"
+msgstr "Waarom vraag je het dan?!"
 
 #. prog 13 @ 156d op say_if
 #: script.p13.0x156d
@@ -6357,7 +6357,7 @@ msgstr "Oooooops!"
 #: script.p13.0x1bab
 msgctxt "script.p13.0x1bab"
 msgid "Ich glaube, einmal reicht."
-msgstr "I think once is enough."
+msgstr "Ik denk dat één keer genoeg is."
 
 #. prog 13 @ 1f06 op add_say_window
 #: script.p13.0x1f06
@@ -6411,7 +6411,7 @@ msgstr "Ben je blind? NW Ik ben een cactus!"
 #: script.p13.0x1fb9
 msgctxt "script.p13.0x1fb9"
 msgid "Ähh. NW Ja."
-msgstr "Uh... NW Yes."
+msgstr "Eh... NW Ja."
 
 #. prog 13 @ 1fd3 op add_say_window
 #: script.p13.0x1fd3
@@ -6453,7 +6453,7 @@ msgstr "En toen"
 #: script.p14.0x0091
 msgctxt "script.p14.0x0091"
 msgid "wollte jemand etwas wegen einer Freundin..."
-msgstr "someone wanted something concerning a girlfriend..."
+msgstr "iemand wilde iets weten over een vriendin..."
 
 #. prog 14 @ 00d8 op add_say_window
 #: script.p14.0x00d8
@@ -6657,7 +6657,7 @@ msgstr "_"
 #: script.p14.0x0888
 msgctxt "script.p14.0x0888"
 msgid "Halt! NW So nicht, Freundchen."
-msgstr "Stop! NW Not so fast, buddy."
+msgstr "Halt! NW Niet zo snel, vriendje."
 
 #. prog 14 @ 08c1 op add_say_window
 #: script.p14.0x08c1
@@ -8139,7 +8139,7 @@ msgstr "Kan ik me aanmelden als kandidaat voor de gameshow?"
 #: script.p24.0x0b09
 msgctxt "script.p24.0x0b09"
 msgid "Wie werde ich noch mal Kandidat bei \"Win or Win\"?"
-msgstr "How do I become a contestant on \"Win or Win\" again?"
+msgstr "Hoe word ik ook alweer kandidaat bij \"Win or Win\"?"
 
 #. prog 24 @ 0b2d op add_option
 #: script.p24.0x0b2d
@@ -8499,7 +8499,7 @@ msgstr "Eigenlijk heb ik alleen de koffer nodig. NW Ik bedoel, als dat zou kunne
 #: script.p26.0x0013
 msgctxt "script.p26.0x0013"
 msgid "Showdown"
-msgstr "Showdown"
+msgstr "Confrontatie"
 
 #. prog 26 @ 009f op add_say_window
 #: script.p26.0x009f
