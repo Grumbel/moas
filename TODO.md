@@ -555,7 +555,12 @@
 
 ## Timing
 - Ticker back to PIT divisor 0x1FFF (~145.67 Hz)
-- IveGotTooMuchTime: original semantics, one step per call
+- IveGotTooMuchTime: DOS keeps one step per call (speed depended on CPU,
+  up to ~145.7 steps/s on fast machines, which is what DOSBox shows).
+  Non-DOS: walking and speech-bubble steps run on a fixed 100 Hz clock
+  (STEP_HZ, catch-up capped at 8), independent of display refresh. Was
+  bound to the ~60 Hz main loop. Check text/speech speed and whether the
+  default game speed 6 still fits at 100 steps/s.
 - Wait()/shake use real 100 ms units (PlatformGetMillis)
 
 ## Input

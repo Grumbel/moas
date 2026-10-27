@@ -400,10 +400,9 @@ void IveGotTooMuchTime(void)
   short ThisTime;
 
   /*
-   * As in the original: at most one game step per call whenever the ticker
-   * (~145.7 Hz) has advanced. Missed ticks are dropped, so walking speed is
-   * bounded by the main loop rate (~60 Hz here), like on DOS. Catching up
-   * every tick made walking far too fast.
+   * Ticker-driven work (seconds, palette cycling, keys) runs whenever the
+   * ~145.7 Hz ticker has advanced. On DOS walking and speech bubbles step
+   * here too, once per call; elsewhere they run on the fixed clock below.
    */
   ThisTime=GetTicker();
   if (ThisTime!=LastTime)
@@ -424,11 +423,39 @@ void IveGotTooMuchTime(void)
     }
 
     LastTime=ThisTime;          /*TotalSpeed:1..8*/
+#ifdef DOS
     Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
     Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
     if (WalkingAllowed==1 && (ThisTime&3)==0) UpDateSayWindows();
+#endif
     if (WalkingAllowed==1) LookKeys();
   }
+#ifndef DOS
+  {
+    /*
+     * DOS ran one step per loop iteration, so the game speed depended on the
+     * CPU (up to one per tick, ~145.7/s, on fast machines). Here steps run on
+     * a fixed STEP_HZ clock, independent of display refresh. Catch-up is
+     * capped so a stall (window drag, breakpoint) doesn't fast-forward.
+     */
+    enum { STEP_HZ=100, MAX_CATCHUP=8 };
+    static unsigned int NextStep=0;
+    static short Step=0;
+    unsigned int Now=PlatformGetMillis();
+    int n=0;
+
+    if (NextStep==0 || (int)(Now-NextStep)>MAX_CATCHUP*1000/STEP_HZ) NextStep=Now;
+    while ((int)(Now-NextStep)>=0 && n<MAX_CATCHUP)
+    {
+      NextStep+=1000/STEP_HZ;
+      n++;
+      Step++;
+      Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+      Walker++; if (WalkingAllowed==1 && Walker>=10-TotalSpeed) { UpDateWalking(); Walker=0; }
+      if (WalkingAllowed==1 && (Step&3)==0) UpDateSayWindows();
+    }
+  }
+#endif
 }
 void WillBeCalledEverySecond(void)
 {
