@@ -159,25 +159,25 @@ msgstr "IDIOMA"
 #: ui.opt.fullscreen
 msgctxt "ui.opt.fullscreen"
 msgid "VOLLBILD"
-msgstr "PANTALLA COMPLETA"
+msgstr "PANT. COMPLETA"
 
 #. source UI
 #: ui.opt.touch
 msgctxt "ui.opt.touch"
 msgid "TOUCH-TASTEN"
-msgstr "BOTONES TÁCTILES"
+msgstr "CONTROL TÁCTIL"
 
 #. source UI
 #: ui.opt.speed
 msgctxt "ui.opt.speed"
 msgid "SPIELTEMPO"
-msgstr "VELOCIDAD DEL JUEGO"
+msgstr "RITMO DE JUEGO"
 
 #. source UI
 #: ui.opt.speech
 msgctxt "ui.opt.speech"
 msgid "SPRECHTEMPO"
-msgstr "VELOCIDAD DEL HABLA"
+msgstr "RITMO DE HABLA"
 
 #. source UI
 #: ui.opt.resume

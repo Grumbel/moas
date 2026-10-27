@@ -165,7 +165,7 @@ msgstr "PLEIN ÉCRAN"
 #: ui.opt.touch
 msgctxt "ui.opt.touch"
 msgid "TOUCH-TASTEN"
-msgstr "BOUTONS TACTILES"
+msgstr "BOUTONS ÉCRAN"
 
 #. source UI
 #: ui.opt.speed
@@ -177,7 +177,7 @@ msgstr "VITESSE DU JEU"
 #: ui.opt.speech
 msgctxt "ui.opt.speech"
 msgid "SPRECHTEMPO"
-msgstr "VITESSE DE LA PAROLE"
+msgstr "DÉBIT DE PAROLE"
 
 #. source UI
 #: ui.opt.resume
@@ -261,7 +261,7 @@ msgstr "PASSER LA SCÈNE"
 #: ui.key.hotspots
 msgctxt "ui.key.hotspots"
 msgid "HOTSPOTS ZEIGEN"
-msgstr "AFFICHER LES POINTS CHAUDS"
+msgstr "VOIR LES ZONES"
 
 
 #. GAME.PCK token 0

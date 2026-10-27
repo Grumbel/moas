@@ -171,13 +171,13 @@ msgstr "PULSANTI TOUCH"
 #: ui.opt.speed
 msgctxt "ui.opt.speed"
 msgid "SPIELTEMPO"
-msgstr "VELOCITÀ DI GIOCO"
+msgstr "RITMO DI GIOCO"
 
 #. source UI
 #: ui.opt.speech
 msgctxt "ui.opt.speech"
 msgid "SPRECHTEMPO"
-msgstr "VELOCITÀ DEL DISCORSO"
+msgstr "RITMO PARLATO"
 
 #. source UI
 #: ui.opt.resume
