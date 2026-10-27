@@ -2,3 +2,4 @@
 build/
 build-dos/
 *.err
+__pycache__/
