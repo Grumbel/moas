@@ -3363,7 +3363,7 @@ msgstr "CLR (...)"
 #: script.p2.0x0213
 msgctxt "script.p2.0x0213"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3 points)____"
+msgstr "CLR ____(3_points)____"
 
 #. prog 2 @ 023e op add_say_window2
 #: script.p2.0x023e
@@ -3913,7 +3913,7 @@ msgstr "Maintenant tout est clair !"
 #: script.p2.0x10d2
 msgctxt "script.p2.0x10d2"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 points)____"
+msgstr "CLR ____(2_points)____"
 
 #. prog 2 @ 10fe op add_say_window2
 #: script.p2.0x10fe
@@ -3937,7 +3937,7 @@ msgstr "CLR Ok, elle est en sécurité dedans !"
 #: script.p2.0x11bb
 msgctxt "script.p2.0x11bb"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 2 @ 11d2 op add_say_window2
 #: script.p2.0x11d2
@@ -4285,7 +4285,7 @@ msgstr "CLR O.K."
 #: script.p6.0x04ff
 msgctxt "script.p6.0x04ff"
 msgid "____(10_Punkte)____ NW Hans Rosenthal meint: Das war spitze!"
-msgstr "____(10 points)____ NW Hans Rosenthal dirait : C'était génial !"
+msgstr "____(10_points)____ NW Hans Rosenthal dirait : C'était génial !"
 
 #. prog 6 @ 0617 op add_say_window2
 #: script.p6.0x0617
@@ -4537,7 +4537,7 @@ msgstr "____(1 point)____"
 #: script.p6.0x12fa
 msgctxt "script.p6.0x12fa"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 points)____"
+msgstr "CLR ____(2_points)____"
 
 #. prog 6 @ 131c op add_say_window2
 #: script.p6.0x131c
@@ -4555,7 +4555,7 @@ msgstr "CLR Il y a une clé par terre !"
 #: script.p6.0x13ac
 msgctxt "script.p6.0x13ac"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 6 @ 13d3 op add_say_window
 #: script.p6.0x13d3
@@ -4579,7 +4579,7 @@ msgstr "CLR Il y a une clé par terre !"
 #: script.p6.0x1495
 msgctxt "script.p6.0x1495"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 6 @ 14bc op add_say_window
 #: script.p6.0x14bc
@@ -4603,7 +4603,7 @@ msgstr "CLR Il y a une clé par terre !"
 #: script.p6.0x157e
 msgctxt "script.p6.0x157e"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 6 @ 15a5 op add_say_window
 #: script.p6.0x15a5
@@ -4627,7 +4627,7 @@ msgstr "CLR Il y a une clé par terre !"
 #: script.p6.0x1667
 msgctxt "script.p6.0x1667"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 6 @ 168e op add_say_window
 #: script.p6.0x168e
@@ -4651,7 +4651,7 @@ msgstr "CLR Il y a une clé par terre !"
 #: script.p6.0x1750
 msgctxt "script.p6.0x1750"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 6 @ 1777 op add_say_window
 #: script.p6.0x1777
@@ -4999,7 +4999,7 @@ msgstr "CLR Il y a déjà de l'eau dedans."
 #: script.p9.0x04c6
 msgctxt "script.p9.0x04c6"
 msgid "____(5_Punkte)____"
-msgstr "____(5 points)____"
+msgstr "____(5_points)____"
 
 #. prog 9 @ 04ec op add_say_window2
 #: script.p9.0x04ec
@@ -5023,7 +5023,7 @@ msgstr "Mais je crois avoir vu un bidon d'huile quelque part dans cette horrible
 #: script.p9.0x05ec
 msgctxt "script.p9.0x05ec"
 msgid "____(5_Punkte)____"
-msgstr "____(5 points)____"
+msgstr "____(5_points)____"
 
 #. prog 9 @ 05fe op add_say_window2
 #: script.p9.0x05fe
@@ -5083,7 +5083,7 @@ msgstr "CLR Oh, ça va être serré."
 #: script.p9.0x07ff
 msgctxt "script.p9.0x07ff"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 9 @ 084b op add_say_window
 #: script.p9.0x084b
@@ -5215,7 +5215,7 @@ msgstr "CLR Il y pousse des courgettes."
 #: script.p10.0x00e6
 msgctxt "script.p10.0x00e6"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 points)____"
+msgstr "CLR ____(2_points)____"
 
 #. prog 10 @ 011b op add_say_window
 #: script.p10.0x011b
@@ -5233,7 +5233,7 @@ msgstr "C'était encore coincé."
 #: script.p10.0x0243
 msgctxt "script.p10.0x0243"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 10 @ 025a op add_say_window2
 #: script.p10.0x025a
@@ -5383,7 +5383,7 @@ msgstr "CLR Un vieux appareil photo instantané."
 #: script.p12.0x0542
 msgctxt "script.p12.0x0542"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 12 @ 0570 op say_if_found
 #: script.p12.0x0570
@@ -5449,7 +5449,7 @@ msgstr "CLR Non ! NW Il y a le squelette d'un rat dedans !"
 #: script.p12.0x071b
 msgctxt "script.p12.0x071b"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 12 @ 072d op add_say_window2
 #: script.p12.0x072d
@@ -5473,7 +5473,7 @@ msgstr "CLR Le clou est trop bien enfoncé. NW Je n'arriverai jamais à le sorti
 #: script.p12.0x0a26
 msgctxt "script.p12.0x0a26"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3 points)____"
+msgstr "CLR ____(3_points)____"
 
 #. prog 12 @ 0a4c op add_say_window
 #: script.p12.0x0a4c
@@ -5677,7 +5677,7 @@ msgstr "Ils veulent livrer immédiatement."
 #: script.p13.0x05b0
 msgctxt "script.p13.0x05b0"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 points)____"
+msgstr "CLR ____(4_points)____"
 
 #. prog 13 @ 05f6 op add_say_window2
 #: script.p13.0x05f6
@@ -5701,7 +5701,7 @@ msgstr "CLR Pourquoi le soudoyerais-je ? NW C'EST lui qui soudoyait ici."
 #: script.p13.0x06c4
 msgctxt "script.p13.0x06c4"
 msgid "CLR ____(2_Punkte)____ NW (Plus je einen Gummipunkte von der Bürgeraktionen \"Freundlichkeit für Flanzen\" und \"Nieder mit der Rächtschreibung\")"
-msgstr "CLR ____(2 points)____ NW (Plus un point bonus chacun des actions citoyennes « Gentillesse pour les plantes » et « À bas la faute d'orthographe »)"
+msgstr "CLR ____(2_points)____ NW (Plus un point bonus chacun des actions citoyennes « Gentillesse pour les plantes » et « À bas la faute d'orthographe »)"
 
 #. prog 13 @ 071d op add_say_window2
 #: script.p13.0x071d
@@ -6265,7 +6265,7 @@ msgstr "___Merci.___"
 #: script.p13.0x17f5
 msgctxt "script.p13.0x17f5"
 msgid "CLR ____(5_Punkte)____"
-msgstr "CLR ____(5 points)____"
+msgstr "CLR ____(5_points)____"
 
 #. prog 13 @ 180c op add_say_window2
 #: script.p13.0x180c
@@ -6571,7 +6571,7 @@ msgstr "Peut-être... NW ...en te détruisant... ?"
 #: script.p14.0x0514
 msgctxt "script.p14.0x0514"
 msgid "CLR ____(5_Punkte)____"
-msgstr "CLR ____(5 points)____"
+msgstr "CLR ____(5_points)____"
 
 #. prog 14 @ 052b op say_if_found
 #: script.p14.0x052b
@@ -6589,7 +6589,7 @@ msgstr "CLR Un panier pour le courrier."
 #: script.p14.0x05c6
 msgctxt "script.p14.0x05c6"
 msgid "CLR ____(10_Punkte)____"
-msgstr "CLR ____(10 points)____"
+msgstr "CLR ____(10_points)____"
 
 #. prog 14 @ 05fe op add_say_window2
 #: script.p14.0x05fe
@@ -6901,7 +6901,7 @@ msgstr "J'espère que quelqu'un me paie la majoration de nuit."
 #: script.p16.0x0503
 msgctxt "script.p16.0x0503"
 msgid "CLR ____(6_Punkte)____ NW (Plus 50 Prozent Nachtzuschlag)"
-msgstr "CLR ____(6 points)____ NW (Plus 50 pour cent de majoration de nuit)"
+msgstr "CLR ____(6_points)____ NW (Plus 50 pour cent de majoration de nuit)"
 
 #. prog 16 @ 0542 op say_if_found
 #: script.p16.0x0542
@@ -7141,7 +7141,7 @@ msgstr "Peut-être que j'ai traversé un champ magnétique avec."
 #: script.p17.0x084f
 msgctxt "script.p17.0x084f"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 17 @ 086e op add_say_window2
 #: script.p17.0x086e
@@ -7375,7 +7375,7 @@ msgstr "CLR Ok."
 #: script.p19.0x05d5
 msgctxt "script.p19.0x05d5"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 19 @ 060a op add_say_window
 #: script.p19.0x060a
@@ -7393,7 +7393,7 @@ msgstr "CLR Ok."
 #: script.p19.0x0654
 msgctxt "script.p19.0x0654"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 19 @ 069f op add_say_window
 #: script.p19.0x069f
@@ -7441,7 +7441,7 @@ msgstr "CLR Dans le coffre il y a une carte de crédit et une cale en bois !"
 #: script.p19.0x080e
 msgctxt "script.p19.0x080e"
 msgid "____(5_Punkte)____"
-msgstr "____(5 points)____"
+msgstr "____(5_points)____"
 
 #. prog 19 @ 0853 op add_say_window2
 #: script.p19.0x0853
@@ -7477,7 +7477,7 @@ msgstr "CLR Ok."
 #: script.p19.0x0970
 msgctxt "script.p19.0x0970"
 msgid "____(2_Punkte)____"
-msgstr "____(2 points)____"
+msgstr "____(2_points)____"
 
 #. prog 20 @ 0031 op set_room_name
 #: script.p20.0x0031
@@ -8383,7 +8383,7 @@ msgstr "Rembrandt ?"
 #: script.p25.0x04c2
 msgctxt "script.p25.0x04c2"
 msgid "____(3_Punkte)____"
-msgstr "____(3 points)____"
+msgstr "____(3_points)____"
 
 #. prog 25 @ 04d4 op add_say_window
 #: script.p25.0x04d4
@@ -8431,7 +8431,7 @@ msgstr "Rembrandt ?"
 #: script.p25.0x065f
 msgctxt "script.p25.0x065f"
 msgid "____(6_Punkte)____"
-msgstr "____(6 points)____"
+msgstr "____(6_points)____"
 
 #. prog 25 @ 0671 op add_say_window
 #: script.p25.0x0671
@@ -8479,7 +8479,7 @@ msgstr "Rembrandt ?"
 #: script.p25.0x0769
 msgctxt "script.p25.0x0769"
 msgid "____(9_Punkte)____"
-msgstr "____(9 points)____"
+msgstr "____(9_points)____"
 
 #. prog 25 @ 077b op add_say_window
 #: script.p25.0x077b
@@ -8509,7 +8509,7 @@ msgstr "Confrontation"
 #: script.p26.0x009f
 msgctxt "script.p26.0x009f"
 msgid "____(13_Punkte)____"
-msgstr "____(13 points)____"
+msgstr "____(13_points)____"
 
 #. prog 26 @ 00b2 op add_say_window2
 #: script.p26.0x00b2

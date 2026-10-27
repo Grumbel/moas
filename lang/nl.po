@@ -3363,7 +3363,7 @@ msgstr "CLR (...)"
 #: script.p2.0x0213
 msgctxt "script.p2.0x0213"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3 puntjes)____"
+msgstr "CLR ____(3_Punten)____"
 
 #. prog 2 @ 023e op add_say_window2
 #: script.p2.0x023e
@@ -3909,7 +3909,7 @@ msgstr "Nu is alles duidelijk!"
 #: script.p2.0x10d2
 msgctxt "script.p2.0x10d2"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 dots)____"
+msgstr "CLR ____(2_Punten)____"
 
 #. prog 2 @ 10fe op add_say_window2
 #: script.p2.0x10fe
@@ -3933,7 +3933,7 @@ msgstr "CLR Oké, het is daar veilig!"
 #: script.p2.0x11bb
 msgctxt "script.p2.0x11bb"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 2 @ 11d2 op add_say_window2
 #: script.p2.0x11d2
@@ -4263,7 +4263,7 @@ msgstr "CLR Beter niet. NW Anders maak ik nog iets kapot."
 #: script.p6.0x03b5
 msgctxt "script.p6.0x03b5"
 msgid "CLR ____(1_Punkt)____"
-msgstr "CLR ____(1 dot)____"
+msgstr "CLR ____(1_punt)____"
 
 #. prog 6 @ 044c op add_say_window
 #: script.p6.0x044c
@@ -4533,7 +4533,7 @@ msgstr "____(1_Punt)____"
 #: script.p6.0x12fa
 msgctxt "script.p6.0x12fa"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 dots)____"
+msgstr "CLR ____(2_Punten)____"
 
 #. prog 6 @ 131c op add_say_window2
 #: script.p6.0x131c
@@ -4551,7 +4551,7 @@ msgstr "CLR Er ligt een sleutel!"
 #: script.p6.0x13ac
 msgctxt "script.p6.0x13ac"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 6 @ 13d3 op add_say_window
 #: script.p6.0x13d3
@@ -4575,7 +4575,7 @@ msgstr "CLR Er ligt een sleutel!"
 #: script.p6.0x1495
 msgctxt "script.p6.0x1495"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 6 @ 14bc op add_say_window
 #: script.p6.0x14bc
@@ -4599,7 +4599,7 @@ msgstr "CLR Er ligt een sleutel!"
 #: script.p6.0x157e
 msgctxt "script.p6.0x157e"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 6 @ 15a5 op add_say_window
 #: script.p6.0x15a5
@@ -4623,7 +4623,7 @@ msgstr "CLR Er ligt een sleutel!"
 #: script.p6.0x1667
 msgctxt "script.p6.0x1667"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 6 @ 168e op add_say_window
 #: script.p6.0x168e
@@ -4647,7 +4647,7 @@ msgstr "CLR Er ligt een sleutel!"
 #: script.p6.0x1750
 msgctxt "script.p6.0x1750"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4_Punten)____"
 
 #. prog 6 @ 1777 op add_say_window
 #: script.p6.0x1777
@@ -4689,7 +4689,7 @@ msgstr "CLR O.K."
 #: script.p6.0x18fe
 msgctxt "script.p6.0x18fe"
 msgid "CLR ____(1_Punkt)____"
-msgstr "CLR ____(1 dot)____"
+msgstr "CLR ____(1_Punt)____"
 
 #. prog 6 @ 194a op add_say_window
 #: script.p6.0x194a
