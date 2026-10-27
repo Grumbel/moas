@@ -219,13 +219,13 @@ msgstr "VOLVER"
 #: ui.opt.on
 msgctxt "ui.opt.on"
 msgid "AN"
-msgstr "ACTIVADO"
+msgstr "SÍ"
 
 #. source UI
 #: ui.opt.off
 msgctxt "ui.opt.off"
 msgid "AUS"
-msgstr "DESACTIVADO"
+msgstr "NO"
 
 #. source UI
 #: ui.key.save
