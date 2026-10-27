@@ -49,6 +49,8 @@ void PlatformEngineMenu(void);
 /* Current window / overlay state, for settings.ini. */
 int PlatformIsFullscreen(void);
 int PlatformTouchControlsOn(void);
+/* 1: picture shown at 4:3, 0: 8:5 (square pixels). */
+int PlatformAspect43(void);
 
 /* Default language from the OS locale: "de" for German, else "en". */
 const char *PlatformPreferredLanguage(void);

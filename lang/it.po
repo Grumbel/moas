@@ -162,6 +162,12 @@ msgid "VOLLBILD"
 msgstr "SCHERMO INTERO"
 
 #. source UI
+#: ui.opt.aspect
+msgctxt "ui.opt.aspect"
+msgid "BILDFORMAT"
+msgstr "PROPORZIONI"
+
+#. source UI
 #: ui.opt.touch
 msgctxt "ui.opt.touch"
 msgid "TOUCH-TASTEN"

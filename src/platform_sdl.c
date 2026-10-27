@@ -80,10 +80,28 @@ static Uint32        start_ticks = 0;
 static int           running  = 1;
 static int           restart_requested;
 static SDL_GameController *pad = NULL;
-static int           pad_use = 0;   /* RT → left click */
-static int           pad_look = 0;  /* LT → right click */
+static int           pad_use = 0;   /* A / R1 → left click */
+static int           pad_look = 0;  /* B / L1 → right click */
+static int           pad_hint = 0;  /* X held → hotspot highlight */
+static int           pad_l2 = 0, pad_r2 = 0; /* trigger state, for edges */
+static float         pad_frac_x = 0, pad_frac_y = 0; /* sub-pixel cursor motion */
+static Uint32        pad_last_tick = 0;
 static int           pad_walk_cooldown = 0;
-static int           pad_aiming = 0; /* 1: soft cursor owned by right stick */
+static int           pad_aiming = 0; /* 1: soft cursor owned by the sticks */
+static Uint32        osd_until = 0;  /* game speed notice after L3/R3 */
+static int           aspect_43 = 1;  /* 1: 4:3 like the CRT, 0: 8:5 (square pixels) */
+static SDL_Texture  *upscaled = NULL; /* integer prescale for smooth 4:3 */
+static int           upscaled_k = 0;
+
+/*
+ * Height the 320x200 picture is shown at, in 320-wide units: 240 for 4:3
+ * (mode 13h pixels were 1.2x taller than wide on a CRT), 200 for square
+ * pixels.
+ */
+static int display_h(void)
+{
+  return aspect_43 ? 240 : LOGICAL_H;
+}
 static int           phys_left = 0, phys_right = 0, phys_middle = 0;
 #ifndef DOS
 extern void MoasPadWalk(int ax, int ay);
@@ -94,7 +112,7 @@ static void wasm_pause_spin(void);
 #endif
 static int           moas_shift_down = 0;
 /*
- * Synthetic Shift (overlay SKIP, gamepad A) until this SDL tick. Time-based:
+ * Synthetic Shift (overlay SKIP, gamepad Y) until this SDL tick. Time-based:
  * the event pump runs in busy loops (SayWait), so a frame counter expired
  * before UpDateSayWindows (every 4 game ticks, ~27 ms) could see it. Speech
  * is dismissed on the Shift release edge, so the hold must outlast one
@@ -121,7 +139,7 @@ static Uint32        sdl_palette[256];
 
 int PlatformShiftDown(void)
 {
-  /* Overlay SKIP button and gamepad A synthesize Shift for speech skip. */
+  /* Overlay SKIP button and gamepad Y synthesize Shift for speech skip. */
   if (overlay_shift_until && (Sint32)(overlay_shift_until - SDL_GetTicks()) > 0)
     return 1;
   return moas_shift_down;
@@ -493,8 +511,16 @@ int PlatformInit(void)
     if (moas_fullscreen == 1)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     {
-      int win_w = LOGICAL_W * SCALE;
-      int win_h = LOGICAL_H * SCALE;
+      int win_w, win_h;
+      if (moas_aspect >= 0)
+        aspect_43 = (moas_aspect == 1);
+      win_w = LOGICAL_W * SCALE;
+#ifdef __EMSCRIPTEN__
+      /* shell.html fixes the canvas aspect; 8:5 is letterboxed inside. */
+      win_h = 240 * SCALE;
+#else
+      win_h = display_h() * SCALE;
+#endif
       /*
        * Touch overlay default: on for Android / web, off for desktop.
        * --touch-controls / --no-touch-controls or the F12 menu override it.
@@ -508,7 +534,7 @@ int PlatformInit(void)
       /*
        * Side letterbox for the button columns. overlay_rects needs
        * dx >= ~136 (btn up to 120 + margins); +280 → 140/side when the
-       * framebuffer is height-limited (SCALE 3 → 960×600 game area).
+       * framebuffer is height-limited (SCALE 3 → 960×720 game area).
        */
       if (overlay_on)
         win_w += OVERLAY_EXTRA_W;
@@ -773,7 +799,7 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
     h = 120;
   top = h + 2 * OV_MARGIN;
   bot = 2 * h + OV_GAP + 2 * OV_MARGIN;
-  dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
+  dh = (int)((long)display_h() * ww / LOGICAL_W);
   if (wh - dh < top + bot)
     return 0;
   if (bw) *bw = w;
@@ -787,8 +813,8 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
 static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
                            int *out_ww, int *out_wh)
 {
-  int ww = LOGICAL_W * SCALE, wh = LOGICAL_H * SCALE;
-  int dw, dh, dx, dy, top_h, bot_h;
+  int ww = LOGICAL_W * SCALE, wh = display_h() * SCALE;
+  int dw, dh, dx, dy, top_h, bot_h, disp_h = display_h();
   float sx, sy, scale;
 
   if (renderer)
@@ -799,17 +825,17 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (wh < 1) wh = 1;
 
   sx = (float)ww / (float)LOGICAL_W;
-  sy = (float)wh / (float)LOGICAL_H;
+  sy = (float)wh / (float)disp_h;
   scale = (sx < sy) ? sx : sy;
   dw = (int)(LOGICAL_W * scale + 0.5f);
-  dh = (int)(LOGICAL_H * scale + 0.5f);
+  dh = (int)(disp_h * scale + 0.5f);
   dx = (ww - dw) / 2;
   dy = (wh - dh) / 2;
 
   if (ov_portrait(ww, wh, NULL, NULL, &top_h, &bot_h)) {
     /* Full width, centred between the button rows. */
     dw = ww;
-    dh = (int)((long)LOGICAL_H * ww / LOGICAL_W);
+    dh = (int)((long)disp_h * ww / LOGICAL_W);
     dx = 0;
     dy = top_h + (wh - top_h - bot_h - dh) / 2;
   } else if (overlay_on)
@@ -829,10 +855,10 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
     if (dx < min_side && ww > 2 * min_side + 64) {
       int avail_w = ww - 2 * min_side;
       float sx2 = (float)avail_w / (float)LOGICAL_W;
-      float sy2 = (float)wh / (float)LOGICAL_H;
+      float sy2 = (float)wh / (float)disp_h;
       float sc2 = (sx2 < sy2) ? sx2 : sy2;
       dw = (int)(LOGICAL_W * sc2 + 0.5f);
-      dh = (int)(LOGICAL_H * sc2 + 0.5f);
+      dh = (int)(disp_h * sc2 + 0.5f);
       dx = min_side + (avail_w - dw) / 2;
       dy = (wh - dh) / 2;
     }
@@ -1344,7 +1370,7 @@ static int hint_alpha(void)
 {
   Sint32 left;
 
-  if (hint_key_down || overlay_down == OV_HINT)
+  if (hint_key_down || pad_hint || overlay_down == OV_HINT)
     return 255;
   if (!hint_until)
     return 0;
@@ -1701,7 +1727,7 @@ static int eng_save_ok, eng_load_ok; /* game is frozen while the menu is open */
  * Rows are drawn in enum order; a page shows the rows in its range.
  */
 enum { ENG_RESUME = 0, ENG_SAVE, ENG_LOAD, ENG_SETTINGS, ENG_RESTART, ENG_QUIT,
-       ENG_LANG, ENG_FULLSCREEN, ENG_TOUCH, ENG_SPEED, ENG_SPEECH, ENG_BACK,
+       ENG_LANG, ENG_FULLSCREEN, ENG_ASPECT, ENG_TOUCH, ENG_SPEED, ENG_SPEECH, ENG_BACK,
        ENG_COUNT };
 enum { ENG_PAGE_MAIN = 0, ENG_PAGE_SETTINGS };
 
@@ -1748,6 +1774,31 @@ int PlatformIsFullscreen(void)
 int PlatformTouchControlsOn(void)
 {
   return overlay_on;
+}
+
+int PlatformAspect43(void)
+{
+  return aspect_43;
+}
+
+/*
+ * Switch 4:3 / 8:5. A plain window keeps its width and follows with its
+ * height, so the picture stays the same size without new black bars.
+ */
+static void eng_toggle_aspect(void)
+{
+  int old_h = display_h();
+  aspect_43 = !aspect_43;
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+  if (window && !(SDL_GetWindowFlags(window) &
+                  (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_MAXIMIZED))) {
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_SetWindowSize(window, w, h * display_h() / old_h);
+  }
+#else
+  (void)old_h;
+#endif
 }
 
 static void eng_toggle_fullscreen(void)
@@ -1956,6 +2007,10 @@ static void eng_menu_draw(const EngLayout *L, int sel, int pressed)
         label = Ui(UI_OPT_FULLSCREEN);
         snprintf(val, sizeof(val), "%s", Ui(eng_is_fullscreen() ? UI_OPT_ON : UI_OPT_OFF));
         break;
+      case ENG_ASPECT:
+        label = Ui(UI_OPT_ASPECT);
+        snprintf(val, sizeof(val), "%s", aspect_43 ? "4:3" : "8:5");
+        break;
       case ENG_TOUCH:
         label = Ui(UI_OPT_TOUCH);
         snprintf(val, sizeof(val), "%s", Ui(overlay_on ? UI_OPT_ON : UI_OPT_OFF));
@@ -2026,6 +2081,9 @@ static int eng_menu_change(int sel, int dir)
     case ENG_FULLSCREEN:
       eng_toggle_fullscreen();
       break;
+    case ENG_ASPECT:
+      eng_toggle_aspect();
+      break;
     case ENG_TOUCH:
       if (eng_row_visible(ENG_TOUCH))
         overlay_set_enabled(!overlay_on);
@@ -2091,7 +2149,14 @@ static const struct { const char *key; int text; } keyhint_rows[] = {
   { "ESC",   UI_KEY_SKIP_SCENE },
   { "H",     UI_KEY_HOTSPOTS },
 };
+/* Same rows for a gamepad. */
+static const char *const padhint_keys[] = { "R2", "L2", "START", "Y", "BACK", "X" };
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
+
+static const char *keyhint_key(int i)
+{
+  return pad ? padhint_keys[i] : keyhint_rows[i].key;
+}
 
 /* The title room (prog 4: "Intro", "Anleitung", copyright notes). */
 static int keyhints_dismissed;
@@ -2128,7 +2193,7 @@ static void keyhints_draw(const SDL_Rect *avoid)
   for (;;) {
     kw = tw = 0;
     for (i = 0; i < KEYHINT_ROWS; i++) {
-      int w = ui_text_width(keyhint_rows[i].key, u);
+      int w = ui_text_width(keyhint_key(i), u);
       if (w > kw) kw = w;
       w = ui_text_width(Ui(keyhint_rows[i].text), u);
       if (w > tw) tw = w;
@@ -2150,7 +2215,7 @@ static void keyhints_draw(const SDL_Rect *avoid)
   ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, 150);
   for (i = 0; i < KEYHINT_ROWS; i++) {
     int y = box.y + pad + i * line_h;
-    ui_draw_label(box.x + pad, y, keyhint_rows[i].key, u, 255, 206, 72);
+    ui_draw_label(box.x + pad, y, keyhint_key(i), u, 255, 206, 72);
     ui_draw_label(box.x + pad + kw + 5 * u, y, Ui(keyhint_rows[i].text), u, 255, 255, 255);
   }
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
@@ -2349,6 +2414,72 @@ void PlatformEngineMenu(void)
     PowerRedrawArea(0, 0, 319, 199);
 }
 
+/*
+ * Scale up by a whole factor with nearest, then smoothly to the final size:
+ * nearest alone gives uneven rows for the 1.2x stretch of 4:3. Exact
+ * integer scales use the texture directly.
+ */
+static SDL_Texture *present_source(int dw, int dh)
+{
+  int k = dw / LOGICAL_W;
+
+  if (dh / LOGICAL_H < k)
+    k = dh / LOGICAL_H;
+  if (k < 1)
+    k = 1;
+  if ((dw == LOGICAL_W * k && dh == LOGICAL_H * k) || !SDL_RenderTargetSupported(renderer))
+    return texture;
+  if (!upscaled || upscaled_k != k) {
+    if (upscaled)
+      SDL_DestroyTexture(upscaled);
+    /* The scale quality hint is read when a texture is created. */
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    upscaled = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                                 SDL_TEXTUREACCESS_TARGET,
+                                 LOGICAL_W * k, LOGICAL_H * k);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+    upscaled_k = k;
+    if (!upscaled)
+      return texture;
+  }
+  if (SDL_SetRenderTarget(renderer, upscaled) != 0)
+    return texture;
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_SetRenderTarget(renderer, NULL);
+  return upscaled;
+}
+
+/* "GAME SPEED 5" at the top of the picture after L3/R3, fading out. */
+static void osd_draw(const SDL_Rect *pic)
+{
+  char text[64];
+  Sint32 left;
+  SDL_Rect box;
+  int u, a;
+
+  if (!osd_until)
+    return;
+  left = (Sint32)(osd_until - SDL_GetTicks());
+  if (left <= 0) {
+    osd_until = 0;
+    return;
+  }
+  a = left >= 300 ? 255 : (int)(left * 255 / 300);
+  snprintf(text, sizeof(text), "%s %d", Ui(UI_OPT_SPEED), (int)TotalSpeed);
+  u = pic->h / 240;
+  if (u < 1)
+    u = 1;
+  box.w = ui_text_width(text, u) + 8 * u;
+  box.h = 15 * u;
+  box.x = pic->x + (pic->w - box.w) / 2;
+  box.y = pic->y + 6 * u;
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  ui_fill_rounded_solid(&box, 2 * u, 0, 0, 0, (Uint8)(a * 160 / 255));
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+  if (a > 128)
+    ui_draw_label(box.x + 4 * u, box.y + 4 * u, text, u, 255, 230, 140);
+}
+
 static void platform_present_frame(void)
 {
   SDL_Rect dst;
@@ -2372,9 +2503,11 @@ static void platform_present_frame(void)
   if (!screen_blank) {
     dst.x += shake_ox;
     dst.y += shake_oy;
-    SDL_RenderCopy(renderer, texture, NULL, &dst);
-    if (!engine_menu_visible)
+    SDL_RenderCopy(renderer, present_source(dw, dh), NULL, &dst);
+    if (!engine_menu_visible) {
       hint_draw(&dst);
+      osd_draw(&dst);
+    }
   }
   /* Touch buttons sit in the letterbox, beside the game picture. */
   overlay_draw();
@@ -2462,43 +2595,59 @@ static void sync_mouse_position(void)
 
 /* ---- Gamepad (SDL GameController) ------------------------------------- */
 /*
- * Left stick / D-pad  → walk (MoasPadWalk)
- * Right stick         → cursor
- * RT                  → use (left click)
- * LT                  → look (right click / SIEHE)
- * A                   → skip speech (Shift)
- * B                   → Esc / abort sequence
- * Start               → Esc / abort sequence
- * Back                → options menu (has Quit)
- * X / Y               → USE / LOOK touch mode (when touch buttons are on)
+ * Left / right stick  → cursor (both together: faster)
+ * D-pad               → walk (MoasPadWalk)
+ * A / R1              → use (left click)
+ * B / L1              → look (right click / SIEHE)
+ * X (hold)            → hotspot highlight (like H)
+ * Y (hold)            → skip speech (Shift)
+ * R2 / L2             → save / load
+ * Start               → options menu
+ * Back                → Esc / abort sequence
+ * R3 / L3             → game speed up / down
  */
+#define PAD_CURSOR_SPEED 150.0f /* logical px/s per stick at full deflection */
+#define OSD_MS          1500
+
 static int axis_dead(int v, int dead)
 {
   if (v > -dead && v < dead) return 0;
   return v;
 }
 
+/* -1..1 with a squared response for finer aim near the centre. */
+static float pad_curve(int v)
+{
+  float f = (float)v / 32767.0f;
+  return f * (0.35f + 0.65f * (f < 0 ? -f : f));
+}
+
+/* SAVE (1) / LOAD (2) through LookKeys, like the overlay buttons. */
+static void pad_queue_save_load(int cmd)
+{
+  if (!MoasCanOpenSaveMenu())
+    return;
+  if (cmd == 2 && !MoasAnySaveExists())
+    return;
+  overlay_pending_cmd = cmd;
+}
+
 static void pad_apply(void)
 {
-  Sint16 lx, ly, rx, ry, lt, rt;
-  int walk_x, walk_y, dx, dy;
   const int stick_dead = 8000;
   const int trig_dead = 12000;
-  int use, look;
+  int walk_x = 0, walk_y = 0, use, look, hint, l2, r2;
+  float sx, sy, dt;
+  Uint32 now = SDL_GetTicks();
+
+  dt = pad_last_tick ? (float)(now - pad_last_tick) / 1000.0f : 0.0f;
+  if (dt > 0.05f)
+    dt = 0.05f; /* no jump after a stall (menu, loading) */
+  pad_last_tick = now;
 
   if (!pad)
     return;
 
-  lx = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTX);
-  ly = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTY);
-  rx = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTX);
-  ry = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTY);
-  lt = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-  rt = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
-
-  /* D-pad overrides left stick when pressed. */
-  walk_x = axis_dead(lx, stick_dead);
-  walk_y = axis_dead(ly, stick_dead);
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_LEFT))
     walk_x = -32767;
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
@@ -2509,33 +2658,39 @@ static void pad_apply(void)
     walk_y = 32767;
 
   /*
-   * Right stick → relative cursor. Warp the OS pointer so release does not
-   * snap back via sync_mouse_position() to the old physical position.
-   * Speed scales with deflection (gentle near centre, faster at the edge).
+   * Both sticks → relative cursor, added up. Time-based: the pump also runs
+   * in busy loops. Warp the OS pointer so release does not snap back via
+   * sync_mouse_position() to the old physical position.
    */
-  dx = axis_dead(rx, stick_dead);
-  dy = axis_dead(ry, stick_dead);
-  if (dx || dy) {
-    int mx, my;
-    /* |d|/32767 in 0..1; use squared response for finer aim near centre. */
-    float fx = (float)dx / 32767.0f;
-    float fy = (float)dy / 32767.0f;
-    float sx = fx * (0.35f + 0.65f * (fx < 0 ? -fx : fx));
-    float sy = fy * (0.35f + 0.65f * (fy < 0 ? -fy : fy));
-    mx = (int)Mouse.x + (int)(sx * 14.0f);
-    my = (int)Mouse.y + (int)(sy * 14.0f);
+  sx = pad_curve(axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTX), stick_dead)) +
+       pad_curve(axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTX), stick_dead));
+  sy = pad_curve(axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTY), stick_dead)) +
+       pad_curve(axis_dead(SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_RIGHTY), stick_dead));
+  if (sx != 0 || sy != 0) {
+    int mx, my, ix, iy;
+    pad_frac_x += sx * PAD_CURSOR_SPEED * dt;
+    pad_frac_y += sy * PAD_CURSOR_SPEED * dt;
+    ix = (int)pad_frac_x;
+    iy = (int)pad_frac_y;
+    pad_frac_x -= (float)ix;
+    pad_frac_y -= (float)iy;
+    mx = (int)Mouse.x + ix;
+    my = (int)Mouse.y + iy;
     if (mx < 0) mx = 0;
     if (my < 0) my = 0;
     if (mx > LOGICAL_W - 1) mx = LOGICAL_W - 1;
     if (my > LOGICAL_H - 1) my = LOGICAL_H - 1;
-    Mouse.x = (short)mx;
-    Mouse.y = (short)my;
     pad_aiming = 1;
-    PlatformSetMousePos(Mouse.x, Mouse.y);
+    if (mx != Mouse.x || my != Mouse.y)
+      PlatformSetMousePos((short)mx, (short)my);
+  } else {
+    pad_frac_x = pad_frac_y = 0;
   }
 
-  use = (rt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-  look = (lt > trig_dead) || SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+  use = SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A) ||
+        SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+  look = SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_B) ||
+         SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
   if (use && !pad_use)
     keyhints_note_click();
   pad_use = use ? 1 : 0;
@@ -2544,9 +2699,24 @@ static void pad_apply(void)
   Mouse.Right = phys_right || pad_look;
   Mouse.Middle = phys_middle;
 
-  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A))
-    overlay_shift_until = SDL_GetTicks() + SHIFT_HOLD_MS; /* skip speech while held */
-  /* B / Start / Back / X / Y are edge-triggered in pad_button_down. */
+  if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_Y))
+    overlay_shift_until = now + SHIFT_HOLD_MS; /* skip speech while held */
+
+  hint = SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_X);
+  if (!hint && pad_hint)
+    hint_release();
+  pad_hint = hint ? 1 : 0;
+
+  /* The triggers are axes: act on the press edge. */
+  r2 = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) > trig_dead;
+  l2 = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT) > trig_dead;
+  if (r2 && !pad_r2)
+    pad_queue_save_load(1);
+  if (l2 && !pad_l2)
+    pad_queue_save_load(2);
+  pad_r2 = r2;
+  pad_l2 = l2;
+  /* Start / Back / L3 / R3 are edge-triggered in pad_button_down. */
 
 #ifndef DOS
   if (pad_walk_cooldown > 0)
@@ -2570,7 +2740,7 @@ static void pad_device_event(const SDL_Event *ev)
     if (pad && ev->cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad))) {
       SDL_GameControllerClose(pad);
       pad = NULL;
-      pad_use = pad_look = 0;
+      pad_use = pad_look = pad_hint = 0;
       MoasLog("gamepad disconnected");
     }
   }
@@ -2581,20 +2751,20 @@ static void pad_button_down(const SDL_ControllerButtonEvent *cb)
   if (!pad || cb->which != SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad)))
     return;
   switch (cb->button) {
-    case SDL_CONTROLLER_BUTTON_B:
-    case SDL_CONTROLLER_BUTTON_START:
+    case SDL_CONTROLLER_BUTTON_BACK:
       synth_esc();
       break;
-    case SDL_CONTROLLER_BUTTON_BACK:
+    case SDL_CONTROLLER_BUTTON_START:
       PlatformEngineMenu();
       break;
-    case SDL_CONTROLLER_BUTTON_X:
-      if (overlay_on)
-        touch_mode = MOAS_TOUCH_USE;
-      break;
-    case SDL_CONTROLLER_BUTTON_Y:
-      if (overlay_on)
-        touch_mode = MOAS_TOUCH_LOOK;
+    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+    case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+      /* Same 1..8 range as the options menu, but no wrap-around. */
+      TotalSpeed = (short)(TotalSpeed + (cb->button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ? 1 : -1));
+      if (TotalSpeed < 1) TotalSpeed = 1;
+      if (TotalSpeed > 8) TotalSpeed = 8;
+      osd_until = SDL_GetTicks() + OSD_MS;
+      MoasSettingsSave();
       break;
     default:
       break;

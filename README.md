@@ -215,7 +215,7 @@ The HTML shell (`mk/wasm/shell.html`) provides:
 - Help text for mouse, touch, and keyboard
 - **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
 - On-canvas touch overlay (Save / Load / USE / LOOK / Options / Hint / Skip Scene / Skip Text), same as Android
-- **Gamepad:** left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc
+- **Gamepad:** sticks move the cursor (both together: faster), D-pad walk, A/R1 use, B/L1 look, X hint, Y skip text, Back skip scene (Esc), Start options, R2 save, L2 load, R3/L3 game speed up/down
 
 Save files are exported as `moas-saves.json` and can be imported on another browser.
 
@@ -265,9 +265,10 @@ moas --lang=en
 # or: MOAS_LANG=en moas
 ```
 
-SDL host: press **F12** (or the touch **Options** button, or gamepad **Back**) for the options menu.
+SDL host: press **F12** (or the touch **Options** button, or gamepad **Start**) for the options menu.
 Its main page has RESUME, SAVE, LOAD, SETTINGS, RESTART and QUIT; SETTINGS holds language,
-fullscreen, touch buttons, game speed and speech speed (saved in `settings.ini` in the state
+fullscreen, aspect ratio (4:3 like the original CRT, default; or 8:5 with square pixels),
+touch buttons, game speed and speech speed (saved in `settings.ini` in the state
 directory). SAVE and LOAD are greyed out while the game would ignore them; Esc, Backspace,
 gamepad B or right-click go back from SETTINGS. The menu works with keyboard,
 gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, tap the
@@ -578,6 +579,7 @@ These are developer tools from the original engine, not needed for normal play.
 --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit
 -f, --fullscreen        Desktop fullscreen
 --windowed              Start in a window (overrides settings.ini)
+--aspect RATIO          4:3 (default, like the original CRT) or 8:5 (square pixels)
 --touch-controls        Show the on-screen Save/Load/Use/Look/Options/Hint/Skip buttons
 --no-touch-controls     Hide them (default except Android / web)
 ```

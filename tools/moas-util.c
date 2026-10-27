@@ -621,6 +621,7 @@ static void extract_ui_strings(void)
     { "ui.opt.hint_keys", "KLICK ODER PFEILE/ENTER - ESC/F12 SCHLIESST" },
     { "ui.opt.language", "SPRACHE" },
     { "ui.opt.fullscreen", "VOLLBILD" },
+    { "ui.opt.aspect", "BILDFORMAT" },
     { "ui.opt.touch", "TOUCH-TASTEN" },
     { "ui.opt.speed", "SPIELTEMPO" },
     { "ui.opt.speech", "SPRECHTEMPO" },

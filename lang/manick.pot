@@ -162,6 +162,12 @@ msgid "VOLLBILD"
 msgstr ""
 
 #. source UI
+#: ui.opt.aspect
+msgctxt "ui.opt.aspect"
+msgid "BILDFORMAT"
+msgstr ""
+
+#. source UI
 #: ui.opt.touch
 msgctxt "ui.opt.touch"
 msgid "TOUCH-TASTEN"

@@ -6,6 +6,29 @@
 
 # TODO / Handoff
 
+## Gamepad remap, 4:3 aspect ratio (2026-10-27)
+- Pad: both sticks move the cursor and add up (both = faster), time-based
+  at `PAD_CURSOR_SPEED` 150 logical px/s per stick (was ~14 px per pump,
+  far too fast). D-pad walks (left stick no longer does). A/R1 use, B/L1
+  look, X held = hotspots (like H), Y held = skip text, Back = Esc, Start =
+  options menu, R2/L2 = save/load (edge on the trigger axis, same queue and
+  checks as the overlay buttons), R3/L3 = game speed +/- (1..8, no wrap,
+  "GAME SPEED n" notice on the picture, saved to settings.ini).
+- Start screen key hints show pad buttons while a pad is connected.
+- Aspect: the picture was shown with square pixels (8:5); mode 13h on a
+  CRT is 4:3 (pixels 1.2x tall). New setting `aspect=4:3|8:5` (default
+  4:3), `--aspect`, SETTINGS row ASPECT RATIO (`ui.opt.aspect`, all .po).
+  `letterbox_geom` uses `display_h()` (240/200); the window opens at
+  960x720 and a plain window changes height on toggle.
+- 4:3 scaling: nearest to an integer multiple in a target texture, then
+  linear to the final size (`present_source`), so rows are not uneven.
+  Exact integer scales skip it.
+- Web: the canvas is always 1240x720 (shell.html slot aspect 31/18); 8:5
+  is letterboxed inside.
+- Tested: build, ctest, Xvfb screenshots at 4:3 and 8:5. Gamepad changes
+  untested on hardware (no pad here); check cursor speed and R36S L3/R3.
+- Website (separate repo) gamepad line updated as well.
+
 ## Port diagnostics go through MoasLog (2026-10-26)
 - `src/log.{h,c}`: `MoasLog(fmt, ...)`, one line per call. Desktop/wasm →
   stderr, Android → SDL_Log, DOS → `MOAS.LOG` in the CWD (truncated per run,
@@ -249,7 +272,7 @@
 - Tested under Xvfb with save copies: H shows labels and an NPC, linger and
   fade-out work. The overlay button itself is untested (layout and touch);
   check landscape/portrait on a phone or with `--touch-controls`.
-- Possible next: gamepad button for it (needs a button-up hook in pad code).
+- Gamepad X shows it while held (2026-10-27).
 - Master mode also shows Jumper (walk-in) areas in cyan (kind 1 from
   `MoasGetHotspots`). Not in normal play: jumpers are exits but also any
   other walk-in trigger, so rooms like the lab get covered in boxes. Telling
@@ -551,7 +574,7 @@ Exit autosave = **AUTOSAVE.SAV** (dedicated; slot 9 stays in-game AutoSaveGame o
 - Runtime language packs: Ui(id) + UnPack LangLookup, --lang / MOAS_LANG
 - moas-util strings: export script/PCK/UI text as json|pot|tsv for translation
 - Android/overlay: letterbox_geom reserves side columns so buttons never cover the game
-- Gamepad: left stick/D-pad walk, right stick cursor, RT use, LT look, A skip, B/Start Esc
+- Gamepad: sticks cursor, D-pad walk, A/R1 use, B/L1 look, X hint, Y skip text, Back Esc, Start menu, R2/L2 save/load, R3/L3 speed
 - WASM fullscreen/window: CSS aspect matches overlay window so buttons stay in letterbox
 - WASM: link -lidbfs.js so FS.filesystems.IDBFS exists at preRun
 - WASM shell: fullscreen/pause/download-upload saves (IDBFS), better key help; touch overlay on web

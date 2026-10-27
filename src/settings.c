@@ -98,6 +98,10 @@ void MoasSettingsLoad(void)
       if (moas_touch_controls < 0 && b >= 0)
         moas_touch_controls = b;
 #endif
+    } else if (!strcmp(key, "aspect")) {
+      b = MoasParseAspect(val);
+      if (moas_aspect < 0 && b >= 0)
+        moas_aspect = b;
     } else if (!strcmp(key, "game_speed")) {
       cfg_total_speed = parse_int(val, 1, 8);
     } else if (!strcmp(key, "speech_speed")) {
@@ -132,11 +136,13 @@ void MoasSettingsSave(void)
                "language=%s\n"
                "fullscreen=%d\n"
                "touch_buttons=%d\n"
+               "aspect=%s\n"
                "game_speed=%d\n"
                "speech_speed=%d\n"
                "volume=%d\n",
                (lang && lang[0]) ? lang : "de",
                PlatformIsFullscreen(), PlatformTouchControlsOn(),
+               PlatformAspect43() ? "4:3" : "8:5",
                (int)TotalSpeed, (int)SpeechSpeed, (int)GlobalVolume);
   if (n < 0 || (size_t)n >= sizeof(text) || !strcmp(text, last_written))
     return;

@@ -8,7 +8,7 @@ extern "C" {
 
 /*
  * Port-side user settings in <config dir>/settings.ini (key=value lines):
- * language, fullscreen, touch buttons, game/speech speed, volume.
+ * language, fullscreen, touch buttons, aspect, game/speech speed, volume.
  * Command line and MOAS_LANG win over the file. Game and speech speed are a
  * user setting: savegames still store them but loading keeps the current ones.
  */

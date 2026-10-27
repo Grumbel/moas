@@ -16,13 +16,16 @@ Copy `Moas.sh` and the `moas/` folder to `/roms/ports/`, or put the zip into
 
 | Button / input     | Action                                       |
 |--------------------|----------------------------------------------|
-| Left stick / D-pad | walk                                         |
-| Right stick        | move the cursor                              |
-| R1 / R2            | use (left click)                             |
-| L1 / L2            | look (right click)                           |
-| A (hold)           | skip text                                    |
-| B / Start          | skip scene (Esc)                             |
-| Select             | options menu: save, load, settings, quit     |
+| Left / right stick | move the cursor (both together: faster)      |
+| D-pad              | walk                                         |
+| A / R1             | use (left click)                             |
+| B / L1             | look (right click)                           |
+| X (hold)           | show hotspots                                |
+| Y (hold)           | skip text                                    |
+| Select             | skip scene (Esc)                             |
+| Start              | options menu: save, load, settings, quit     |
+| R2 / L2            | save / load                                  |
+| R3 / L3            | game speed up / down                         |
 | Start + Select     | quit (gptokeyb)                              |
 
 In the options menu: D-pad up/down to select, left/right or A to change,
