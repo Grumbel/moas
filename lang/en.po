@@ -3603,7 +3603,7 @@ msgstr "CLR I'm rich!"
 #: script.p2.0x07fb
 msgctxt "script.p2.0x07fb"
 msgid "CLR _____Extrablatt!_____ NW Toastscheibe auf dem Mond entdeckt! NW Verschiedene terroristische Gruppen und Toastbrothersteller bekannten sich zu der Tat."
-msgstr "CLR _____Extrablatt!_____ NW Slice of toast discovered on the Moon! NW Various terrorist groups and toast manufacturers claimed responsibility."
+msgstr "CLR _____Extra! Extra!_____ NW Slice of toast discovered on the Moon! NW Various terrorist groups and toast manufacturers claimed responsibility."
 
 #. prog 2 @ 0856 op say_if_found
 #: script.p2.0x0856
@@ -3741,7 +3741,7 @@ msgstr "CLR The glass is empty!"
 #: script.p2.0x0bad
 msgctxt "script.p2.0x0bad"
 msgid "CLR _____Extrablatt!_____ NW Toastscheibe auf dem Mond entdeckt! NW Verschiedene terroristische Gruppen und Toastbrothersteller bekannten sich zu der Tat."
-msgstr "CLR _____Extrablatt!_____ NW Slice of toast discovered on the Moon! NW Various terrorist groups and toast manufacturers claimed responsibility."
+msgstr "CLR _____Extra! Extra!_____ NW Slice of toast discovered on the Moon! NW Various terrorist groups and toast manufacturers claimed responsibility."
 
 #. prog 2 @ 0c08 op say_if_found
 #: script.p2.0x0c08
