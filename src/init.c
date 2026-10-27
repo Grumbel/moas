@@ -169,7 +169,7 @@ void InitVars(void)
     *Fun=32;  /* Numlock */
   }
 #endif
-  TotalSpeed=6; SpeechSpeed=8;  /* DOS default was 3, too slow today */
+  TotalSpeed=3; SpeechSpeed=8;
   KeyAbortState=0;
   Mouse.x=16;  Mouse.y=10;
   Mouse.BewegeMode=-1;
