@@ -2925,7 +2925,7 @@ msgstr "NW NW 1.7–2.7.95: NW Concepto del juego, camino de entrada, fachada de
 #: script.p1.0x02b6
 msgctxt "script.p1.0x02b6"
 msgid "NW NW 8.7-9.7.95: NW \"Inzwischen\"-Bild, \"Stunden-Später\"-Bild, Küche, Garten, Flur, \"Kaboom\"-Bild"
-msgstr "NW NW 8.7-9.7.95: NW \"In the meantime\" picture, \"Hours later\" picture, kitchen, garden, hallway, \"Kaboom\" picture"
+msgstr "NW NW 8.7-9.7.95: NW imagen «Mientras tanto», imagen «Horas después», cocina, jardín, pasillo, imagen «¡Kaboom!»"
 
 #. prog 1 @ 0300 op print_sentence_plus
 #: script.p1.0x0300
@@ -3363,7 +3363,7 @@ msgstr "CLR (...)"
 #: script.p2.0x0213
 msgctxt "script.p2.0x0213"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3 dots)____"
+msgstr "CLR ____(3 puntos)____"
 
 #. prog 2 @ 023e op add_say_window2
 #: script.p2.0x023e
@@ -3387,7 +3387,7 @@ msgstr "CLR ¡Soy un genio!"
 #: script.p2.0x02ba
 msgctxt "script.p2.0x02ba"
 msgid "CLR \"Bitte benutzen Sie den Türklopfer!\""
-msgstr "CLR \"Please use the door knocker!\""
+msgstr "CLR «¡Usa el aldabón de la puerta!»"
 
 #. prog 2 @ 02da op say_if_found
 #: script.p2.0x02da
@@ -3519,7 +3519,7 @@ msgstr "CLR Una foto de un cactus."
 #: script.p2.0x0573
 msgctxt "script.p2.0x0573"
 msgid "CLR Ein Buch. NW \"Fotografieren für Follidioten\""
-msgstr "CLR A book. NW \"Photography for Complete Idiots\""
+msgstr "CLR Un libro. NW \"Fotografía para completos idiotas\""
 
 #. prog 2 @ 0598 op say_if_found
 #: script.p2.0x0598
@@ -3621,7 +3621,7 @@ msgstr "CLR Una foto de la Luna con una rebanada de tostada. NW _____Genial.____
 #: script.p2.0x089a
 msgctxt "script.p2.0x089a"
 msgid "CLR Ein echt scharfes Messer. NW Auf dem Zettel steht \"Beweisstück_A\"."
-msgstr "CLR A really sharp knife. NW The note says \"Exhibit_A\"."
+msgstr "CLR Un cuchillo muy afilado. NW La nota dice «Exhibit_A»."
 
 #. prog 2 @ 08cf op say_if_found
 #: script.p2.0x08cf
@@ -3645,7 +3645,7 @@ msgstr "CLR _____¡Guau!_____"
 #: script.p2.0x091d
 msgctxt "script.p2.0x091d"
 msgid "CLR \"Sehr geehrter Dr. Ed! NW Wir bedauern, daß Sie mit unserem Produkt nicht zufrieden sind. NW"
-msgstr "CLR \"Dear Dr. Ed! NW We’re sorry you’re not satisfied with our product. NW"
+msgstr "CLR «¡Estimado Dr. Ed! NW Lamentamos que no esté satisfecho con nuestro producto. NW"
 
 #. prog 2 @ 095e op add_say_window2
 #: script.p2.0x095e
@@ -3687,19 +3687,19 @@ msgstr "CLR ¿Soy John Wayne?"
 #: script.p2.0x0ab4
 msgctxt "script.p2.0x0ab4"
 msgid "CLR Nein, danke. Da weiß man nie was drin ist."
-msgstr "CLR No, thanks. You never know what's inside."
+msgstr "CLR No, gracias. Nunca se sabe qué hay dentro."
 
 #. prog 2 @ 0ada op say_if_found
 #: script.p2.0x0ada
 msgctxt "script.p2.0x0ada"
 msgid "CLR Nein, danke. Die ist alt und wie aus Leder."
-msgstr "CLR No, thanks. It's old and as tough as leather."
+msgstr "CLR No, gracias. Es viejo y duro como el cuero."
 
 #. prog 2 @ 0afd op say_if_found
 #: script.p2.0x0afd
 msgctxt "script.p2.0x0afd"
 msgid "CLR Soll ich das trinken, oder was?"
-msgstr "CLR Should I drink that, or what?"
+msgstr "CLR ¿Debería beberme eso o qué?"
 
 #. prog 2 @ 0b19 op say_if_found
 #: script.p2.0x0b19
@@ -3711,31 +3711,31 @@ msgstr "CLR Tasty!"
 #: script.p2.0x0b2a
 msgctxt "script.p2.0x0b2a"
 msgid "CLR Was soll ich denn fotografieren?"
-msgstr "CLR What am I supposed to photograph?"
+msgstr "CLR ¿Qué se supone que debo fotografiar?"
 
 #. prog 2 @ 0b48 op say_if_found
 #: script.p2.0x0b48
 msgctxt "script.p2.0x0b48"
 msgid "CLR Alleine ist es ziemlich nutzlos."
-msgstr "CLR It's pretty useless on its own."
+msgstr "CLR Por sí solo, sirve de muy poco."
 
 #. prog 2 @ 0b63 op say_if_found
 #: script.p2.0x0b63
 msgctxt "script.p2.0x0b63"
 msgid "CLR Alleine ist das ziemlich nutzlos."
-msgstr "CLR That's pretty useless on its own."
+msgstr "CLR Eso, por sí solo, sirve de muy poco."
 
 #. prog 2 @ 0b7e op say_if_found
 #: script.p2.0x0b7e
 msgctxt "script.p2.0x0b7e"
 msgid "CLR Was soll ich denn aufschliessen?"
-msgstr "CLR What am I supposed to unlock?"
+msgstr "CLR ¿Qué se supone que debo abrir con la llave?"
 
 #. prog 2 @ 0b99 op say_if_found
 #: script.p2.0x0b99
 msgctxt "script.p2.0x0b99"
 msgid "CLR Das Glas ist leer!"
-msgstr "CLR The glass is empty!"
+msgstr "CLR ¡El vaso está vacío!"
 
 #. prog 2 @ 0bad op say_if_found
 #: script.p2.0x0bad
@@ -3753,43 +3753,43 @@ msgstr "CLR __Mmm!__ NW __Crunchy!__"
 #: script.p2.0x0c28
 msgctxt "script.p2.0x0c28"
 msgid "CLR Was soll ich damit einschleimen?"
-msgstr "CLR What am I supposed to grease up with that?"
+msgstr "CLR ¿Con qué se supone que voy a engrasar eso?"
 
 #. prog 2 @ 0c42 op say_if_found
 #: script.p2.0x0c42
 msgctxt "script.p2.0x0c42"
 msgid "CLR __Wow!__ NW Der Bild vom nächsten Monat ist noch besser!"
-msgstr "CLR __Wow!__ NW Next month's issue of Bild is even better!"
+msgstr "CLR __¡Vaya!__ NW ¡El número del mes que viene de Bild es aún mejor!"
 
 #. prog 2 @ 0c6e op say_if_found
 #: script.p2.0x0c6e
 msgctxt "script.p2.0x0c6e"
 msgid "CLR ...in die Taler springen und herumwühlen wie ein Maulwurf..."
-msgstr "CLR ...jump into the coins and rummage around like a mole..."
+msgstr "CLR ...saltar sobre las monedas y rebuscar como un topo..."
 
 #. prog 2 @ 0c99 op say_if_found
 #: script.p2.0x0c99
 msgctxt "script.p2.0x0c99"
 msgid "CLR Soll ich mir die Pulsadern aufschneiden, oder was?"
-msgstr "CLR Should I slit my wrists or what?"
+msgstr "CLR ¿Debería cortarme las venas o qué?"
 
 #. prog 2 @ 0cc2 op say_if_found
 #: script.p2.0x0cc2
 msgctxt "script.p2.0x0cc2"
 msgid "CLR Den laß ich da hängen. NW Ich brauche ihn nicht mehr."
-msgstr "CLR I'll leave that hanging there. NW I don't need it anymore."
+msgstr "CLR Dejaré eso colgado ahí. NW Ya no lo necesito."
 
 #. prog 2 @ 0cf3 op say_if_found
 #: script.p2.0x0cf3
 msgctxt "script.p2.0x0cf3"
 msgid "CLR Yeah yeah yeah!"
-msgstr "CLR Yeah yeah yeah!"
+msgstr "CLR ¡Sí, sí, sí!"
 
 #. prog 2 @ 0d0e op say_if_found
 #: script.p2.0x0d0e
 msgctxt "script.p2.0x0d0e"
 msgid "CLR Was ein Gekreische!"
-msgstr "CLR What a racket!"
+msgstr "CLR ¡Qué escándalo!"
 
 #. prog 2 @ 0d30 op add_say_window2
 #: script.p2.0x0d30
@@ -3801,7 +3801,7 @@ msgstr "CLR Glug. Glug. Glug."
 #: script.p2.0x0d6c
 msgctxt "script.p2.0x0d6c"
 msgid "CLR Der Koffer ist voller Geld!"
-msgstr "CLR The suitcase is full of money!"
+msgstr "CLR ¡La maleta está llena de dinero!"
 
 #. prog 2 @ 0d96 op add_say_window2
 #: script.p2.0x0d96
@@ -3813,19 +3813,19 @@ msgstr "Y ahí está mi disquete también.."
 #: script.p2.0x0dc4
 msgctxt "script.p2.0x0dc4"
 msgid "CLR Da ist ja meine Diskette"
-msgstr "CLR There’s my floppy disk"
+msgstr "CLR ¡Ahí está mi disquete!"
 
 #. prog 2 @ 0de5 op add_say_window2
 #: script.p2.0x0de5
 msgctxt "script.p2.0x0de5"
 msgid "CLR Der Koffer ist leer."
-msgstr "CLR The suitcase is empty."
+msgstr "CLR La maleta está vacía."
 
 #. prog 2 @ 0e0c op add_say_window2
 #: script.p2.0x0e0c
 msgctxt "script.p2.0x0e0c"
 msgid "CLR Soll ich ihn essen, oder was?"
-msgstr "CLR Should I ihn essen, or what?"
+msgstr "CLR ¿Se supone que debo comérmelo o qué?"
 
 #. prog 2 @ 0e53 op add_say_window2
 #: script.p2.0x0e53
@@ -3891,13 +3891,13 @@ msgstr "CLR Nice little scraps of paper!"
 #: script.p2.0x1040
 msgctxt "script.p2.0x1040"
 msgid "CLR Das habe ich schon gelesen."
-msgstr "CLR I've already read that."
+msgstr "CLR Ya he leído eso."
 
 #. prog 2 @ 1077 op add_say_window
 #: script.p2.0x1077
 msgctxt "script.p2.0x1077"
 msgid "CLR Ahhaaa! NW So geht das! NW Ach soooo! NW So rum muß man die Kamera halten..."
-msgstr "CLR Ahhaaa! NW So that’s how it works! NW Oh, I see! NW That’s how you’re supposed to hold the camera..."
+msgstr "CLR ¡Ajá! NW ¡Así es como funciona! NW ¡Ah, ya entiendo! NW Así es como hay que sujetar la cámara..."
 
 #. prog 2 @ 10bb op add_say_window
 #: script.p2.0x10bb
@@ -3909,7 +3909,7 @@ msgstr "¡Ahora todo tiene sentido!"
 #: script.p2.0x10d2
 msgctxt "script.p2.0x10d2"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 dots)____"
+msgstr "CLR ____(2 puntos)____"
 
 #. prog 2 @ 10fe op add_say_window2
 #: script.p2.0x10fe
@@ -3927,13 +3927,13 @@ msgstr "Hay un motor dentro."
 #: script.p2.0x1193
 msgctxt "script.p2.0x1193"
 msgid "CLR Okay, darin ist sie sicher!"
-msgstr "CLR Okay, it's safe in there!"
+msgstr "CLR Vale, ¡aquí estará a salvo!"
 
 #. prog 2 @ 11bb op add_say_window2
 #: script.p2.0x11bb
 msgctxt "script.p2.0x11bb"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 2 @ 11d2 op add_say_window2
 #: script.p2.0x11d2
@@ -3945,7 +3945,7 @@ msgstr "CLR ¿Por qué iba a meter eso en la maleta?"
 #: script.p2.0x1205
 msgctxt "script.p2.0x1205"
 msgid "CLR Ich werf' das Alte erst mal weg!"
-msgstr "CLR I'll throw the old one away for now!"
+msgstr "CLR ¡Tiraré el viejo por ahora!"
 
 #. prog 2 @ 122c op add_say_window
 #: script.p2.0x122c
@@ -3957,19 +3957,19 @@ msgstr "CLR O.K."
 #: script.p2.0x12ca
 msgctxt "script.p2.0x12ca"
 msgid "CLR Das war wohl nichts."
-msgstr "CLR That didn't work."
+msgstr "CLR Eso no ha funcionado."
 
 #. prog 2 @ 1376 op add_say_window2
 #: script.p2.0x1376
 msgctxt "script.p2.0x1376"
 msgid "CLR Das war wohl nichts."
-msgstr "CLR That didn't work."
+msgstr "CLR Eso no ha funcionado."
 
 #. prog 2 @ 13a4 op say_if_found
 #: script.p2.0x13a4
 msgctxt "script.p2.0x13a4"
 msgid "CLR Ich brauche keine Zuchini-Scheiben. NW Es sei denn, ich finde noch Knoblaubsauce..."
-msgstr "CLR I don't need zucchini slices. NW Unless I find some garlic sauce..."
+msgstr "CLR No necesito rodajas de calabacín. NW A menos que encuentre salsa de ajo..."
 
 #. prog 2 @ 13dc op say_if_found
 #: script.p2.0x13dc
@@ -3981,13 +3981,13 @@ msgstr "CLR ¡El pan de tostada ya suele venir cortado!"
 #: script.p2.0x140e
 msgctxt "script.p2.0x140e"
 msgid "CLR Ich mag kein Zuchini-Sandwich."
-msgstr "CLR I don't like zucchini sandwiches."
+msgstr "CLR No me gustan los sándwiches de calabacín."
 
 #. prog 2 @ 142a op say_if_found
 #: script.p2.0x142a
 msgctxt "script.p2.0x142a"
 msgid "CLR Das braucht nicht geschmiert werden."
-msgstr "CLR No need to butter it."
+msgstr "CLR No hace falta untarlo con mantequilla."
 
 #. prog 2 @ 1451 op print_sentence_ret
 #: script.p2.0x1451
@@ -4011,31 +4011,31 @@ msgstr "CLR Eh?"
 #: script.p2.0x14cc
 msgctxt "script.p2.0x14cc"
 msgid "Unmatched C_WALK!"
-msgstr "Unmatched C_WALK!"
+msgstr "Sin correspondencia: C_WALK!"
 
 #. prog 2 @ 14ef op print_sentence_ret
 #: script.p2.0x14ef
 msgctxt "script.p2.0x14ef"
 msgid "Unmatched M_WALK!"
-msgstr "Unmatched M_WALK!"
+msgstr "Sin correspondencia: M_WALK!"
 
 #. prog 2 @ 1512 op print_sentence_ret
 #: script.p2.0x1512
 msgctxt "script.p2.0x1512"
 msgid "Unmatched M_SPEECH !"
-msgstr "Unmatched M_SPEECH !"
+msgstr "Sin correspondencia: M_SPEECH !"
 
 #. prog 2 @ 1526 op say_if_found
 #: script.p2.0x1526
 msgctxt "script.p2.0x1526"
 msgid "CLR Das kann ich nicht bewegen."
-msgstr "CLR I can't move that."
+msgstr "CLR No puedo mover eso."
 
 #. prog 2 @ 153b op add_say_window2
 #: script.p2.0x153b
 msgctxt "script.p2.0x153b"
 msgid "CLR Besser nicht."
-msgstr "CLR Better not."
+msgstr "CLR Mejor no."
 
 #. prog 4 @ 0010 op add_say_window2
 #: script.p4.0x0010
@@ -4053,13 +4053,13 @@ msgstr "NW Sin embargo, el loco Dr. Ed se volvió aún más loco y secuestró a 
 #: script.p4.0x0078
 msgctxt "script.p4.0x0078"
 msgid "NW Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."
-msgstr "NW After enjoying his newfound freedom for a while, Jack reluctantly decided to rescue his girlfriend. And he wants to take two friends along to help him."
+msgstr "NW Tras disfrutar un tiempo de su recién estrenada libertad, Jack decidió a regañadientes rescatar a su novia. Y quiere llevarse a dos amigos para que le ayuden."
 
 #. prog 4 @ 0119 op print_sentence
 #: script.p4.0x0119
 msgctxt "script.p4.0x0119"
 msgid "Mänick Mänschion V1.0 Copyrighthinweis: NW -------------------------------------------- NW"
-msgstr "Mänick Mänschion V1.0 Copyright notice: NW -------------------------------------------- NW"
+msgstr "Mänick Mänschion V1.0 Aviso de copyright: NW -------------------------------------------- NW"
 
 #. prog 4 @ 016b op print_sentence
 #: script.p4.0x016b
@@ -4077,55 +4077,55 @@ msgstr "1. Todos los archivos deben distribuirse juntos. Los datos no deben modi
 #: script.p4.0x01ca
 msgctxt "script.p4.0x01ca"
 msgid "2. Es wird unentgeltlich, d. h. ohne Gebühr, Kopierkostenentschädigung o.ä. weitergegeben."
-msgstr "2. Debe distribuirse de forma gratuita, es decir, sin cobro, reembolso de costes de copia, ni el"
+msgstr "2. Debe distribuirse gratuitamente, es decir, sin cuota, compensación por los costes de copia ni nada parecido."
 
 #. prog 4 @ 0208 op print_sentence
 #: script.p4.0x0208
 msgctxt "script.p4.0x0208"
 msgid "Mänick Mänschion Copyrighthinweis: (Fortsetzung) NW ------------------------------------------------------ NW"
-msgstr "Mänick Mänschion Copyright notice: (continued) NW ------------------------------------------------------ NW"
+msgstr "Aviso de copyright de Mänick Mänschion (continuación): NW ------------------------------------------------------ NW"
 
 #. prog 4 @ 0269 op print_sentence
 #: script.p4.0x0269
 msgctxt "script.p4.0x0269"
 msgid "Für die kommerzielle Nutzung, der Weitergabe gegen Entgelt oder als Teil eines kostenpflichtigen Produkts (z.B. Shareware CD) ist das schriftlich Einverständnis des Autors erforderlich. NW NW"
-msgstr "Para uso comercial, distribución de pago o inclusión en un producto que cueste dinero (p. ej. un shareware"
+msgstr "Para el uso comercial, la distribución a cambio de dinero o la inclusión en un producto de pago (p. ej., un CD de shareware), se requiere el consentimiento por escrito del autor. NW NW"
 
 #. prog 4 @ 02d4 op print_sentence_plus
 #: script.p4.0x02d4
 msgctxt "script.p4.0x02d4"
 msgid "Die Verbreitung im Internet und Mailboxen ohne Gebühren ist gestattet. NW NW _______ Thomas Holz"
-msgstr "La distribución en Internet y a través de sistemas de tablón de anuncios sin tarifas está permitida. NW NW ___"
+msgstr "Se permite la distribución por Internet y por sistemas de tablón de anuncios gratuitos. NW NW _______ Thomas Holz"
 
 #. prog 4 @ 0310 op print_sentence_plus
 #: script.p4.0x0310
 msgctxt "script.p4.0x0310"
 msgid "Hinweis: NW ---------- NW Dies ist keine Shareware, sondern ein vollständiges Spiel. Es ist komplett spielbar und bedarf keiner Registrierung. Viel Spaß!"
-msgstr "Nota: NW ---------- NW Esto no es shareware sino un juego completo. Es totalmente jugable y requiere "
+msgstr "Nota: NW ---------- NW Esto no es shareware, sino un juego completo. Se puede jugar íntegramente y no requiere registro. ¡Que te diviertas!"
 
 #. prog 4 @ 0414 op add_say_window2
 #: script.p4.0x0414
 msgctxt "script.p4.0x0414"
 msgid "CLR Vor 20 Jahren schlug kein Meteor im Garten der Äddisons ein. NW Vor 20 Jahren schlug kein Meteor im Garten der Äddisons ein."
-msgstr "CLR No meteor struck the Addisons' garden 20 years ago. NW No meteor struck the Addisons' garden 20 years ago."
+msgstr "CLR Hace 20 años no cayó ningún meteorito en el jardín de los Addison. NW Hace 20 años no cayó ningún meteorito en el jardín de los Addison."
 
 #. prog 4 @ 046a op add_say_window2
 #: script.p4.0x046a
 msgctxt "script.p4.0x046a"
 msgid "CLR Trotzdem wurde der verrückte Dr.Ed noch verrückter und entführte Jack's Freundin Sandy. NW Trotzdem wurde der verrückte Dr.Ed noch verrückter und entführte Jack's Freundin Sandy."
-msgstr "CLR Nevertheless, the mad Dr. Ed became even madder and kidnapped Jack's girlfriend Sandy. NW Nevertheless, the mad Dr. Ed became even madder and kidnapped Jack's girlfriend Sandy."
+msgstr "CLR Aun así, el chiflado Dr. Ed se volvió todavía más loco y secuestró a Sandy, la novia de Jack. NW Aun así, el chiflado Dr. Ed se volvió todavía más loco y secuestró a Sandy, la novia de Jack."
 
 #. prog 4 @ 04d8 op add_say_window2
 #: script.p4.0x04d8
 msgctxt "script.p4.0x04d8"
 msgid "CLR Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."
-msgstr "CLR After enjoying his newfound freedom for a while, Jack reluctantly decided to rescue his girlfriend. And he wants to take two friends along to help him."
+msgstr "CLR Tras disfrutar un tiempo de su recién estrenada libertad, Jack decidió a regañadientes rescatar a su novia. Y quiere llevarse a dos amigos para que le ayuden."
 
 #. prog 4 @ 0542 op add_say_window2
 #: script.p4.0x0542
 msgctxt "script.p4.0x0542"
 msgid "CLR Nachdem Jack seine neue Freiheit eine Weile genossen hat, enschloss er sich doch schweren Herzens seine Freundin zu befreien. Und er will zwei Freunde mitnehnen, die ihm helfen."
-msgstr "CLR After enjoying his newfound freedom for a while, Jack reluctantly decided to rescue his girlfriend. And he wants to take two friends along to help him."
+msgstr "CLR Tras disfrutar un tiempo de su recién estrenada libertad, Jack decidió a regañadientes rescatar a su novia. Y quiere llevarse a dos amigos para que le ayuden."
 
 #. prog 5 @ 000c op set_room_name
 #: script.p5.0x000c
@@ -4137,7 +4137,7 @@ msgstr "El camino a la casa"
 #: script.p5.0x0076
 msgctxt "script.p5.0x0076"
 msgid "Du hörst das Zirpen der Grillen in der Nacht. Der Kies knirscht unter deinen Füßen und du hast das Gefühl, daß du nicht der einzige bist, der dieses Geräusch verursacht. Aber jedesmal wenn du stehenbleibst, hörst du nichts mehr."
-msgstr "Oyes grillos cantando en la noche. La grava cruje bajo tus pies, y tienes la sensación de "
+msgstr "Oyes el canto de los grillos por la noche. La grava cruje bajo tus pies y tienes la sensación de que no eres el único que provoca ese ruido. Pero cada vez que te detienes, deja de oírse."
 
 #. prog 5 @ 00fc op add_say_window2
 #: script.p5.0x00fc
@@ -4149,19 +4149,19 @@ msgstr "Uf, eso estuvo lejos. NW Me pregunto por qué no me trajeron de vuelta e
 #: script.p5.0x0142
 msgctxt "script.p5.0x0142"
 msgid "CLR Warnung! NW Das Haus ist baufällig, radioaktiv verseucht und von Zombies belagert. NW Und giftig. NW Und Privatbesitz. NW Eltern zahlen die Beerdigungskosten für ihre Kinder. NW Freundlich!"
-msgstr "CLR Warning! NW The house is dilapidated, contaminated with radioactive material, and surrounded by zombies. NW And poisonous. NW And private property. NW Parents pay the funeral costs for their children. NW Have a nice day!"
+msgstr "CLR ¡Advertencia! NW La casa está en ruinas, contaminada por radiactividad y rodeada de zombis. NW Y es tóxica. NW Y propiedad privada. NW Los padres pagan los gastos del funeral de sus hijos. NW ¡Que tenga un buen día!"
 
 #. prog 5 @ 01d3 op say_if_found
 #: script.p5.0x01d3
 msgctxt "script.p5.0x01d3"
 msgid "CLR Der Zaun war mal sehr schön, aber das ist wohl lange her. NW Jetzt ist er total verwahrlost. NW Irgendetwas großes schein einfach durch ihn durchgetrampelt zu sein."
-msgstr "CLR The fence must have been lovely once, but that was a long time ago. NW Now it's completely neglected. NW Something big seems to have simply trampled straight through it."
+msgstr "CLR El cercado debió de ser precioso en su día, pero de eso hace mucho. NW Ahora está completamente abandonado. NW Algo grande parece haberlo atravesado de frente."
 
 #. prog 5 @ 02f8 op add_say_window
 #: script.p5.0x02f8
 msgctxt "script.p5.0x02f8"
 msgid "Soll ich dir jetzt deinen hübschen Körper zerstrahlen.. NW ..oder soll ich dir das Gehirn raussaugen? NW ___-Seufz-___ NW Wenn ich mich doch nur entscheiden könnte."
-msgstr "¿Debo desintegrar tu bonito cuerpo con radiación... NW ...o succionarte el cerebro? NW ___-suspiro-_"
+msgstr "¿Debo desintegrar tu bonito cuerpo con radiación...? NW ...¿o succionarte el cerebro? NW ___-suspiro-___ NW ¡Si tan solo pudiera decidirme!"
 
 #. prog 5 @ 0359 op add_say_window
 #: script.p5.0x0359
@@ -4209,7 +4209,7 @@ msgstr "CLR Grunz?"
 #: script.p6.0x020d
 msgctxt "script.p6.0x020d"
 msgid "CLR Soll ich den Balkon runterspringen?"
-msgstr "CLR Should I jump off the balcony?"
+msgstr "CLR ¿Debería saltar del balcón?"
 
 #. prog 6 @ 0255 op add_say_window2
 #: script.p6.0x0255
@@ -4233,7 +4233,7 @@ msgstr "CLR Grunz?"
 #: script.p6.0x02c1
 msgctxt "script.p6.0x02c1"
 msgid "CLR Soll ich den Balkon runterspringen?"
-msgstr "CLR Should I the Balkon runterspringen?"
+msgstr "CLR ¿Debería saltar del balcón?"
 
 #. prog 6 @ 030f op add_say_window2
 #: script.p6.0x030f
@@ -4245,7 +4245,7 @@ msgstr "CLR Grunz?"
 #: script.p6.0x0321
 msgctxt "script.p6.0x0321"
 msgid "CLR Ich kann nicht fliegen."
-msgstr "CLR I can't fly."
+msgstr "CLR No puedo volar."
 
 #. prog 6 @ 034e op say_if_found
 #: script.p6.0x034e
@@ -4257,7 +4257,7 @@ msgstr "CLR Un telescopio. NW Comentario inteligente, lo sé."
 #: script.p6.0x0375
 msgctxt "script.p6.0x0375"
 msgid "CLR Besser nicht. NW Sonst mache ich noch was kaputt."
-msgstr "CLR Better not. NW Otherwise I'll break something."
+msgstr "CLR Mejor no. NW Si no, me romperé algo."
 
 #. prog 6 @ 03b5 op add_say_window
 #: script.p6.0x03b5
@@ -4269,7 +4269,7 @@ msgstr "CLR ____(1 dot)____"
 #: script.p6.0x044c
 msgctxt "script.p6.0x044c"
 msgid "CLR Ich werf' das alte erst mal weg!"
-msgstr "CLR I'll throw the old one away for now!"
+msgstr "CLR ¡Tiraré el viejo por ahora!"
 
 #. prog 6 @ 0472 op add_say_window
 #: script.p6.0x0472
@@ -4287,13 +4287,13 @@ msgstr "____(10_Puntos)____ NW Hans Rosenthal diría: ¡Eso fue fantástico!"
 #: script.p6.0x0617
 msgctxt "script.p6.0x0617"
 msgid "CLR Der Briefkasten ist leer."
-msgstr "CLR The mailbox is empty."
+msgstr "CLR El buzón está vacío."
 
 #. prog 6 @ 0830 op add_say_window
 #: script.p6.0x0830
 msgctxt "script.p6.0x0830"
 msgid "CLR Ich werf' das alte erst mal weg!"
-msgstr "CLR I'll throw the old one away for now!"
+msgstr "CLR ¡Tiraré el viejo por ahora!"
 
 #. prog 6 @ 0856 op add_say_window
 #: script.p6.0x0856
@@ -4305,19 +4305,19 @@ msgstr "CLR O.K."
 #: script.p6.0x08d9
 msgctxt "script.p6.0x08d9"
 msgid "CLR Ein Briefkasten. NW Das Fähnchen ist unten, also ist keine Post drin."
-msgstr "CLR A mailbox. NW The little flag is down, so there's no mail inside."
+msgstr "CLR Un buzón. NW La banderita está bajada, así que no hay correo dentro."
 
 #. prog 6 @ 0908 op say_if_found
 #: script.p6.0x0908
 msgctxt "script.p6.0x0908"
 msgid "CLR Der Briefkasten ist festgeschweißt."
-msgstr "CLR The mailbox is welded shut."
+msgstr "CLR El buzón está soldado y no se puede abrir."
 
 #. prog 6 @ 0933 op say_if_found
 #: script.p6.0x0933
 msgctxt "script.p6.0x0933"
 msgid "CLR Ich kann das Spiel doch nicht ohne System angehen."
-msgstr "CLR I can't approach this game without a system."
+msgstr "CLR No puedo jugar a esto sin un plan."
 
 #. prog 6 @ 0957 op say_if_found
 #: script.p6.0x0957
@@ -4329,13 +4329,13 @@ msgstr "El buzón está lleno."
 #: script.p6.0x0c2e
 msgctxt "script.p6.0x0c2e"
 msgid "CLR Die Fenster sehen wie große Augen aus."
-msgstr "CLR The windows look like big eyes."
+msgstr "CLR Las ventanas parecen ojos enormes."
 
 #. prog 6 @ 0c4f op say_if_found
 #: script.p6.0x0c4f
 msgctxt "script.p6.0x0c4f"
 msgid "CLR An die Fenster kommt man schlecht dran."
-msgstr "CLR It's hard to reach the windows."
+msgstr "CLR Cuesta llegar hasta las ventanas."
 
 #. prog 6 @ 0c87 op say_if_found
 #: script.p6.0x0c87
@@ -4347,7 +4347,7 @@ msgstr "CLR My beloved aluminum suitcase!"
 #: script.p6.0x0cda
 msgctxt "script.p6.0x0cda"
 msgid "CLR Das nenne ich Luftpost!"
-msgstr "CLR Now that's what I call airmail!"
+msgstr "CLR ¡Esto sí que es correo aéreo!"
 
 #. prog 6 @ 0d3b op add_say_window2
 #: script.p6.0x0d3b
@@ -4497,25 +4497,25 @@ msgstr "Gracias, ya he estado buscando ese."
 #: script.p6.0x1116
 msgctxt "script.p6.0x1116"
 msgid "CLR Der läßt mich bestimmt nicht rein. NW Ich muß versuchen, unbemerkt ins Haus zu kommen."
-msgstr "CLR He definitely won't let me in. NW I have to try to get into the house unnoticed."
+msgstr "CLR Seguro que no me dejará entrar. NW Tengo que intentar entrar en la casa sin que me vea."
 
 #. prog 6 @ 116d op add_say_window2
 #: script.p6.0x116d
 msgctxt "script.p6.0x116d"
 msgid "CLR Vielleicht sollte ich mir die vertrockneten Pflanzen noch einmal genauer ansehen..."
-msgstr "CLR Maybe I should take another closer look at the withered plants..."
+msgstr "CLR Quizá debería echar otro vistazo a las plantas marchitas..."
 
 #. prog 6 @ 119e op say_if_found
 #: script.p6.0x119e
 msgctxt "script.p6.0x119e"
 msgid "CLR Da ist ein Klopfer an der Tür"
-msgstr "CLR There's a knocker on the door"
+msgstr "CLR Hay un aldabón en la puerta."
 
 #. prog 6 @ 11db op add_say_window2
 #: script.p6.0x11db
 msgctxt "script.p6.0x11db"
 msgid "CLR \"Nicht willkommen!\""
-msgstr "CLR \"Not welcome!\""
+msgstr "CLR «¡No eres bienvenido!»"
 
 #. prog 6 @ 1295 op add_say_window2
 #: script.p6.0x1295
@@ -4533,25 +4533,25 @@ msgstr "____(1_Point)____"
 #: script.p6.0x12fa
 msgctxt "script.p6.0x12fa"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 dots)____"
+msgstr "CLR ____(2 puntos)____"
 
 #. prog 6 @ 131c op add_say_window2
 #: script.p6.0x131c
 msgctxt "script.p6.0x131c"
 msgid "CLR Da liegt ein Zettel."
-msgstr "CLR There's a note lying there."
+msgstr "CLR Hay una nota en el suelo."
 
 #. prog 6 @ 138d op add_say_window
 #: script.p6.0x138d
 msgctxt "script.p6.0x138d"
 msgid "CLR Da liegt ein Schlüssel!"
-msgstr "CLR There's a key lying there!"
+msgstr "CLR ¡Hay una llave ahí!"
 
 #. prog 6 @ 13ac op add_say_window2
 #: script.p6.0x13ac
 msgctxt "script.p6.0x13ac"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 6 @ 13d3 op add_say_window
 #: script.p6.0x13d3
@@ -4569,13 +4569,13 @@ msgstr "Pero quizá haya algo bajo una de las otras plantas.."
 #: script.p6.0x1476
 msgctxt "script.p6.0x1476"
 msgid "CLR Da liegt ein Schlüssel!"
-msgstr "CLR There's a key lying there!"
+msgstr "CLR ¡Hay una llave ahí!"
 
 #. prog 6 @ 1495 op add_say_window2
 #: script.p6.0x1495
 msgctxt "script.p6.0x1495"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 6 @ 14bc op add_say_window
 #: script.p6.0x14bc
@@ -4593,13 +4593,13 @@ msgstr "Pero quizá haya algo bajo una de las otras plantas.."
 #: script.p6.0x155f
 msgctxt "script.p6.0x155f"
 msgid "CLR Da liegt ein Schlüssel!"
-msgstr "CLR There's a key lying there!"
+msgstr "CLR ¡Hay una llave ahí!"
 
 #. prog 6 @ 157e op add_say_window2
 #: script.p6.0x157e
 msgctxt "script.p6.0x157e"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 6 @ 15a5 op add_say_window
 #: script.p6.0x15a5
@@ -4617,13 +4617,13 @@ msgstr "Pero quizá haya algo bajo una de las otras plantas.."
 #: script.p6.0x1648
 msgctxt "script.p6.0x1648"
 msgid "CLR Da liegt ein Schlüssel!"
-msgstr "CLR There's a key lying there!"
+msgstr "CLR ¡Hay una llave ahí!"
 
 #. prog 6 @ 1667 op add_say_window2
 #: script.p6.0x1667
 msgctxt "script.p6.0x1667"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 6 @ 168e op add_say_window
 #: script.p6.0x168e
@@ -4641,13 +4641,13 @@ msgstr "Pero quizá haya algo bajo una de las otras plantas.."
 #: script.p6.0x1731
 msgctxt "script.p6.0x1731"
 msgid "CLR Da liegt ein Schlüssel!"
-msgstr "CLR There's a key lying there!"
+msgstr "CLR ¡Hay una llave ahí!"
 
 #. prog 6 @ 1750 op add_say_window2
 #: script.p6.0x1750
 msgctxt "script.p6.0x1750"
 msgid "CLR ____(4_Punkte)____"
-msgstr "CLR ____(4 dots)____"
+msgstr "CLR ____(4 puntos)____"
 
 #. prog 6 @ 1777 op add_say_window
 #: script.p6.0x1777
@@ -4671,13 +4671,13 @@ msgstr "CLR A withered plant."
 #: script.p6.0x1815
 msgctxt "script.p6.0x1815"
 msgid "CLR Ein Kaktee im Vorgarten. NW Auf was für Ideen die Leute doch kommen."
-msgstr "CLR A cactus in the front garden. NW The things people come up with."
+msgstr "CLR Un cactus en el jardín delantero. NW A la gente se le ocurren unas cosas..."
 
 #. prog 6 @ 1865 op add_say_window
 #: script.p6.0x1865
 msgctxt "script.p6.0x1865"
 msgid "CLR Ich werf' das alte erst mal weg!"
-msgstr "CLR I werf' the alte erst time weg!"
+msgstr "CLR ¡Tiraré el viejo por ahora!"
 
 #. prog 6 @ 188b op add_say_window
 #: script.p6.0x188b
@@ -4695,31 +4695,31 @@ msgstr "CLR ____(1 dot)____"
 #: script.p6.0x194a
 msgctxt "script.p6.0x194a"
 msgid "CLR Hallo! NW _____ NW Du da. NW Kaktee. NW __Eh?__ NW Hallo?"
-msgstr "CLR Hello! NW _____ NW You there. NW Cactus. NW __Eh?__ NW Hello?"
+msgstr "CLR ¡Hola! NW _____ NW Tú, ahí. NW Cactus. NW __¿Eh?__ NW ¿Hola?"
 
 #. prog 6 @ 1986 op add_say_window
 #: script.p6.0x1986
 msgctxt "script.p6.0x1986"
 msgid "CLR Die anwortet sowieso nicht."
-msgstr "CLR It won't answer anyway."
+msgstr "CLR De todos modos, no va a contestar."
 
 #. prog 6 @ 19a2 op add_say_window2
 #: script.p6.0x19a2
 msgctxt "script.p6.0x19a2"
 msgid "CLR Die hat aber Stacheln!"
-msgstr "CLR But it's got spines!!"
+msgstr "CLR ¡Pero tiene espinas!"
 
 #. prog 6 @ 19d5 op add_say_window
 #: script.p6.0x19d5
 msgctxt "script.p6.0x19d5"
 msgid "CLR Ich grab' doch keine Kaktee an."
-msgstr "CLR I'm not touching a cactus."
+msgstr "CLR No pienso tocar un cactus."
 
 #. prog 6 @ 19f3 op say_if_found
 #: script.p6.0x19f3
 msgctxt "script.p6.0x19f3"
 msgid "CLR Die fasse ich nicht an."
-msgstr "CLR I'm not touching that."
+msgstr "CLR No voy a tocar eso."
 
 #. prog 6 @ 1a27 op print_sentence
 #: script.p6.0x1a27
@@ -4737,13 +4737,13 @@ msgstr "Luego mueve el cursor del ratón a la puerta principal y suelta el botó
 #: script.p8.0x0173
 msgctxt "script.p8.0x0173"
 msgid "Wähle deine Mitspieler NW __________"
-msgstr "Choose your companions NW __________"
+msgstr "Elige a tus compañeros NW __________"
 
 #. prog 8 @ 01a9 op set_room_name
 #: script.p8.0x01a9
 msgctxt "script.p8.0x01a9"
 msgid "Die Auswahl der Mitspieler"
-msgstr "Choosing your companions"
+msgstr "Elección de compañeros"
 
 #. prog 8 @ 0299 op add_say_window2
 #: script.p8.0x0299
@@ -4755,7 +4755,7 @@ msgstr "_"
 #: script.p8.0x02d3
 msgctxt "script.p8.0x02d3"
 msgid "CLR Das ist Matt, von seinen Freunden auch 'Schrank' genannt. Er ist stark und, ehm. Na ja stark eben."
-msgstr "CLR This is Matt, also known as 'Wardrobe' to his friends. He's strong and, um... well, strong, basically."
+msgstr "CLR Este es Matt, al que sus amigos llaman «Armario». Es fuerte y, eh... bueno, fuerte, básicamente."
 
 #. prog 8 @ 0317 op add_say_window2
 #: script.p8.0x0317
@@ -4767,7 +4767,7 @@ msgstr "¿Qué? ¿Eh? Claro. Voy contigo, aunque no sé a dónde vamos..."
 #: script.p8.0x038e
 msgctxt "script.p8.0x038e"
 msgid "CLR Das ist Terry. Er studiert Elektrotechnik, Elektronik und Teilchen-Physik."
-msgstr "CLR This is Terry. He studies electrical engineering, electronics, and particle physics."
+msgstr "CLR Este es Terry. Estudia ingeniería eléctrica, electrónica y física de partículas."
 
 #. prog 8 @ 03c9 op add_say_window2
 #: script.p8.0x03c9
@@ -4779,7 +4779,7 @@ msgstr "Hoy no, Jack. Mi propia novia Mandy acaba de dejarme..."
 #: script.p8.0x042c
 msgctxt "script.p8.0x042c"
 msgid "CLR Das ist Ron. Ron mixt die besten Drinks in der Stadt und ist auf jeder Party zu finden."
-msgstr "CLR This is Ron. Ron mixes the best drinks in town and can be found at every party."
+msgstr "CLR Este es Ron. Prepara los mejores cócteles de la ciudad y está en todas las fiestas."
 
 #. prog 8 @ 0467 op add_say_window2
 #: script.p8.0x0467
@@ -4791,7 +4791,7 @@ msgstr "Hay esa fiesta en casa de Alice esta noche; de lo contrario, me encantar
 #: script.p8.0x04d2
 msgctxt "script.p8.0x04d2"
 msgid "CLR Das ist Amanda. Sie ist ein wenig ängstlich und schüchtern, aber dafür auch sehr unauffällig."
-msgstr "CLR This is Amanda. She's a little nervous and shy, but she also keeps a very low profile."
+msgstr "CLR Esta es Amanda. Es un poco nerviosa y tímida, pero sabe pasar desapercibida."
 
 #. prog 8 @ 0507 op add_say_window2
 #: script.p8.0x0507
@@ -4803,7 +4803,7 @@ msgstr "Gracias por confiar en mí, Jack, pero esto es demasiado peligroso para 
 #: script.p8.0x055f
 msgctxt "script.p8.0x055f"
 msgid "CLR Das ist Drive. Wenn er nicht gerade sein Motorrad repariert, fährt er es zu Schrott. NW Er ist stark und hat vor nichts Angst."
-msgstr "CLR This is Drive. When he's not repairing his motorcycle, he's wrecking it. NW He's strong and afraid of nothing."
+msgstr "CLR Este es Drive. Cuando no está reparando su moto, la está destrozando. NW Es fuerte y no le teme a nada."
 
 #. prog 8 @ 05ab op add_say_window2
 #: script.p8.0x05ab
@@ -4815,7 +4815,7 @@ msgstr "Lo siento, Jack, pero primero quiero que mi carburador vuelva a funciona
 #: script.p8.0x060b
 msgctxt "script.p8.0x060b"
 msgid "CLR Das ist Ronda. Sie will Ärtztin, Schriftstellerin, Schauspielerin und Fotomodell werden."
-msgstr "CLR This is Ronda. She wants to become a doctor, writer, actress, and model."
+msgstr "CLR Esta es Ronda. Quiere ser médica, escritora, actriz y modelo."
 
 #. prog 8 @ 0647 op add_say_window2
 #: script.p8.0x0647
@@ -4881,7 +4881,7 @@ msgstr "¿Qué dice ese cartel, Ronda?"
 #: script.p8.0x082a
 msgctxt "script.p8.0x082a"
 msgid "Da steht: NW Warnung! NW Das Haus ist baufällig, radioaktiv verseucht und von Zombies belagert. NW Und giftig. NW Und Privatbesitz. NW Eltern zahlen die Beerdigungskosten für ihre Kinder."
-msgstr "Dice: NW ¡Advertencia! NW Esta casa es estructuralmente insegura, contaminada con radiactividad, y ro"
+msgstr "Dice: NW ¡Advertencia! NW La casa está en ruinas, contaminada por la radiactividad y rodeada de zombis. NW Y es tóxica. NW Y propiedad privada. NW Los padres pagan los gastos del funeral de sus hijos."
 
 #. prog 8 @ 08bd op add_say_window2
 #: script.p8.0x08bd
@@ -4953,7 +4953,7 @@ msgstr "CLR A puzzle piece"
 #: script.p9.0x02ca
 msgctxt "script.p9.0x02ca"
 msgid "CLR ____(1_Punkt)____"
-msgstr "CLR ____(1 point)____"
+msgstr "CLR ____(1 punto)____"
 
 #. prog 9 @ 02f8 op say_if_found
 #: script.p9.0x02f8
@@ -4965,13 +4965,13 @@ msgstr "CLR A faucet."
 #: script.p9.0x0321
 msgctxt "script.p9.0x0321"
 msgid "CLR Danke, ich bin nicht durstig."
-msgstr "CLR Thanks, I'm not thirsty."
+msgstr "CLR Gracias, no tengo sed."
 
 #. prog 9 @ 034f op add_say_window2
 #: script.p9.0x034f
 msgctxt "script.p9.0x034f"
 msgid "CLR Sofort, Chef!"
-msgstr "CLR Right away, boss!"
+msgstr "CLR ¡Enseguida, jefe!"
 
 #. prog 9 @ 0383 op add_say_window2
 #: script.p9.0x0383
@@ -4989,7 +4989,7 @@ msgstr "CLR Además, me lo he ganado a pulso."
 #: script.p9.0x03e4
 msgctxt "script.p9.0x03e4"
 msgid "CLR Da ist schon Wasser drin."
-msgstr "CLR There's already water in it."
+msgstr "CLR Ya tiene agua."
 
 #. prog 9 @ 04c6 op add_say_window2
 #: script.p9.0x04c6
@@ -5007,7 +5007,7 @@ msgstr "CLR Interesting architecture."
 #: script.p9.0x0537
 msgctxt "script.p9.0x0537"
 msgid "CLR Geht nicht, die Tür ist festgeklemmt."
-msgstr "CLR No good; the door is jammed."
+msgstr "CLR No sirve; la puerta está atascada."
 
 #. prog 9 @ 0564 op add_say_window2
 #: script.p9.0x0564
@@ -5025,7 +5025,7 @@ msgstr "____(5 points)____"
 #: script.p9.0x05fe
 msgctxt "script.p9.0x05fe"
 msgid "CLR Okay. NW Schon erledigt!"
-msgstr "CLR Okay. NW Already done!"
+msgstr "CLR Vale. NW ¡Ya está hecho!"
 
 #. prog 9 @ 0662 op say_if_found
 #: script.p9.0x0662
@@ -5037,25 +5037,25 @@ msgstr "CLR Nice cupboard."
 #: script.p9.0x0679
 msgctxt "script.p9.0x0679"
 msgid "CLR Die Türen sind zugenagelt."
-msgstr "CLR The doors are nailed shut."
+msgstr "CLR Las puertas están clavadas."
 
 #. prog 9 @ 06bb op say_if_found
 #: script.p9.0x06bb
 msgctxt "script.p9.0x06bb"
 msgid "CLR Ein Speiseaufzug. Er ist leer und alle Lampen sind aus."
-msgstr "CLR A dumbwaiter. It's empty and all the lights are off."
+msgstr "CLR Un montaplatos. Está vacío y todas las luces están apagadas."
 
 #. prog 9 @ 0703 op add_say_window2
 #: script.p9.0x0703
 msgctxt "script.p9.0x0703"
 msgid "CLR Nichts. NW Der Aufzug ist tot."
-msgstr "CLR Nothing. NW The elevator is dead."
+msgstr "CLR Nada. NW El ascensor está muerto."
 
 #. prog 9 @ 072d op add_say_window2
 #: script.p9.0x072d
 msgctxt "script.p9.0x072d"
 msgid "CLR Solange ich das Messer habe, quetsch ich mich nicht in einen so engen Kasten! NW Sonst kündigt mir meine Lebensversichrung."
-msgstr "CLR As long as I'm holding the knife, I'm not squeezing into a box this narrow! NW Otherwise my life insurance will drop me."
+msgstr "CLR Mientras tenga el cuchillo, ¡no pienso meterme en una caja tan estrecha! NW Si no, el seguro de vida me dará de baja."
 
 #. prog 9 @ 0781 op add_say_window2
 #: script.p9.0x0781
@@ -5073,7 +5073,7 @@ msgstr "Quizá pueda esconder el cuchillo a salvo en algún sitio del jardín de
 #: script.p9.0x07e4
 msgctxt "script.p9.0x07e4"
 msgid "CLR Oh, das wird eng."
-msgstr "CLR Oh, this is going to be tight."
+msgstr "CLR Uf, esto va a estar muy justo."
 
 #. prog 9 @ 07ff op add_say_window2
 #: script.p9.0x07ff
@@ -5091,13 +5091,13 @@ msgstr "¡La puerta del frigorífico está en medio!"
 #: script.p9.0x086e
 msgctxt "script.p9.0x086e"
 msgid "CLR Draussen ist es dunkel."
-msgstr "CLR It's dark outside."
+msgstr "CLR Fuera está oscuro."
 
 #. prog 9 @ 0887 op say_if_found
 #: script.p9.0x0887
 msgctxt "script.p9.0x0887"
 msgid "CLR Das Fenster ist zugenagelt."
-msgstr "CLR The window is boarded up."
+msgstr "CLR La ventana está tapiada con tablas."
 
 #. prog 9 @ 08bc op add_say_window
 #: script.p9.0x08bc
@@ -5115,13 +5115,13 @@ msgstr "CLR A boombox."
 #: script.p9.0x0914
 msgctxt "script.p9.0x0914"
 msgid "____(1_Punkt)____"
-msgstr "____(1 point)____"
+msgstr "____(1 punto)____"
 
 #. prog 9 @ 0933 op add_say_window2
 #: script.p9.0x0933
 msgctxt "script.p9.0x0933"
 msgid "CLR So einen wollte ich schon immer haben."
-msgstr "CLR I've always wanted one of these."
+msgstr "CLR Siempre he querido tener uno de estos."
 
 #. prog 9 @ 0971 op print_sentence_ret
 #: script.p9.0x0971
@@ -5151,7 +5151,7 @@ msgstr "Podría jurar que ya me había encargado de eso."
 #: script.p9.0x0be5
 msgctxt "script.p9.0x0be5"
 msgid "Hallo?"
-msgstr "Hello?"
+msgstr "¿Hola?"
 
 #. prog 9 @ 0bf7 op add_say_window
 #: script.p9.0x0bf7
@@ -5169,7 +5169,7 @@ msgstr "Si crees que puedes salirte con la tuya conmigo..."
 #: script.p9.0x0c3c
 msgctxt "script.p9.0x0c3c"
 msgid "CLR ..und dann reisse ich Ihnen die Zehennägel aus.."
-msgstr "CLR ...then I'll pull your toenails out..."
+msgstr "CLR ...y después le arrancaré las uñas de los pies..."
 
 #. prog 9 @ 0c6d op add_say_window2
 #: script.p9.0x0c6d
@@ -5181,7 +5181,7 @@ msgstr "CLR ...y lo haré gratis. Si no..."
 #: script.p9.0x0c9e
 msgctxt "script.p9.0x0c9e"
 msgid "CLR Ich hoffe wir haben uns... Hallo? Hallo? Sind Sie noch dran?"
-msgstr "CLR I hope we've understood each other... Hello? Hello? Are you still there?"
+msgstr "CLR Espero que nos hayamos entendido... ¿Hola? ¿Hola? ¿Sigue ahí?"
 
 #. prog 9 @ 0cd6 op add_say_window
 #: script.p9.0x0cd6
@@ -5199,25 +5199,25 @@ msgstr "En el jardín"
 #: script.p10.0x008b
 msgctxt "script.p10.0x008b"
 msgid "CLR Da wachsen Zuchini."
-msgstr "CLR Zucchini are growing there."
+msgstr "CLR Ahí crecen calabacines."
 
 #. prog 10 @ 00b5 op add_say_window2
 #: script.p10.0x00b5
 msgctxt "script.p10.0x00b5"
 msgid "CLR Da wachsen Zuchini."
-msgstr "CLR Zucchini are growing there."
+msgstr "CLR Ahí crecen calabacines."
 
 #. prog 10 @ 00e6 op add_say_window2
 #: script.p10.0x00e6
 msgctxt "script.p10.0x00e6"
 msgid "CLR ____(2_Punkte)____"
-msgstr "CLR ____(2 points)____"
+msgstr "CLR ____(2 puntos)____"
 
 #. prog 10 @ 011b op add_say_window
 #: script.p10.0x011b
 msgctxt "script.p10.0x011b"
 msgid "CLR Wenn's sein muß..."
-msgstr "CLR If I have to..."
+msgstr "CLR Si no queda más remedio..."
 
 #. prog 10 @ 019f op add_say_window
 #: script.p10.0x019f
@@ -5241,7 +5241,7 @@ msgstr "CLR ¡No voy a escarbar ahí otra vez!"
 #: script.p10.0x0291
 msgctxt "script.p10.0x0291"
 msgid "CLR Die Familienkrypta. NW ___Unheimlich!___"
-msgstr "CLR The family crypt. NW ___Spooky!___"
+msgstr "CLR La cripta familiar. NW ___¡Qué miedo!___"
 
 #. prog 10 @ 02cd op add_say_window2
 #: script.p10.0x02cd
@@ -5271,7 +5271,7 @@ msgstr "CLR Pirámides."
 #: script.p11.0x0154
 msgctxt "script.p11.0x0154"
 msgid "CLR Das Bild ist festgenagelt."
-msgstr "CLR The picture is nailed down."
+msgstr "CLR El cuadro está clavado."
 
 #. prog 11 @ 0174 op add_say_window2
 #: script.p11.0x0174
@@ -5283,37 +5283,37 @@ msgstr "Parece que me esperaban."
 #: script.p11.0x01a3
 msgctxt "script.p11.0x01a3"
 msgid "CLR Die Tür ist solide und hat weder Schloß noch Türgriff."
-msgstr "CLR The door is solid and has neither a lock nor a handle."
+msgstr "CLR La puerta es maciza y no tiene cerradura ni pomo."
 
 #. prog 11 @ 01f3 op add_say_window2
 #: script.p11.0x01f3
 msgctxt "script.p11.0x01f3"
 msgid "CLR Besser nicht. Ich bin froh, daß sie offen ist."
-msgstr "CLR Better not. I'm glad it's open."
+msgstr "CLR Mejor no. Me alegro de que esté abierta."
 
 #. prog 11 @ 0217 op add_say_window2
 #: script.p11.0x0217
 msgctxt "script.p11.0x0217"
 msgid "CLR Ich kann die Tür nicht öffnen. NW Sie hat keinen Griff."
-msgstr "CLR I can't open the door. NW It has no handle."
+msgstr "CLR No puedo abrir la puerta. NW No tiene pomo."
 
 #. prog 11 @ 024f op add_say_window2
 #: script.p11.0x024f
 msgctxt "script.p11.0x024f"
 msgid "CLR Ich könnte natürlich die geschlossene Tür verkeilen.. NW ..und damit alle Leute die drin sind einsperren! NW Geniale Idee! NW Leider hat der Programmierer nicht an diese Möglichkeit gedacht..."
-msgstr "CLR Of course, I could wedge the closed door shut... NW ...and trap everyone inside! NW Brilliant idea! NW Unfortunately, the programmer didn't think of that possibility..."
+msgstr "CLR Claro que podría bloquear la puerta cerrada con una cuña... NW ...¡y dejar a todos encerrados! NW ¡Qué idea tan brillante! NW Por desgracia, al programador no se le ocurrió esa posibilidad..."
 
 #. prog 11 @ 02cf op add_say_window2
 #: script.p11.0x02cf
 msgctxt "script.p11.0x02cf"
 msgid "CLR Die Tür hat weder Schlüsselloch, noch Griff."
-msgstr "CLR The door has neither a keyhole nor a handle."
+msgstr "CLR La puerta no tiene ni cerradura ni pomo."
 
 #. prog 11 @ 0302 op add_say_window2
 #: script.p11.0x0302
 msgctxt "script.p11.0x0302"
 msgid "CLR Die Tür hat weder Schlüsselloch, noch Griff."
-msgstr "CLR The door has neither a keyhole nor a handle."
+msgstr "CLR La puerta no tiene ni cerradura ni pomo."
 
 #. prog 11 @ 04c2 op add_say_window2
 #: script.p11.0x04c2
@@ -5367,13 +5367,13 @@ msgstr "CLR Grunt?"
 #: script.p12.0x04ab
 msgctxt "script.p12.0x04ab"
 msgid "CLR Da muß ich erst runter gehen."
-msgstr "CLR I have to go downstairs first."
+msgstr "CLR Primero tengo que bajar las escaleras."
 
 #. prog 12 @ 050b op say_if_found
 #: script.p12.0x050b
 msgctxt "script.p12.0x050b"
 msgid "CLR Eine alte Sofortbildkamera."
-msgstr "CLR An old instant camera."
+msgstr "CLR Una cámara instantánea antigua."
 
 #. prog 12 @ 0542 op add_say_window2
 #: script.p12.0x0542
@@ -5385,7 +5385,7 @@ msgstr "CLR ____(4 points)____"
 #: script.p12.0x0570
 msgctxt "script.p12.0x0570"
 msgid "CLR Es schaut mich an!"
-msgstr "CLR It's looking at me!"
+msgstr "CLR ¡Me está mirando!"
 
 #. prog 12 @ 0585 op say_if_found
 #: script.p12.0x0585
@@ -5397,25 +5397,25 @@ msgstr "CLR No!"
 #: script.p12.0x0594
 msgctxt "script.p12.0x0594"
 msgid "CLR Das fasse ich nicht an."
-msgstr "CLR I'm not touching that."
+msgstr "CLR No voy a tocar eso."
 
 #. prog 12 @ 05c0 op say_if_found
 #: script.p12.0x05c0
 msgctxt "script.p12.0x05c0"
 msgid "CLR Ein Glas Wasser."
-msgstr "CLR A glass of water."
+msgstr "CLR Un vaso de agua."
 
 #. prog 12 @ 05ee op add_say_window2
 #: script.p12.0x05ee
 msgctxt "script.p12.0x05ee"
 msgid "____(1_Punkt)____"
-msgstr "____(1 point)____"
+msgstr "____(1 punto)____"
 
 #. prog 12 @ 0600 op add_say_window2
 #: script.p12.0x0600
 msgctxt "script.p12.0x0600"
 msgid "CLR Okay. NW ____Ok.____"
-msgstr "CLR Okay. NW ____Okay.____"
+msgstr "CLR Vale. NW ____Vale.____"
 
 #. prog 12 @ 0636 op say_if_found
 #: script.p12.0x0636
@@ -5427,13 +5427,13 @@ msgstr "CLR A puzzle piece"
 #: script.p12.0x0664
 msgctxt "script.p12.0x0664"
 msgid "CLR ____(1_Punkt)____ NW ___(Immerhin!)___"
-msgstr "CLR ____(1 point)____ NW ___(At least!)___"
+msgstr "CLR ____(1 punto)____ NW ___(¡Al menos!)___"
 
 #. prog 12 @ 06a3 op say_if_found
 #: script.p12.0x06a3
 msgctxt "script.p12.0x06a3"
 msgid "CLR Da liegt das Skelett einer Ratte drin!"
-msgstr "CLR There's a rat skeleton in there!"
+msgstr "CLR ¡Hay un esqueleto de rata ahí dentro!"
 
 #. prog 12 @ 06c5 op say_if_found
 #: script.p12.0x06c5
@@ -5451,25 +5451,25 @@ msgstr "____(2 points)____"
 #: script.p12.0x072d
 msgctxt "script.p12.0x072d"
 msgid "CLR Okay."
-msgstr "CLR Okay."
+msgstr "CLR Vale."
 
 #. prog 12 @ 07c6 op say_if_found
 #: script.p12.0x07c6
 msgctxt "script.p12.0x07c6"
 msgid "CLR In der Wand steckt ein Nagel."
-msgstr "CLR There's a nail sticking out of the wall."
+msgstr "CLR Hay un clavo que sobresale de la pared."
 
 #. prog 12 @ 07e1 op say_if_found
 #: script.p12.0x07e1
 msgctxt "script.p12.0x07e1"
 msgid "CLR Der Nagel ist zu fest. NW Den bekomme ich mit bloßen Händen nie herraus."
-msgstr "CLR The nail is too firmly stuck. NW I'll never get it out with my bare hands."
+msgstr "CLR El clavo está demasiado atascado. NW Nunca conseguiré sacarlo con las manos desnudas."
 
 #. prog 12 @ 0a26 op add_say_window2
 #: script.p12.0x0a26
 msgctxt "script.p12.0x0a26"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3 points)____"
+msgstr "CLR ____(3 puntos)____"
 
 #. prog 12 @ 0a4c op add_say_window
 #: script.p12.0x0a4c
@@ -5571,7 +5571,7 @@ msgstr "Help!"
 #: script.p12.0x113b
 msgctxt "script.p12.0x113b"
 msgid "CLR Hab' ich dich!"
-msgstr "CLR Got you!"
+msgstr "CLR ¡Te pillé!"
 
 #. prog 13 @ 000b op add_say_window2
 #: script.p13.0x000b
@@ -5595,49 +5595,49 @@ msgstr "CLR El cactus no me deja pasar por ahí."
 #: script.p13.0x024e
 msgctxt "script.p13.0x024e"
 msgid "CLR Ein lila Telefon mit gelben Kabel und grünem Stecker auf einem türkisen Tisch. NW Schick."
-msgstr "CLR A purple telephone with yellow cable and a green plug on a turquoise table. NW Stylish."
+msgstr "CLR Un teléfono morado con cable amarillo y enchufe verde sobre una mesa turquesa. NW Con mucho estilo."
 
 #. prog 13 @ 02c0 op add_say_window
 #: script.p13.0x02c0
 msgctxt "script.p13.0x02c0"
 msgid "CLR 0190-92743762183547 NW ____Hallo?____ NW Ja, ich warte. NW ______ NW Hallo, ich.. NW Ja, ich warte. NW ______ NW Also, ich.. NW Ja, ich warte. NW _______ NW Nun, ich.. NW ___Was??___ NW Ja, ich denke im Garten geht das."
-msgstr "CLR 0190-92743762183547 NW ____Hello?____ NW Yes, I'm waiting. NW ______ NW Hello, I... NW Yes, I'm waiting. NW ______ NW Well, I... NW Yes, I'm waiting. NW _______ NW Now, I... NW ___What??___ NW Yes, I think the garden will do."
+msgstr "CLR 0190-92743762183547 NW ____¿Hola?____ NW Sí, estoy esperando. NW ______ NW Hola, yo... NW Sí, estoy esperando. NW ______ NW Bueno, yo... NW Sí, estoy esperando. NW _______ NW Ahora, yo... NW ___¿Qué??___ NW Sí, creo que el jardín servirá."
 
 #. prog 13 @ 0345 op add_say_window
 #: script.p13.0x0345
 msgctxt "script.p13.0x0345"
 msgid "CLR ___Cool!___ NW Die holen mich sogar ab!"
-msgstr "CLR ___Cool!___ NW They're even coming to pick me up!"
+msgstr "CLR ___¡Genial!___ NW ¡Incluso vienen a recogerme!"
 
 #. prog 13 @ 0398 op add_say_window
 #: script.p13.0x0398
 msgctxt "script.p13.0x0398"
 msgid "CLR Wen soll ich anrufen?"
-msgstr "CLR Who should I call?"
+msgstr "CLR ¿A quién debería llamar?"
 
 #. prog 13 @ 03b0 op add_say_window
 #: script.p13.0x03b0
 msgctxt "script.p13.0x03b0"
 msgid "CLR Ich drücke mal die Wahlwiederholung.."
-msgstr "CLR I'll try redialing..."
+msgstr "CLR Voy a probar a llamar de nuevo..."
 
 #. prog 13 @ 03e2 op add_say_window
 #: script.p13.0x03e2
 msgctxt "script.p13.0x03e2"
 msgid "Hallo? NW ___Ähhh___ NW Was? NW Nein, die einmalige CD-Sammlung der 60er wollte ich nicht bestellen. NW Nein, ehrlich. NW Muß mich verwählt haben!"
-msgstr "¿Hola? NW ___Eh...___ NW ¿Qué? NW No, no quería pedir esa colección única de CDs de música de los 60. NW No, de verd"
+msgstr "¿Hola? NW ___Eh...___ NW ¿Qué? NW No, no quería pedir esa colección única de CD de música de los años 60. NW No, de verdad. NW Debo de haber marcado mal."
 
 #. prog 13 @ 043e op add_say_window
 #: script.p13.0x043e
 msgctxt "script.p13.0x043e"
 msgid "Verkäufer!"
-msgstr "Salesman!"
+msgstr "¡Vendedor!"
 
 #. prog 13 @ 044e op add_say_window2
 #: script.p13.0x044e
 msgctxt "script.p13.0x044e"
 msgid "CLR Pass auf was du sagst!"
-msgstr "CLR Watch what you say!"
+msgstr "CLR ¡Cuidado con lo que dices!"
 
 #. prog 13 @ 0477 op add_say_window
 #: script.p13.0x0477
@@ -5661,7 +5661,7 @@ msgstr "¡Tsk! NW ¿De dónde se supone que saque ahora una tarjeta de crédito?
 #: script.p13.0x054e
 msgctxt "script.p13.0x054e"
 msgid "____Ja.____ NW Die Kreditkartennummer ist 02-290253-234272. NW ___Danke.___"
-msgstr "____Yes.____ NW The credit card number is 02-290253-234272. NW ___Thank you.___"
+msgstr "____Sí.____ NW El número de la tarjeta de crédito es 02-290253-234272. NW ___Gracias.___"
 
 #. prog 13 @ 058e op add_say_window
 #: script.p13.0x058e
@@ -5679,49 +5679,49 @@ msgstr "CLR ____(4 points)____"
 #: script.p13.0x05f6
 msgctxt "script.p13.0x05f6"
 msgid "CLR Hey, ist das etwa Wasser!!!? NW Bitte gib es mir!"
-msgstr "CLR Hey, is that water?! NW Please give it to me!"
+msgstr "CLR ¡Oye, ¿eso es agua?! NW ¡Dámela, por favor!"
 
 #. prog 13 @ 0650 op say_if_found
 #: script.p13.0x0650
 msgctxt "script.p13.0x0650"
 msgid "CLR Das Glas ist leer. Damit kann ich ihn nicht gießen."
-msgstr "CLR The glass is empty. I can't water him with it."
+msgstr "CLR El vaso está vacío. No puedo regarlo con eso."
 
 #. prog 13 @ 0673 op say_if_found
 #: script.p13.0x0673
 msgctxt "script.p13.0x0673"
 msgid "CLR Warum sollte ich ihn bestechen? NW ER ist es der hier besticht."
-msgstr "CLR Why should I bribe him? NW HE's the one doing the bribing here."
+msgstr "CLR ¿Por qué iba a sobornarlo? NW ¡Es ÉL quien está intentando sobornarme!"
 
 #. prog 13 @ 06c4 op add_say_window2
 #: script.p13.0x06c4
 msgctxt "script.p13.0x06c4"
 msgid "CLR ____(2_Punkte)____ NW (Plus je einen Gummipunkte von der Bürgeraktionen \"Freundlichkeit für Flanzen\" und \"Nieder mit der Rächtschreibung\")"
-msgstr "CLR ____(2 points)____ NW (Plus one bonus point each from the civic campaigns \"Kindness to Plants\" and \"Down with Spelling\")"
+msgstr "CLR ____(2 puntos)____ NW (Más un punto extra por cada una de las campañas cívicas «Amabilidad con las plantas» y «Abajo la ortografía»)"
 
 #. prog 13 @ 071d op add_say_window2
 #: script.p13.0x071d
 msgctxt "script.p13.0x071d"
 msgid "CLR Hey, danke! NW Ich hab' seit 3 Jahren nichts mehr zu trinken bekommen! NW Du bist echt ok!"
-msgstr "CLR Hey, thanks! NW I haven't had anything to drink in three years! NW You're really okay!"
+msgstr "CLR ¡Oye, gracias! NW ¡Llevo tres años sin beber nada! NW ¡Eres genial!"
 
 #. prog 13 @ 0774 op add_say_window2
 #: script.p13.0x0774
 msgctxt "script.p13.0x0774"
 msgid "CLR Danke! NW Man weiß hier nie, wann man wieder etwas zu trinken bekommt.."
-msgstr "CLR Thanks! NW You never know when you'll get something to drink here again..."
+msgstr "CLR ¡Gracias! NW Nunca se sabe cuándo volverás a conseguir algo de beber por aquí..."
 
 #. prog 13 @ 07be op add_say_window2
 #: script.p13.0x07be
 msgctxt "script.p13.0x07be"
 msgid "CLR Nein danke, ich weiß wie ich aussehen."
-msgstr "CLR No thanks, I know what I look like."
+msgstr "CLR No, gracias, ya sé qué aspecto tengo."
 
 #. prog 13 @ 07fb op add_say_window2
 #: script.p13.0x07fb
 msgctxt "script.p13.0x07fb"
 msgid "CLR Hey, geil ein Photo von der kleinen Kaktee vorm Haus. NW Uh, was die für Stacheln hat! NW ___DANKE!___"
-msgstr "CLR Hey, cool, a photo of the little cactus in front of the house. NW Wow, look at those spines! NW ___THANKS!___"
+msgstr "CLR Oye, qué bien, una foto del pequeño cactus de delante de la casa. NW ¡Vaya, mira esas espinas! NW ___¡GRACIAS!___"
 
 #. prog 13 @ 085d op add_say_window
 #: script.p13.0x085d
@@ -5733,43 +5733,43 @@ msgstr "CLR ¿Y cuál es la combinación de la caja fuerte?"
 #: script.p13.0x0881
 msgctxt "script.p13.0x0881"
 msgid "CLR Ach ja, genau, aber du meinst den Kühlschrank."
-msgstr "CLR Oh, right, exactly, but you mean the refrigerator."
+msgstr "CLR Ah, sí, eso es, pero te refieres al frigorífico."
 
 #. prog 13 @ 08a5 op add_say_window
 #: script.p13.0x08a5
 msgctxt "script.p13.0x08a5"
 msgid "CLR Quatsch, den dusseligen Kühlschrank in der Küche habe ich auch so aufbekommen. NW Sonst wäre ich nicht hier."
-msgstr "CLR Nonsense, I opened that stupid refrigerator in the kitchen just fine. NW Otherwise I wouldn't be here."
+msgstr "CLR Tonterías, abrí sin problemas ese estúpido frigorífico de la cocina. NW Si no, no estaría aquí."
 
 #. prog 13 @ 08e9 op add_say_window
 #: script.p13.0x08e9
 msgctxt "script.p13.0x08e9"
 msgid "CLR Nein nein, ich meine den Kühlschrank im Keller. NW Er ist durch ein Zahlenschloß gesichert!"
-msgstr "CLR No, no, I mean the refrigerator in the basement. NW It's secured with a combination lock!"
+msgstr "CLR No, no, me refiero al frigorífico del sótano. NW ¡Está protegido con una cerradura de combinación!"
 
 #. prog 13 @ 0923 op add_say_window
 #: script.p13.0x0923
 msgctxt "script.p13.0x0923"
 msgid "CLR Hat der Doc Angst, daß ihm der Joghurt wegläuft, oder was soll das?"
-msgstr "CLR Is the Doc afraid his yogurt will escape, or what is this supposed to be?"
+msgstr "CLR ¿El Doc teme que se le escape el yogur o qué se supone que es esto?"
 
 #. prog 13 @ 0956 op add_say_window
 #: script.p13.0x0956
 msgctxt "script.p13.0x0956"
 msgid "CLR Ich sag dir, der ist verrückt! NW Und die Safekombination ist (tuschel tuschel tuschel)."
-msgstr "CLR I'm telling you, he's crazy! NW And the safe combination is (whisper whisper whisper)."
+msgstr "CLR ¡Te lo digo, está loco! NW Y la combinación de la caja fuerte es (susurro, susurro, susurro)."
 
 #. prog 13 @ 0999 op add_say_window
 #: script.p13.0x0999
 msgctxt "script.p13.0x0999"
 msgid "CLR Was ein Genie! Wie kommt man auf solche Zahlen? NW _____Unglaublich!_____"
-msgstr "CLR What a genius! How does anyone come up with numbers like that? NW _____Unbelievable!_____"
+msgstr "CLR ¡Qué genio! ¿Cómo se le ocurren a alguien números así? NW _____¡Increíble!_____"
 
 #. prog 13 @ 09cd op add_say_window2
 #: script.p13.0x09cd
 msgctxt "script.p13.0x09cd"
 msgid "CLR Tja, der Doc hat ein Händchen für Mathematik, das muß man ihm lassen. NW Aber behalt die Zahlen bitte für dich. NW Sonst bekomme ich noch Ärger."
-msgstr "CLR Well, the Doc has a knack for mathematics, you have to give him that. NW But please keep the numbers to yourself. NW Otherwise I'll get in trouble."
+msgstr "CLR Bueno, hay que reconocer que el Doc tiene talento para las matemáticas. NW Pero, por favor, no le cuentes los números a nadie. NW Si no, me meteré en un lío."
 
 #. prog 13 @ 0a33 op add_say_window2
 #: script.p13.0x0a33
@@ -5811,7 +5811,7 @@ msgstr "Ya está bien."
 #: script.p13.0x0b01
 msgctxt "script.p13.0x0b01"
 msgid "Danke. NW (Schluchz)"
-msgstr "Thanks. NW (Sobbing)"
+msgstr "Gracias. NW (Solloza)"
 
 #. prog 13 @ 0b15 op add_say_window
 #: script.p13.0x0b15
@@ -5907,7 +5907,7 @@ msgstr "Está bien."
 #: script.p13.0x0c42
 msgctxt "script.p13.0x0c42"
 msgid "Ehm, hallo, Kaktus."
-msgstr "Um, hello, cactus."
+msgstr "Eh, hola, cactus."
 
 #. prog 13 @ 0c5b op add_option
 #: script.p13.0x0c5b
@@ -5949,7 +5949,7 @@ msgstr "Así que este doctor está un poco loco, entonces..."
 #: script.p13.0x0d43
 msgctxt "script.p13.0x0d43"
 msgid "Was heißt, \"er kann telepathisch mit Gemüse reden\"?"
-msgstr "¿Qué quieres decir, \"he can talk telepathically to vegetables\"?"
+msgstr "¿Qué quieres decir con \"puede hablar telepáticamente con las verduras\"?"
 
 #. prog 13 @ 0d6c op add_option
 #: script.p13.0x0d6c
@@ -6003,7 +6003,7 @@ msgstr "Llevo tres años sin afeitarme y todavía me veo genial, si me preguntas
 #: script.p13.0x0f2d
 msgctxt "script.p13.0x0f2d"
 msgid "____Hi!____ NW Und noch einmal danke fürs Wasser.."
-msgstr "____Hi!____ NW And thanks again for the water..."
+msgstr "____¡Hola!____ NW Y gracias otra vez por el agua..."
 
 #. prog 13 @ 0f63 op add_say_window
 #: script.p13.0x0f63
@@ -6021,7 +6021,7 @@ msgstr "Bueno, eso es una sorpresa."
 #: script.p13.0x0fb4
 msgctxt "script.p13.0x0fb4"
 msgid "Ich war damals Versicherungsvertreter. NW Ich hatte den Kerl keine 4 Stunden bearbeitet, schon schien er weich zu werden. NW Er bat mich ins Labor,.. NW ..und dann.. NW ..und dann.."
-msgstr "Antes era vendedor de seguros. NW Llevaba menos de cuatro horas trabajando con el tipo cuando él "
+msgstr "Antes era vendedor de seguros. NW Llevaba menos de cuatro horas tratando con aquel tipo cuando ya parecía estar ablandándose. NW Me invitó a entrar en el laboratorio... NW ...y entonces... NW ...y entonces..."
 
 #. prog 13 @ 1012 op add_say_window
 #: script.p13.0x1012
@@ -6051,7 +6051,7 @@ msgstr "¡Este (censurado) (censurado) (censurado) (censurado) (censurado) (cens
 #: script.p13.0x114f
 msgctxt "script.p13.0x114f"
 msgid "Der ist völlig geistesgestört! NW Er arbeitet im Keller an einer furchtbaren Erfindung. NW Und er entführt Menschen. NW An denen probiert er das Ding aus."
-msgstr "¡Está completamente loco! NW Está trabajando en un invento terrible en el sótano. NW Y secuestra p"
+msgstr "¡Está completamente loco! NW Está trabajando en un invento terrible en el sótano. NW Y secuestra a personas. NW Prueba ese aparato con ellas."
 
 #. prog 13 @ 11ab op add_say_window
 #: script.p13.0x11ab
@@ -6075,7 +6075,7 @@ msgstr "¿Un poco loco? NW ¡Está completamente de la cabeza! NW ¡Totalmente c
 #: script.p13.0x124e
 msgctxt "script.p13.0x124e"
 msgid "Der Mann kann telepathisch mit jeglichen Lebensmitteln in seinem Kühlschrank aufnehmen.. NW ..um diese ansschließend.. NW ..bestialisch.. NW ..in Ketchup zu ertränken!"
-msgstr "El hombre puede comunicarse telepáticamente con cualquier comida de su frigorífico... NW ...para luego... "
+msgstr "El hombre puede comunicarse telepáticamente con cualquier alimento de su frigorífico... NW ...para luego... NW ...ahogarlo bestialmente... NW ...en kétchup."
 
 #. prog 13 @ 12b7 op say_if
 #: script.p13.0x12b7
@@ -6111,7 +6111,7 @@ msgstr "¡Claro que no puede hablar! NW Es un cactus. NW ¡Los cactus no hablan!
 #: script.p13.0x13c9
 msgctxt "script.p13.0x13c9"
 msgid "Die Verdummungsmaschiene! NW Er hat sie das erste Mal an seinem Sohn ausprobiert, aber der ist dadurch schlauer geworden. NW Es ist ein Gerät direkt aus der Hölle."
-msgstr "¡La máquina de embotecimiento! NW La probó primero en su hijo, pero lo hizo más listo. NW "
+msgstr "¡La máquina para volver estúpida a la gente! NW La probó primero con su hijo, pero eso lo volvió más inteligente. NW Es un aparato salido directamente del infierno."
 
 #. prog 13 @ 1437 op add_say_window
 #: script.p13.0x1437
@@ -6207,13 +6207,13 @@ msgstr "__Ow!__"
 #: script.p13.0x166e
 msgctxt "script.p13.0x166e"
 msgid "CLR Da hängt ein Schlüssel am Kronleuchter"
-msgstr "CLR There's a key hanging from the chandelier."
+msgstr "CLR Hay una llave colgada de la lámpara de araña."
 
 #. prog 13 @ 168b op say_if_found
 #: script.p13.0x168b
 msgctxt "script.p13.0x168b"
 msgid "CLR Wie soll ich da bitte drankommen?"
-msgstr "CLR How am I supposed to reach that?"
+msgstr "CLR ¿Cómo se supone que voy a llegar hasta ahí?"
 
 #. prog 13 @ 16b4 op say_if_found
 #: script.p13.0x16b4
@@ -6225,7 +6225,7 @@ msgstr "CLR Hay una llave colgando del candelabro"
 #: script.p13.0x16d1
 msgctxt "script.p13.0x16d1"
 msgid "CLR Wie soll ich da bitte drankommen?"
-msgstr "CLR How am I supposed to reach that?"
+msgstr "CLR ¿Cómo se supone que voy a llegar hasta ahí?"
 
 #. prog 13 @ 1742 op add_say_window
 #: script.p13.0x1742
@@ -6351,7 +6351,7 @@ msgstr "CLR ___KLIRR!___"
 #: script.p13.0x1b8f
 msgctxt "script.p13.0x1b8f"
 msgid "Oooooops!"
-msgstr "Oooooops!"
+msgstr "¡Ups!"
 
 #. prog 13 @ 1bab op say_if_found
 #: script.p13.0x1bab
@@ -6411,7 +6411,7 @@ msgstr "¿Estás ciego? NW ¡Soy un cactus!"
 #: script.p13.0x1fb9
 msgctxt "script.p13.0x1fb9"
 msgid "Ähh. NW Ja."
-msgstr "Uh... NW Yes."
+msgstr "Eh... NW Sí."
 
 #. prog 13 @ 1fd3 op add_say_window
 #: script.p13.0x1fd3
@@ -7047,7 +7047,7 @@ msgstr "CLR ¿Qué se supone que debo hacer, enviar faxes tontos?"
 #: script.p17.0x02eb
 msgctxt "script.p17.0x02eb"
 msgid "CLR Das ist genau das richtige für die \"Wild\"-Redaktion!"
-msgstr "CLR This is just the thing for the editorial office of \"Wild\"!"
+msgstr "CLR Es justo lo que necesita la redacción de «Wild»."
 
 #. prog 17 @ 0321 op add_say_window
 #: script.p17.0x0321
@@ -7893,7 +7893,7 @@ msgstr "CLR ¡Caray, eso es dinamita!"
 #: script.p24.0x020a
 msgctxt "script.p24.0x020a"
 msgid "CLR ____(3_Punkte)____"
-msgstr "CLR ____(3_Points)____"
+msgstr "CLR ____(3 puntos)____"
 
 #. prog 24 @ 0236 op add_say_window
 #: script.p24.0x0236
@@ -7947,7 +7947,7 @@ msgstr "CLR Por favor, aléjate de mis flores."
 #: script.p24.0x03e2
 msgctxt "script.p24.0x03e2"
 msgid "CLR Hast du Zuchini in den Ohren? NW Du sollst die Blumen in Ruhe lassen!"
-msgstr "CLR Are you deaf or do you have zucchini in your ears? NW Leave the flowers alone!"
+msgstr "CLR ¿Estás sordo o tienes calabacines en las orejas? NW ¡Deja las flores en paz!"
 
 #. prog 24 @ 041a op add_say_window
 #: script.p24.0x041a
@@ -7959,13 +7959,13 @@ msgstr "CLR Por favor, deja las flores en paz."
 #: script.p24.0x0451
 msgctxt "script.p24.0x0451"
 msgid "CLR Das sind Schnittblumen. NW Die braucht man nicht mehr abschneiden."
-msgstr "CLR These are cut flowers. NW There's no need to cut them anymore."
+msgstr "CLR Son flores cortadas. NW Ya no hace falta cortarlas."
 
 #. prog 24 @ 04c7 op add_say_window2
 #: script.p24.0x04c7
 msgctxt "script.p24.0x04c7"
 msgid "CLR Im Fernsehen läuft die Gameshow \"Win or Win\". NW Die suchen noch Kandidaten."
-msgstr "CLR The game show \"Win or Win\" is on TV. NW They're still looking for contestants."
+msgstr "CLR En la tele están dando el concurso «Win or Win». NW Siguen buscando concursantes."
 
 #. prog 24 @ 0500 op add_say_window2
 #: script.p24.0x0500
@@ -7995,7 +7995,7 @@ msgstr "CLR Gracias, pero con mi propia declaración de la renta me basta."
 #: script.p24.0x05f7
 msgctxt "script.p24.0x05f7"
 msgid "CLR Ein Spielautomat mit dem Spiel \"Die total verrückte Rallye\"."
-msgstr "CLR A video game cabinet featuring \"The Totally Crazy Rally\"."
+msgstr "CLR Una máquina recreativa con el videojuego «La rally totalmente loca»."
 
 #. prog 24 @ 0687 op add_say_window2
 #: script.p24.0x0687
@@ -8007,7 +8007,7 @@ msgstr "CLR ¡Juego genial! NW Pero creo que debería volver a jugar a este jueg
 #: script.p24.0x06d7
 msgctxt "script.p24.0x06d7"
 msgid "CLR Ein Spielautomat mit dem Spiel \"Weebee Worlds\"."
-msgstr "CLR A video game cabinet featuring \"Weebee Worlds\"."
+msgstr "CLR Una máquina recreativa con el videojuego «Weebee Worlds»."
 
 #. prog 24 @ 0760 op add_say_window2
 #: script.p24.0x0760
@@ -8139,7 +8139,7 @@ msgstr "¿Podría presentarme como concursante del concurso?"
 #: script.p24.0x0b09
 msgctxt "script.p24.0x0b09"
 msgid "Wie werde ich noch mal Kandidat bei \"Win or Win\"?"
-msgstr "¿Cómo me hago concursante de \"Win or Win\" again?"
+msgstr "¿Cómo me hago concursante de «Win or Win»?"
 
 #. prog 24 @ 0b2d op add_option
 #: script.p24.0x0b2d
@@ -8205,7 +8205,7 @@ msgstr "Solo tienes que llamar. NW No paran de anunciar el número. NW Solo tien
 #: script.p24.0x0cd5
 msgctxt "script.p24.0x0cd5"
 msgid "___Danke.___ NW Ich habe die Farben selbst ausgesucht. NW Mein Mann bestand auf den Spielautomaten. NW Haben Sie mal \"Weebee Worlds\" gespielt? NW Das ist guuut!"
-msgstr "___Gracias.___ NW Yo misma elegí los colores. NW Mi marido insistió en la máquina recreativa. NW ¿Has jugado alguna vez a \"Weebee Worlds\"? NW It's sooo good!"
+msgstr "___Gracias.___ NW Yo misma elegí los colores. NW Mi marido insistió en la máquina recreativa. NW ¿Has jugado alguna vez a \"Weebee Worlds\"? NW ¡Está buenííísimo!"
 
 #. prog 24 @ 0d32 op say_if
 #: script.p24.0x0d32
@@ -8289,13 +8289,13 @@ msgstr "Y dile a esa zorra del maquillaje que debería.."
 #: script.p25.0x015f
 msgctxt "script.p25.0x015f"
 msgid "Oh (Räusper) NW Willkommen bei \"Win or Win\". NW Bei der Gameshow die nur Gewinner kennt. NW Gesponsort von \"Wild\", der tollen Zeitung."
-msgstr "Oh (clears throat) NW Welcome to \"Win or Win\". NW The game show where everyone wins. NW Sponsored by \"Wild\", the wonderful newspaper."
+msgstr "Oh (se aclara la garganta) NW Bienvenidos a «Win or Win». NW El concurso en el que todo el mundo gana. NW Patrocinado por «Wild», el maravilloso periódico."
 
 #. prog 25 @ 01be op add_say_window
 #: script.p25.0x01be
 msgctxt "script.p25.0x01be"
 msgid "Schicken aus Sie Ihre Beiträge an die \"Wild\". NW Denn nur die \"Wild\" veröffentlicht auch wirklich ALLES!"
-msgstr "Send your submissions to \"Wild\". NW Because only \"Wild\" really publishes EVERYTHING!"
+msgstr "Envíen sus propuestas a «Wild». NW ¡Porque solo «Wild» lo publica TODO de verdad!"
 
 #. prog 25 @ 0205 op add_say_window
 #: script.p25.0x0205
@@ -8325,7 +8325,7 @@ msgstr "¿Dónde está el maquillaje? NW Se me ha movido el peluquín. NW Esa va
 #: script.p25.0x02d5
 msgctxt "script.p25.0x02d5"
 msgid "Ja und da sind wir wieder bei \"Win or Win\". NW Jetzt geht es um den Superpreis. NW Genau! DM 100.000 in Bar. NW Gleich zum mitnehmen."
-msgstr "Y volvemos a \"Win or Win\". NW Now it's time for the grand prize. NW That's right! 100,000 marks in cash. NW Yours to take home right away."
+msgstr "Y volvemos a «Win or Win». NW Ahora llega el gran premio. NW ¡Así es! 100.000 marcos en efectivo. NW Para llevártelos a casa ahora mismo."
 
 #. prog 25 @ 0373 op add_say_window
 #: script.p25.0x0373
