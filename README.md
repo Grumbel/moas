@@ -26,6 +26,13 @@ effects may not yet match the original DOS release.
 - SDL audio output for digitized tracker samples (14 kHz, unsigned 8-bit mono)
 - DOS save-game structures adapted to a packed on-disk layout
 - Debug logging for scripts, input, waits, windows, and data loading
+- Translations: the original German plus English, Spanish, French, Italian
+  and Dutch (`lang/<code>.po`), including translated title cards, help pages
+  and credits; switchable at runtime
+- Options menu (**F12**) with save/load, settings (language, fullscreen,
+  touch buttons, game and speech speed) persisted in `settings.ini`
+- Touch buttons for Android and the web build, gamepad support, hotspot
+  highlight (**H**)
 - FreeDesktop integration (`.desktop`, hicolor icons, AppStream metainfo)
   under the name **Mänick Mänschion**
 - Cross builds: Windows (MinGW), Android (APK with the game data as assets),
@@ -140,7 +147,8 @@ unfree). The flake allows only the Open Watcom package names via
 `allowUnfreePredicate` — no global `allowUnfree`.
 
 Run the result under DOSBox or FreeDOS with the shipped data files next to
-`moas.exe`. The historical `manick/GAME.EXE` remains the reference original
+`moas.exe`. Port diagnostics go to `MOAS.LOG` in the current directory
+instead of over the VGA screen. The historical `manick/GAME.EXE` remains the reference original
 binary.
 
 ### Windows (MinGW)
@@ -201,6 +209,9 @@ TU under Emscripten; the blocking DOS-style game loop uses ASYNCIFY so
 The HTML shell (`mk/wasm/shell.html`) provides:
 
 - **Fullscreen**, **Pause/Resume**, **Download saves** / **Upload saves…**
+- Pausing when the tab is hidden and resuming when it is shown again (an
+  explicit pause stays); an overlay on the picture while paused, and a
+  "Game stopped" overlay if the WASM module crashes
 - Help text for mouse, touch, and keyboard
 - **IndexedDB** persistence for `/moas-state` (IDBFS; requires `-lidbfs.js`)
 - On-canvas touch overlay (Save / Load / USE / LOOK / Options / Hint / Skip Scene / Skip Text), same as Android
@@ -254,8 +265,11 @@ moas --lang=en
 # or: MOAS_LANG=en moas
 ```
 
-SDL host: press **F12** (or the touch **Options** button, or gamepad **Back**) for the options menu
-(language, fullscreen, touch buttons, game/speech speed, quit). It works with keyboard,
+SDL host: press **F12** (or the touch **Options** button, or gamepad **Back**) for the options menu.
+Its main page has RESUME, SAVE, LOAD, SETTINGS, RESTART and QUIT; SETTINGS holds language,
+fullscreen, touch buttons, game speed and speech speed (saved in `settings.ini` in the state
+directory). SAVE and LOAD are greyed out while the game would ignore them; Esc, Backspace,
+gamepad B or right-click go back from SETTINGS. The menu works with keyboard,
 gamepad, mouse (hover/click, wheel, right-click closes) and touch (tap a row, tap the
 left half of a value to step back, tap outside to close). Switching the language there
 takes effect at once, including object names and verbs (prog0's name table is
@@ -297,6 +311,29 @@ cycles through the same list (`lang_codes[]` in `src/lang.c`). The game font has
 no accents besides ÄÖÜß/äöü, so other accented letters are folded to the base
 letter (é→e, ñ→n, ç→c, œ→oe; ¡ ¿ are dropped). The file to ship is **`lang/<code>.po` only** (e.g. `lang/en.po`).
 Template with all strings: `lang/manick.pot` (from `moas-util strings pot`).
+
+### Translated pictures
+
+Some text is drawn into the graphics (title cards, help and copyright pages,
+credits). `lang/<code>/<kind>/<kind>_NNN.png` (kind `bild`, `inv` or
+`phase`, same names and format as `moas-util unpack`: 8-bit indexed, game
+palette indices) replaces that picture at load time when the language is
+active. The PNG palette is ignored and the size must match the original;
+`--debug=load` logs each override. English, Spanish, French, Italian and Dutch
+versions exist for the "Inzwischen..." / "Stunden später..." cards, the red
+titles, the help and copyright pages and the credits.
+
+Two scripts make them:
+
+- `tools/phasefont.py`: the red titles, help pages and credits share one
+  font, cut from the originals into `tools/phasetext/help.font` using the
+  German transcript `de.txt`. `phasefont.py render` erases the original
+  lines and draws the text from `tools/phasetext/<code>.txt` in the same
+  place and shadow style; `phasefont.py accents` composes accented letters
+  from base glyphs.
+- `tools/titlecard.py`: sets the hand-drawn "Stunden später..." /
+  "Inzwischen..." cards in another language from letters cut out of the
+  German and English cards, and draws the shadow again.
 
 ## Game data (`manick-src/`)
 
@@ -476,7 +513,8 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **H** (hold) | Outline everything clickable in the room; stays up briefly after release (SDL port) |
 
 The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc, H)
-in the bottom-right corner. It is hidden on touch devices.
+in the bottom-right corner. On the start screen it disappears after the first click;
+it is hidden on touch devices.
 
 ### Esc vs Shift (skipping)
 
@@ -528,7 +566,7 @@ These are developer tools from the original engine, not needed for normal play.
 ```text
 -h, --help              Show help
 --version               Show the version and exit
--d, --debug=LIST        Enable comma-separated debug categories
+-d, --debug=LIST        Enable comma-separated debug categories (also master mode)
 --skip-intro            Skip the intro/title script
 --proc=N                Start at program N
 --addr=N                Start at an address in that program
@@ -536,8 +574,10 @@ These are developer tools from the original engine, not needed for normal play.
 --statedir=PATH         Savegame directory (MOAS_STATEDIR)
 --load=SLOT|FILE        Load a save at startup (slot 0–9 or path to .SAV)
 --load SLOT|FILE        Same as --load=
+--lang=CODE             Language (de, en, es, fr, it, nl; loads lang/CODE.po)
 --no-autosave           Do not restore/write AUTOSAVE.SAV on start/exit
 -f, --fullscreen        Desktop fullscreen
+--windowed              Start in a window (overrides settings.ini)
 --touch-controls        Show the on-screen Save/Load/Use/Look/Options/Hint/Skip buttons
 --no-touch-controls     Hide them (default except Android / web)
 ```
@@ -567,13 +607,16 @@ MOAS_DEBUG=all ./build/moas
 ## Repository layout
 
 - `src/` — C game engine and SDL2 platform layer
-- `tools/moas-util.c` — data list / extract / script disassembler
-- `manick/` — Mänick game data (see above)
+- `tools/moas-util.c`, `tools/mu_*.c` — data list / extract / disassemble / unpack / pack
+- `tools/phasefont.py`, `tools/phasetext/`, `tools/titlecard.py` — translated pictures
+- `manick-src/` — unpacked game data the builds pack (see above)
+- `manick/` — original Mänick release data, the packing reference
+- `lang/` — translations (`<code>.po`) and translated pictures (`<code>/`)
 - `data/` — FreeDesktop `.desktop` file, hicolor icons, AppStream metainfo
 - `mk/android/` — Android NDK/APK packaging scripts and templates
 - `mk/r36s/` — PortMaster launcher, `port.json`, screenshot
 - `mk/wasm/` — Emscripten HTML shell and helper scripts
-- `nix/` — Windows, Android, R36S, and WASM derivations
+- `nix/` — game data, DOS, Windows, Android, R36S, and WASM derivations
 - `docs/screenshot.png` — screenshot of the current port
 - `TODO.md` — current implementation notes and outstanding work
 - `flake.nix` — Nix development shell, packages, and apps
