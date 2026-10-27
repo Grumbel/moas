@@ -2511,7 +2511,7 @@ msgstr "amanda"
 #: script.p0.0x0676
 msgctxt "script.p0.0x0676"
 msgid "drive"
-msgstr "drive"
+msgstr "lecteur"
 
 #. prog 0 @ 067d op add_description
 #: script.p0.0x067d
@@ -3787,7 +3787,7 @@ msgstr "CLR Je le laisse accroché là. NW Je n'en ai plus besoin."
 #: script.p2.0x0cf3
 msgctxt "script.p2.0x0cf3"
 msgid "CLR Yeah yeah yeah!"
-msgstr "CLR Yeah yeah yeah !"
+msgstr "CLR Ouais, ouais, ouais !"
 
 #. prog 2 @ 0d0e op say_if_found
 #: script.p2.0x0d0e
@@ -4015,19 +4015,19 @@ msgstr "CLR Eh ?"
 #: script.p2.0x14cc
 msgctxt "script.p2.0x14cc"
 msgid "Unmatched C_WALK!"
-msgstr "Unmatched C_WALK!"
+msgstr "Aucun C_WALK correspondant !"
 
 #. prog 2 @ 14ef op print_sentence_ret
 #: script.p2.0x14ef
 msgctxt "script.p2.0x14ef"
 msgid "Unmatched M_WALK!"
-msgstr "Unmatched M_WALK!"
+msgstr "Aucun M_WALK correspondant !"
 
 #. prog 2 @ 1512 op print_sentence_ret
 #: script.p2.0x1512
 msgctxt "script.p2.0x1512"
 msgid "Unmatched M_SPEECH !"
-msgstr "Unmatched M_SPEECH !"
+msgstr "Aucun M_SPEECH correspondant !"
 
 #. prog 2 @ 1526 op say_if_found
 #: script.p2.0x1526
@@ -5419,7 +5419,7 @@ msgstr "____(1 point)____"
 #: script.p12.0x0600
 msgctxt "script.p12.0x0600"
 msgid "CLR Okay. NW ____Ok.____"
-msgstr "CLR Okay. NW ____Ok.____"
+msgstr "CLR D’accord. NW ____D’accord.____"
 
 #. prog 12 @ 0636 op say_if_found
 #: script.p12.0x0636
@@ -5455,7 +5455,7 @@ msgstr "____(2 points)____"
 #: script.p12.0x072d
 msgctxt "script.p12.0x072d"
 msgid "CLR Okay."
-msgstr "CLR Okay."
+msgstr "CLR D’accord."
 
 #. prog 12 @ 07c6 op say_if_found
 #: script.p12.0x07c6
@@ -5699,7 +5699,6 @@ msgstr "CLR Pourquoi le soudoyerais-je ? NW C'EST lui qui soudoyait ici."
 
 #. prog 13 @ 06c4 op add_say_window2
 #: script.p13.0x06c4
-#, fuzzy
 msgctxt "script.p13.0x06c4"
 msgid "CLR ____(2_Punkte)____ NW (Plus je einen Gummipunkte von der Bürgeraktionen \"Freundlichkeit für Flanzen\" und \"Nieder mit der Rächtschreibung\")"
 msgstr "CLR ____(2 points)____ NW (Plus un point bonus chacun des actions citoyennes « Gentillesse pour les plantes » et « À bas la faute d'orthographe »)"
@@ -6234,7 +6233,6 @@ msgstr "CLR Comment je suis censé l'atteindre ?"
 
 #. prog 13 @ 1742 op add_say_window
 #: script.p13.0x1742
-#, fuzzy
 msgctxt "script.p13.0x1742"
 msgid "--KREIIIISCH!-- NW --KREIIIISCH!-"
 msgstr "--CRIIII!-- NW --CRIIII!--"
@@ -6375,7 +6373,7 @@ msgstr "___Ouch!___"
 #: script.p13.0x1f17
 msgctxt "script.p13.0x1f17"
 msgid "__Zurück!__ NW Oder ich piekse!"
-msgstr "__Back off!__ NW Or I'll prick you!"
+msgstr "__Recule !__ NW Ou je te pique !"
 
 #. prog 13 @ 1f38 op add_say_window
 #: script.p13.0x1f38
@@ -6387,7 +6385,7 @@ msgstr "Tu as déjà fait ça !"
 #: script.p13.0x1f4a
 msgctxt "script.p13.0x1f4a"
 msgid "Stimmt! NW Und ich tu es noch einmal!"
-msgstr "That's right! NW And I'll do it again!"
+msgstr "C’est ça ! NW Et je recommence !"
 
 #. prog 13 @ 1f68 op add_say_window
 #: script.p13.0x1f68
@@ -6405,7 +6403,7 @@ msgstr "___Haha!___"
 #: script.p13.0x1f8b
 msgctxt "script.p13.0x1f8b"
 msgid "Wer bist du?"
-msgstr "Who are you?"
+msgstr "Qui es-tu ?"
 
 #. prog 13 @ 1f9a op add_say_window
 #: script.p13.0x1f9a
@@ -6417,7 +6415,7 @@ msgstr "T'es aveugle ? NW Je suis un cactus !"
 #: script.p13.0x1fb9
 msgctxt "script.p13.0x1fb9"
 msgid "Ähh. NW Ja."
-msgstr "Uh... NW Yes."
+msgstr "Euh... NW Oui."
 
 #. prog 13 @ 1fd3 op add_say_window
 #: script.p13.0x1fd3
@@ -6429,7 +6427,7 @@ msgstr "___Grunt!___"
 #: script.p13.0x1fe6
 msgctxt "script.p13.0x1fe6"
 msgid "__Zurück!__ NW Oder ich piekse!"
-msgstr "__Back off!__ NW Or I'll prick you!"
+msgstr "__Recule !__ NW Ou je te pique !"
 
 #. prog 14 @ 0016 op add_say_window2
 #: script.p14.0x0016
@@ -6471,19 +6469,19 @@ msgstr "Aha ! Ça devait être toi ! NW Alors tu cherches ta petite amie !"
 #: script.p14.0x0114
 msgctxt "script.p14.0x0114"
 msgid "war da irgendjemand, so ein aufdringlicher... NW _"
-msgstr "was there someone, some pushy guy... NW _"
+msgstr "il y avait quelqu’un, un type plutôt collant... NW _"
 
 #. prog 14 @ 0141 op add_say_window2
 #: script.p14.0x0141
 msgctxt "script.p14.0x0141"
 msgid "war da jemand wegen eines Zettels.. NW _"
-msgstr "was there someone asking about a note... NW _"
+msgstr "il y avait quelqu’un au sujet d’un mot... NW _"
 
 #. prog 14 @ 017c op add_say_window
 #: script.p14.0x017c
 msgctxt "script.p14.0x017c"
 msgid "war da ein Irrer.."
-msgstr "was there a lunatic.."
+msgstr "il y avait un dingue..."
 
 #. prog 14 @ 01ba op add_say_window
 #: script.p14.0x01ba
@@ -6513,13 +6511,13 @@ msgstr "_"
 #: script.p14.0x025f
 msgctxt "script.p14.0x025f"
 msgid "Ja. Und das war's."
-msgstr "Yes. And that's it."
+msgstr "Oui. Et voilà."
 
 #. prog 14 @ 028e op add_say_window
 #: script.p14.0x028e
 msgctxt "script.p14.0x028e"
 msgid "Und jetzt zu dir!"
-msgstr "And now, on to you!"
+msgstr "Et maintenant, à toi !"
 
 #. prog 14 @ 02b0 op set_room_name
 #: script.p14.0x02b0
@@ -7239,7 +7237,7 @@ msgstr "Grunt??"
 #: script.p18.0x037c
 msgctxt "script.p18.0x037c"
 msgid "_______Tssss!_______ NW Hat dieser Kerl doch glatt meine 1.1 Gigawatt Mikrowelle gesprengt! NW ---Seufz--- NW Bevor ich die nicht repariert habe, gibt es keine Pizza."
-msgstr "_______Tssss!_______ NW That guy actually blew up my 1.1-gigawatt microwave! NW ---Sigh--- NW No pizza until I've repaired it."
+msgstr "_______Tssss !_______ NW Ce type a vraiment fait exploser mon micro-ondes de 1,1 gigawatt ! NW ---Soupir--- NW Pas de pizza tant que je ne l’ai pas réparé."
 
 #. prog 18 @ 0426 op say_if_found
 #: script.p18.0x0426
@@ -7269,7 +7267,7 @@ msgstr "CLR Je dois détruire cette machine d'une façon ou d'une autre !"
 #: script.p18.0x0609
 msgctxt "script.p18.0x0609"
 msgid "Wen haben wir denn da?"
-msgstr "Who do we have here?"
+msgstr "Mais qui voilà ?"
 
 #. prog 19 @ 000c op set_room_name
 #: script.p19.0x000c
@@ -7545,7 +7543,7 @@ msgstr "CLR Hé, du toast !"
 #: script.p20.0x0504
 msgctxt "script.p20.0x0504"
 msgid "CLR Okay!"
-msgstr "CLR Okay !"
+msgstr "CLR D’accord !"
 
 #. prog 20 @ 0538 op say_if_found
 #: script.p20.0x0538
@@ -7677,13 +7675,13 @@ msgstr "CLR On ne devrait pas toaster les courgettes. NW Ça détruit les vitami
 #: script.p20.0x0d3a
 msgctxt "script.p20.0x0d3a"
 msgid "CLR ___Okay.___ NW Aber auf dein Risiko."
-msgstr "CLR ___Okay.___ NW Mais à tes risques et périls."
+msgstr "CLR ___D’accord.___ NW Mais à tes risques et périls."
 
 #. prog 20 @ 0e2e op add_say_window
 #: script.p20.0x0e2e
 msgctxt "script.p20.0x0e2e"
 msgid "CLR ______WOW!______"
-msgstr "CLR ______WOW!______"
+msgstr "CLR ______WAOUH !______"
 
 #. prog 20 @ 0e74 op add_say_window
 #: script.p20.0x0e74
@@ -7695,7 +7693,7 @@ msgstr "CLR Et au revoir !"
 #: script.p20.0x0ec2
 msgctxt "script.p20.0x0ec2"
 msgid "CLR ___Okay.___ NW Aber auf dein Risiko."
-msgstr "Mais à tes risques et périls."
+msgstr "CLR ___D’accord.___ NW Mais à tes risques et périls."
 
 #. prog 20 @ 0f67 op add_say_window
 #: script.p20.0x0f67
@@ -7707,13 +7705,13 @@ msgstr "CLR La disquette a fondu..."
 #: script.p20.0x0f99
 msgctxt "script.p20.0x0f99"
 msgid "CLR ___Okay.___ NW Aber auf dein Risiko."
-msgstr "Mais à tes risques et périls."
+msgstr "CLR ___D’accord.___ NW Mais à tes risques et périls."
 
 #. prog 20 @ 108d op add_say_window
 #: script.p20.0x108d
 msgctxt "script.p20.0x108d"
 msgid "CLR ______WOW!______"
-msgstr "______WOW!______"
+msgstr "CLR ______WAOUH !______"
 
 #. prog 20 @ 10ce op add_say_window2
 #: script.p20.0x10ce
@@ -7875,25 +7873,25 @@ msgstr "Dans le salon"
 #: script.p24.0x013a
 msgctxt "script.p24.0x013a"
 msgid "CLR Nettes Wohnzimmer!"
-msgstr "Bel salon !"
+msgstr "CLR Joli salon !"
 
 #. prog 24 @ 016d op say_if_found
 #: script.p24.0x016d
 msgctxt "script.p24.0x016d"
 msgid "CLR Ein Blumenstrauß. NW Diese Art habe ich zuvor nie gesehen."
-msgstr "Un bouquet de fleurs. NW Je n'avais jamais vu cette espèce."
+msgstr "CLR Un bouquet de fleurs. NW Je n’avais jamais vu cette espèce."
 
 #. prog 24 @ 01af op add_say_window2
 #: script.p24.0x01af
 msgctxt "script.p24.0x01af"
 msgid "CLR Da hilft kein gießen mehr."
-msgstr "Aucun arrosage n'y changera plus rien."
+msgstr "CLR Arroser ne servira plus à rien."
 
 #. prog 24 @ 01eb op add_say_window2
 #: script.p24.0x01eb
 msgctxt "script.p24.0x01eb"
 msgid "CLR Huch, das ist ja Dynamit!"
-msgstr "Aïe, c'est de la dynamite !"
+msgstr "CLR Oh là, c’est de la dynamite !"
 
 #. prog 24 @ 020a op add_say_window2
 #: script.p24.0x020a
@@ -7905,139 +7903,139 @@ msgstr "CLR ____(3_points)____"
 #: script.p24.0x0236
 msgctxt "script.p24.0x0236"
 msgid "CLR Bitte bleib von meinen Blumen fern."
-msgstr "S'il te plaît reste loin de mes fleurs."
+msgstr "CLR S’il te plaît, éloigne-toi de mes fleurs."
 
 #. prog 24 @ 0264 op add_say_window
 #: script.p24.0x0264
 msgctxt "script.p24.0x0264"
 msgid "CLR Hast du Zuchini in den Ohren? NW Du sollst die Blumen in Ruhe lassen!"
-msgstr "Tu as des courgettes dans les oreilles ? NW Laisse les fleurs tranquilles !"
+msgstr "CLR Tu as des courgettes dans les oreilles ? NW Laisse les fleurs tranquilles !"
 
 #. prog 24 @ 029c op add_say_window
 #: script.p24.0x029c
 msgctxt "script.p24.0x029c"
 msgid "CLR Lass bitte die Blumen in Ruhe."
-msgstr "S'il te plaît laisse les fleurs tranquilles."
+msgstr "CLR S’il te plaît, laisse les fleurs tranquilles."
 
 #. prog 24 @ 02d3 op add_say_window2
 #: script.p24.0x02d3
 msgctxt "script.p24.0x02d3"
 msgid "CLR Das sind Schnittblumen. NW Die braucht man nicht mehr abschneiden."
-msgstr "Ce sont des fleurs coupées. NW Pas besoin de les recouper."
+msgstr "CLR Ce sont des fleurs coupées. NW Inutile de les couper davantage."
 
 #. prog 24 @ 0317 op say_if_found
 #: script.p24.0x0317
 msgctxt "script.p24.0x0317"
 msgid "CLR Ein vertrockneter Blumenstrauß."
-msgstr "Un bouquet fané."
+msgstr "CLR Un bouquet fané."
 
 #. prog 24 @ 0349 op add_say_window2
 #: script.p24.0x0349
 msgctxt "script.p24.0x0349"
 msgid "CLR Da hilft kein gießen mehr."
-msgstr "Aucun arrosage n'y changera plus rien."
+msgstr "CLR Arroser ne servira plus à rien."
 
 #. prog 24 @ 0385 op add_say_window2
 #: script.p24.0x0385
 msgctxt "script.p24.0x0385"
 msgid "CLR Was soll ich mit einem Strauß Trockenblumen?"
-msgstr "Qu'est-ce que je ferais d'un bouquet de fleurs séchées ?"
+msgstr "CLR Que veux-tu que je fasse d’un bouquet de fleurs séchées ?"
 
 #. prog 24 @ 03b4 op add_say_window
 #: script.p24.0x03b4
 msgctxt "script.p24.0x03b4"
 msgid "CLR Bitte bleib von meinen Blumen fern."
-msgstr "S'il te plaît reste loin de mes fleurs."
+msgstr "CLR S’il te plaît, éloigne-toi de mes fleurs."
 
 #. prog 24 @ 03e2 op add_say_window
 #: script.p24.0x03e2
 msgctxt "script.p24.0x03e2"
 msgid "CLR Hast du Zuchini in den Ohren? NW Du sollst die Blumen in Ruhe lassen!"
-msgstr "T'es sourd ou tu as des courgettes dans les oreilles ? NW Laisse les fleurs tranquilles !"
+msgstr "CLR Tu as des courgettes dans les oreilles ? NW Laisse les fleurs tranquilles !"
 
 #. prog 24 @ 041a op add_say_window
 #: script.p24.0x041a
 msgctxt "script.p24.0x041a"
 msgid "CLR Lass bitte die Blumen in Ruhe."
-msgstr "S'il te plaît laisse les fleurs tranquilles."
+msgstr "CLR S’il te plaît, laisse les fleurs tranquilles."
 
 #. prog 24 @ 0451 op add_say_window2
 #: script.p24.0x0451
 msgctxt "script.p24.0x0451"
 msgid "CLR Das sind Schnittblumen. NW Die braucht man nicht mehr abschneiden."
-msgstr "CLR These are cut flowers. NW There's no need to cut them anymore."
+msgstr "CLR Ce sont des fleurs coupées. NW Inutile de les couper davantage."
 
 #. prog 24 @ 04c7 op add_say_window2
 #: script.p24.0x04c7
 msgctxt "script.p24.0x04c7"
 msgid "CLR Im Fernsehen läuft die Gameshow \"Win or Win\". NW Die suchen noch Kandidaten."
-msgstr ""
+msgstr "CLR À la télévision, il y a le jeu télévisé « Win or Win ». NW Ils cherchent encore des candidats."
 
 #. prog 24 @ 0500 op add_say_window2
 #: script.p24.0x0500
 msgctxt "script.p24.0x0500"
 msgid "CLR Rufen Sie an! NW 0190-92743762183547"
-msgstr "Appelez maintenant ! NW 0190-92743762183547"
+msgstr "CLR Appelez maintenant ! NW 0190-92743762183547"
 
 #. prog 24 @ 0550 op add_say_window
 #: script.p24.0x0550
 msgctxt "script.p24.0x0550"
 msgid "CLR Der Doc hat freiwillig Steuern nachgezahlt."
-msgstr "Le Doc a spontanément payé des impôts en retard."
+msgstr "CLR Le Doc a spontanément payé des impôts en retard."
 
 #. prog 24 @ 057f op add_say_window2
 #: script.p24.0x057f
 msgctxt "script.p24.0x057f"
 msgid "CLR Die Kaktee hatte recht. NW Der IST verrückt!"
-msgstr "Le cactus avait raison. NW IL EST fou !"
+msgstr "CLR Le cactus avait raison. NW IL EST fou !"
 
 #. prog 24 @ 05b7 op add_say_window2
 #: script.p24.0x05b7
 msgctxt "script.p24.0x05b7"
 msgid "CLR Danke, aber mir reicht meine eigene Steuererklärung."
-msgstr "Merci, mais ma propre déclaration d'impôts me suffit."
+msgstr "CLR Merci, mais ma propre déclaration d’impôts me suffit."
 
 #. prog 24 @ 05f7 op say_if_found
 #: script.p24.0x05f7
 msgctxt "script.p24.0x05f7"
 msgid "CLR Ein Spielautomat mit dem Spiel \"Die total verrückte Rallye\"."
-msgstr ""
+msgstr "CLR Une borne d’arcade avec le jeu « Le rallye complètement fou »."
 
 #. prog 24 @ 0687 op add_say_window2
 #: script.p24.0x0687
 msgctxt "script.p24.0x0687"
 msgid "CLR Cooles Spiel! NW Aber ich denke, ich sollte jetzt an diesem Spiel weiterspielen."
-msgstr "Jeu cool ! NW Mais je pense que je ferais mieux de retourner jouer à ce jeu maintenant."
+msgstr "CLR Jeu sympa ! NW Mais je ferais mieux de continuer à jouer maintenant."
 
 #. prog 24 @ 06d7 op say_if_found
 #: script.p24.0x06d7
 msgctxt "script.p24.0x06d7"
 msgid "CLR Ein Spielautomat mit dem Spiel \"Weebee Worlds\"."
-msgstr ""
+msgstr "CLR Une borne d’arcade avec le jeu « Weebee Worlds »."
 
 #. prog 24 @ 0760 op add_say_window2
 #: script.p24.0x0760
 msgctxt "script.p24.0x0760"
 msgid "CLR Cooles Spiel! NW Aber ich denke, ich sollte jetzt an diesem Spiel weiterspielen."
-msgstr "Jeu cool ! NW Mais je pense que je ferais mieux de retourner jouer à ce jeu maintenant."
+msgstr "CLR Jeu sympa ! NW Mais je ferais mieux de continuer à jouer maintenant."
 
 #. prog 24 @ 07d7 op say_if_found
 #: script.p24.0x07d7
 msgctxt "script.p24.0x07d7"
 msgid "CLR Sie schaut wie gebannt auf den Fernseher."
-msgstr "Elle regarde la télé, complètement hypnotisée."
+msgstr "CLR Elle regarde la télé, fascinée."
 
 #. prog 24 @ 080c op add_say_window2
 #: script.p24.0x080c
 msgctxt "script.p24.0x080c"
 msgid "CLR Oh, danke!"
-msgstr "Oh, merci !"
+msgstr "CLR Oh, merci !"
 
 #. prog 24 @ 0834 op add_say_window
 #: script.p24.0x0834
 msgctxt "script.p24.0x0834"
 msgid "CLR Ich will doch gar nicht verreisen."
-msgstr "Je ne veux pas voyager du tout."
+msgstr "CLR Je ne veux pas du tout partir en voyage."
 
 #. prog 24 @ 084f op add_say_window
 #: script.p24.0x084f
@@ -8049,7 +8047,7 @@ msgstr "Tu es sûr ?"
 #: script.p24.0x085c
 msgctxt "script.p24.0x085c"
 msgid "CLR Sicher."
-msgstr "Sûr."
+msgstr "CLR Bien sûr."
 
 #. prog 24 @ 08a6 op add_say_window
 #: script.p24.0x08a6
@@ -8127,7 +8125,7 @@ msgstr "Qu'est-ce qu'il y a à la télé ?"
 #: script.p24.0x0a99
 msgctxt "script.p24.0x0a99"
 msgid "Und was ist so toll an \"Win or Win\"?"
-msgstr ""
+msgstr "Et qu’est-ce qu’il a de si génial, ce « Win or Win » ?"
 
 #. prog 24 @ 0ab9 op add_option
 #: script.p24.0x0ab9
@@ -8145,7 +8143,7 @@ msgstr "Pourrais-je me présenter comme candidat au jeu télé ?"
 #: script.p24.0x0b09
 msgctxt "script.p24.0x0b09"
 msgid "Wie werde ich noch mal Kandidat bei \"Win or Win\"?"
-msgstr ""
+msgstr "Comment faire déjà pour participer à « Win or Win » ?"
 
 #. prog 24 @ 0b2d op add_option
 #: script.p24.0x0b2d
@@ -8181,7 +8179,7 @@ msgstr "À plus !"
 #: script.p24.0x0bd8
 msgctxt "script.p24.0x0bd8"
 msgid "Das ist die Spielshow \"Win or Win\"."
-msgstr ""
+msgstr "C’est le jeu télévisé « Win or Win »."
 
 #. prog 24 @ 0bf4 op say_if
 #: script.p24.0x0bf4
@@ -8211,7 +8209,7 @@ msgstr "Il suffit d'appeler. NW Ils annoncent le numéro en permanence. NW Il su
 #: script.p24.0x0cd5
 msgctxt "script.p24.0x0cd5"
 msgid "___Danke.___ NW Ich habe die Farben selbst ausgesucht. NW Mein Mann bestand auf den Spielautomaten. NW Haben Sie mal \"Weebee Worlds\" gespielt? NW Das ist guuut!"
-msgstr ""
+msgstr "___Merci.___ NW J’ai choisi les couleurs moi-même. NW Mon mari tenait absolument à avoir la borne d’arcade. NW Vous avez déjà joué à « Weebee Worlds » ? NW C’est troooop bien !"
 
 #. prog 24 @ 0d32 op say_if
 #: script.p24.0x0d32
@@ -8505,7 +8503,7 @@ msgstr "En fait, j'aurais seulement besoin de la valise. NW Je veux dire, si c'�
 #: script.p26.0x0013
 msgctxt "script.p26.0x0013"
 msgid "Showdown"
-msgstr "Showdown"
+msgstr "Confrontation"
 
 #. prog 26 @ 009f op add_say_window
 #: script.p26.0x009f
@@ -8695,3 +8693,4 @@ msgstr "Allons voir."
 
 #~ msgid "t "
 #~ msgstr "t "
+
