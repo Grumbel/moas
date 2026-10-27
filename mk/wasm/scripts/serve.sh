@@ -27,7 +27,7 @@ if [ -n "${PKG:-}" ]; then
   cd "$PKG"
 fi
 
-app_name="${APP_NAME:-moas}"
+app_name="${APP_NAME:-manick}"
 port="${MOAS_WASM_PORT:-8765}"
 
 port_file=$(mktemp)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.grumbel.moas</id>
+  <id>org.grumbel.manick</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
   <name>Mänick Mänschion</name>
@@ -16,10 +16,10 @@
       translations can be chosen in the options menu.
     </p>
   </description>
-  <launchable type="desktop-id">moas.desktop</launchable>
+  <launchable type="desktop-id">manick.desktop</launchable>
   <url type="homepage">https://github.com/Grumbel/moas</url>
   <provides>
-    <binary>moas</binary>
+    <binary>manick</binary>
   </provides>
   <categories>
     <category>Game</category>

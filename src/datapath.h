@@ -12,8 +12,8 @@ void MoasInitDataPath(const char *argv0);
 const char *MoasDataDir(void);
 
 /* Writable state directory (savegames). Created on first use.
- * Linux: $XDG_STATE_HOME/moas or ~/.local/state/moas
- * Windows: %LOCALAPPDATA%\\moas\\state
+ * Linux: $XDG_STATE_HOME/manick or ~/.local/state/manick
+ * Windows: %LOCALAPPDATA%\\manick\\state
  * Android: <internal>/moas-state
  * Emscripten: /moas-state (pair with IDBFS)
  * DOS: "." (CWD; DOSBox runner persists *.SAV to host state dir)
@@ -21,8 +21,8 @@ const char *MoasDataDir(void);
 const char *MoasStateDir(void);
 
 /* Config directory (settings.ini, see settings.h).
- * Linux: $XDG_CONFIG_HOME/moas or ~/.config/moas
- * Windows: %APPDATA%\\moas
+ * Linux: $XDG_CONFIG_HOME/manick or ~/.config/manick
+ * Windows: %APPDATA%\\manick
  * Android: <internal>/moas-config
  * Emscripten: /moas-config
  * DOS: "."

@@ -64,7 +64,7 @@ static void usage(const char *argv0)
     "\n"
     "Examples:\n"
     "  %s --load=0\n"
-    "  %s --load=~/.local/state/moas/GAME3.SAV\n"
+    "  %s --load=~/.local/state/manick/GAME3.SAV\n"
     "  %s --skip-intro --debug=script\n"
     "  MOAS_DEBUG=all %s\n",
     argv0, argv0, argv0, argv0, argv0);
@@ -143,7 +143,7 @@ void MoasParseArgs(int argc, char **argv)
     const char *a = argv[i];
     const char *v;
     if (!strcmp(a, "-h") || !strcmp(a, "--help")) {
-      usage(argv[0] ? argv[0] : "moas");
+      usage(argv[0] ? argv[0] : "manick");
       exit(0);
     }
     if (!strcmp(a, "--version")) {

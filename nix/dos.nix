@@ -3,10 +3,10 @@
 #
 # Cross-compile MOAS for MS-DOS with Open Watcom (DOS/4GW).
 #
-#   nix build .#moas-dos
-#   nix build .#moas-dos-zip
-#   nix run .#moas-dos            # Watcom rebuild under DOSBox-X
-#   nix run .#moas-dos-original   # historical manick/GAME.EXE under DOSBox-X
+#   nix build .#manick-dos
+#   nix build .#manick-dos-zip
+#   nix run .#manick-dos            # Watcom rebuild under DOSBox-X
+#   nix run .#manick-dos-original   # historical manick/GAME.EXE under DOSBox-X
 #
 # Open Watcom is Watcom-1.0 (redistributable; marked unfree in nixpkgs).
 # The flake allows that package only via allowUnfreePredicate in flake.nix.
@@ -22,7 +22,7 @@ let
   watcom = pkgs.open-watcom-bin;
 
   moasDos = pkgs.stdenvNoCC.mkDerivation {
-    pname = "moas-dos";
+    pname = "manick-dos";
     inherit version;
     src = lib.cleanSource ../.;
 
@@ -55,7 +55,7 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out/dos
-      cp build-dos/moas.exe $out/dos/
+      cp build-dos/manick.exe $out/dos/
       cp ${gamedata}/* $out/dos/
       if [ -f manick/DOS4GW.EXE ]; then
         cp manick/DOS4GW.EXE $out/dos/
@@ -64,8 +64,8 @@ let
       cat > $out/dos/README.txt <<'EOR'
 MOAS — MS-DOS build (Open Watcom, DOS/4GW)
 
-  nix run .#moas-dos              # this rebuild
-  nix run .#moas-dos-original     # historical manick/GAME.EXE
+  nix run .#manick-dos              # this rebuild
+  nix run .#manick-dos-original     # historical manick/GAME.EXE
 EOR
       runHook postInstall
     '';
@@ -78,20 +78,20 @@ EOR
     };
   };
 
-  moasDosZip = pkgs.runCommand "moas-${version}-dos.zip" {
+  moasDosZip = pkgs.runCommand "manick-${version}-dos.zip" {
     nativeBuildInputs = [ pkgs.zip ];
   } ''
     mkdir -p $out
     work=$(mktemp -d)
-    cp -r --no-preserve=mode ${moasDos}/dos "$work/moas-${version}-dos"
+    cp -r --no-preserve=mode ${moasDos}/dos "$work/manick-${version}-dos"
     cd "$work"
-    zip -r -9 $out/moas-${version}-dos.zip moas-${version}-dos
+    zip -r -9 $out/manick-${version}-dos.zip manick-${version}-dos
   '';
 
   /*
    * Shared DOSBox-X launcher.
    * dosDir: store path containing EXE + GAME.* + DOS4GW.EXE
-   * exeName: MOAS.EXE or GAME.EXE
+   * exeName: MANICK.EXE or GAME.EXE
    * title / workTag: window title and temp dir name
    */
   mkDosboxRun = {
@@ -194,16 +194,16 @@ EOF
     };
 
   moasDosRun = mkDosboxRun {
-    name = "moas-dos";
+    name = "manick-dos";
     dosDir = "${moasDos}/dos";
-    exeName = "MOAS.EXE";
+    exeName = "MANICK.EXE";
     title = "MOAS (Open Watcom rebuild)";
-    workTag = "moas-dos";
-    stateSubdir = "moas-dos";
+    workTag = "manick-dos";
+    stateSubdir = "manick-dos";
   };
 
   # Historical binary from manick/ — no rebuild, just stage data + GAME.EXE
-  moasOriginalDos = pkgs.runCommand "moas-dos-original-${version}" { } ''
+  moasOriginalDos = pkgs.runCommand "manick-dos-original-${version}" { } ''
     mkdir -p $out/dos
     for f in ${../manick}/GAME.* ${../manick}/DOS4GW.EXE ${../manick}/LICENCE.DAT; do
       [ -f "$f" ] || continue
@@ -217,23 +217,23 @@ EOF
     cat > $out/dos/README.txt <<'EOR'
 MOAS — original DOS binary (manick/GAME.EXE + DOS4GW.EXE)
 
-  nix run .#moas-dos-original
+  nix run .#manick-dos-original
 EOR
   '';
 
   moasDosOriginalRun = mkDosboxRun {
-    name = "moas-dos-original";
+    name = "manick-dos-original";
     dosDir = "${moasOriginalDos}/dos";
     exeName = "GAME.EXE";
     title = "MOAS (original GAME.EXE)";
-    workTag = "moas-dos-original";
-    stateSubdir = "moas-dos-original";
+    workTag = "manick-dos-original";
+    stateSubdir = "manick-dos-original";
   };
 
 in {
-  moas-dos = moasDos;
-  moas-dos-zip = moasDosZip;
-  moas-dos-run = moasDosRun;
-  moas-dos-original = moasOriginalDos;
-  moas-dos-original-run = moasDosOriginalRun;
+  manick-dos = moasDos;
+  manick-dos-zip = moasDosZip;
+  manick-dos-run = moasDosRun;
+  manick-dos-original = moasOriginalDos;
+  manick-dos-original-run = moasDosOriginalRun;
 }

@@ -1,15 +1,15 @@
 <!-- SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com> -->
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 
-# MOAS for the R36S (ArkOS) and other PortMaster handhelds
+# Mänick Mänschion for the R36S (ArkOS) and other PortMaster handhelds
 
-Point-and-click adventure system (Mänick Mänschion). Native aarch64 build,
+Point-and-click adventure on the MOAS engine. Native aarch64 build,
 linked against an ArkOS-era (Ubuntu 19.10) userland; it uses the device's
 SDL2. The original 320×200 picture is letterboxed to fill the screen.
 
 ## Install
 
-Copy `Moas.sh` and the `moas/` folder to `/roms/ports/`, or put the zip into
+Copy `Mänick Mänschion.sh` and the `manick/` folder to `/roms/ports/`, or put the zip into
 `ports/PortMaster/autoinstall/` and start PortMaster once.
 
 ## Controls
@@ -36,5 +36,5 @@ Save games and logs stay under the port directory on the SD card.
 ## Build
 
 ```sh
-nix build .#moas-r36s-portmaster-zip
+nix build .#manick-r36s-portmaster-zip
 ```

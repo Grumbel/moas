@@ -4,10 +4,10 @@
 # The Android build, after Pingus's ndk-build pipeline (mk/android/): SDL2's
 # native library and Java side are built once from its release tarball, the
 # game into libmain.so against it, and both packaged into a signed APK.
-# Game data (moas-gamedata, packed from manick-src/) is staged into APK assets/ and extracted at runtime.
+# Game data (manick-gamedata, packed from manick-src/) is staged into APK assets/ and extracted at runtime.
 #
-#   nix build .#moas-android        the APK
-#   nix run .#install-android-moas  install it with adb
+#   nix build .#manick-android        the APK
+#   nix run .#install-android-manick  install it with adb
 
 { pkgs
 , sdlSrc
@@ -77,10 +77,10 @@ let
     fileset = pkgs.lib.fileset.unions [ ../src ../lang ];
   };
 
-  apkName = "moas-${version}.apk";
+  apkName = "manick-${version}.apk";
 
   apk = pkgs.stdenvNoCC.mkDerivation {
-    pname = "moas-android";
+    pname = "manick-android";
     inherit version;
     dontUnpack = true;
     nativeBuildInputs = [ androidSdk pkgs.jdk17 pkgs.zip pkgs.gnumake ];
@@ -88,7 +88,7 @@ let
       BUILD_TOOLS_VERSION = buildToolsVersion;
       PACKAGE_PLATFORM = packagePlatform;
       TARGET_ABIS = abis;
-      APP_NAME = "moas";
+      APP_NAME = "manick";
       APP_DIR = "${../mk/android/app}";
       GAME_SRC_DIR = "${gameSrc}";
       GAME_DATA_DIR = "${gamedata}";
@@ -108,7 +108,7 @@ let
     '';
     installPhase = ''
       mkdir -p $out
-      cp out/moas.apk $out/${apkName}
+      cp out/manick.apk $out/${apkName}
     '';
     dontPatchELF = true;
     dontStrip = true;
@@ -116,10 +116,10 @@ let
 
   installApp = {
     type = "app";
-    program = toString (pkgs.writeShellScript "install-moas-apk" ''
+    program = toString (pkgs.writeShellScript "install-manick-apk" ''
       exec ${pkgs.android-tools}/bin/adb install -r ${apk}/${apkName}
     '');
-    meta.description = "Install the MOAS APK on a connected Android device with adb";
+    meta.description = "Install the Mänick Mänschion APK on a connected Android device with adb";
   };
 
 in {

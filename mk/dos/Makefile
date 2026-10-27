@@ -8,7 +8,7 @@
 #   export PATH=$WATCOM/binl:$PATH   # or use the wrapped bin/
 #   make -f mk/dos/Makefile
 #
-# Output: build-dos/moas.exe  (MZ + DOS/4G stub)
+# Output: build-dos/manick.exe  (MZ + DOS/4G stub)
 
 ifndef WATCOM
 $(error WATCOM is not set — point it at an Open Watcom root)
@@ -38,7 +38,7 @@ WSTUB := $(firstword $(wildcard $(WATCOM)/binw/wstub.exe) $(wildcard $(WATCOM)/b
 
 .PHONY: all clean
 
-all: $(OBJDIR)/moas.exe
+all: $(OBJDIR)/manick.exe
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
@@ -46,7 +46,7 @@ $(OBJDIR):
 $(OBJDIR)/%.obj: $(SRCDIR)/%.c | $(OBJDIR)
 	$(WCC386) $(CFLAGS) -fo=$@ $<
 
-$(OBJDIR)/moas.exe: $(OBJS)
+$(OBJDIR)/manick.exe: $(OBJS)
 	$(WLINK) name $@ system dos4g \
 	  $(if $(WSTUB),option stub=$(WSTUB),) \
 	  file { $(OBJS) }

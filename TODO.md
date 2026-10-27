@@ -6,6 +6,31 @@
 
 # TODO / Handoff
 
+## Game named `manick`, engine stays MOAS (2026-10-27)
+- Shipped game is Mänick Mänschion (original distribution `Manick.zip`), so
+  binary, data dir and packages are `manick`; the full name is for GUIs.
+  Flake packages/apps are `manick-*` too (`nix build .#manick-wasm`,
+  `nix run .#manick`). Engine side keeps MOAS: `moas-util`, `MOAS_*` env
+  vars, dev-shell scripts `moas-configure`/`moas-build`/`moas-run`.
+- Binary `manick` (`manick.exe` on Windows/DOS), `share/manick`,
+  `data/manick.desktop`, icon `manick`, AppStream/Android id
+  `org.grumbel.manick` (APK no longer upgrades the old `org.grumbel.moas`).
+- Save/config dirs `~/.local/state/manick`, `~/.config/manick`,
+  `%LOCALAPPDATA%\manick\state`, `%APPDATA%\manick`; no fallback to the old
+  `moas` dirs (move them by hand). Android internal and web IDBFS paths
+  (`moas-state`, `moas-config`, `moas-saves.json`) unchanged on purpose.
+- Artifacts: `manick-<ver>-win64.zip`, `manick-<ver>.apk`,
+  `manick-<ver>-dos.zip`, web `manick.html/.js/.wasm/.data`. DOSBox runner
+  state moved to `~/.local/state/manick-dos{,-original}`.
+- PortMaster: `manick.zip` with `Mänick Mänschion.sh` and `ports/manick/`.
+  Untested on device: check the umlaut file name survives PortMaster
+  install on ArkOS (fallback: `Manick Manschion.sh`). The zip is written
+  with Python's zipfile so that name carries the UTF-8 flag; Info-ZIP in
+  the sandbox left it unflagged (read as CP437 `M├ñnick`).
+- Icon master renamed to `data/icons/manick-master.png`.
+- TODO website repo: update flake package names (`manick-*`) and
+  download/wasm file names in its flake.nix, index.html, README.
+
 ## Gamepad remap, 4:3 aspect ratio (2026-10-27)
 - Pad: both sticks move the cursor and add up (both = faster), time-based
   at `PAD_CURSOR_SPEED` 150 logical px/s per stick (was ~14 px per pump,
@@ -479,7 +504,7 @@
   `SDL2_INCLUDE_DIRS` and `SDL2_LIBRARIES` are already set via `-D`.
 
 ## Cross ports (this bundle)
-- MS-DOS: `nix/dos.nix`, `mk/dos/Makefile` — Open Watcom → DOS/4GW `moas.exe`
+- MS-DOS: `nix/dos.nix`, `mk/dos/Makefile` — Open Watcom → DOS/4GW `manick.exe`
 - WebAssembly: `nix/wasm.nix`, `mk/wasm/` — Emscripten + ASYNCIFY + preload data
 - Technique mirrored from Kurvenrausch (Nix flake packages + mk/ tree)
 - Windows: `nix/windows.nix` — MinGW + SDL2-win32 flake, win32/win64 zip
@@ -490,9 +515,9 @@
 - Windows: first MinGW build may need small POSIX path fixes — untested here
 
 ## Desktop integration
-- FreeDesktop `.desktop` file: `data/moas.desktop`
+- FreeDesktop `.desktop` file: `data/manick.desktop`
 - hicolor icons (16–256 px): large red “M” with protagonist, night path scene
-- AppStream metainfo: `data/metainfo/org.grumbel.moas.metainfo.xml`
+- AppStream metainfo: `data/metainfo/org.grumbel.manick.metainfo.xml`
 - CMake install rules for applications/, icons/hicolor/, metainfo/
 
 ## Audio
@@ -520,8 +545,8 @@
 ## Savegames (2026-10)
 - Broken: wrote GAME*.SAV to process CWD; ChkOpen(READ) looked in data dir
 - Fixed: MoasStateDir / MoasConfigDir / MoasStatePath
-  - Linux: `$XDG_STATE_HOME/moas` (fallback `~/.local/state/moas`)
-  - Config: `$XDG_CONFIG_HOME/moas` (reserved)
+  - Linux: `$XDG_STATE_HOME/manick` (fallback `~/.local/state/manick`)
+  - Config: `$XDG_CONFIG_HOME/manick`
   - Override: `MOAS_STATEDIR` / `MOAS_CONFIGDIR`
   - DOS: CWD; DOSBox runners persist to `~/.local/state/moas-dos` and `moas-dos-original`
 - Manual save: clearer errors if no slot clicked; thumbnail uses fixed loop vars

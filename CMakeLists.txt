@@ -84,22 +84,22 @@ set(MOAS_SOURCES
 if(EMSCRIPTEN)
   list(APPEND MOAS_SOURCES src/moas_globals.c)
 endif()
-add_executable(moas ${MOAS_SOURCES})
+add_executable(manick ${MOAS_SOURCES})
 
-target_include_directories(moas PRIVATE src ${SDL2_INCLUDE_DIRS})
+target_include_directories(manick PRIVATE src ${SDL2_INCLUDE_DIRS})
 if(WIN32)
   # libm is not used on MinGW; SDL2main is pulled via find_package / SDL2_LIBRARIES.
-  target_link_libraries(moas PRIVATE ${SDL2_LIBRARIES})
+  target_link_libraries(manick PRIVATE ${SDL2_LIBRARIES})
 else()
-  target_link_libraries(moas PRIVATE ${SDL2_LIBRARIES} m)
+  target_link_libraries(manick PRIVATE ${SDL2_LIBRARIES} m)
 endif()
 
 if(TARGET SDL2::SDL2)
-  target_link_libraries(moas PRIVATE SDL2::SDL2)
+  target_link_libraries(manick PRIVATE SDL2::SDL2)
 endif()
 # Windows entry point: SDL2main calls SDL_main (main after #include <SDL.h>).
 if(WIN32 AND TARGET SDL2::SDL2main)
-  target_link_libraries(moas PRIVATE SDL2::SDL2main)
+  target_link_libraries(manick PRIVATE SDL2::SDL2main)
 endif()
 
 # Default install data dir; can be overridden (-DMOAS_DATADIR=...)
@@ -107,11 +107,11 @@ if(NOT DEFINED MOAS_DATADIR OR MOAS_DATADIR STREQUAL "")
   if(EMSCRIPTEN)
     set(MOAS_DATADIR "/data")
   else()
-    set(MOAS_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/moas")
+    set(MOAS_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/manick")
   endif()
 endif()
 
-target_compile_definitions(moas PRIVATE
+target_compile_definitions(manick PRIVATE
   $<$<NOT:$<BOOL:${WIN32}>>:LINUX>
   $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>
   "MOAS_DATADIR=\"${MOAS_DATADIR}\""
@@ -119,7 +119,7 @@ target_compile_definitions(moas PRIVATE
 )
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-  target_compile_options(moas PRIVATE
+  target_compile_options(manick PRIVATE
     -Wall -Wextra
     -Wno-unused-parameter
     -Wno-unused-variable
@@ -202,11 +202,11 @@ else()
 endif()
 
 if(EMSCRIPTEN)
-  # Web page: moas.html + .js + .wasm (+ data pack). ASYNCIFY lets the
+  # Web page: manick.html + .js + .wasm (+ data pack). ASYNCIFY lets the
   # existing blocking Wait/getch loop yield to the browser.
   # Touch overlay buttons on by default (as on Android); runtime switch
   # --touch-controls / F12 menu exists on every SDL target.
-  target_compile_definitions(moas PRIVATE MOAS_OVERLAY_BUTTONS)
+  target_compile_definitions(manick PRIVATE MOAS_OVERLAY_BUTTONS)
   set(MOAS_VERSION "${PROJECT_VERSION_FULL}")
   set(MOAS_SOURCE_URL "https://github.com/Grumbel/moas")
   configure_file(mk/wasm/shell.html ${CMAKE_CURRENT_BINARY_DIR}/shell.html @ONLY)
@@ -224,8 +224,8 @@ if(EMSCRIPTEN)
     configure_file("${CMAKE_SOURCE_DIR}/lang/${_f}" "${_wasm_data}/lang/${_f}" COPYONLY)
   endforeach()
 
-  set_target_properties(moas PROPERTIES SUFFIX ".html")
-  target_link_options(moas PRIVATE
+  set_target_properties(manick PROPERTIES SUFFIX ".html")
+  target_link_options(manick PRIVATE
     --shell-file ${CMAKE_CURRENT_BINARY_DIR}/shell.html
     -sALLOW_MEMORY_GROWTH=1
     -sGROWABLE_ARRAYBUFFERS=0
@@ -239,38 +239,38 @@ if(EMSCRIPTEN)
     -Wl,--allow-multiple-definition
     --preload-file ${_wasm_data}@/data
   )
-  set_property(TARGET moas APPEND PROPERTY LINK_DEPENDS
+  set_property(TARGET manick APPEND PROPERTY LINK_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/mk/wasm/shell.html)
 
-  set(_web ${CMAKE_CURRENT_BINARY_DIR}/moas)
+  set(_web ${CMAKE_CURRENT_BINARY_DIR}/manick)
   install(FILES ${_web}.html ${_web}.js ${_web}.wasm DESTINATION .)
   # Emscripten also emits a .data pack for --preload-file
   install(FILES ${_web}.data DESTINATION . OPTIONAL)
   install(FILES ${_web}.html DESTINATION . RENAME index.html)
 else()
-  install(TARGETS moas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS manick RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # Ship game data (exclude the original DOS binaries)
   install(DIRECTORY lang/
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/moas/lang
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/manick/lang
     OPTIONAL)
   if(_gamedata)
     foreach(_f ${MOAS_GAMEDATA_FILES})
-      install(FILES "${_gamedata}/${_f}" DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+      install(FILES "${_gamedata}/${_f}" DESTINATION ${CMAKE_INSTALL_DATADIR}/manick)
     endforeach()
   endif()
 
-  install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/moas)
+  install(FILES COPYING DESTINATION ${CMAKE_INSTALL_DATADIR}/manick)
 
   # --- Linux desktop integration ---
-  install(FILES data/moas.desktop
+  install(FILES data/manick.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 
   install(DIRECTORY data/icons/hicolor/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor
     FILES_MATCHING PATTERN "*.png")
 
-  install(FILES data/metainfo/org.grumbel.moas.metainfo.xml
+  install(FILES data/metainfo/org.grumbel.manick.metainfo.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 endif()
 
@@ -279,7 +279,7 @@ endif()
 set(MOAS_SANITIZE "" CACHE STRING "Comma-separated -fsanitize= list (empty = off)")
 if(MOAS_SANITIZE AND NOT EMSCRIPTEN AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
   message(STATUS "Sanitizers: ${MOAS_SANITIZE}")
-  foreach(tgt moas moas-util)
+  foreach(tgt manick moas-util)
     if(TARGET ${tgt})
       # Script bytecode is read as unaligned shorts (Parameter[] in
       # Execute); by design, so UBSan's alignment check is just noise.

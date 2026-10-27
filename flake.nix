@@ -57,7 +57,7 @@
         gamedata = import ./nix/gamedata.nix { inherit pkgs; };
 
         moas = pkgs.stdenv.mkDerivation {
-          pname = "moas";
+          pname = "manick";
           inherit version;
           src = ./.;
 
@@ -69,7 +69,7 @@
 
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-            "-DMOAS_DATADIR=${placeholder "out"}/share/moas"
+            "-DMOAS_DATADIR=${placeholder "out"}/share/manick"
             "-DMOAS_GAMEDATA_DIR=${gamedata}"
             "-DPROJECT_VERSION_FULL=${version}"
           ];
@@ -78,7 +78,7 @@
             description = "Point-and-click adventure engine (DOS port to SDL2)";
             license = licenses.gpl2Plus;
             platforms = platforms.linux;
-            mainProgram = "moas";
+            mainProgram = "manick";
           };
         };
 
@@ -173,7 +173,7 @@
         moasRun = pkgs.writeShellScriptBin "moas-run" ''
           ${moasPreamble}
           moas-build
-          exec "$MOAS_BUILD_DIR/moas" \
+          exec "$MOAS_BUILD_DIR/manick" \
             --datadir="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}" \
             "$@"
         '';
@@ -194,7 +194,7 @@ try:
 except Exception:
   pass
 ' \
-            --args "$MOAS_BUILD_DIR/moas" \
+            --args "$MOAS_BUILD_DIR/manick" \
             --datadir="''${MOAS_DATADIR:-$MOAS_BUILD_DIR/gamedata}" \
             "$@"
         '';
@@ -202,53 +202,53 @@ except Exception:
       in {
         packages = {
           default = moas;
-          moas = moas;
-          moas-gamedata = gamedata;
+          manick = moas;
+          manick-gamedata = gamedata;
 
-          moas-win64 = windows.win64;
-          moas-win64-zip = windows.win64Zip;
-          moas-win32 = windows.win32;
-          moas-win32-zip = windows.win32Zip;
+          manick-win64 = windows.win64;
+          manick-win64-zip = windows.win64Zip;
+          manick-win32 = windows.win32;
+          manick-win32-zip = windows.win32Zip;
 
-          moas-r36s = r36s.r36s;
-          moas-r36s-portmaster = r36s.portmaster;
-          moas-r36s-portmaster-zip = r36s.portmasterZip;
+          manick-r36s = r36s.r36s;
+          manick-r36s-portmaster = r36s.portmaster;
+          manick-r36s-portmaster-zip = r36s.portmasterZip;
           arkos-sysroot = r36s.sysroot;
 
-          moas-android = android.apk;
+          manick-android = android.apk;
           sdl2-android = android.sdlAndroidLibs;
 
-          moas-wasm = wasm.moasWasm;
+          manick-wasm = wasm.moasWasm;
           sdl2-wasm = wasm.sdl2Wasm;
 
-          moas-dos = dos.moas-dos;
-          moas-dos-zip = dos.moas-dos-zip;
-          moas-dos-run = dos.moas-dos-run;
-          moas-dos-original = dos.moas-dos-original;
-          moas-dos-original-run = dos.moas-dos-original-run;
+          manick-dos = dos.manick-dos;
+          manick-dos-zip = dos.manick-dos-zip;
+          manick-dos-run = dos.manick-dos-run;
+          manick-dos-original = dos.manick-dos-original;
+          manick-dos-original-run = dos.manick-dos-original-run;
         };
 
         apps = {
           default = {
             type = "app";
-            program = "${moas}/bin/moas";
+            program = "${moas}/bin/manick";
           };
-          moas = {
+          manick = {
             type = "app";
-            program = "${moas}/bin/moas";
+            program = "${moas}/bin/manick";
           };
           # Open Watcom DOS rebuild under DOSBox-X
-          moas-dos = {
+          manick-dos = {
             type = "app";
-            program = "${dos.moas-dos-run}/bin/moas-dos";
+            program = "${dos.manick-dos-run}/bin/manick-dos";
           };
           # Historical manick/GAME.EXE under DOSBox-X
-          moas-dos-original = {
+          manick-dos-original = {
             type = "app";
-            program = "${dos.moas-dos-original-run}/bin/moas-dos-original";
+            program = "${dos.manick-dos-original-run}/bin/manick-dos-original";
           };
-          install-android-moas = android.installApp;
-          moas-wasm = wasm.serveApp;
+          install-android-manick = android.installApp;
+          manick-wasm = wasm.serveApp;
         };
 
         devShells.default = pkgs.mkShell.override { stdenv = pkgs.ccacheStdenv; } {

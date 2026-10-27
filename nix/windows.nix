@@ -4,10 +4,10 @@
 # Windows builds, cross-compiled with MinGW (pkgsCross). SDL2 is the official
 # prebuilt MinGW package (SDL2-win32 flake), same approach as Kurvenrausch/Pingus.
 #
-#   nix build .#moas-win64
-#   nix build .#moas-win64-zip
-#   nix build .#moas-win32
-#   nix build .#moas-win32-zip
+#   nix build .#manick-win64
+#   nix build .#manick-win64-zip
+#   nix build .#manick-win32
+#   nix build .#manick-win32-zip
 
 { pkgs
 , sdl2Win64
@@ -37,9 +37,9 @@ let
 
   mkFolder = { crossPkgs, sdl2, arch }:
     let game = mkGame { inherit crossPkgs sdl2 arch; };
-    in pkgs.runCommand "moas-${arch}-${version}" { } ''
+    in pkgs.runCommand "manick-${arch}-${version}" { } ''
       mkdir -p $out
-      cp ${game}/bin/moas.exe $out/
+      cp ${game}/bin/manick.exe $out/
       cp ${sdl2}/bin/SDL2.dll $out/
       # Game data beside the binary
       cp ${gamedata}/* $out/
@@ -48,12 +48,12 @@ let
       # per-language pictures: lang/<code>/<kind>/*.png
       for d in ${../lang}/*/; do cp -r "$d" $out/lang/; done
       cp ${../COPYING} $out/COPYING.txt
-      cp ${../data/icons/hicolor/256x256/apps/moas.png} $out/moas.png 2>/dev/null || true
+      cp ${../data/icons/hicolor/256x256/apps/manick.png} $out/manick.png 2>/dev/null || true
       cat > $out/README.txt <<EOF
-      MOAS ${version}
-      Mouse Orientiertes Adventure System — Mänick Mänschion
+      Mänick Mänschion ${version}
+      Point-and-click adventure on MOAS (Mouse Orientiertes Adventure System)
 
-      Start moas.exe. Point and click with the mouse; Space/Enter also click.
+      Start manick.exe. Point and click with the mouse; Space/Enter also click.
       F10 opens the file menu. Esc aborts dialogs. Q or Alt+F4 quits.
       Use --fullscreen for a borderless fullscreen window.
 
@@ -66,12 +66,12 @@ let
     '';
 
   mkZip = { folder, arch }:
-    pkgs.runCommand "moas-${version}-${arch}.zip" { nativeBuildInputs = [ pkgs.zip ]; } ''
+    pkgs.runCommand "manick-${version}-${arch}.zip" { nativeBuildInputs = [ pkgs.zip ]; } ''
       mkdir -p $out
       work=$(mktemp -d)
-      cp -r --no-preserve=mode ${folder} "$work/moas-${version}-${arch}"
+      cp -r --no-preserve=mode ${folder} "$work/manick-${version}-${arch}"
       cd "$work"
-      zip -r -9 $out/moas-${version}-${arch}.zip moas-${version}-${arch}
+      zip -r -9 $out/manick-${version}-${arch}.zip manick-${version}-${arch}
     '';
 
   win64 = mkFolder { crossPkgs = pkgs.pkgsCross.mingwW64; sdl2 = sdl2Win64; arch = "win64"; };

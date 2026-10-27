@@ -6,7 +6,7 @@
 # tree gives files identical to the original. Used by every target, including
 # cross builds that can't run moas-util themselves.
 #
-#   nix build .#moas-gamedata
+#   nix build .#manick-gamedata
 
 # Not versioned: it only rebuilds when its sources change.
 { pkgs }:
@@ -24,7 +24,7 @@ let
   };
 in
 pkgs.stdenv.mkDerivation {
-  name = "moas-gamedata";
+  name = "manick-gamedata";
   inherit src;
   dontConfigure = true;
   buildPhase = ''

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Ingo Ruhnke <grumbel@gmail.com>
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
-# MOAS: PortMaster launcher for the R36S / ArkOS (and alike).
+# Mänick Mänschion (MOAS engine): PortMaster launcher for the R36S / ArkOS (and alike).
 
 XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 if [ -d "/opt/system/Tools/PortMaster/" ]; then
@@ -18,7 +18,7 @@ source "$controlfolder/control.txt"
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
 get_controls
 
-GAMEDIR="/$directory/ports/moas"
+GAMEDIR="/$directory/ports/manick"
 cd "$GAMEDIR" || exit 1
 > "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
 
@@ -28,7 +28,7 @@ export MOAS_DATADIR="$GAMEDIR/data"
 export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
 
 # gptokeyb: Select+Start quits.
-$GPTOKEYB "moas" &
-pm_platform_helper "$GAMEDIR/moas"
-./moas --fullscreen
+$GPTOKEYB "manick" &
+pm_platform_helper "$GAMEDIR/manick"
+./manick --fullscreen
 pm_finish

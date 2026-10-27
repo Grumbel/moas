@@ -12,9 +12,9 @@
 # only compiler builtins. On the device, SDL2 is ArkOS's (KMS/DRM, its own
 # build), the stable SDL2 ABI.
 #
-#   nix build .#moas-r36s                the binary
-#   nix build .#moas-r36s-portmaster     a PortMaster port: copy to /roms/ports/
-#   nix build .#moas-r36s-portmaster-zip for PortMaster's autoinstall
+#   nix build .#manick-r36s                the binary
+#   nix build .#manick-r36s-portmaster     a PortMaster port: copy to /roms/ports/
+#   nix build .#manick-r36s-portmaster-zip for PortMaster's autoinstall
 
 { pkgs
 , version
@@ -136,7 +136,7 @@ let
   '';
 
   r36s = pkgs.stdenv.mkDerivation {
-    pname = "moas-r36s";
+    pname = "manick-r36s";
     inherit version;
     src = lib.cleanSource ../.;
     nativeBuildInputs = [ pkgs.cmake ];
@@ -162,41 +162,52 @@ let
     dontPatchELF = true;
     dontPatchShebangs = true;
     postInstall = ''
-      ${binutils}/bin/${tp}-strip $out/bin/moas
+      ${binutils}/bin/${tp}-strip $out/bin/manick
     '';
     dontStrip = true;
   };
 
   # PortMaster: the launcher script, the port folder and its metadata.
   portmaster = pkgs.stdenvNoCC.mkDerivation {
-    pname = "moas-r36s-portmaster";
+    pname = "manick-r36s-portmaster";
     inherit version;
     dontUnpack = true;
     dontPatchShebangs = true; # the launcher runs with the device's bash
     dontFixup = true;
     installPhase = ''
-      mkdir -p $out/moas/data
-      install -m755 ${r36s}/bin/moas $out/moas/moas
-      cp ${../COPYING} $out/moas/LICENSE.txt
-      cp ${../data/icons/hicolor/256x256/apps/moas.png} $out/moas/cover.png
+      mkdir -p $out/manick/data
+      install -m755 ${r36s}/bin/manick $out/manick/manick
+      cp ${../COPYING} $out/manick/LICENSE.txt
+      cp ${../data/icons/hicolor/256x256/apps/manick.png} $out/manick/cover.png
       # Game data (skip original DOS binaries)
-      cp ${gamedata}/* $out/moas/data/
-      mkdir -p $out/moas/data/lang
-      cp ${../lang}/*.po $out/moas/data/lang/
+      cp ${gamedata}/* $out/manick/data/
+      mkdir -p $out/manick/data/lang
+      cp ${../lang}/*.po $out/manick/data/lang/
       # per-language pictures: lang/<code>/<kind>/*.png
-      for d in ${../lang}/*/; do cp -r "$d" $out/moas/data/lang/; done
+      for d in ${../lang}/*/; do cp -r "$d" $out/manick/data/lang/; done
       cp ${../mk/r36s/screenshot.png} $out/screenshot.png
-      cp ${../mk/r36s/Moas.sh} $out/Moas.sh
-      chmod +x $out/Moas.sh
+      cp "${../mk/r36s}/Mänick Mänschion.sh" "$out/Mänick Mänschion.sh"
+      chmod +x "$out/Mänick Mänschion.sh"
       substitute ${../mk/r36s/port.json} $out/port.json --subst-var-by version ${version}
       cp ${../mk/r36s/README.md} $out/README.md
     '';
   };
 
-  portmasterZip = pkgs.runCommand "moas-${version}-r36s-portmaster.zip" { nativeBuildInputs = [ pkgs.zip ]; } ''
+  # Python's zipfile flags the launcher's umlaut name as UTF-8; Info-ZIP
+  # in the build sandbox stores it unflagged (read back as CP437).
+  portmasterZip = pkgs.runCommand "manick-${version}-r36s-portmaster.zip" { nativeBuildInputs = [ pkgs.python3 ]; } ''
     mkdir -p $out
     cd ${portmaster}
-    zip -r -9 $out/moas.zip .
+    python3 - $out/manick.zip <<'EOF'
+    import os, sys, zipfile
+    with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_DEFLATED, compresslevel=9,
+                         strict_timestamps=False) as z:
+        for root, dirs, files in os.walk("."):
+            dirs.sort()
+            for name in sorted(dirs + files):
+                path = os.path.join(root, name)[2:]
+                z.write(path)
+    EOF
   '';
 
 in {

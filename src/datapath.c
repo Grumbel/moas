@@ -171,11 +171,11 @@ void MoasInitDataPath(const char *argv0)
     return;
   }
 
-  snprintf(buf, sizeof(buf), "%s/../share/moas", exe_dir);
+  snprintf(buf, sizeof(buf), "%s/../share/manick", exe_dir);
   REMEMBER(buf);
   if (looks_like_data_dir(buf)) {
     set_data_dir(buf);
-    MoasLog("moas: data directory ($exe/../share/moas): %s\n", data_dir);
+    MoasLog("moas: data directory ($exe/../share/manick): %s\n", data_dir);
     return;
   }
   snprintf(buf, sizeof(buf), "%s/manick", exe_dir);
@@ -299,9 +299,9 @@ static void resolve_state_dir(void)
   {
     const char *la = getenv("LOCALAPPDATA");
     if (la && la[0])
-      snprintf(state_dir, sizeof(state_dir), "%s\\moas\\state", la);
+      snprintf(state_dir, sizeof(state_dir), "%s\\manick\\state", la);
     else
-      snprintf(state_dir, sizeof(state_dir), "moas-state");
+      snprintf(state_dir, sizeof(state_dir), "manick-state");
     moas_mkdir_p(state_dir);
   }
 #else
@@ -313,13 +313,13 @@ static void resolve_state_dir(void)
   } else {
     env = getenv("XDG_STATE_HOME");
     if (env && env[0])
-      snprintf(state_dir, sizeof(state_dir), "%s/moas", env);
+      snprintf(state_dir, sizeof(state_dir), "%s/manick", env);
     else {
       const char *home = getenv("HOME");
       if (home && home[0])
-        snprintf(state_dir, sizeof(state_dir), "%s/.local/state/moas", home);
+        snprintf(state_dir, sizeof(state_dir), "%s/.local/state/manick", home);
       else
-        snprintf(state_dir, sizeof(state_dir), "moas-state");
+        snprintf(state_dir, sizeof(state_dir), "manick-state");
     }
   }
   if (moas_mkdir_p(state_dir) != 0)
@@ -354,9 +354,9 @@ static void resolve_config_dir(void)
   {
     const char *ad = getenv("APPDATA");
     if (ad && ad[0])
-      snprintf(config_dir, sizeof(config_dir), "%s\\moas", ad);
+      snprintf(config_dir, sizeof(config_dir), "%s\\manick", ad);
     else
-      snprintf(config_dir, sizeof(config_dir), "moas-config");
+      snprintf(config_dir, sizeof(config_dir), "manick-config");
     moas_mkdir_p(config_dir);
   }
 #else
@@ -367,13 +367,13 @@ static void resolve_config_dir(void)
   } else {
     env = getenv("XDG_CONFIG_HOME");
     if (env && env[0])
-      snprintf(config_dir, sizeof(config_dir), "%s/moas", env);
+      snprintf(config_dir, sizeof(config_dir), "%s/manick", env);
     else {
       const char *home = getenv("HOME");
       if (home && home[0])
-        snprintf(config_dir, sizeof(config_dir), "%s/.config/moas", home);
+        snprintf(config_dir, sizeof(config_dir), "%s/.config/manick", home);
       else
-        snprintf(config_dir, sizeof(config_dir), "moas-config");
+        snprintf(config_dir, sizeof(config_dir), "manick-config");
     }
   }
   if (moas_mkdir_p(config_dir) != 0)

@@ -5,8 +5,8 @@
 # download) and a self-contained site (html/js/wasm/data), same approach
 # as Kurvenrausch.
 #
-#   nix build .#moas-wasm
-#   nix run .#moas-wasm-serve
+#   nix build .#manick-wasm
+#   nix run .#manick-wasm-serve
 
 { pkgs
 , version
@@ -54,7 +54,7 @@ let
   };
 
   moasWasm = pkgs.stdenv.mkDerivation {
-    pname = "moas-wasm";
+    pname = "manick-wasm";
     inherit version;
     src = pkgs.lib.cleanSource ../.;
     dontConfigure = true;
@@ -88,13 +88,13 @@ let
 
   serveApp = {
     type = "app";
-    program = toString (pkgs.writeShellScript "moas-wasm-serve" ''
+    program = toString (pkgs.writeShellScript "manick-wasm-serve" ''
       export PKG=${moasWasm}
-      export APP_NAME=moas
+      export APP_NAME=manick
       export PATH=${pkgs.python3}/bin:${pkgs.xdg-utils}/bin:$PATH
       exec bash ${../mk/wasm/scripts/serve.sh} "$@"
     '');
-    meta.description = "Serve the WebAssembly build of MOAS and open it in a browser";
+    meta.description = "Serve the WebAssembly build of Mänick Mänschion and open it in a browser";
   };
 
 in {

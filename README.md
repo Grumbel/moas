@@ -5,9 +5,12 @@ Thomas Holz around 1992–2000 for DOS. This repository is a work-in-progress
 port using SDL2: the original game logic stays intact while DOS hardware and
 services are replaced by a modern platform layer.
 
-The shipped product / window title is **Mänick Mänschion** (the adventure that
-runs on this engine). The binary, package id, and icon theme name remain
-`moas` / `org.grumbel.moas`.
+The shipped product is **Mänick Mänschion**, the adventure that runs on this
+engine (originally distributed as `Manick.zip`). Its binary, data directory,
+icon and desktop file are named `manick`, the application id is
+`org.grumbel.manick`, and the full name is used wherever a GUI shows it. The
+flake packages are `manick-*` as well. The engine side (`moas-util`, `MOAS_*`
+environment variables, the dev-shell `moas-*` scripts) keeps the MOAS name.
 
 **Original game (Thomas Holz):** <http://www.thomasholz.de/manick.htm>
 
@@ -94,16 +97,16 @@ On NixOS, the supplied flake provides a build environment and package:
 nix develop
 cmake -S . -B build
 cmake --build build
-./build/moas
+./build/manick
 ```
 
 The build packs the game data from `manick-src/` into `build/gamedata/`
-(see [Game data](#game-data-manick-src)), and `./build/moas` finds it there.
+(see [Game data](#game-data-manick-src)), and `./build/manick` finds it there.
 The development shell sets `MOAS_DATADIR` to `$MOAS_BUILD_DIR/gamedata`.
 Elsewhere, set the data directory explicitly:
 
 ```sh
-MOAS_DATADIR="$PWD/build/gamedata" ./build/moas
+MOAS_DATADIR="$PWD/build/gamedata" ./build/manick
 ```
 
 You can also configure and build directly with CMake on other Linux systems:
@@ -111,14 +114,14 @@ You can also configure and build directly with CMake on other Linux systems:
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build --parallel
-./build/moas
+./build/manick
 ```
 
 To build and run the Nix package directly:
 
 ```sh
 nix run .
-# or: nix build .#moas && ./result/bin/moas
+# or: nix build .#manick && ./result/bin/manick
 ```
 
 The CMake install target installs the executable, game data, FreeDesktop
@@ -136,10 +139,10 @@ source, Android SDK where needed).
 Cross-compiles the original `#ifdef DOS` code with Open Watcom from Nix:
 
 ```sh
-nix build .#moas-dos          # $result/dos/moas.exe + GAME.* + DOS4GW.EXE
-nix build .#moas-dos-zip      # zip of the same folder
-nix run .#moas-dos            # Watcom rebuild under DOSBox-X
-nix run .#moas-dos-original   # historical manick/GAME.EXE under DOSBox-X
+nix build .#manick-dos          # $result/dos/manick.exe + GAME.* + DOS4GW.EXE
+nix build .#manick-dos-zip      # zip of the same folder
+nix run .#manick-dos            # Watcom rebuild under DOSBox-X
+nix run .#manick-dos-original   # historical manick/GAME.EXE under DOSBox-X
 ```
 
 Open Watcom is licensed under Watcom-1.0 (redistributable; nixpkgs marks it
@@ -147,7 +150,7 @@ unfree). The flake allows only the Open Watcom package names via
 `allowUnfreePredicate` — no global `allowUnfree`.
 
 Run the result under DOSBox or FreeDOS with the shipped data files next to
-`moas.exe`. Port diagnostics go to `MOAS.LOG` in the current directory
+`manick.exe`. Port diagnostics go to `MOAS.LOG` in the current directory
 instead of over the VGA screen. The historical `manick/GAME.EXE` remains the reference original
 binary.
 
@@ -155,10 +158,10 @@ binary.
 
 
 ```sh
-nix build .#moas-win64          # 64-bit
-nix build .#moas-win64-zip      # zip with SDL2.dll + data
-nix build .#moas-win32
-nix build .#moas-win32-zip
+nix build .#manick-win64          # 64-bit
+nix build .#manick-win64-zip      # zip with SDL2.dll + data
+nix build .#manick-win32
+nix build .#manick-win32-zip
 ```
 
 See `nix/windows.nix`.
@@ -181,8 +184,8 @@ right.
 
 
 ```sh
-nix build .#moas-android         # moas-<version>.apk
-nix run .#install-android-moas   # install on a device with adb
+nix build .#manick-android         # manick-<version>.apk
+nix run .#install-android-manick   # install on a device with adb
 ```
 
 NDK build of `libmain.so` against a prebuilt SDL2, packaged with SDL’s Java
@@ -197,11 +200,11 @@ adb logcat -s SDL/APP:V MOAS:V *:E
 ### WebAssembly (Emscripten)
 
 ```sh
-nix build .#moas-wasm
-nix run .#moas-wasm              # local HTTP server + open browser
+nix build .#manick-wasm
+nix run .#manick-wasm              # local HTTP server + open browser
 ```
 
-Static SDL2 for wasm32 and a self-contained site (`moas.html` / `.js` /
+Static SDL2 for wasm32 and a self-contained site (`manick.html` / `.js` /
 `.wasm` plus preloaded game data). Header globals use a single definition
 TU under Emscripten; the blocking DOS-style game loop uses ASYNCIFY so
 `Wait` / `getch` can yield to the browser (`nix/wasm.nix`, `mk/wasm/`).
@@ -222,8 +225,8 @@ Save files are exported as `moas-saves.json` and can be imported on another brow
 ### R36S and other PortMaster handhelds (ArkOS)
 
 ```sh
-nix build .#moas-r36s-portmaster-zip   # for PortMaster autoinstall
-nix build .#moas-r36s-portmaster       # or copy contents to /roms/ports/
+nix build .#manick-r36s-portmaster-zip   # for PortMaster autoinstall
+nix build .#manick-r36s-portmaster       # or copy contents to /roms/ports/
 ```
 
 Cross-compiled against an Ubuntu 19.10 arm64 sysroot (`nix/r36s.nix`) so the
@@ -236,7 +239,7 @@ The top-level `VERSION` file is the only source of truth. In git it always
 ends in `-dev` (e.g. `0.1.0-dev`); Nix builds append the revision count and
 short hash (`0.1.0-dev.1615+gf1fb306`, `...-dirty` for a dirty tree). A
 release `VERSION` (no `-dev`) is used as-is. CMake reads `VERSION` unless
-`-DPROJECT_VERSION_FULL=...` is passed (the flake does). `moas --version`
+`-DPROJECT_VERSION_FULL=...` is passed (the flake does). `manick --version`
 prints it, and the options menu (F12) shows it at the bottom.
 
 Release: set `VERSION` to e.g. `0.1.0`, commit, tag `v0.1.0`, then bump
@@ -261,8 +264,8 @@ from the SDL port are included under `ui.*`.
 ### Runtime language packs (no gettext)
 
 ```sh
-moas --lang=en
-# or: MOAS_LANG=en moas
+manick --lang=en
+# or: MOAS_LANG=en manick
 ```
 
 SDL host: press **F12** (or the touch **Options** button, or gamepad **Start**) for the options menu.
@@ -293,7 +296,7 @@ Generate a template, translate it, install as `lang/en.po`:
 ```sh
 moas-util --datadir manick strings pot > manick.pot
 # translate → lang/en.po
-moas --lang=en
+manick --lang=en
 ```
 
 A minimal PO parser loads `msgctxt` / `msgid` / `msgstr` (including multiline
@@ -343,13 +346,13 @@ The game data is kept in the repository in two forms:
 - **`manick-src/`**: the data unpacked by `moas-util unpack` (scripts as
   text, graphics as PNG, see [Editing the game data](#editing-the-game-data-unpack--pack)).
   This is what the builds use: CMake target `gamedata` packs it into
-  `<build>/gamedata/`, and `nix build .#moas-gamedata` does the same for the
+  `<build>/gamedata/`, and `nix build .#manick-gamedata` does the same for the
   Nix packages (cross builds get it via `-DMOAS_GAMEDATA_DIR=`, as they can't
   run `moas-util`).
 - **`manick/`**: the original release, left untouched. It is the reference
   for packing: graphics with unchanged pixels keep their original bytes, so
   the packed files are identical to `manick/` as long as `manick-src/` isn't
-  edited. `nix run .#moas-dos-original` runs `manick/GAME.EXE` on it.
+  edited. `nix run .#manick-dos-original` runs `manick/GAME.EXE` on it.
 
 The packed files:
 
@@ -407,7 +410,7 @@ Edit `manick-src/` and rebuild; the `gamedata` target repacks it. By hand:
 
 ```sh
 ./build/moas-util --srcdir manick-src --outdir build/data --reference manick pack
-./build/moas --datadir build/data
+./build/manick --datadir build/data
 ```
 
 `manick-src/` was made with `moas-util --datadir manick --outdir manick-src
@@ -458,7 +461,7 @@ On the menu, **click a slot** (small framed boxes on the left/right). Slot **9**
 Save files are named `GAME0.SAV` … `GAME9.SAV` under the **state directory** (printed at startup), for example:
 
 ```text
-~/.local/state/moas/GAME0.SAV
+~/.local/state/manick/GAME0.SAV
 ```
 
 **Resume file:** the engine keeps `AUTOSAVE.SAV` in the same state directory and restores it on the next start (skips intro, like `--load`). It is only ever written at a point where the original game would allow F5 (player has control, no dialogue/menu, no script running), because the `.SAV` format has no script position:
@@ -469,10 +472,10 @@ Save files are named `GAME0.SAV` … `GAME9.SAV` under the **state directory** (
 So quitting in the middle of a cutscene or dialogue resumes just before it. Use `--no-autosave` to disable both writing and restoring. Explicit `--load=…` still takes priority over `AUTOSAVE.SAV`.
 
 Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).  
-DOSBox runners persist to `~/.local/state/moas-dos` / `moas-dos-original`.
+DOSBox runners persist to `~/.local/state/manick-dos` / `manick-dos-original`.
 
 **Load:** press **F7**, then click a slot that shows a thumbnail (empty slots do nothing useful).  
-Or from the shell: `moas --load=0` (see command-line options).  
+Or from the shell: `manick --load=0` (see command-line options).  
 **Save:** press **F5**, then click an empty or occupied slot (0–8).
 
 You need **player control** and no dialogue window open (`Window.Status == None`); during cutscenes or forced walks these keys are ignored.
@@ -587,10 +590,10 @@ These are developer tools from the original engine, not needed for normal play.
 Load a save without the in-game menu:
 
 ```sh
-./build/moas --load=0
-./build/moas --load=3 --statedir=$HOME/.local/state/moas
-./build/moas --load=$HOME/.local/state/moas/GAME2.SAV
-./build/moas --no-autosave   # fresh start; do not write AUTOSAVE.SAV on quit
+./build/manick --load=0
+./build/manick --load=3 --statedir=$HOME/.local/state/manick
+./build/manick --load=$HOME/.local/state/manick/GAME2.SAV
+./build/manick --no-autosave   # fresh start; do not write AUTOSAVE.SAV on quit
 ```
 
 `--load` implies `--skip-intro` (the save already holds game state).  
@@ -600,10 +603,10 @@ Debug categories are `script`, `input`, `wait`, `window`, `load`, and `all`.
 For example:
 
 ```sh
-./build/moas --debug=wait,input,window
-./build/moas --skip-intro --debug=script
-./build/moas --fullscreen
-MOAS_DEBUG=all ./build/moas
+./build/manick --debug=wait,input,window
+./build/manick --skip-intro --debug=script
+./build/manick --fullscreen
+MOAS_DEBUG=all ./build/manick
 ```
 
 ## Repository layout
