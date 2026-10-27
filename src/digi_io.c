@@ -53,6 +53,8 @@ static void digi_audio_callback(void *userdata, Uint8 *stream, int len);
 void DigiStartSdlAudio(void)
 {
   SDL_AudioSpec want, have;
+  if (digi_audio_dev)
+    return;
   if (SDL_WasInit(SDL_INIT_AUDIO) == 0) {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
       MoasLog("moas: SDL audio init failed: %s\n", SDL_GetError());
@@ -127,7 +129,7 @@ void InitDigi(void)
 #endif
   InitVolumeTab();
   InitStepTable();
-  /* SDL audio started later from InitAll after PlatformInit (Android). */
+  /* SDL audio is opened by LoadMusic, only when there is a song. */
 }
 
 #ifdef DOS
@@ -344,6 +346,7 @@ void LoadMusic(short Num)
   close(ifil);
   V_Play=1;
 #ifndef DOS
+  DigiStartSdlAudio();
   MoasLog("moas: LoadMusic(%d) SongBegin=%d SongEnd=%d\n",
           (int)Num, (int)SongBegin, (int)SongEnd);
 #endif

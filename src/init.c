@@ -50,7 +50,6 @@ struct
 } Boot;
 
 #ifndef DOS
-void DigiStartSdlAudio(void); /* digi_io.c */
 #endif
 
 void InitAll(void)
@@ -81,8 +80,10 @@ void InitAll(void)
 #ifdef DOS
   /* InitDigi(); — disabled; matches original GAME.EXE behaviour */
 #else
+  /* SDL audio opens in LoadMusic once a song is actually loaded; the
+   * Mänick data has none, and an idle open device hisses on some
+   * handhelds (R36S). */
   InitDigi();
-  DigiStartSdlAudio();
 #endif
   Init320Tab();              InitScreenData();
   InitVars();                InitPersons();

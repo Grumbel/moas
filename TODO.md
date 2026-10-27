@@ -6,6 +6,20 @@
 
 # TODO / Handoff
 
+## Pad X/Back swap, no idle audio, PortMaster zip modes (2026-10-27)
+- Pad: X = skip scene (Esc), Back/Select held = hotspots (was the other
+  way round). Key hints, README, R36S README, web help and website updated.
+  The engine options menu is unchanged (X changes, Back closes).
+- Audio: the SDL audio device is no longer opened at startup, only in
+  LoadMusic once a song is loaded. The Mänick data has no songs, so no
+  device is opened at all (strace: no pulse/pipewire connect). The open,
+  idle device hissed on the R36S. Untested on the device.
+- R36S saves failed with errno 2 under `conf/manick`: `conf/` could not be
+  created, likely because the zip carried the store's read-only modes
+  (dirs 0555). The zip now stores 0755 dirs / 0644 files / 0755
+  executables. Possibly also a local permission problem on the device;
+  recheck there.
+
 ## Game named `manick`, engine stays MOAS (2026-10-27)
 - Shipped game is Mänick Mänschion (original distribution `Manick.zip`), so
   binary, data dir and packages are `manick`; the full name is for GUIs.

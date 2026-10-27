@@ -198,7 +198,9 @@ let
   };
 
   # Python's zipfile flags the launcher's umlaut name as UTF-8; Info-ZIP
-  # in the build sandbox stores it unflagged (read back as CP437).
+  # in the build sandbox stores it unflagged (read back as CP437). Modes
+  # are reset from the store's read-only ones, so the port can create
+  # log.txt and conf/ in its own folder.
   portmasterZip = pkgs.runCommand "manick-${version}-r36s-portmaster.zip" { nativeBuildInputs = [ pkgs.python3 ]; } ''
     mkdir -p $out
     cd ${portmaster}
@@ -210,7 +212,16 @@ let
             dirs.sort()
             for name in sorted(dirs + files):
                 path = os.path.join(root, name)[2:]
-                z.write(path)
+                info = zipfile.ZipInfo.from_file(path, strict_timestamps=False)
+                if info.is_dir():
+                    info.external_attr = (0o40755 << 16) | 0x10
+                    z.writestr(info, b"")
+                else:
+                    mode = 0o755 if os.access(path, os.X_OK) else 0o644
+                    info.external_attr = (0o100000 | mode) << 16
+                    info.compress_type = zipfile.ZIP_DEFLATED
+                    with open(path, "rb") as f:
+                        z.writestr(info, f.read())
     EOF
   '';
 

@@ -20,9 +20,9 @@ Copy `Mänick Mänschion.sh` and the `manick/` folder to `/roms/ports/`, or put 
 | D-pad              | walk                                         |
 | A / R1             | use (left click)                             |
 | B / L1             | look (right click)                           |
-| X (hold)           | show hotspots                                |
+| X                  | skip scene (Esc)                             |
 | Y (hold)           | skip text                                    |
-| Select             | skip scene (Esc)                             |
+| Select (hold)      | show hotspots                                |
 | Start              | options menu: save, load, settings, quit     |
 | R2 / L2            | save / load                                  |
 | R3 / L3            | game speed up / down                         |

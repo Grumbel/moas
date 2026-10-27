@@ -82,7 +82,7 @@ static int           restart_requested;
 static SDL_GameController *pad = NULL;
 static int           pad_use = 0;   /* A / R1 → left click */
 static int           pad_look = 0;  /* B / L1 → right click */
-static int           pad_hint = 0;  /* X held → hotspot highlight */
+static int           pad_hint = 0;  /* Back held → hotspot highlight */
 static int           pad_l2 = 0, pad_r2 = 0; /* trigger state, for edges */
 static float         pad_frac_x = 0, pad_frac_y = 0; /* sub-pixel cursor motion */
 static Uint32        pad_last_tick = 0;
@@ -2150,7 +2150,7 @@ static const struct { const char *key; int text; } keyhint_rows[] = {
   { "H",     UI_KEY_HOTSPOTS },
 };
 /* Same rows for a gamepad. */
-static const char *const padhint_keys[] = { "R2", "L2", "START", "Y", "BACK", "X" };
+static const char *const padhint_keys[] = { "R2", "L2", "START", "Y", "X", "BACK" };
 #define KEYHINT_ROWS ((int)(sizeof(keyhint_rows) / sizeof(keyhint_rows[0])))
 
 static const char *keyhint_key(int i)
@@ -2599,11 +2599,11 @@ static void sync_mouse_position(void)
  * D-pad               → walk (MoasPadWalk)
  * A / R1              → use (left click)
  * B / L1              → look (right click / SIEHE)
- * X (hold)            → hotspot highlight (like H)
+ * X                   → Esc / skip scene
  * Y (hold)            → skip speech (Shift)
  * R2 / L2             → save / load
  * Start               → options menu
- * Back                → Esc / abort sequence
+ * Back (hold)         → hotspot highlight (like H)
  * R3 / L3             → game speed up / down
  */
 #define PAD_CURSOR_SPEED 150.0f /* logical px/s per stick at full deflection */
@@ -2702,7 +2702,7 @@ static void pad_apply(void)
   if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_Y))
     overlay_shift_until = now + SHIFT_HOLD_MS; /* skip speech while held */
 
-  hint = SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_X);
+  hint = SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_BACK);
   if (!hint && pad_hint)
     hint_release();
   pad_hint = hint ? 1 : 0;
@@ -2716,7 +2716,7 @@ static void pad_apply(void)
     pad_queue_save_load(2);
   pad_r2 = r2;
   pad_l2 = l2;
-  /* Start / Back / L3 / R3 are edge-triggered in pad_button_down. */
+  /* Start / X / L3 / R3 are edge-triggered in pad_button_down. */
 
 #ifndef DOS
   if (pad_walk_cooldown > 0)
@@ -2751,7 +2751,7 @@ static void pad_button_down(const SDL_ControllerButtonEvent *cb)
   if (!pad || cb->which != SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(pad)))
     return;
   switch (cb->button) {
-    case SDL_CONTROLLER_BUTTON_BACK:
+    case SDL_CONTROLLER_BUTTON_X:
       synth_esc();
       break;
     case SDL_CONTROLLER_BUTTON_START:
