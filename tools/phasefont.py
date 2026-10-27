@@ -13,6 +13,9 @@ shadow is added when rendering.
       Cut glyphs out of the pictures listed in TRANSCRIPT and write them as
       editable ASCII art to FONT. This made tools/phasetext/help.font,
       which was then fixed and extended by hand.
+  phasefont.py accents FONT
+      Add the accented letters FONT lacks (áàâä..., ñ, ç, ¡, ¿), built from
+      the base letter and an accent mark (MARKS). Edit them by hand after.
   phasefont.py render FONT SPEC SRCDIR OUTDIR
       Erase the text of each picture named in SPEC and draw the translated
       lines instead. Graphics stay where they are. Warns (and exits 1) when
@@ -555,6 +558,87 @@ def cmd_extract(transcript, srcdir, fontpath):
     write_font(fontpath, font)
 
 
+# ---------------------------------------------------------------- accents
+
+# accent marks, drawn above the letter body (or below for the cedilla)
+MARKS = {
+    'acute': ["..YY", ".YY"],
+    'grave': ["YY", ".YY"],
+    'circ': [".YYY", "YY.YY"],
+    'diaer': ["YY..YY", "YY..YY"],
+    'diaer_i': ["Y..Y", "Y..Y"],
+    'tilde': [".YY..Y", "Y..YY"],
+    'cedilla': ["..Y", ".YY"],
+}
+
+ACCENTED = {
+    'á': ('a', 'acute'), 'à': ('a', 'grave'), 'â': ('a', 'circ'), 'ä': ('a', 'diaer'),
+    'é': ('e', 'acute'), 'è': ('e', 'grave'), 'ê': ('e', 'circ'), 'ë': ('e', 'diaer'),
+    'í': ('i', 'acute'), 'ì': ('i', 'grave'), 'î': ('i', 'circ'), 'ï': ('i', 'diaer_i'),
+    'ó': ('o', 'acute'), 'ò': ('o', 'grave'), 'ô': ('o', 'circ'), 'ö': ('o', 'diaer'),
+    'ú': ('u', 'acute'), 'ù': ('u', 'grave'), 'û': ('u', 'circ'), 'ü': ('u', 'diaer'),
+    'ñ': ('n', 'tilde'), 'ç': ('c', 'cedilla'), 'ÿ': ('y', 'diaer'),
+    'Á': ('A', 'acute'), 'À': ('A', 'grave'), 'Â': ('A', 'circ'), 'Ä': ('A', 'diaer'),
+    'É': ('E', 'acute'), 'È': ('E', 'grave'), 'Ê': ('E', 'circ'), 'Ë': ('E', 'diaer'),
+    'Í': ('I', 'acute'), 'Ì': ('I', 'grave'), 'Î': ('I', 'circ'), 'Ï': ('I', 'diaer_i'),
+    'Ó': ('O', 'acute'), 'Ò': ('O', 'grave'), 'Ô': ('O', 'circ'), 'Ö': ('O', 'diaer'),
+    'Ú': ('U', 'acute'), 'Ù': ('U', 'grave'), 'Û': ('U', 'circ'), 'Ü': ('U', 'diaer'),
+    'Ñ': ('N', 'tilde'), 'Ç': ('C', 'cedilla'),
+}
+
+
+def compose(base, mark, base_is_lower):
+    """Put an accent mark on a glyph, centred on the letter body."""
+    upper = min(y for _, y in base.ink) <= -8 and not base_is_lower
+    # the i's own dot goes; lowercase bodies start at row -6
+    body = {(x, y) for x, y in base.ink if y >= -6} if not upper else set(base.ink)
+    rows = MARKS[mark]
+    mw = max(len(r) for r in rows)
+    bx = [x for x, _ in body]
+    left = round((min(bx) + max(bx) + 1 - mw) / 2)
+    if mark == 'cedilla':
+        top = 1
+    else:
+        top = (-12 if upper else -9)
+    ink = set(body)
+    for dy, r in enumerate(rows):
+        for dx, c in enumerate(r):
+            if c == 'Y':
+                ink.add((left + dx, top + dy))
+    shift = min(x for x, _ in ink)
+    ink = {(x - shift, y) for x, y in ink}
+    return Glyph(ink, base.advance, base.offset + shift)
+
+
+def flipped(g, dy):
+    """Upside-down glyph moved down by dy (for ¡ and ¿)."""
+    w = g.width
+    ink = {(w - 1 - x, -9 - y + dy) for x, y in g.ink}
+    return Glyph(ink, g.advance, g.offset)
+
+
+def cmd_accents(fontpath):
+    """Add accented letters that the font lacks, built from base glyphs."""
+    font = read_font(fontpath)
+    added = {}
+    for ch, (base, mark) in ACCENTED.items():
+        if ch not in font and base in font:
+            added[ch] = compose(font[base], mark, base.islower())
+    for ch, src in (('¡', '!'), ('¿', '?')):
+        if ch not in font and src in font:
+            added[ch] = flipped(font[src], 3)
+    with open(fontpath, encoding='utf-8') as f:
+        text = f.read()
+    tmp = fontpath + '.tmp'
+    write_font(tmp, added)
+    with open(tmp, encoding='utf-8') as f:
+        extra = f.read()
+    os.remove(tmp)
+    with open(fontpath, 'w', encoding='utf-8') as f:
+        f.write(text.rstrip('\n') + '\n\n' + extra)
+    print("added", ''.join(sorted(added)))
+
+
 # ---------------------------------------------------------------- render
 
 def text_ink(font, text):
@@ -705,6 +789,8 @@ def main():
         cmd_lines(args)
     elif cmd == 'extract' and len(args) == 3:
         cmd_extract(*args)
+    elif cmd == 'accents' and len(args) == 1:
+        cmd_accents(*args)
     elif cmd == 'render' and len(args) == 4:
         sys.exit(cmd_render(*args))
     else:

@@ -1,0 +1,177 @@
+# Dutch text for the phase pictures. Line numbers refer to the German
+# original (see de.txt and `phasefont.py lines`); 'N+' adds a line below N.
+# Lines that stay as in the original (names, address, "Copyright & Co.")
+# are not listed.
+
+== phase_035.png
+0: Help
+
+== phase_036.png
+0: Copyright 1995-96 door Thomas Holz
+
+== phase_053.png
+0: Inventaris
+1: Systeemmenu
+2: Muiscursor
+3: Gesproken tekst
+4: Opdrachtregel
+5: Speler
+
+== phase_054.png
+0: De muiscursor
+1: Met de muis naast uw computer
+2: beweegt u de muiscursor.
+3: Een gouden muiscursor geeft aan
+4: dat hier iets interessants is.
+5: Is de muiscursor grijs, dan is
+6: hier niets.
+7: Is de muiscursor gearceerd, dan
+8: kunt u niets invoeren.
+
+== phase_055.png
+0: Het systeemmenu
+1: Klik op het pictogram om het
+2: menu te openen.
+3: Hier kunt u de help of het
+4: projectdagboek lezen, of het
+5: spel afsluiten.
+
+== phase_056.png
+0: De inventaris
+1: Aan de bovenrand van het scherm
+2: ziet u alles wat u bij u hebt.
+3: -
+4: Vaak moet u dingen pakken
+5: voordat u ze kunt gebruiken.
+
+== phase_057.png
+0: De opdrachtregel
+1: Vaak toont hij helemaal niets.
+2: Wijst de muiscursor naar een
+3: object of persoon, dan wordt de
+4: naam getoond.
+5: Geeft u een opdracht,
+6: dan wordt die hier getoond.
+
+== phase_058.png
+0: Lopen & kijken
+1: Klik met de rechtermuisknop op
+2: de vloer en de speler loopt
+3: erheen.
+4: Of gebruik de cursortoetsen om
+6: de speler te besturen.
+7: Klik met de rechtermuisknop op
+8: een object en de speler bekijkt
+9: het.
+
+== phase_059.png
+0: Voorwerpen gebruiken
+1: Voorwerpen gebruiken, pakken en
+2: lezen en met personen praten
+3: gaat met één klik.
+4: Klik daarvoor met de linker-
+5: muisknop op een object of
+6: een persoon.
+7: -
+
+== phase_060.png
+0: Voorwerpen combineren
+1: U moet minstens een van
+2: de twee dingen bezitten.
+3: Klik in de inventaris op het
+4: eerste en houd de knop ingedrukt.
+5: Sleep dan de muiscursor
+6: naar het tweede voorwerp.
+7: Laat daar de muisknop los.
+
+== phase_061.png
+0: Dingen verplaatsen
+1: Dingen die u niet kunt meenemen,
+2: kunt u soms verplaatsen.
+3: -
+4: Klik op het object en
+5: houd de knop ingedrukt.
+6: Sleep dan de muis in de
+7: gewenste richting.
+8: Pas dan laat u de muis los.
+
+== phase_062.png
+0: Het systeemmenu
+1: Druk op de toets F10 om het
+2: systeemmenu te openen.
+3: -
+4: Het bevat de instellingen voor
+5: het muziekvolume, de anima-
+6: tiesnelheid en de spreek-
+7: snelheid.
+8: Kies een instelling met 'Omhoog'
+9: en 'Omlaag'. 'Links' en
+11 x=106: 'Rechts' veranderen die.
+12: -
+
+== phase_063.png
+0: Laden & opslaan
+1: F5 opent het opslagmenu, F7
+2: het laadmenu.
+3: Bij elke opgeslagen stand hoort
+4: een momentopname en een korte
+5: beschrijving.
+6: Rechtsonder staat een
+7: automatisch opgeslagen stand.
+
+== phase_064.png
+0: Gesproken tekst
+1: Als een persoon iets zegt, ver-
+2: schijnt het boven hem en
+3: verdwijnt na een tijdje.
+4: Zolang u de Shift-toets
+5: ingedrukt houdt, blijft de tekst.
+6: U kunt hem rustig lezen.
+7: Laat u de Shift-toets los,
+8: dan verdwijnt de tekst meteen.
+9: U hoeft niet te wachten.
+
+== phase_065.png
+0: Tekstvensters
+1: Tekstvensters tonen dingen die
+2: (nog) niet gezegd worden.
+3: Tekstvensters pauzeren het spel.
+4: Met een klik op de linker-
+5: muisknop worden ze gesloten.
+6: Soms, bijv. bij dialogen,
+7: kunt u in tekstvensters iets
+8: kiezen.
+
+== phase_066.png
+2: Mänick Mänschion is copyright ©
+3: 1995, 1996 door Thomas Holz,
+5: Het spel mag onder de volgende voorwaarden
+6: gekopieerd en verspreid worden:
+7: 1. Alle bestanden worden samen verspreid.
+8: De gegevens worden niet gewijzigd.
+9: 2. Het wordt gratis verspreid, d.w.z. zonder
+10: vergoeding, kopieerkosten e.d.
+
+== phase_067.png
+2: Voor commercieel gebruik, verspreiding
+3: tegen betaling of als deel van een betaald
+4: product (bijv. shareware-cd) is de
+5: schriftelijke toestemming van de auteur
+6: vereist.
+7: Verspreiding via internet en BBS'en
+8: zonder kosten is toegestaan.
+
+== phase_068.png
+0: Commentaar & info
+1: Wie graag commentaar wil
+2: geven, kan dat per
+3: e-mail doen:
+5: Trouwens, ik zoek ook nog
+6: tekenaars. Wie dus goed kan
+7: tekenen...
+8: En wie over nieuwe projecten wil horen,
+9: stuurt mij een lege e-mail met als onderwerp
+10: 'mailing-list'.
+
+== phase_113.png
+0: Idee, Puzzels, Code, Graphics:

@@ -1,0 +1,177 @@
+# Spanish text for the phase pictures. Line numbers refer to the German
+# original (see de.txt and `phasefont.py lines`); 'N+' adds a line below N.
+# Lines that stay as in the original (names, address, "Copyright & Co.")
+# are not listed.
+
+== phase_035.png
+0: Ayuda
+
+== phase_036.png
+0: Copyright 1995-96 por Thomas Holz
+
+== phase_053.png
+0: Inventario
+1: Menú del sistema
+2: Cursor del ratón
+3: Texto hablado
+4: Línea de comandos
+5: Jugador
+
+== phase_054.png
+0: El cursor del ratón
+1: Con el ratón junto a su ordenador
+2: mueve el cursor del ratón.
+3: Un cursor dorado indica que aquí
+4: hay algo interesante.
+5: Si el cursor es gris, aquí no
+6: hay nada.
+7: Si el cursor está rayado, no
+8: puede introducir nada.
+
+== phase_055.png
+0: El menú del sistema
+1: Haga clic en el icono para abrir
+2: el menú.
+3: Aquí puede leer la ayuda o el
+4: diario del proyecto, o salir
+5: del juego.
+
+== phase_056.png
+0: El inventario
+1: En el borde superior de la pantalla
+2: se ven todas las cosas que lleva.
+3: -
+4: A menudo tiene que coger cosas
+5: antes de poder usarlas.
+
+== phase_057.png
+0: La línea de comandos
+1: A menudo no muestra nada.
+2: Si el cursor señala un objeto
+3: o una persona, se muestra su
+4: nombre.
+5: Cuando da una orden,
+6: se muestra aquí.
+
+== phase_058.png
+0: Caminar y mirar
+1: Haga clic con el botón derecho
+2: en el suelo y el jugador
+3: irá allí.
+4: O use las teclas del cursor
+6: para dirigir al jugador.
+7: Haga clic con el botón derecho
+8: en un objeto y el jugador
+9: lo mirará.
+
+== phase_059.png
+0: Usar objetos
+1: Usar, coger y leer objetos y
+2: hablar con personas se hace
+3: con un solo clic.
+4: Para hacerlo, haga clic con el
+5: botón izquierdo del ratón en
+6: un objeto o una persona.
+7: -
+
+== phase_060.png
+0: Combinar objetos
+1: Debe tener al menos una de
+2: las dos cosas.
+3: Haga clic en la primera en el
+4: inventario y mantenga el botón.
+5: Luego arrastre el cursor
+6: hasta el segundo objeto.
+7: Suelte allí el botón del ratón.
+
+== phase_061.png
+0: Mover cosas
+1: Las cosas que no puede llevarse
+2: a veces se pueden mover.
+3: -
+4: Haga clic en el objeto y
+5: mantenga pulsado el botón.
+6: Arrastre entonces el ratón
+7: en la dirección deseada.
+8: Solo después suelte el ratón.
+
+== phase_062.png
+0: El menú del sistema
+1: Pulse la tecla F10 para abrir
+2: el menú del sistema.
+3: -
+4: Contiene los ajustes del
+5: volumen de la música, la velo-
+6: cidad de animación y la
+7: velocidad del habla.
+8: Elija un ajuste con 'Arriba'
+9: y 'Abajo'. 'Izquierda' y
+11 x=106: 'Derecha' lo cambian.
+12: -
+
+== phase_063.png
+0: Cargar y guardar
+1: F5 abre el menú de guardar, F7
+2: el de cargar.
+3: Cada partida guardada tiene
+4: una instantánea y una breve
+5: descripción.
+6: Abajo a la derecha hay una
+7: partida autoguardada.
+
+== phase_064.png
+0: Texto hablado
+1: Cuando una persona dice algo,
+2: aparece encima de ella y
+3: desaparece al cabo de un rato.
+4: Mientras mantenga pulsada la
+5: tecla de mayúsculas, el texto
+6: se queda. Puede leerlo con calma.
+7: Suelte la tecla de mayúsculas y
+8: el texto desaparece enseguida.
+9: No hace falta esperar.
+
+== phase_065.png
+0: Ventanas de texto
+1: Las ventanas de texto muestran
+2: cosas que (aún) no se dicen.
+3: Además pausan el juego.
+4: Un clic con el botón izquierdo
+5: del ratón las cierra.
+6: A veces, p. ej. en diálogos,
+7: se puede elegir algo en las
+8: ventanas de texto.
+
+== phase_066.png
+2: Mänick Mänschion es copyright ©
+3: 1995, 1996 de Thomas Holz,
+5: El juego puede copiarse y distribuirse
+6: en estas condiciones:
+7: 1. Se distribuyen todos los archivos juntos.
+8: Los datos no se modifican.
+9: 2. Se distribuye gratis, es decir, sin
+10: tarifa, gastos de copia, etc.
+
+== phase_067.png
+2: El uso comercial, la distribución a
+3: cambio de dinero o como parte de un
+4: producto de pago (p. ej. CD shareware)
+5: requiere el permiso escrito del autor.
+6: -
+7: Se permite la distribución gratuita
+8: en Internet y en BBS.
+
+== phase_068.png
+0: Comentarios e información
+1: Si quiere hacer un
+2: comentario, puede hacerlo
+3: por e-mail:
+5: Por cierto, también busco
+6: dibujantes. Así que si dibuja
+7: bien...
+8: Y si quiere saber de futuros proyectos,
+9: envíeme un e-mail vacío con el asunto
+10: 'mailing-list'.
+
+== phase_113.png
+0: Idea, Enigmas, Código, Gráficos:

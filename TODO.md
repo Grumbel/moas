@@ -87,9 +87,10 @@
 - EN phases 35, 36, 53-68 and 113 rendered with it (114-116 are already
   English). The graphics inside the help pages (system menu, command line
   bars, save slots, text windows) still show German.
-- Other languages: write tools/phasetext/<code>.txt and render into
-  lang/<code>/phase. Missing glyphs: Ä Ö ß " and accented letters; add
-  them to help.font by hand.
+- ES/FR/IT/NL phases rendered the same way from es/fr/it/nl.txt (same
+  lines as en.txt, reflowed where the text hit graphics or the edge).
+  `phasefont.py accents` composes the accented letters and ¡ ¿ from base
+  glyphs plus mark templates. Still missing: ß " « » œ.
 - Not tested in game yet.
 
 ## Later: more translations, accented glyphs (2026-10-22, not started)
