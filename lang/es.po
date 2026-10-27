@@ -2,8 +2,8 @@
 # Charset: UTF-8
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
 "Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 
 #. source UI
 #: ui.verb.use
@@ -3663,7 +3663,7 @@ msgstr "..de partes del cuerpo humano.. NW ..está claramente fuera de las espec
 #: script.p2.0x09eb
 msgctxt "script.p2.0x09eb"
 msgid "Garantieanspruch erlischt. NW Mit freundlichen Grüßen: NW Speiseaufzüge Gebrüder Hungrig.\""
-msgstr "garantía queda anulada. NW Atentamente, NW Montacargas Hermanos Hambrientos."""
+msgstr "garantía queda anulada. NW Atentamente, NW Montacargas Hermanos Hambrientos."
 
 #. prog 2 @ 0a55 op add_say_window2
 #: script.p2.0x0a55
@@ -8121,7 +8121,7 @@ msgstr "¿Qué hay en la tele?"
 #: script.p24.0x0a99
 msgctxt "script.p24.0x0a99"
 msgid "Und was ist so toll an \"Win or Win\"?"
-msgstr "¿Y qué tiene de bueno \3Win or Win\"?"
+msgstr "¿Y qué tiene de bueno \"Win or Win\"?"
 
 #. prog 24 @ 0ab9 op add_option
 #: script.p24.0x0ab9
@@ -8205,7 +8205,7 @@ msgstr "Solo tienes que llamar. NW No paran de anunciar el número. NW Solo tien
 #: script.p24.0x0cd5
 msgctxt "script.p24.0x0cd5"
 msgid "___Danke.___ NW Ich habe die Farben selbst ausgesucht. NW Mein Mann bestand auf den Spielautomaten. NW Haben Sie mal \"Weebee Worlds\" gespielt? NW Das ist guuut!"
-msgstr "___Gracias.___ NW Yo misma elegí los colores. NW Mi marido insistió en la máquina recreativa. NW ¿Has jugado alguna vez a \3Weebee Worlds\"? NW It's sooo good!"
+msgstr "___Gracias.___ NW Yo misma elegí los colores. NW Mi marido insistió en la máquina recreativa. NW ¿Has jugado alguna vez a \"Weebee Worlds\"? NW It's sooo good!"
 
 #. prog 24 @ 0d32 op say_if
 #: script.p24.0x0d32
@@ -8325,7 +8325,7 @@ msgstr "¿Dónde está el maquillaje? NW Se me ha movido el peluquín. NW Esa va
 #: script.p25.0x02d5
 msgctxt "script.p25.0x02d5"
 msgid "Ja und da sind wir wieder bei \"Win or Win\". NW Jetzt geht es um den Superpreis. NW Genau! DM 100.000 in Bar. NW Gleich zum mitnehmen."
-msgstr "Y volvemos a \3Win or Win\". NW Now it's time for the grand prize. NW That's right! 100,000 marks in cash. NW Yours to take home right away."
+msgstr "Y volvemos a \"Win or Win\". NW Now it's time for the grand prize. NW That's right! 100,000 marks in cash. NW Yours to take home right away."
 
 #. prog 25 @ 0373 op add_say_window
 #: script.p25.0x0373
@@ -8686,4 +8686,3 @@ msgstr "¿Crees que la fiesta en casa de Alice ya ha terminado?"
 msgctxt "script.p26.0x07ce"
 msgid "Schauen wir mal nach."
 msgstr "Vamos a ver."
-

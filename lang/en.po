@@ -2,8 +2,8 @@
 # Charset: UTF-8
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
 "Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 
 #. source UI
 #: ui.verb.use
@@ -8686,4 +8686,3 @@ msgstr "Do you think the party at Alice's is over yet?"
 msgctxt "script.p26.0x07ce"
 msgid "Schauen wir mal nach."
 msgstr "Let's go and see."
-
