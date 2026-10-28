@@ -6,6 +6,20 @@
 
 # TODO / Handoff
 
+## Windows: Wine runners, binary file I/O (2026-10-28)
+- `nix run .#manick-win64` / `.#manick-win32` run the MinGW builds under
+  `wineWow64Packages.stable` (Wine 11). They print the WINEPREFIX, the
+  drive mappings and where game/saves/settings live (host path and
+  Windows path). The game runs from the store folder (cwd, MOAS_DATADIR=.).
+  Prefix: `$XDG_STATE_HOME/manick-wine` (persistent, shared by both
+  arches), `WINEPREFIX` overrides, `MANICK_WINE_TEMP=1` = temp prefix
+  removed on exit. Packages `manick-win{64,32}-run`.
+- Running them showed the Windows builds were broken: InternalError 1005
+  at start. Data (`try_open`) and saves (io.c, ChkOpen WRITE) were opened
+  without O_BINARY outside DOS, so MinGW used text mode (CRLF / ^Z).
+  Now O_BINARY on `_WIN32` too. Tested under Wine: both arches start,
+  autosave written and restored on the next run. Not tried on real Windows.
+
 ## Screenshots (2026-10-28)
 - F9 / PrintScreen write the 320x200 Display buffer with the shown palette
   (`sdl_palette`, so fades are captured as seen) as an indexed PNG to the

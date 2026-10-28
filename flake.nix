@@ -209,6 +209,8 @@ except Exception:
           manick-win64-zip = windows.win64Zip;
           manick-win32 = windows.win32;
           manick-win32-zip = windows.win32Zip;
+          manick-win64-run = windows.win64Run;
+          manick-win32-run = windows.win32Run;
 
           manick-r36s = r36s.r36s;
           manick-r36s-portmaster = r36s.portmaster;
@@ -236,6 +238,15 @@ except Exception:
           manick = {
             type = "app";
             program = "${moas}/bin/manick";
+          };
+          # MinGW Windows builds under Wine (persistent WINEPREFIX)
+          manick-win64 = {
+            type = "app";
+            program = "${windows.win64Run}/bin/manick-win64";
+          };
+          manick-win32 = {
+            type = "app";
+            program = "${windows.win32Run}/bin/manick-win32";
           };
           # Open Watcom DOS rebuild under DOSBox-X
           manick-dos = {
