@@ -15,6 +15,7 @@
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 #ifdef __ANDROID__
 #include <SDL_system.h>
@@ -109,6 +110,7 @@ extern void MoasPadWalk(int ax, int ay);
 #ifdef __EMSCRIPTEN__
 static volatile int  wasm_paused = 0;
 static void wasm_pause_spin(void);
+static void wasm_sync_canvas_size(void);
 #endif
 static int           moas_shift_down = 0;
 /*
@@ -723,6 +725,31 @@ static void wasm_pause_spin(void)
     }
     SDL_Delay(40);
   }
+}
+
+/*
+ * shell.html sizes the canvas with CSS (fixed aspect in the page, the
+ * whole screen in fullscreen). Keep the drawing buffer at that size in
+ * device pixels, so the picture and the touch buttons are laid out for
+ * the real shape instead of being stretched from 1240x720. SDL scales
+ * mouse coordinates by window size / CSS size.
+ */
+static void wasm_sync_canvas_size(void)
+{
+  double cw, ch, dpr;
+  int w, h, cur_w, cur_h;
+
+  if (!window ||
+      emscripten_get_element_css_size("#canvas", &cw, &ch) != EMSCRIPTEN_RESULT_SUCCESS)
+    return;
+  dpr = emscripten_get_device_pixel_ratio();
+  w = (int)(cw * dpr + 0.5);
+  h = (int)(ch * dpr + 0.5);
+  if (w < 64 || h < 64)
+    return;
+  SDL_GetWindowSize(window, &cur_w, &cur_h);
+  if (w != cur_w || h != cur_h)
+    SDL_SetWindowSize(window, w, h);
 }
 #endif
 
@@ -3167,6 +3194,7 @@ void PlatformPumpEvents(void)
     sync_mouse_position();
   pad_apply();
 #ifdef __EMSCRIPTEN__
+  wasm_sync_canvas_size();
   wasm_pause_spin();
 #endif
 }

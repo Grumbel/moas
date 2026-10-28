@@ -6,6 +6,23 @@
 
 # TODO / Handoff
 
+## WASM: fullscreen fills the screen in any shape (2026-10-28)
+- shell.html kept the 31:18 slot in fullscreen, and the canvas buffer
+  stayed 1240x720 and was stretched, so portrait fullscreen showed a
+  small landscape strip. Fullscreen slot is now 100vw x 100vh.
+- The fullscreen rules were `#wrap:fullscreen ..., #wrap:-webkit-full-screen ...`
+  selector lists, which Firefox drops whole (unknown pseudo-class), so
+  none of them applied there. Now a `fs` class set from
+  fullscreenchange / webkitfullscreenchange.
+- `wasm_sync_canvas_size()` (every event pump) sets the SDL window to the
+  canvas CSS size x devicePixelRatio, so the layout code sees the real
+  shape and the buffer is at device resolution (also outside fullscreen).
+- Tested: Firefox under Xvfb 600x1000, real fullscreen via the page
+  button: picture full width, rows layout. Not tested: Chrome/Safari,
+  phones, touch/mouse coordinate mapping after the buffer resize (SDL
+  scales by window size / CSS size), F11 / menu fullscreen (that is SDL's
+  own canvas fullscreen, not the shell's).
+
 ## Touch overlay layout picks the bigger picture (2026-10-28)
 - `ov_portrait()` used to need the picture at full width between the
   button rows and fell back to the side columns otherwise, even for tall
