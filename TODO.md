@@ -16,9 +16,13 @@
   landscape windows use it too. Side columns cap button height so four
   fit vertically.
 - Checked with a harness over `letterbox_geom` for 400..2000 px windows:
-  picture width changes by at most 4 px per 2 px resize. Windows under
-  ~340 px wide still jump (rows need 64 px buttons). Not looked at on a
-  phone or in the browser yet.
+  picture width changes by at most 4 px per 2 px resize. Not looked at
+  on a phone or in the browser yet.
+- Narrow windows (under ~340 px, where four 64 px buttons don't fit
+  across) stack Save/Load and Options/Hint in the top corners instead of
+  falling back to side columns (298x702 gave a 122 px picture). Smooth for
+  tall windows (h >= 1.6 w); short narrow ones (e.g. 320x450) still jump
+  where the top switches between one and two rows.
 
 ## Mouse button legend (2026-10-27)
 - Second key-hint box, bottom left: LMB use / RMB look, or A / R1 and

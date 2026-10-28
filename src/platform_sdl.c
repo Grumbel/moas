@@ -811,33 +811,45 @@ static float ov_side_fit(int ww, int wh, int disp_h,
 
 /*
  * Rows layout: one row of buttons above the picture and two below (thumb
- * columns in the corners), instead of side columns. Wins over the side
- * columns whenever it gives the larger picture, which is the case for
- * portrait windows (a phone held upright) and near-square ones. The
- * buttons get shorter, down to a minimum, so the picture can use the full
- * width. Returns 0 when the side columns are better. top_h / bot_h are the
- * heights reserved above and below the picture.
+ * columns in the corners), instead of side columns. Where four across do
+ * not fit (narrow phones), the top corners get two rows too, mirroring the
+ * bottom. Wins over the side columns whenever it gives the larger picture,
+ * which is the case for portrait windows (a phone held upright) and
+ * near-square ones. The buttons get shorter, down to a minimum, so the
+ * picture can use the full width. Returns 0 when the side columns are
+ * better. top_h / bot_h are the heights reserved above and below the
+ * picture, *stacked is set when the top has two rows.
  */
-static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
+static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h,
+                       int *stacked)
 {
-  int w, h, hmax, top, bot, dh, disp_h = display_h();
+  int w, h, hmax, top, bot, dh, rows, disp_h = display_h();
   int sx, sy, sw, sh;
   float scale, sx_f, sy_f;
 
   if (!overlay_on)
     return 0;
   /* Four across the top row, with a wider gap between the two pairs. */
+  rows = 1;
   w = (ww - 2 * OV_MARGIN - 5 * OV_GAP) / 4;
   if (w > 200)
     w = 200;
-  if (w < 64)
-    return 0;
+  if (w < 64) {
+    /* Two per top corner, stacked. */
+    rows = 2;
+    w = (ww - 2 * OV_MARGIN - 2 * OV_GAP) / 2;
+    if (w > 120)
+      w = 120;
+    if (w < 64)
+      return 0;
+  }
   hmax = (w * 5) / 7;
   if (hmax > 120)
     hmax = 120;
-  /* Three rows of buttons: shrink them until the picture fills the width. */
+  /* rows + 2 rows of buttons: shrink them until the picture fills the
+   * width. */
   dh = (int)((long)disp_h * ww / LOGICAL_W);
-  h = (wh - dh - OV_GAP - 4 * OV_MARGIN) / 3;
+  h = (wh - dh - rows * OV_GAP - 4 * OV_MARGIN) / (rows + 2);
   if (h > hmax)
     h = hmax;
   if (h < 52)
@@ -845,9 +857,9 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
   /* Keep very short buttons from turning into wide bars. */
   if (w > 2 * h && 2 * h >= 64)
     w = 2 * h;
-  top = h + 2 * OV_MARGIN;
+  top = rows * h + (rows - 1) * OV_GAP + 2 * OV_MARGIN;
   bot = 2 * h + OV_GAP + 2 * OV_MARGIN;
-  if (wh - top - bot < disp_h / 2)
+  if (wh - top - bot < 40)
     return 0;
   sx_f = (float)ww / (float)LOGICAL_W;
   sy_f = (float)(wh - top - bot) / (float)disp_h;
@@ -856,6 +868,7 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
   if (ww >= wh ? scale <= ov_side_fit(ww, wh, disp_h, &sx, &sy, &sw, &sh)
                : scale < ov_side_fit(ww, wh, disp_h, &sx, &sy, &sw, &sh))
     return 0;
+  if (stacked) *stacked = rows == 2;
   if (bw) *bw = w;
   if (bh) *bh = h;
   if (top_h) *top_h = top;
@@ -877,7 +890,7 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (ww < 1) ww = 1;
   if (wh < 1) wh = 1;
 
-  if (ov_portrait(ww, wh, NULL, NULL, &top_h, &bot_h)) {
+  if (ov_portrait(ww, wh, NULL, NULL, &top_h, &bot_h, NULL)) {
     /* As large as fits, centred between the button rows. */
     int avail_h = wh - top_h - bot_h;
     dw = ww;
@@ -1278,7 +1291,7 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
   int btn_w, btn_h, gap, margin;
   int left_x, right_x;
   int top_y, low_y;
-  int side;
+  int side, stacked;
 
   letterbox_geom(&dx, &dy, &dw, &dh, &ww, &wh);
   gap = OV_GAP;
@@ -1286,19 +1299,27 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
 
 #define OV_SET(i, X, Y) (out[(i) - 1].x = (X), out[(i) - 1].y = (Y), \
                          out[(i) - 1].w = btn_w, out[(i) - 1].h = btn_h)
-  if (ov_portrait(ww, wh, &btn_w, &btn_h, NULL, NULL)) {
-    /* Save Load -- Hint Options in a row above the picture; below it, the
-     * thumb columns of landscape: Use / Look left, Skip Scene / Skip Text
+  if (ov_portrait(ww, wh, &btn_w, &btn_h, NULL, NULL, &stacked)) {
+    /* Save Load -- Hint Options in a row above the picture (or Save/Load
+     * and Options/Hint stacked in the top corners); below it, the thumb
+     * columns of landscape: Use / Look left, Skip Scene / Skip Text
      * right. */
     int step = btn_w + gap;
     left_x = margin;
     right_x = ww - margin - btn_w;
     top_y = margin;
     low_y = wh - margin - 2 * btn_h - gap;
-    OV_SET(OV_SAVE,       left_x,          top_y);
-    OV_SET(OV_LOAD,       left_x + step,   top_y);
-    OV_SET(OV_HINT,       right_x - step,  top_y);
-    OV_SET(OV_OPTIONS,       right_x,         top_y);
+    if (stacked) {
+      OV_SET(OV_SAVE,     left_x,          top_y);
+      OV_SET(OV_LOAD,     left_x,          top_y + btn_h + gap);
+      OV_SET(OV_OPTIONS,  right_x,         top_y);
+      OV_SET(OV_HINT,     right_x,         top_y + btn_h + gap);
+    } else {
+      OV_SET(OV_SAVE,     left_x,          top_y);
+      OV_SET(OV_LOAD,     left_x + step,   top_y);
+      OV_SET(OV_HINT,     right_x - step,  top_y);
+      OV_SET(OV_OPTIONS,  right_x,         top_y);
+    }
     OV_SET(OV_MODE_USE,   left_x,          low_y);
     OV_SET(OV_MODE_LOOK,  left_x,          low_y + btn_h + gap);
     OV_SET(OV_SKIP_SCENE, right_x,         low_y);
