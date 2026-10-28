@@ -12,12 +12,14 @@
       margin: 0; padding: 0; height: 100%;
       background: #0a0a12; color: #e8e8f0;
       font-family: system-ui, sans-serif;
-      overflow: hidden;
+      overflow-x: hidden;
     }
+    /* Centred when it fits, otherwise taller than the window and scrolls
+     * (a fixed height would cut off the top and bottom). */
     #wrap {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      height: 100%; gap: 0.55rem;
+      min-height: 100%; gap: 0.55rem;
       box-sizing: border-box; padding: 8px;
     }
     /*
@@ -35,6 +37,7 @@
       max-height: 72vh;
       background: #000;
       position: relative;
+      flex-shrink: 0;
       box-sizing: border-box;
       border: 1px solid #333;
     }

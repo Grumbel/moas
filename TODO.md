@@ -25,6 +25,12 @@
   touches on the canvas). Fullscreen slot is `position: fixed; inset: 0`
   instead of 100vw/100vh, which on Android was cut off at top and bottom
   until the next relayout.
+- The page itself could not scroll and cut off the game when the window
+  was too short for game + help text: html/body had `overflow: hidden`
+  and #wrap a fixed `height: 100%` with centred content. Now body scrolls
+  vertically, #wrap has `min-height: 100%`, the slot doesn't shrink.
+  Checked in Firefox 900x600 (top visible, wheel scrolls). Scrolling by
+  touch only works off the canvas (SDL takes touches on it).
 - Probe page (canvas.width/height + change counter) in Firefox with
   devPixelsPerPx 2: buffer = CSS x dpr, set once, snaps on window resize
   and fullscreen enter/exit.
