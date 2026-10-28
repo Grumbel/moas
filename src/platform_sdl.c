@@ -774,17 +774,57 @@ void PlatformSetPalette(const unsigned char *pal768)
 #define OV_MARGIN 8
 
 /*
- * Portrait (taller than wide, e.g. a phone held upright): the picture uses
- * the full width, with one row of buttons above it and two below, instead
- * of squeezing the picture between side columns and leaving the space above
- * and below empty. Returns 0 when there is no room for that. top_h / bot_h
- * are the heights reserved above and below the picture.
+ * Side-column layout: the picture as large as it fits with columns kept
+ * free left and right for the touch overlay (Save/Load/USE/LOOK left,
+ * Options/Hint/Skip right). overlay_rects needs dx >= btn_w + margins, so
+ * where the natural letterbox is narrower the picture shrinks to make room.
+ * Returns the picture scale.
+ */
+static float ov_side_fit(int ww, int wh, int disp_h,
+                         int *dx, int *dy, int *dw, int *dh)
+{
+  float sx = (float)ww / (float)LOGICAL_W;
+  float sy = (float)wh / (float)disp_h;
+  float scale = (sx < sy) ? sx : sy;
+  int x0 = 0, avail_w = ww;
+
+  if (overlay_on) {
+    int min_side = ww / 9;
+    if (min_side < 88)
+      min_side = 88;
+    if (min_side > 180)
+      min_side = 180;
+    if ((ww - LOGICAL_W * scale) / 2 < min_side && ww > 2 * min_side + 64) {
+      x0 = min_side;
+      avail_w = ww - 2 * min_side;
+      sx = (float)avail_w / (float)LOGICAL_W;
+      if (sx < scale)
+        scale = sx;
+    }
+  }
+  *dw = (int)(LOGICAL_W * scale + 0.5f);
+  *dh = (int)(disp_h * scale + 0.5f);
+  *dx = x0 + (avail_w - *dw) / 2;
+  *dy = (wh - *dh) / 2;
+  return scale;
+}
+
+/*
+ * Rows layout: one row of buttons above the picture and two below (thumb
+ * columns in the corners), instead of side columns. Wins over the side
+ * columns whenever it gives the larger picture, which is the case for
+ * portrait windows (a phone held upright) and near-square ones. The
+ * buttons get shorter, down to a minimum, so the picture can use the full
+ * width. Returns 0 when the side columns are better. top_h / bot_h are the
+ * heights reserved above and below the picture.
  */
 static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
 {
-  int w, h, top, bot, dh;
+  int w, h, hmax, top, bot, dh, disp_h = display_h();
+  int sx, sy, sw, sh;
+  float scale, sx_f, sy_f;
 
-  if (!overlay_on || wh <= ww)
+  if (!overlay_on)
     return 0;
   /* Four across the top row, with a wider gap between the two pairs. */
   w = (ww - 2 * OV_MARGIN - 5 * OV_GAP) / 4;
@@ -792,15 +832,29 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h)
     w = 200;
   if (w < 64)
     return 0;
-  h = (w * 5) / 7;
+  hmax = (w * 5) / 7;
+  if (hmax > 120)
+    hmax = 120;
+  /* Three rows of buttons: shrink them until the picture fills the width. */
+  dh = (int)((long)disp_h * ww / LOGICAL_W);
+  h = (wh - dh - OV_GAP - 4 * OV_MARGIN) / 3;
+  if (h > hmax)
+    h = hmax;
   if (h < 52)
     h = 52;
-  if (h > 120)
-    h = 120;
+  /* Keep very short buttons from turning into wide bars. */
+  if (w > 2 * h && 2 * h >= 64)
+    w = 2 * h;
   top = h + 2 * OV_MARGIN;
   bot = 2 * h + OV_GAP + 2 * OV_MARGIN;
-  dh = (int)((long)display_h() * ww / LOGICAL_W);
-  if (wh - dh < top + bot)
+  if (wh - top - bot < disp_h / 2)
+    return 0;
+  sx_f = (float)ww / (float)LOGICAL_W;
+  sy_f = (float)(wh - top - bot) / (float)disp_h;
+  scale = (sx_f < sy_f) ? sx_f : sy_f;
+  /* Ties go to the side columns in landscape, to the rows in portrait. */
+  if (ww >= wh ? scale <= ov_side_fit(ww, wh, disp_h, &sx, &sy, &sw, &sh)
+               : scale < ov_side_fit(ww, wh, disp_h, &sx, &sy, &sw, &sh))
     return 0;
   if (bw) *bw = w;
   if (bh) *bh = h;
@@ -815,7 +869,6 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
 {
   int ww = LOGICAL_W * SCALE, wh = display_h() * SCALE;
   int dw, dh, dx, dy, top_h, bot_h, disp_h = display_h();
-  float sx, sy, scale;
 
   if (renderer)
     SDL_GetRendererOutputSize(renderer, &ww, &wh);
@@ -824,44 +877,19 @@ static void letterbox_geom(int *out_x, int *out_y, int *out_w, int *out_h,
   if (ww < 1) ww = 1;
   if (wh < 1) wh = 1;
 
-  sx = (float)ww / (float)LOGICAL_W;
-  sy = (float)wh / (float)disp_h;
-  scale = (sx < sy) ? sx : sy;
-  dw = (int)(LOGICAL_W * scale + 0.5f);
-  dh = (int)(disp_h * scale + 0.5f);
-  dx = (ww - dw) / 2;
-  dy = (wh - dh) / 2;
-
   if (ov_portrait(ww, wh, NULL, NULL, &top_h, &bot_h)) {
-    /* Full width, centred between the button rows. */
+    /* As large as fits, centred between the button rows. */
+    int avail_h = wh - top_h - bot_h;
     dw = ww;
     dh = (int)((long)disp_h * ww / LOGICAL_W);
-    dx = 0;
-    dy = top_h + (wh - top_h - bot_h - dh) / 2;
-  } else if (overlay_on)
-  /*
-   * Keep side columns free for the touch overlay (Save/Load/USE/LOOK left,
-   * Options/Hint/Skip right).
-   * overlay_rects needs dx >= btn_w + margins (~80–136). If the natural
-   * letterbox is narrower (near-16:10 panels), shrink the game viewport so
-   * buttons sit beside the picture instead of on top of it.
-   */
-  {
-    int min_side = ww / 9;
-    if (min_side < 88)
-      min_side = 88;
-    if (min_side > 180)
-      min_side = 180;
-    if (dx < min_side && ww > 2 * min_side + 64) {
-      int avail_w = ww - 2 * min_side;
-      float sx2 = (float)avail_w / (float)LOGICAL_W;
-      float sy2 = (float)wh / (float)disp_h;
-      float sc2 = (sx2 < sy2) ? sx2 : sy2;
-      dw = (int)(LOGICAL_W * sc2 + 0.5f);
-      dh = (int)(disp_h * sc2 + 0.5f);
-      dx = min_side + (avail_w - dw) / 2;
-      dy = (wh - dh) / 2;
+    if (dh > avail_h) {
+      dh = avail_h;
+      dw = (int)((long)LOGICAL_W * avail_h / disp_h);
     }
+    dx = (ww - dw) / 2;
+    dy = top_h + (avail_h - dh) / 2;
+  } else {
+    ov_side_fit(ww, wh, disp_h, &dx, &dy, &dw, &dh);
   }
 
   if (out_x) *out_x = dx;
@@ -1291,8 +1319,13 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
     btn_h = 52;
   if (btn_h > 88)
     btn_h = 88;
+  /* Two above, two below with some space between, all on screen. */
+  if (btn_h > (wh - 2 * margin - 4 * gap) / 4)
+    btn_h = (wh - 2 * margin - 4 * gap) / 4;
+  if (btn_h < 52)
+    btn_h = 52;
 
-  if (dx >= btn_w + margin * 2) {
+  if (dx >=btn_w + margin * 2) {
     left_x = (dx - btn_w) / 2;
     if (left_x < margin)
       left_x = margin;

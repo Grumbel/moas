@@ -6,6 +6,20 @@
 
 # TODO / Handoff
 
+## Touch overlay layout picks the bigger picture (2026-10-28)
+- `ov_portrait()` used to need the picture at full width between the
+  button rows and fell back to the side columns otherwise, even for tall
+  windows (584x715 with 4:3: picture 408 wide, black above and below).
+  Now the rows layout shrinks its buttons (down to 52 px high) to make
+  room, fits the picture into what remains, and is chosen whenever it gives
+  a larger picture than the side columns (`ov_side_fit()`), so near-square
+  landscape windows use it too. Side columns cap button height so four
+  fit vertically.
+- Checked with a harness over `letterbox_geom` for 400..2000 px windows:
+  picture width changes by at most 4 px per 2 px resize. Windows under
+  ~340 px wide still jump (rows need 64 px buttons). Not looked at on a
+  phone or in the browser yet.
+
 ## Mouse button legend (2026-10-27)
 - Second key-hint box, bottom left: LMB use / RMB look, or A / R1 and
   B / L1 with a pad. Shown wherever the key legend is (start screen,
