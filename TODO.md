@@ -23,6 +23,13 @@
   falling back to side columns (298x702 gave a 122 px picture). Smooth for
   tall windows (h >= 1.6 w); short narrow ones (e.g. 320x450) still jump
   where the top switches between one and two rows.
+- Button size caps (120x88 side columns, 200x120 rows) are for a 720 px
+  short side and grow with it (`ov_cap()`). Labels use one font scale for
+  all buttons (`ov_label_scale()`, ~h/35, shrunk until every label fits)
+  instead of 1x/2x per button, so SKIP SCENE no longer drops to 1x alone.
+  Key names on the buttons scale the same way.
+- Xvfb screenshots (xdotool windowmove 0 0 + windowsize, no WM) at
+  2000x1087, 1440x2560, 298x702 look right.
 
 ## Mouse button legend (2026-10-27)
 - Second key-hint box, bottom left: LMB use / RMB look, or A / R1 and

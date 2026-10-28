@@ -773,6 +773,13 @@ void PlatformSetPalette(const unsigned char *pal768)
 #define OV_GAP    10
 #define OV_MARGIN 8
 
+/* Button size limits are for a 720 px short side and grow beyond it. */
+static int ov_cap(int ww, int wh, int base)
+{
+  int s = ww < wh ? ww : wh;
+  return s > 720 ? base * s / 720 : base;
+}
+
 /*
  * Side-column layout: the picture as large as it fits with columns kept
  * free left and right for the touch overlay (Save/Load/USE/LOOK left,
@@ -832,20 +839,20 @@ static int ov_portrait(int ww, int wh, int *bw, int *bh, int *top_h, int *bot_h,
   /* Four across the top row, with a wider gap between the two pairs. */
   rows = 1;
   w = (ww - 2 * OV_MARGIN - 5 * OV_GAP) / 4;
-  if (w > 200)
-    w = 200;
+  if (w > ov_cap(ww, wh, 200))
+    w = ov_cap(ww, wh, 200);
   if (w < 64) {
     /* Two per top corner, stacked. */
     rows = 2;
     w = (ww - 2 * OV_MARGIN - 2 * OV_GAP) / 2;
-    if (w > 120)
-      w = 120;
+    if (w > ov_cap(ww, wh, 120))
+      w = ov_cap(ww, wh, 120);
     if (w < 64)
       return 0;
   }
   hmax = (w * 5) / 7;
-  if (hmax > 120)
-    hmax = 120;
+  if (hmax > ov_cap(ww, wh, 120))
+    hmax = ov_cap(ww, wh, 120);
   /* rows + 2 rows of buttons: shrink them until the picture fills the
    * width. */
   dh = (int)((long)disp_h * ww / LOGICAL_W);
@@ -1331,15 +1338,15 @@ static void overlay_rects(SDL_Rect out[OV_COUNT])
   if (side < ww - (dx + dw))
     side = ww - (dx + dw);
   btn_w = side - margin * 2;
-  if (btn_w > 120)
-    btn_w = 120;
+  if (btn_w > ov_cap(ww, wh, 120))
+    btn_w = ov_cap(ww, wh, 120);
   if (btn_w < 64)
     btn_w = 64;
   btn_h = (btn_w * 5) / 7;
   if (btn_h < 52)
     btn_h = 52;
-  if (btn_h > 88)
-    btn_h = 88;
+  if (btn_h > ov_cap(ww, wh, 88))
+    btn_h = ov_cap(ww, wh, 88);
   /* Two above, two below with some space between, all on screen. */
   if (btn_h > (wh - 2 * margin - 4 * gap) / 4)
     btn_h = (wh - 2 * margin - 4 * gap) / 4;
@@ -1605,6 +1612,27 @@ static const char *overlay_key_name(int which)
   }
 }
 
+static const int ov_labels[OV_COUNT] = {
+  UI_OV_SAVE, UI_OV_LOAD, UI_OV_SKIP_SCENE, UI_OV_SKIP_TEXT, UI_OV_USE, UI_OV_LOOK, UI_OV_OPTIONS,
+  UI_OV_HINT
+};
+
+/*
+ * Font scale for the button labels: grows with the button, one size for
+ * all of them, the largest at which every label fits the width.
+ */
+static int ov_label_scale(const SDL_Rect *r)
+{
+  int ts = r->h / 35, i;
+
+  if (ts < 1)
+    ts = 1;
+  for (i = 0; i < OV_COUNT && ts > 1; i++)
+    while (ts > 1 && ui_text_width(Ui(ov_labels[i]), ts) > r->w - 12)
+      ts--;
+  return ts;
+}
+
 static void overlay_draw_button(int which, const SDL_Rect *r)
 {
   static const SDL_Color face_cols[OV_COUNT] = {
@@ -1617,10 +1645,6 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
     {  70,  74,  96, 255 },  /* Options */
     { 150, 112,  30, 255 },  /* Hint */
   };
-  static const int labels[OV_COUNT] = {
-    UI_OV_SAVE, UI_OV_LOAD, UI_OV_SKIP_SCENE, UI_OV_SKIP_TEXT, UI_OV_USE, UI_OV_LOOK, UI_OV_OPTIONS,
-    UI_OV_HINT
-  };
   int disabled = (which == OV_SAVE && !ov_save_ok) ||
                  (which == OV_LOAD && !ov_load_ok);
   int pressed = (overlay_pressed == which) && !disabled;
@@ -1628,7 +1652,7 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
                  (which == OV_MODE_LOOK && touch_mode == MOAS_TOUCH_LOOK);
   SDL_Color c = face_cols[which - 1], top, bot;
   SDL_Rect face = *r, inner, sh;
-  const char *label = Ui(labels[which - 1]);
+  const char *label = Ui(ov_labels[which - 1]);
   int rad = r->w / 7;
   int ts, label_h, pad, icon, tw;
   SDL_Texture *tex;
@@ -1668,8 +1692,8 @@ static void overlay_draw_button(int which, const SDL_Rect *r)
   bot.r = ui_shade(c.r, 80);  bot.g = ui_shade(c.g, 80);  bot.b = ui_shade(c.b, 80);  bot.a = 255;
   ui_fill_rounded(&inner, rad - 2, top, bot);
 
-  /* Label along the bottom; 2x when it fits. */
-  ts = (face.h >= 70 && ui_text_width(label, 2) <= inner.w - 8) ? 2 : 1;
+  /* Label along the bottom. */
+  ts = ov_label_scale(r);
   tw = ui_text_width(label, ts);
   label_h = 7 * ts;
   pad = face.h / 16 + 2;
@@ -1724,7 +1748,7 @@ static void overlay_draw_keys(void)
   overlay_rects(r);
   for (i = 0; i < OV_COUNT; i++) {
     const char *key = overlay_key_name(i + 1);
-    int ks = r[i].h >= 70 ? 2 : 1, pad = r[i].h / 16 + 2;
+    int ks = r[i].h / 35 > 1 ? r[i].h / 35 : 1, pad = r[i].h / 16 + 2;
     if (key)
       ui_draw_label(r[i].x + r[i].w - 2 - pad - ui_text_width(key, ks),
                     r[i].y + 2 + pad / 2 + 1, key, ks, 255, 230, 140);
