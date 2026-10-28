@@ -21,10 +21,11 @@
       box-sizing: border-box; padding: 8px;
     }
     /*
-     * SDL window is (320*3+280)×(240*3) = 1240×720 (4:3 picture; 8:5 is
-     * letterboxed inside) so overlay buttons sit in the side letterbox. The
-     * slot must use that aspect or the canvas is squeezed and the buttons
-     * land on the game picture.
+     * The game sizes its drawing buffer to the canvas (wasm_sync_canvas_size)
+     * and lays out picture and buttons for any shape. 31:18 is the shape of
+     * the default window (4:3 picture plus the button columns). The canvas
+     * is absolutely positioned so its buffer size never feeds back into the
+     * page layout.
      */
     #slot {
       /* 1240 / 720 */
@@ -34,6 +35,8 @@
       max-height: 72vh;
       background: #000;
       position: relative;
+      box-sizing: border-box;
+      border: 1px solid #333;
     }
     /* Shown whenever the game loop is not running (paused or crashed). */
     #overlay {
@@ -56,10 +59,14 @@
     #wrap.fs {
       padding: 0;
     }
+    /* Fixed to the viewport rather than 100vw/100vh, which on Android
+     * can include the system bars until the next relayout. */
     #wrap.fs #slot {
+      position: fixed;
+      inset: 0;
+      width: auto;
+      height: auto;
       aspect-ratio: auto;
-      width: 100vw;
-      height: 100vh;
       max-height: none;
       border: none;
     }
@@ -68,12 +75,10 @@
     }
     canvas.emscripten {
       display: block; background: #000;
+      position: absolute; left: 0; top: 0;
       width: 100% !important; height: 100% !important;
       image-rendering: pixelated; image-rendering: crisp-edges;
       outline: none; touch-action: none;
-      border: 1px solid #333;
-    }
-    #wrap.fs canvas.emscripten {
       border: none;
     }
     #status { font-size: 0.9rem; opacity: 0.85; min-height: 1.2em; }

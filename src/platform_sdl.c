@@ -512,6 +512,10 @@ int PlatformInit(void)
     Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     if (moas_fullscreen == 1)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#ifdef __EMSCRIPTEN__
+    /* Canvas buffer at device pixels; the window size stays in CSS px. */
+    flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
     {
       int win_w, win_h;
       if (moas_aspect >= 0)
@@ -729,22 +733,24 @@ static void wasm_pause_spin(void)
 
 /*
  * shell.html sizes the canvas with CSS (fixed aspect in the page, the
- * whole screen in fullscreen). Keep the drawing buffer at that size in
- * device pixels, so the picture and the touch buttons are laid out for
- * the real shape instead of being stretched from 1240x720. SDL scales
- * mouse coordinates by window size / CSS size.
+ * whole screen in fullscreen). Keep the window at that size, so the
+ * picture and the touch buttons are laid out for the real shape instead
+ * of being stretched from 1240x720. With SDL_WINDOW_ALLOW_HIGHDPI, SDL
+ * makes the drawing buffer devicePixelRatio times larger, the same as its
+ * own browser-resize handler does, so the two agree. Called every event
+ * pump: SDL only reacts to window resizes, not to the canvas changing
+ * size within the page (fullscreen).
  */
 static void wasm_sync_canvas_size(void)
 {
-  double cw, ch, dpr;
+  double cw, ch;
   int w, h, cur_w, cur_h;
 
   if (!window ||
       emscripten_get_element_css_size("#canvas", &cw, &ch) != EMSCRIPTEN_RESULT_SUCCESS)
     return;
-  dpr = emscripten_get_device_pixel_ratio();
-  w = (int)(cw * dpr + 0.5);
-  h = (int)(ch * dpr + 0.5);
+  w = (int)(cw + 0.5);
+  h = (int)(ch + 0.5);
   if (w < 64 || h < 64)
     return;
   SDL_GetWindowSize(window, &cur_w, &cur_h);

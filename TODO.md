@@ -15,8 +15,19 @@
   none of them applied there. Now a `fs` class set from
   fullscreenchange / webkitfullscreenchange.
 - `wasm_sync_canvas_size()` (every event pump) sets the SDL window to the
-  canvas CSS size x devicePixelRatio, so the layout code sees the real
-  shape and the buffer is at device resolution (also outside fullscreen).
+  canvas CSS size; SDL_WINDOW_ALLOW_HIGHDPI makes the buffer
+  devicePixelRatio times that. (First version multiplied by the ratio
+  itself, which fought SDL's own browser-resize handler.)
+- The canvas is `position: absolute` in the slot and the border moved to
+  the slot. Before, the slot's auto height let the canvas buffer's
+  intrinsic size feed back into the layout: on the page the canvas crept
+  to its size over many frames, and touch scrolling broke (SDL swallows
+  touches on the canvas). Fullscreen slot is `position: fixed; inset: 0`
+  instead of 100vw/100vh, which on Android was cut off at top and bottom
+  until the next relayout.
+- Probe page (canvas.width/height + change counter) in Firefox with
+  devPixelsPerPx 2: buffer = CSS x dpr, set once, snaps on window resize
+  and fullscreen enter/exit.
 - Tested: Firefox under Xvfb 600x1000, real fullscreen via the page
   button: picture full width, rows layout. Not tested: Chrome/Safari,
   phones, touch/mouse coordinate mapping after the buffer resize (SDL
