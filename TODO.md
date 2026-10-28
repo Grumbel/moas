@@ -6,6 +6,19 @@
 
 # TODO / Handoff
 
+## Screenshots (2026-10-28)
+- F9 / PrintScreen write the 320x200 Display buffer with the shown palette
+  (`sdl_palette`, so fades are captured as seen) as an indexed PNG to the
+  state dir: `screenshot-YYYYMMDD-HHMMSS[-N].png`. Notice
+  `ui.osd.screenshot` (all .po, manick.pot, moas-util) via the OSD, which
+  now takes any text (`osd_show`). WASM: downloads via a blob link and
+  unlinks the file so IDBFS doesn't grow.
+- PNG writer moved from tools/mu_png.c to src/pngwrite.c, shared with
+  moas-util (CMake, nix/gamedata.nix).
+- Tested: Xvfb, F9 twice, PNGs 320x200 colormap look right, notice shows.
+  WASM builds; download not tried in a browser. Only in-game, not inside
+  the F12 menu (which isn't in the picture anyway).
+
 ## WASM: fullscreen fills the screen in any shape (2026-10-28)
 - shell.html kept the 31:18 slot in fullscreen, and the canvas buffer
   stayed 1240x720 and was stretched, so portrait fullscreen showed a

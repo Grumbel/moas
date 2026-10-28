@@ -63,6 +63,7 @@ enum {
   UI_KEY_HOTSPOTS,
   UI_KEY_USE,
   UI_KEY_LOOK,
+  UI_OSD_SCREENSHOT,
   UI_COUNT
 };
 

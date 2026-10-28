@@ -65,6 +65,7 @@ static const char *ui_fallback[UI_COUNT] = {
   [UI_KEY_HOTSPOTS]  = "HOTSPOTS ZEIGEN",
   [UI_KEY_USE]       = "BENUTZEN",
   [UI_KEY_LOOK]      = "ANSEHEN",
+  [UI_OSD_SCREENSHOT]= "SCREENSHOT GESPEICHERT",
 };
 
 static const char *ui_names[UI_COUNT] = {
@@ -114,6 +115,7 @@ static const char *ui_names[UI_COUNT] = {
   [UI_KEY_HOTSPOTS]  = "key.hotspots",
   [UI_KEY_USE]       = "key.use",
   [UI_KEY_LOOK]      = "key.look",
+  [UI_OSD_SCREENSHOT]= "osd.screenshot",
 };
 
 static char *ui_str[UI_COUNT];

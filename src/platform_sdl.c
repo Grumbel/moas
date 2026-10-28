@@ -11,6 +11,8 @@
 #include "settings.h"
 #include "version.h"
 #include "log.h"
+#include "datapath.h"
+#include "pngwrite.h"
 
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
@@ -25,6 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
+#include <time.h>
 #ifdef __ANDROID__
 #include <sys/stat.h>
 #include <unistd.h>
@@ -89,7 +93,8 @@ static float         pad_frac_x = 0, pad_frac_y = 0; /* sub-pixel cursor motion 
 static Uint32        pad_last_tick = 0;
 static int           pad_walk_cooldown = 0;
 static int           pad_aiming = 0; /* 1: soft cursor owned by the sticks */
-static Uint32        osd_until = 0;  /* game speed notice after L3/R3 */
+static Uint32        osd_until = 0;  /* short notice (game speed, screenshot) */
+static char          osd_text[64];
 static int           aspect_43 = 1;  /* 1: 4:3 like the CRT, 0: 8:5 (square pixels) */
 static SDL_Texture  *upscaled = NULL; /* integer prescale for smooth 4:3 */
 static int           upscaled_k = 0;
@@ -2594,10 +2599,84 @@ static SDL_Texture *present_source(int dw, int dh)
   return upscaled;
 }
 
-/* "GAME SPEED 5" at the top of the picture after L3/R3, fading out. */
+#define OSD_MS 1500
+
+static void osd_show(const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(osd_text, sizeof(osd_text), fmt, ap);
+  va_end(ap);
+  osd_until = SDL_GetTicks() + OSD_MS;
+}
+
+/*
+ * F9 / PrintScreen: the 320x200 game picture as shown (current palette,
+ * without touch buttons, hints or menus) as an indexed PNG in the state
+ * directory. The browser build downloads it instead and removes the file.
+ */
+static void take_screenshot(void)
+{
+  const unsigned char *src = Display ? Display : Screen;
+  unsigned char pal[768];
+  char base[64], name[80], path[4096];
+  time_t now = time(NULL);
+  struct tm *tm = localtime(&now);
+  FILE *f;
+  int i;
+
+  if (!src || !tm)
+    return;
+  for (i = 0; i < 256; i++) {
+    pal[i * 3 + 0] = (unsigned char)(sdl_palette[i] >> 16);
+    pal[i * 3 + 1] = (unsigned char)(sdl_palette[i] >> 8);
+    pal[i * 3 + 2] = (unsigned char)sdl_palette[i];
+  }
+  strftime(base, sizeof(base), "screenshot-%Y%m%d-%H%M%S", tm);
+  /* Several in the same second get -2, -3, ... */
+  for (i = 1; i < 100; i++) {
+    if (i == 1)
+      snprintf(name, sizeof(name), "%s.png", base);
+    else
+      snprintf(name, sizeof(name), "%s-%d.png", base, i);
+    if (MoasStatePath(path, sizeof(path), name) != 0)
+      return;
+    f = fopen(path, "rb");
+    if (!f)
+      break;
+    fclose(f);
+  }
+  if (png_write_indexed(path, src, LOGICAL_W, LOGICAL_H, pal, NULL) != 0) {
+    MoasLog("moas: cannot write %s: %s", path, strerror(errno));
+    return;
+  }
+#ifdef __EMSCRIPTEN__
+  EM_ASM({
+    var path = UTF8ToString($0);
+    try {
+      var url = URL.createObjectURL(new Blob([FS.readFile(path)], { type: 'image/png' }));
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = UTF8ToString($1);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    } catch (e) {
+      console.warn('moas: screenshot download failed', e);
+    }
+    try { FS.unlink(path); } catch (e) { }
+  }, path, name);
+#else
+  MoasLog("moas: screenshot %s", path);
+#endif
+  osd_show("%s", Ui(UI_OSD_SCREENSHOT));
+}
+
+/* Notice like "GAME SPEED 5" at the top of the picture, fading out. */
 static void osd_draw(const SDL_Rect *pic)
 {
-  char text[64];
+  const char *text = osd_text;
   Sint32 left;
   SDL_Rect box;
   int u, a;
@@ -2610,7 +2689,6 @@ static void osd_draw(const SDL_Rect *pic)
     return;
   }
   a = left >= 300 ? 255 : (int)(left * 255 / 300);
-  snprintf(text, sizeof(text), "%s %d", Ui(UI_OPT_SPEED), (int)TotalSpeed);
   u = pic->h / 240;
   if (u < 1)
     u = 1;
@@ -2752,7 +2830,6 @@ static void sync_mouse_position(void)
  * R3 / L3             → game speed up / down
  */
 #define PAD_CURSOR_SPEED 150.0f /* logical px/s per stick at full deflection */
-#define OSD_MS          1500
 
 static int axis_dead(int v, int dead)
 {
@@ -2908,7 +2985,7 @@ static void pad_button_down(const SDL_ControllerButtonEvent *cb)
       TotalSpeed = (short)(TotalSpeed + (cb->button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ? 1 : -1));
       if (TotalSpeed < 1) TotalSpeed = 1;
       if (TotalSpeed > 8) TotalSpeed = 8;
-      osd_until = SDL_GetTicks() + OSD_MS;
+      osd_show("%s %d", Ui(UI_OPT_SPEED), (int)TotalSpeed);
       MoasSettingsSave();
       break;
     default:
@@ -3150,6 +3227,10 @@ void PlatformPumpEvents(void)
             KeyAbortState = 2;
           if (k == SDLK_F12) {
             PlatformEngineMenu();
+            continue;
+          }
+          if (k == SDLK_F9 || k == SDLK_PRINTSCREEN) {
+            take_screenshot();
             continue;
           }
           /* Alt+Q (DOS quit key) arrives via the conio queue below. */

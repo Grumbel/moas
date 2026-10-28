@@ -474,6 +474,12 @@ So quitting in the middle of a cutscene or dialogue resumes just before it. Use 
 Overrides: `MOAS_STATEDIR`, or `XDG_STATE_HOME` (Linux).  
 DOSBox runners persist to `~/.local/state/manick-dos` / `manick-dos-original`.
 
+**Screenshots:** **F9** (or **PrintScreen**, if the desktop doesn't take it) saves the
+320x200 game picture as an indexed PNG, `screenshot-YYYYMMDD-HHMMSS.png`, in the
+same state directory. It is the picture as the game drew it, with the current
+palette and the mouse pointer, without letterbox, touch buttons, hints or the
+F12 menu. The web build downloads the file instead.
+
 **Load:** press **F7**, then click a slot that shows a thumbnail (empty slots do nothing useful).  
 Or from the shell: `manick --load=0` (see command-line options).  
 **Save:** press **F5**, then click an empty or occupied slot (0–8).
@@ -514,6 +520,7 @@ Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Ba
 | **Ctrl+C** / **Alt+F4** | Quit (SDL port) |
 | **F12** | Options menu (SDL port) |
 | **F11** / **Alt+Enter** | Toggle fullscreen (SDL port) |
+| **F9** / **PrintScreen** | Screenshot of the game picture (SDL port, see below) |
 | **H** (hold) | Outline everything clickable in the room; stays up briefly after release (SDL port) |
 
 The start screen and the F12 menu show a short key legend (F5, F7, F12, Shift, Esc, H)

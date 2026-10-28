@@ -641,6 +641,7 @@ static void extract_ui_strings(void)
     { "ui.key.hotspots", "HOTSPOTS ZEIGEN" },
     { "ui.key.use", "BENUTZEN" },
     { "ui.key.look", "ANSEHEN" },
+    { "ui.osd.screenshot", "SCREENSHOT GESPEICHERT" },
     { NULL, NULL }
   };
   int i;

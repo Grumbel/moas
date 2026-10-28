@@ -18,6 +18,8 @@ let
       ../tools
       ../src/pngread.c
       ../src/pngread.h
+      ../src/pngwrite.c
+      ../src/pngwrite.h
       ../manick-src
       ../manick
     ];
@@ -31,7 +33,7 @@ pkgs.stdenv.mkDerivation {
     runHook preBuild
     $CC -O2 -D_GNU_SOURCE -Isrc -o moas-util \
       tools/moas-util.c tools/mu_common.c tools/mu_data.c tools/mu_gfx.c \
-      tools/mu_png.c tools/mu_script.c src/pngread.c
+      tools/mu_png.c tools/mu_script.c src/pngread.c src/pngwrite.c
     ./moas-util --srcdir manick-src --outdir $out --reference manick pack
     runHook postBuild
   '';

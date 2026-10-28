@@ -78,6 +78,7 @@ set(MOAS_SOURCES
   src/print.c
   src/platform_sdl.c
   src/pngread.c
+  src/pngwrite.c
   src/settings.c
 )
 
@@ -147,7 +148,8 @@ endif()
 # Standalone data inspection tool (no SDL).
 if(NOT EMSCRIPTEN)
   add_executable(moas-util tools/moas-util.c tools/mu_common.c tools/mu_data.c
-    tools/mu_gfx.c tools/mu_png.c tools/mu_script.c src/pngread.c)
+    tools/mu_gfx.c tools/mu_png.c tools/mu_script.c src/pngread.c
+    src/pngwrite.c)
   target_include_directories(moas-util PRIVATE src)
   target_compile_definitions(moas-util PRIVATE
     $<$<NOT:$<BOOL:${WIN32}>>:_GNU_SOURCE>

@@ -281,6 +281,12 @@ msgctxt "ui.key.look"
 msgid "ANSEHEN"
 msgstr "LOOK"
 
+#. source UI
+#: ui.osd.screenshot
+msgctxt "ui.osd.screenshot"
+msgid "SCREENSHOT GESPEICHERT"
+msgstr "SCREENSHOT SAVED"
+
 #. GAME.PCK token 0
 #: pck.0
 msgctxt "pck.0"
