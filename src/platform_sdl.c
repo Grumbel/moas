@@ -533,14 +533,11 @@ int PlatformInit(void)
       win_h = display_h() * SCALE;
 #endif
       /*
-       * Touch overlay default: on for Android / web, off for desktop.
-       * --touch-controls / --no-touch-controls or the F12 menu override it.
+       * Touch overlay default: on everywhere, so the Options button (F12
+       * menu) is easy to find. --touch-controls / --no-touch-controls or
+       * the F12 menu override it.
        */
-#if defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(MOAS_OVERLAY_BUTTONS)
       overlay_on = (moas_touch_controls != 0);
-#else
-      overlay_on = (moas_touch_controls == 1);
-#endif
 #ifndef __ANDROID__
       /*
        * Side letterbox for the button columns. overlay_rects needs

@@ -6,6 +6,14 @@
 
 # TODO / Handoff
 
+## Touch buttons on by default everywhere (2026-10-28)
+- Desktop (Linux, Windows) now shows the overlay buttons by default too, so
+  the Options button makes the F12 menu hard to miss. `--no-touch-controls`
+  or F12 → Settings → Touch buttons turns them off. `MOAS_OVERLAY_BUTTONS`
+  (web-only CMake define) is gone; the default is no longer per platform.
+- An existing settings.ini still carries `touch_buttons=0` (it was always
+  written), so players who already ran a desktop build keep them off.
+
 ## Windows: Wine runners, binary file I/O (2026-10-28)
 - `nix run .#manick-win64` / `.#manick-win32` run the MinGW builds under
   `wineWow64Packages.stable` (Wine 11). They print the WINEPREFIX, the

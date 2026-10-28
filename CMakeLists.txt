@@ -206,9 +206,6 @@ endif()
 if(EMSCRIPTEN)
   # Web page: manick.html + .js + .wasm (+ data pack). ASYNCIFY lets the
   # existing blocking Wait/getch loop yield to the browser.
-  # Touch overlay buttons on by default (as on Android); runtime switch
-  # --touch-controls / F12 menu exists on every SDL target.
-  target_compile_definitions(manick PRIVATE MOAS_OVERLAY_BUTTONS)
   set(MOAS_VERSION "${PROJECT_VERSION_FULL}")
   set(MOAS_SOURCE_URL "https://github.com/Grumbel/moas")
   configure_file(mk/wasm/shell.html ${CMAKE_CURRENT_BINARY_DIR}/shell.html @ONLY)

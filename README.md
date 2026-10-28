@@ -178,8 +178,9 @@ one. See `nix/windows.nix`.
 ### Android
 
 Letterbox **touch buttons** (SDL overlay, not the 320×200 buffer). On by
-default on Android and the web build; on desktop builds enable them with
-`--touch-controls` or **F12 → Settings → Touch buttons** (the window grows to make room):
+default on every platform, so the **Options** button (F12 menu) is easy to find;
+on desktop turn them off with `--no-touch-controls` or **F12 → Settings → Touch buttons**
+(the window shrinks back to the game picture):
 
 - **Left:** Save, Load (top) — F5 / F7; **Use** / **Look** mode (bottom, left / right mouse button)
 - **Right:** **Options** and **Hint** (top) — Options opens the options menu, Hint outlines what can be clicked in the room (like **H**); **Skip Scene** and **Skip Text** (bottom) — Skip Scene is **Esc** (aborts armed cutscenes), Skip Text acts like **Shift** (speed up / dismiss speech)
@@ -510,7 +511,7 @@ On Android there is no right button. Left-column HUD toggles (**USE** / **LOOK**
 | **USE** (default) | Walk | Use / talk / grab+pull (desktop left-click) |
 | **LOOK** | Walk | **Siehe** (look) — desktop right-click on object |
 
-Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Back** exits the activity fully. The same buttons are available on desktop with `--touch-controls`.
+Pull (`Bewege`) only runs in **USE** mode. Arrow keys work with a keyboard. **Back** exits the activity fully. The same buttons are shown on desktop too (off with `--no-touch-controls`).
 
 ### Movement and inventory
 
@@ -552,7 +553,7 @@ These are **not** the same:
 **Shift** matches original DOS keyboard flag `0x417` (either Shift key). **Middle mouse** does the same as a Shift edge for speech.
 
 The touch **Skip Text** button acts like **Shift** (speech only); touch **Skip Scene** is **Esc**, the sequence abort.
-Without a touchscreen (desktop `--touch-controls`), the buttons show their key
+Without a touchscreen (desktop), the buttons show their key
 in the top-right corner while the options menu is open: F5, F7, ESC, SHIFT, F12, H,
 and LMB / RMB on Use / Look.
 
@@ -602,7 +603,7 @@ These are developer tools from the original engine, not needed for normal play.
 --windowed              Start in a window (overrides settings.ini)
 --aspect RATIO          4:3 (default, like the original CRT) or 8:5 (square pixels)
 --touch-controls        Show the on-screen Save/Load/Use/Look/Options/Hint/Skip buttons
---no-touch-controls     Hide them (default except Android / web)
+--no-touch-controls     Hide them (toggle with F12)
 ```
 
 Load a save without the in-game menu:

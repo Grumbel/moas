@@ -58,7 +58,7 @@ static void usage(const char *argv0)
     "  --aspect RATIO          4:3 (default, like the original CRT) or 8:5\n"
     "                          (square pixels)\n"
     "  --touch-controls        Show on-screen Save/Load/Use/Look/Options/Hint/Skip buttons\n"
-    "  --no-touch-controls     Hide them (default on desktop; toggle with F12)\n"
+    "  --no-touch-controls     Hide them (toggle with F12)\n"
     "\n"
     "Options taking a value accept both --opt VALUE and --opt=VALUE.\n"
     "\n"
