@@ -449,7 +449,11 @@ int MoasOpenState(const char *name, int flags, int mode)
 
 static int try_open(const char *path)
 {
+#if defined(_WIN32)
+  return open(path, O_RDONLY | O_BINARY);
+#else
   return open(path, O_RDONLY);
+#endif
 }
 
 static void fold_case_copy(char *dst, const char *src, size_t dstsz, int upper)

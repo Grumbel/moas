@@ -93,7 +93,7 @@ short ChkOpen(char *FileName,char Mode)
     xfil=MoasOpenData(FileName);
 #endif
   if (Mode==WRITE)
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
     xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY|O_BINARY,S_IWRITE);
 #else
     xfil=open(FileName,O_TRUNC|O_CREAT|O_WRONLY,S_IWRITE);

@@ -597,7 +597,7 @@ void LoadSaveMenu(char *Text)
             ifil = -1;
           else
             ifil = open(savpath, O_RDONLY
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
                         |O_BINARY
 #endif
               );
@@ -657,7 +657,7 @@ int SaveGameToFile(const char *path, int quiet)
 
   MiniPic = MALLOC(1000);
   ofil = open(path, O_TRUNC | O_CREAT | O_WRONLY
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
               | O_BINARY
 #endif
 #ifdef DOS
@@ -807,7 +807,7 @@ int LoadGameFromFile(const char *path)
   }
 
   ifil = open(path, O_RDONLY
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
               | O_BINARY
 #endif
     );
@@ -818,7 +818,7 @@ int LoadGameFromFile(const char *path)
   close(ifil);
   (void)ChkOpen("?", READ);
   ifil = open(path, O_RDONLY
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
               | O_BINARY
 #endif
     );
@@ -1142,7 +1142,7 @@ int MoasTryLoadAutosave(void)
   if (MoasStatePath(savpath, sizeof(savpath), MOAS_AUTOSAVE_NAME) != 0)
     return -1;
   fd = open(savpath, O_RDONLY
-#ifdef DOS
+#if defined(DOS) || defined(_WIN32)
             | O_BINARY
 #endif
     );
