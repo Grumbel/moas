@@ -13,7 +13,7 @@ const char *MoasDataDir(void);
 
 /* Writable state directory (savegames). Created on first use.
  * Linux: $XDG_STATE_HOME/manick or ~/.local/state/manick
- * Windows: %LOCALAPPDATA%\\manick\\state
+ * Windows: %APPDATA%\\manick\\state
  * Android: <internal>/manick-state
  * Emscripten: /manick-state (pair with IDBFS)
  * DOS: "." (CWD; DOSBox runner persists *.SAV to host state dir)

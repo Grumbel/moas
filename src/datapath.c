@@ -297,9 +297,10 @@ static void resolve_state_dir(void)
   }
 #elif defined(_WIN32)
   {
-    const char *la = getenv("LOCALAPPDATA");
-    if (la && la[0])
-      snprintf(state_dir, sizeof(state_dir), "%s\\manick\\state", la);
+    /* Roaming, not Local: saves are user data that should follow the user. */
+    const char *ad = getenv("APPDATA");
+    if (ad && ad[0])
+      snprintf(state_dir, sizeof(state_dir), "%s\\manick\\state", ad);
     else
       snprintf(state_dir, sizeof(state_dir), "manick-state");
     moas_mkdir_p(state_dir);

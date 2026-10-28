@@ -78,7 +78,7 @@ let
 
   # Run a Windows folder under Wine. The game itself stays in the read-only
   # store (it only reads from its own directory); saves and settings go to
-  # %LOCALAPPDATA% / %APPDATA% inside a persistent WINEPREFIX. WoW64 Wine runs
+  # %APPDATA% (Roaming) inside a persistent WINEPREFIX. WoW64 Wine runs
   # both the win64 and win32 builds from one 64-bit prefix, so they share saves.
   mkWineRun = { folder, arch }:
     let wine = pkgs.wineWow64Packages.stable;
@@ -138,8 +138,8 @@ let
         say "directory layout:"
         say "  game (read-only):  $GAMEDIR"
         say "                     = $(winepath -w "$GAMEDIR" 2>/dev/null || echo "Z:$GAMEDIR")  (Wine maps / to Z:)"
-        say "  saves (state):     $USERDIR/AppData/Local/manick/state"
-        say "                     = %LOCALAPPDATA%\\manick\\state"
+        say "  saves (state):     $USERDIR/AppData/Roaming/manick/state"
+        say "                     = %APPDATA%\\manick\\state"
         say "  settings (config): $USERDIR/AppData/Roaming/manick"
         say "                     = %APPDATA%\\manick"
         say "  drive C:           $WINEPREFIX/drive_c"

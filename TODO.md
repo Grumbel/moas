@@ -6,6 +6,15 @@
 
 # TODO / Handoff
 
+## Windows saves in Roaming (2026-10-28)
+- Savegames, AUTOSAVE.SAV and screenshots moved from
+  `%LOCALAPPDATA%\manick\state` to `%APPDATA%\manick\state`, next to
+  settings.ini. Local is for machine-bound data; saves should follow the
+  user (roaming profiles, migration to a new PC). No fallback to the old
+  dir (not released yet). The Wine runner prints the new path.
+- Possible later: `FOLDERID_SavedGames` (`%USERPROFILE%\Saved Games`) is the
+  official spot, but needs SHGetKnownFolderPath and few games use it.
+
 ## Touch buttons on by default everywhere (2026-10-28)
 - Desktop (Linux, Windows) now shows the overlay buttons by default too, so
   the Options button makes the F12 menu hard to miss. `--no-touch-controls`

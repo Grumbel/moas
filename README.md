@@ -169,7 +169,7 @@ nix run .#manick-win32            # run the 32-bit build under Wine
 
 The Wine runners print the directory layout they set up. The game runs
 straight from its read-only store folder (Wine's `Z:`), and saves and
-settings go to `%LOCALAPPDATA%\manick\state` and `%APPDATA%\manick` inside
+settings go to `%APPDATA%\manick\state` and `%APPDATA%\manick` inside
 a persistent prefix at `~/.local/state/manick-wine` (`$XDG_STATE_HOME`).
 Both builds share it (WoW64 Wine runs win32 in a 64-bit prefix). Set
 `WINEPREFIX` to use another prefix, or `MANICK_WINE_TEMP=1` for a throwaway
