@@ -6,6 +6,18 @@
 
 # TODO / Handoff
 
+## Android adaptive launcher icon (2026-11-06)
+- Android 8+ uses an adaptive icon with the existing scene in its background
+  and a transparent foreground. The 432 px xxxhdpi layer centers the master
+  artwork in the 66 dp safe area and extends its edge pixels to fill 108 dp;
+  regenerate with ImageMagick: `magick data/icons/manick-master.png -resize
+  264x264 -virtual-pixel edge -set option:distort:viewport 432x432-84-84
+  -filter point -distort SRT 0 +repage
+  mk/android/app/res/drawable-xxxhdpi/ic_launcher_background.png`.
+- Android 5–7 retain the existing density-specific launcher icons. The Nix
+  APK build passes; check the icon on real launchers with different masks
+  when a device is available.
+
 ## Windows saves in Roaming (2026-10-28)
 - Savegames, AUTOSAVE.SAV and screenshots moved from
   `%LOCALAPPDATA%\manick\state` to `%APPDATA%\manick\state`, next to
